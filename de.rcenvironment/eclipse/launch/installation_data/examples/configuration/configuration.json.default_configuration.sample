@@ -1,0 +1,5 @@
+{
+	"general" : {
+		"instanceName" : "Default instance started by \"${systemUser}\" on ${hostName}"
+	}
+}
