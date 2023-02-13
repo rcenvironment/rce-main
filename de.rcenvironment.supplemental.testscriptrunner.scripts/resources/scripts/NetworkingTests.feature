@@ -46,7 +46,7 @@ Scenario: Basic networking between three instances with relay
   And   the visible network of "NodeC" should consist of "NodeA, NodeB, NodeC"
   	
 @NetworkingTestsFeature
-@Network10
+@Network04
 @SSHTestSuite
 @NoGUITestSuite
 Scenario: Configuring standard uplink setup
@@ -67,7 +67,7 @@ Scenario: Configuring standard uplink setup
         
 #TODO work out other method to test connection establishment than checking visibility of a tool    
 @NetworkingTestsFeature
-@Network11
+@Network05
 @SSHTestSuite
 @NoGUITestSuite
 Scenario: Connection established with autoRetry
@@ -86,7 +86,7 @@ Scenario: Connection established with autoRetry
     
 
 @NetworkingTestsFeature
-@Network12
+@Network06
 @SSHTestSuite
 @NoGUITestSuite
 Scenario: Connection established after restart
@@ -106,7 +106,7 @@ Scenario: Connection established after restart
     And waiting for 30 seconds
         
 @NetworkingTestsFeature
-@Network13
+@Network07
 @SSHTestSuite
 @NoGUITestSuite
 Scenario: Connection of client instance to uplink instance established after multiple restarts of client
@@ -160,7 +160,7 @@ Scenario: Connection of client instance to uplink instance established after mul
     And  the log output of "Cli1" should indicate a clean shutdown with no warnings or errors
         
 @NetworkingTestsFeature
-@Network14
+@Network08
 @NoGUITestSuite
 @BasicIntegrationTestSuite
 Scenario: Connection with other major version - regular connection
@@ -175,7 +175,7 @@ Scenario: Connection with other major version - regular connection
     And   the visible network of "NodeB" should consist of "NodeB"
     
 @NetworkingTestsFeature
-@Network15
+@Network09
 @NoGUITestSuite
 @BasicIntegrationTestSuite
 Scenario Outline: Connection with other major version - uplink connection
@@ -203,7 +203,7 @@ Scenario Outline: Connection with other major version - uplink connection
     |default|legacy|legacy|
     
 @NetworkingTestsFeature
-@Network16
+@Network10
 @NoGUITestSuite
 @BasicIntegrationTestSuite
 Scenario: Connection with other minor version - regular connection
@@ -218,7 +218,7 @@ Scenario: Connection with other minor version - regular connection
     And   the visible network of "NodeB" should consist of "NodeA, NodeB"
     
 #@NetworkingTestsFeature
-@Network17
+@Network11
 @NoGUITestSuite
 @BasicIntegrationTestSuite
 Scenario Outline: Connection with other minor version - uplink connection
