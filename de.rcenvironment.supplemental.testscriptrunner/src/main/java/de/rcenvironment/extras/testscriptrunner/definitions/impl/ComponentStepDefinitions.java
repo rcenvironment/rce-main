@@ -182,7 +182,7 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
          * @return
          */
         private static Endpoint parseComponentsShowOutputLine(String outputLine) {
-            final String[] outputComponents = outputLine.split("|");
+            final String[] outputComponents = outputLine.split("[|]");
 
             // An endpoint is either an input or an output. An output has only a name, a default datatype, and a list of admissible
             // datatypes, while an input additionally has a default and admissible input handlings and input execution constraints.
@@ -339,39 +339,38 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
         // as it is irrelevant for user-observed behavior
 
         assertTrue(outputLines[2].equals("Static Inputs:"));
-        final List<String> staticInputLines = new LinkedList<>();
         int currentIndex = 3;
         String currentLine = outputLines[currentIndex];
         while (!currentLine.equals("Dynamic Inputs:")) {
-            staticInputLines.add(currentLine);
+            staticInputsOfLastComponent.add(Endpoint.parseComponentsShowOutputLine(currentLine));
             currentIndex += 1;
             currentLine = outputLines[currentIndex];
         }
         currentIndex += 1;
         currentLine = outputLines[currentIndex];
 
-        final List<String> dynamicInputLines = new LinkedList<>();
         while (!currentLine.equals("Static Outputs:")) {
-            dynamicInputLines.add(currentLine);
+            dynamicInputsOfLastComponent.add(Endpoint.parseComponentsShowOutputLine(currentLine));
             currentIndex += 1;
             currentLine = outputLines[currentIndex];
         }
         currentIndex += 1;
         currentLine = outputLines[currentIndex];
 
-        final List<String> staticOutputLines = new LinkedList<>();
         while (!currentLine.equals("Dynamic Outputs:")) {
-            staticOutputLines.add(currentLine);
+            staticOutputsOfLastComponent.add(Endpoint.parseComponentsShowOutputLine(currentLine));
             currentIndex += 1;
             currentLine = outputLines[currentIndex];
         }
         currentIndex += 1;
-
-        final List<String> dynamicOutputLines = new LinkedList<>();
-        while (currentIndex < outputLines.length) {
-            currentLine = outputLines[currentIndex];
-            dynamicOutputLines.add(currentLine);
+        if (currentIndex > outputLines.length) {
+            return;
+        }
+        currentLine = outputLines[currentIndex];
+        while (!currentLine.startsWith("Finished executing command components show")) {
+            dynamicOutputsOfLastComponent.add(Endpoint.parseComponentsShowOutputLine(currentLine));
             currentIndex += 1;
+            currentLine = outputLines[currentIndex];
         }
 
     }
@@ -389,7 +388,7 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
     }
 
     @Then("^that input should have the input handling \"([^\"]*)\"$")
-    public void thatInputShouldHaveTheInputHandling(String expectedInputHandling)  {
+    public void thatInputShouldHaveTheInputHandling(String expectedInputHandling) {
         final Endpoint lastInputQueried = getLastStaticInputQueried();
         assertEquals(expectedInputHandling, lastInputQueried.defaultInputHandling);
     }

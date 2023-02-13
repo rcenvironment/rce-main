@@ -1,6 +1,6 @@
 Feature: WorkflowAsComponent
 
-#@WorkflowAsComponentFeature
+@WorkflowAsComponentFeature
 @WorkflowIntegrationOnCommandline
 Scenario: Workflow can be integrated as component via console command
 	Given running instance "Instance1" using the default build
@@ -25,7 +25,7 @@ Scenario: Workflow can be integrated as component by dropping integration folder
   And   instance "Instance1" should see these components:
         | Instance1 | workflow/IntegerIncrement   | local         |
         
-#@WorkflowAsComponentFeature
+@WorkflowAsComponentFeature
 @LocalExecutionOfIntegratedWorkflows
 Scenario: Workflows containing integrated workflows can be executed locally
 	Given running instance "Instance1" using the default build
