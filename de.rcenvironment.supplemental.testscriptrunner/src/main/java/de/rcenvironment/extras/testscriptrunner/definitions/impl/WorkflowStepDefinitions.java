@@ -25,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -65,6 +67,8 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
     private static final String QUOTATION_MARK = "\"";
 
     private static final String BACKSLASH = "\\";
+
+    private static final String FORWARD_SLASH = "/";
 
     private static final String ESCAPED_BACKSLASH = "\\\\";
 
@@ -321,37 +325,6 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
             FileUtils.copyFile(origin, dest);
         } else {
             fail(StringUtils.format("%s is neither directory nor file", fileOrDir));
-        }
-    }
-
-    /**
-     * Copies configuration files to the installation site of the software under test in preparation of running a workflow.
-     * Note: It uses (via "TestContext") the given build of test step "using the ... build".
-     * Note: It uses (via "TestContext") the origin project directory  of test step "copying ... into workspace( of ...").
-     * Both of the above are set during their steps; so without these steps this step is likely to fail (there are no default values or so in TestContext)!
-     * This step is required as a special copy action for input files, for now (2021-10-26) especially of workflow 0203.
-     * 
-     * @param fileNamesToCopy list of (configuration) files which have to be copied
-     * @param workflowGroupDir target directory of the workflow for the copying (e. g. "02_Component Groups")
-     *///(?: workflow[s]?)? \"([^\"]+)\"
-    @When("^copying configuration file[s]? \"([^\"]+)\" of workflow group \"([^\"]*)\" into installation workspace")
-    public void whenPreparingInstallationWorkspace(String fileNamesToCopy, String workflowGroupDir) throws Exception {
-        String originDir = TestContext.getWorkflowProjectDirectory() + File.separator + workflowGroupDir;
-        //String[] filesToCopy = {"CPACS.xml", "MappingRules.xsl", "XMLMerger_Integrate.xml"};
-        String projectName = "Workflow Examples Project";
-        String sutDir = TestContext.getTestedInstanceInstallationRoot() + File.separator + "workspace" + File.separator + projectName + File.separator + workflowGroupDir;
-        printToCommandConsole("   +++   SUT DIR: " + sutDir);
-        
-        String[] filesToCopy = fileNamesToCopy.split(",[ ]");
-        for (String fileToCopy : filesToCopy) {
-            File originFile = Paths.get(executionContext.getTestScriptLocation().toString(), new File(originDir + File.separator + fileToCopy).getPath()).toFile();
-            File destFile = new File(sutDir + File.separator + fileToCopy);
-            // Delete previous versions on the destination location
-            if (destFile.exists()) {
-                FileUtils.forceDelete(destFile);
-            }
-            printToCommandConsole("   +++   copy files: " + originFile + destFile);
-            FileUtils.copyFile(originFile, destFile);
         }
     }
 
@@ -796,6 +769,26 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
         return (new File(workflowPath)).getName();
     }
 
+    private void correctPathToInputFiles(Path orgWorkflowFileLocation) throws IOException {
+        // During workflow execution the workflow file and all placeholder files will be copied to a temp dir.
+        // In the workflow file, there are only relative project paths to the placeholder files given.
+        // Headless instances don't know about this projects.
+        // That's why we have to replace the placholder file paths by absolute paths in the temp dir.
+        Path testLocation = executionContext.getTestScriptLocation().toPath();
+        String correctedWorkflowRoot = testLocation.resolve("workflows").toString().replace(BACKSLASH, FORWARD_SLASH);
+        try (Stream<String> lines = Files.lines(orgWorkflowFileLocation)) {
+            Stream<String> updatedLines = lines.map(line -> replacePathToInputFile(line, correctedWorkflowRoot));
+            Files.write(orgWorkflowFileLocation, updatedLines.collect(Collectors.toList()));
+        }
+    }
+
+    private String replacePathToInputFile(String line, String correctedWorkflowRoot) {
+        if (line.contains("startValue") && line.contains("Workflow Examples Project")) {
+            return line.replace("Workflow Examples Project", correctedWorkflowRoot + "/Workflow Examples Project");
+        }
+        return line;
+    }
+
     private String[] startWorkflowOnInstance(final ManagedInstance instance, String workflowName, String placeholderFile)
         throws IOException {
         boolean hasPlaceholder = placeholderFile != null;
@@ -809,6 +802,17 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
         Path wfFileLocation = tempDir.toPath().resolve(originalWfFileLocation.getFileName());
         Files.copy(originalWfFileLocation, wfFileLocation);
         String startInfoText = StringUtils.format("Starting workflow %s on instance %s", workflowName, instanceId);
+
+        // If necessary (i. e. there is a startValue with path), correct relative file references in wfFileLocation (assumed to start with
+        // "Workflow Examples Project")
+        // given as "start value" to be absolute references (e. g. for input files CPACS.xml, XMLMerger_Integrate.xml, MappingRules.xsl).
+        List<String> fileContent = Files.readAllLines(wfFileLocation);
+        for (String line : fileContent) {
+            if (line.contains("startValue") && line.contains("Workflow Examples Project")) {
+                correctPathToInputFiles(wfFileLocation);
+                break;
+            }
+        }
 
         Path placeholderFileLocation = null;
 

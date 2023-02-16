@@ -281,7 +281,6 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
 
         // parse actual state
         String output = executeCommandOnInstance(instance, "components list --as-table", false);
-        // log.debug(output);
         for (String line : output.split("\n")) {
             if (line.startsWith("Finished executing command")) {
                 // synthetic final line; not part of the actual output
