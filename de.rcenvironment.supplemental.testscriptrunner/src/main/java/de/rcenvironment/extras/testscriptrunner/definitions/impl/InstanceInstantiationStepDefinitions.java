@@ -74,7 +74,6 @@ public class InstanceInstantiationStepDefinitions extends InstanceManagementStep
         final boolean wipeProfile = keepProfile == null;
         final PrefixingTextOutForwarder imOperationOutputReceiver = getTextoutReceiverForIMOperations();
         final String installationId = parseInstallationId(buildShort, buildExplicit, imOperationOutputReceiver);
-        TestContext.setTestedInstanceInstallationRoot(installationId);
 
         final List<String> instanceDefinitionParts = parseCommaSeparatedList(instanceList);
         final List<String> instanceIds = new ArrayList<>();

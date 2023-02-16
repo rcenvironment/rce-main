@@ -311,7 +311,6 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
     public void whenCopyingIntoWorkspace(String fileOrDir, String instanceId) throws Exception {
         ManagedInstance instance = resolveInstance(instanceId);
         printToCommandConsole(StringUtils.format("Copying %s to instance %s", fileOrDir, instance));
-        TestContext.setWorkflowProjectDirectory(fileOrDir);
         File workspace = instance.getAbsolutePathFromRelative("workspace");
         if (!workspace.exists()) {
             workspace.mkdir();

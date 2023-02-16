@@ -38,9 +38,6 @@ Scenario: Execute all example workflows
     Then   the log output of "NodeA" should contain the pattern "(?:de.rcenvironment.core.component.api.ComponentException: Script execution error: Exception: Example failure in <script> at line number 2)"
     And    the log output of "NodeA" should contain 1 error
 
-
-
-
 # Currently disabled for suite @ExampleWorkflow03, see Mantis #17767
 @ExampleWorkflow03
 @ExampleWorkflows_02_ComponentGroups
