@@ -337,7 +337,7 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
      *        optional
      * @param instanceId the instance to execute the command on
      */
-    @When("^starting (?:the )?workflow \"([^\"]*)\" (?:using \"([^\"]*)\" as placeholder file)?on (?:instance )?\"([^\"]*)\"$")
+    @When("^starting (?:the )?workflow \"([^\"]*)\" (?:using \"([^\"]*)\" as placeholder file )?on (?:instance )?\"([^\"]*)\"$")
     public void whenStartingWorkflowOnInstance(String workflowNameInput, String placeholderFile, String instanceId) throws Exception {
         final ManagedInstance instance = resolveInstance(instanceId);
         String workflowPath = addExtension(workflowNameInput, WORKFLOW_EXTENSION);
@@ -357,7 +357,7 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
             log.warn("Another workflow of the same file is still running. Cannot store the new workflow id.");
         } else {
             runningWorkflows.put(workflowKey, workflowId);
-            startJobCheckingTermiantion(instanceId, instance, workflowName, workflowId, workflowKey);
+            startJobCheckingTermination(instanceId, instance, workflowName, workflowId, workflowKey);
         }
 
         Path logFilesDirectory = Paths.get(workflowLogDir);
@@ -370,7 +370,7 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
         this.lastWorkflowInitiatingInstance = instance;
     }
 
-    private void startJobCheckingTermiantion(String instanceId, final ManagedInstance instance, final String workflowName,
+    private void startJobCheckingTermination(String instanceId, final ManagedInstance instance, final String workflowName,
         String workflowId, String workflowKey) {
         new Job(StringUtils.format("check for termination workflow %s", workflowId)) {
 
