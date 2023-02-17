@@ -1,5 +1,16 @@
 Feature: UplinkTests
 
+# General remark:
+# Many scenarios are here allowed to have warnings which indicate problems with shutdowns etc., like:
+#    stream is already closed
+#    session already closed
+#    Error in asynchronous callback; shutting down queue
+#    Session terminated in non-terminal state UNCLEAN_SHUTDOWN_INITIATED
+#    as it is already in use by session 
+# This, however, is not the ideal case, these warnings are foremost allowed because they do not affect 
+# the intended test objectives, but hint to general problems at synchronizing shutdowns etc.; these 
+# problems are at least partially addressed in already existing Issues.
+
 @UplinkTestsFeature
 @Uplink01
 Scenario: Simple check of uplink connections of two client and two uplink server instances
@@ -33,6 +44,7 @@ Scenario: Simple check of uplink connections of two client and two uplink server
     """
     as it exceeds the significant character limit (8)
     stream is already closed
+    session already closed
     """
 
 @UplinkTestsFeature
@@ -78,12 +90,16 @@ Scenario: Check of uplink autoconnect after restart of Client1 (provides tool fo
     And stopping instances "Client1, Client2"
     And waiting for 15 seconds
     And stopping instance "Uplink1"
-    And the log output of instances "Client1, Client2" should indicate a clean shutdown with no warnings or errors
+    And the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors:
+    """
+    #Error in asynchronous callback; shutting down queue
+    """
     And waiting for 15 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
     stream is already closed
+    session already closed
     """
 
 # Variant of @Uplink02: crash instead of restart
@@ -139,12 +155,16 @@ Scenario: Check of uplink autoconnect after crash and restart of Client1 (provid
     and client ID "Client1_" is already in use. To allow parallel logins, use a different client ID for each client.
     finished with a warning or error; inspect the log output above for details
     """
-    And the log output of instances "Client2" should indicate a clean shutdown with no warnings or errors
+    And the log output of instances "Client2" should indicate a clean shutdown with these allowed warnings or errors:
+    """
+    #Error in asynchronous callback; shutting down queue
+    """
     And waiting for 15 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
     stream is already closed
+    session already closed
     Session terminated in non-terminal state UNCLEAN_SHUTDOWN_INITIATED
     as it is already in use by session
     """
@@ -191,12 +211,16 @@ Scenario: Check of uplink autoconnect after restart of Client2 (uses tool from C
     And stopping instances "Client1, Client2"
     And waiting for 15 seconds
     And stopping instance "Uplink1"
-    And the log output of instances "Client1, Client2" should indicate a clean shutdown with no warnings or errors
+    And the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors:
+    """
+    #Error in asynchronous callback; shutting down queue
+    """
     And waiting for 15 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
     stream is already closed
+    session already closed
     """
 
 @UplinkTestsFeature
@@ -265,6 +289,7 @@ Scenario: Check of uplink autoconnect after shutdown and restart of uplink serve
     """
     as it exceeds the significant character limit (8)
     stream is already closed
+    session already closed
     """
 
 # Variant of @Uplink04: crash instead of restart
@@ -321,6 +346,7 @@ Scenario: Check of uplink autoconnect after crash and restart of uplink server
     """
     as it exceeds the significant character limit (8)
     stream is already closed
+    session already closed
     """
 
 # This combines the previous restart options. It is meant to be used in the context of automated
@@ -396,12 +422,16 @@ Scenario: Combined check of uplink autoconnect after shutdown and restart of cli
     And stopping instances "Client1, Client2"
     And waiting for 15 seconds
     And stopping instance "Uplink1"
-    And the log output of instances "Client1, Client2" should indicate a clean shutdown with no warnings or errors
+    And the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors:
+    """
+    #Error in asynchronous callback; shutting down queue
+    """
     And waiting for 15 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
     stream is already closed
+    session already closed
     """
 
 @UplinkTestsFeature
@@ -440,11 +470,12 @@ Scenario: Autoconnect after startup with uplink server started before clients
     """
     as it exceeds the significant character limit (8)
     stream is already closed
+    session already closed
     """
 
 @UplinkTestsFeature
 @Uplink09
-Scenario: Autoconnect after startup with clients started before uplink sever
+Scenario: Autoconnect after startup with clients started before uplink server
     Given instance "Uplink1, Client1, Client2" using the default build
     And configured network connections "Client1-[upl]->Uplink1 [autoStart autoRetry]"
     And configured network connections "Client2-[upl]->Uplink1 [autoStart autoRetry]"
@@ -477,6 +508,7 @@ Scenario: Autoconnect after startup with clients started before uplink sever
     """
     as it exceeds the significant character limit (8)
     stream is already closed
+    session already closed
     """
 
 @UplinkTestsFeature
@@ -537,12 +569,16 @@ Scenario: Check of disconnect and connect of clients in an uplink connection
     And stopping instance "Client2"
     And waiting for 5 seconds
     And stopping instance "Uplink1"
-    And the log output of instances "Client1, Client2" should indicate a clean shutdown with no warnings or errors
+    And the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors:
+    """
+    #Error in asynchronous callback; shutting down queue
+    """
     And waiting for 15 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
     stream is already closed
+    session already closed
     """
 
 @UplinkTestsFeature
@@ -591,6 +627,7 @@ Scenario: Two clients with same ID access the uplink server after startup and di
     """
     as it exceeds the significant character limit (8)
     stream is already closed
+    session already closed
     from using namespace userNameClient3a as it is already in use
     """
 
@@ -651,6 +688,7 @@ Scenario: Two clients with same ID access the uplink server after startup and re
     """
     as it exceeds the significant character limit (8)
     stream is already closed
+    session already closed
     from using namespace userNameClient3a as it is already in use
     """
 
@@ -713,6 +751,7 @@ Scenario: Two clients with same ID access the uplink server after startup and re
     """
     as it exceeds the significant character limit (8)
     stream is already closed
+    session already closed
     from using namespace userNameClient3a as it is already in use
     Session terminated in non-terminal state UNCLEAN_SHUTDOWN_INITIATED
     """
@@ -752,6 +791,7 @@ Scenario: After crash, the same client connects again to the uplink server (s. M
     """
     as it exceeds the significant character limit (8)
     stream is already closed
+    session already closed
     from using namespace userNameClient1_ as it is already in use
     Session terminated in non-terminal state UNCLEAN_SHUTDOWN_INITIATED
     )
