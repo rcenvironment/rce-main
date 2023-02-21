@@ -45,34 +45,35 @@ import de.rcenvironment.core.workflow.execution.function.EndpointAdapters;
  * A CommandPlugin that provides the command `wf integrate`.
  * 
  * @author Alexander Weinert
+ * @author Kathrin Schaffert (#18057)
  */
 @Component
 public class WfIntegrateCommandPlugin implements CommandPlugin {
 
     private static final String SYNTAX_DESCRIPTION = "ComponentName:OutputName:ExposedName,";
-    
+
     private static final String DESCRIPTION_TEXT = "elements of the workflow to expose (see User Guide)";
-    
+
     private static final CommandFlag VERBOSE_FLAG = new CommandFlag("-v", "--verbose", "enable verbose output");
-    
+
     private static final StringParameter TOOLNAME_PARAMETER = new StringParameter(null, "toolname", "name for the tool");
-    
+
     private static final StringParameter WORKFLOW_FILE_PARAMETER = new StringParameter(null, "workflow file",
-            "workflow to be integrated");
-    
+        "workflow to be integrated");
+
     private static final StringParameter ELEMENT_PARAMETER = new StringParameter(null, "element", "element to be exposed");
-    
+
     private static final ListCommandParameter EXPOSE_LIST_PARAMETER = new ListCommandParameter(ELEMENT_PARAMETER,
-            SYNTAX_DESCRIPTION, DESCRIPTION_TEXT);
-    
+        SYNTAX_DESCRIPTION, DESCRIPTION_TEXT);
+
     private static final NamedParameter NAMED_EXPOSE_PARAMETER = new NamedSingleParameter("--expose",
-            DESCRIPTION_TEXT, EXPOSE_LIST_PARAMETER);
-    
+        DESCRIPTION_TEXT, EXPOSE_LIST_PARAMETER);
+
     private static final NamedParameter NAMED_EXPOSE_INPUTS_PARAMETER = new NamedSingleParameter("--expose-inputs",
-            DESCRIPTION_TEXT, EXPOSE_LIST_PARAMETER);
-    
+        DESCRIPTION_TEXT, EXPOSE_LIST_PARAMETER);
+
     private static final NamedParameter NAMED_EXPOSE_OUTPUTS_PARAMETER = new NamedSingleParameter("--expose-outputs",
-            DESCRIPTION_TEXT, EXPOSE_LIST_PARAMETER);
+        DESCRIPTION_TEXT, EXPOSE_LIST_PARAMETER);
 
     private WorkflowIntegrationService workflowIntegrationService;
 
@@ -83,16 +84,13 @@ public class WfIntegrateCommandPlugin implements CommandPlugin {
         return new MainCommandDescription[] {
             new MainCommandDescription("wf-integrate", "integrate a workflow file as a component",
                 "integrate a workflow file as a component", this::performWfIntegrate,
-                new CommandModifierInfo(new AbstractCommandParameter[]
-                    { TOOLNAME_PARAMETER, WORKFLOW_FILE_PARAMETER },
+                new CommandModifierInfo(new AbstractCommandParameter[] { TOOLNAME_PARAMETER, WORKFLOW_FILE_PARAMETER },
                     new CommandFlag[] { VERBOSE_FLAG },
                     new NamedParameter[] {
                         NAMED_EXPOSE_PARAMETER,
                         NAMED_EXPOSE_INPUTS_PARAMETER,
                         NAMED_EXPOSE_OUTPUTS_PARAMETER
-                    }
-                )
-            )
+                    }))
         };
     }
 
@@ -102,22 +100,22 @@ public class WfIntegrateCommandPlugin implements CommandPlugin {
         final boolean verbose = modifiers.hasCommandFlag("-v");
         final ParsedStringParameter toolnameParameter = (ParsedStringParameter) modifiers.getPositionalCommandParameter(0);
         final ParsedStringParameter workflowFileParameter = (ParsedStringParameter) modifiers.getPositionalCommandParameter(1);
-        
+
         final ParsedListParameter exportListParameter = (ParsedListParameter) modifiers.getCommandParameter("--expose");
         final List<String> exportListValues = exportListParameter.getResult().stream()
-                .map(parameter -> (String) parameter.getResult()).collect(Collectors.toList());
+            .map(parameter -> (String) parameter.getResult()).collect(Collectors.toList());
         final ParsedListParameter exportInputsListParameter = (ParsedListParameter) modifiers.getCommandParameter("--expose-inputs");
         final List<String> exportInputsListValues = exportInputsListParameter.getResult()
-                .stream().map(parameter -> (String) parameter.getResult()).collect(Collectors.toList());
+            .stream().map(parameter -> (String) parameter.getResult()).collect(Collectors.toList());
         final ParsedListParameter exportOutputsListParameter = (ParsedListParameter) modifiers.getCommandParameter("--expose-outputs");
         final List<String> exportOutputsListValues = exportOutputsListParameter.getResult().stream()
-                .map(parameter -> (String) parameter.getResult()).collect(Collectors.toList());
-        
+            .map(parameter -> (String) parameter.getResult()).collect(Collectors.toList());
+
 //        if (exportListValues.isEmpty() && exportInputListValues.isEmpty() && exportInputsListValues.isEmpty()
 //                && exportOutputListValues.isEmpty() && exportOutputsListValues.isEmpty()) {
 //            throw CommandException.syntaxError("No export defined", context);
 //        }
-        
+
         final String componentname = toolnameParameter.getResult();
         final Optional<String> idValidationError = ComponentIdRules.validateComponentIdRules(componentname);
         if (idValidationError.isPresent()) {
@@ -129,17 +127,22 @@ public class WfIntegrateCommandPlugin implements CommandPlugin {
             desc = workflowLoaderService.loadWorkflowDescriptionFromFile(new File(workflowFileParameter.getResult()), null);
         } catch (WorkflowFileException e1) {
             throw CommandException.executionError(StringUtils.format("Workflow file at '%s' could not be parsed",
-                    workflowFileParameter.getResult()), context);
+                workflowFileParameter.getResult()), context);
+        }
+
+        if (desc.getName() == null) {
+            // if the workflow name is null, an exception is thrown in the wf list console command 
+            addWorkflowName(desc, workflowFileParameter);
         }
 
         final WfIntegrateCommandParser parser = new WfIntegrateCommandParser();
         final Collection<EndpointAdapter> unpackedParseResults = new LinkedList<>();
         final Collection<String> parseErrors = new LinkedList<>();
-        
+
         parseListParameter(exportListValues, "--expose", parser, desc, unpackedParseResults, parseErrors);
         parseListParameter(exportInputsListValues, "--expose-inputs", parser, desc, unpackedParseResults, parseErrors);
         parseListParameter(exportOutputsListValues, "--expose-outputs", parser, desc, unpackedParseResults, parseErrors);
-        
+
         final String parseErrorMessage = parseErrors.stream()
             .collect(Collectors.joining("\n"));
 
@@ -173,14 +176,20 @@ public class WfIntegrateCommandPlugin implements CommandPlugin {
         } catch (IOException e) {
             throw CommandException.executionError(
                 StringUtils.format("Could not integrate workflow '%s' as component '%s'",
-                        workflowFileParameter.getResult(), componentname), context);
+                    workflowFileParameter.getResult(), componentname),
+                context);
         }
     }
-    
-    private void parseListParameter(List<String> values, String type, WfIntegrateCommandParser parser, WorkflowDescription desc, Collection<EndpointAdapter> unpackedParseResults, Collection<String> parseErrors) {
+
+    private void addWorkflowName(WorkflowDescription desc, ParsedStringParameter workflowFileParameter) {
+        desc.setName((new File(workflowFileParameter.getResult())).getName());
+    }
+
+    private void parseListParameter(List<String> values, String type, WfIntegrateCommandParser parser, WorkflowDescription desc,
+        Collection<EndpointAdapter> unpackedParseResults, Collection<String> parseErrors) {
         for (int i = 0; i < values.size(); i++) {
             final Collection<ParseResult<EndpointAdapter>> exposureParameters =
-                    parser.parseEndpointAdapterDefinition(type, values.get(i), desc);
+                parser.parseEndpointAdapterDefinition(type, values.get(i), desc);
             for (ParseResult<EndpointAdapter> parameter : exposureParameters) {
                 if (parameter.isSuccessfulResult()) {
                     unpackedParseResults.add(parameter.getResult());
