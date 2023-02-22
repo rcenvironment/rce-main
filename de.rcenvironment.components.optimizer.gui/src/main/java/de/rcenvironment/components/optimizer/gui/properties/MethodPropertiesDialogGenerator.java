@@ -46,6 +46,8 @@ import de.rcenvironment.core.gui.utils.incubator.WidgetGroupFactory;
  * This class is for generating a properties {@link Dialog} for a given optimization method based on a json file.
  * 
  * @author Sascha Zur
+ * @author Kathrin Schaffert (#17981
+ * )
  */
 public class MethodPropertiesDialogGenerator extends Dialog {
 
@@ -226,6 +228,7 @@ public class MethodPropertiesDialogGenerator extends Dialog {
 
         @Override
         public void widgetSelected(SelectionEvent arg0) {
+
             for (Object field : container.getChildren()) {
                 if (field instanceof Text) {
                     String key = (String) ((Text) field).getData();
@@ -251,12 +254,9 @@ public class MethodPropertiesDialogGenerator extends Dialog {
 
                     if (key != null) {
                         String value = settings.get(key).get(OptimizerComponentConstants.DEFAULT_VALUE_KEY);
-                        if (value != null) {
-                            if (value.equals(TRUE) || value.equals("false")) {
-                                ((Button) field).setSelection(Boolean.parseBoolean(value));
-                            } else {
-                                ((Button) field).setText(value);
-                            }
+                        if (value != null && (value.equals(TRUE) || value.equals("false"))) {
+                            ((Button) field).setSelection(Boolean.parseBoolean(value));
+                            updateMethodDescription((Button) field);
                         }
                     }
                 }
@@ -440,22 +440,25 @@ public class MethodPropertiesDialogGenerator extends Dialog {
         @Override
         public void widgetDefaultSelected(SelectionEvent e) {
             Button source = (Button) e.getSource();
-            if (methodDescription.getCommonSettings().containsKey(widgetToKeyMap.get(source))) {
-                methodDescription.getCommonSettings().get(widgetToKeyMap.get(source)).put(OptimizerComponentConstants.VALUE_KEY,
-                    "" + source.getSelection());
-            } else if (methodDescription.getSpecificSettings().containsKey(widgetToKeyMap.get(source))) {
-                methodDescription.getSpecificSettings().get(widgetToKeyMap.get(source)).put(OptimizerComponentConstants.VALUE_KEY,
-                    "" + source.getSelection());
-            } else if (methodDescription.getResponsesSettings().containsKey(widgetToKeyMap.get(source))) {
-                methodDescription.getResponsesSettings().get(widgetToKeyMap.get(source)).put(OptimizerComponentConstants.VALUE_KEY,
-                    "" + source.getSelection());
-            }
-            validateInputs();
+            updateMethodDescription(source);
         }
 
         @Override
         public void widgetSelected(SelectionEvent e) {
             widgetDefaultSelected(e);
+        }
+    }
+
+    private void updateMethodDescription(Button source) {
+        if (methodDescription.getCommonSettings().containsKey(widgetToKeyMap.get(source))) {
+            methodDescription.getCommonSettings().get(widgetToKeyMap.get(source)).put(OptimizerComponentConstants.VALUE_KEY,
+                "" + source.getSelection());
+        } else if (methodDescription.getSpecificSettings().containsKey(widgetToKeyMap.get(source))) {
+            methodDescription.getSpecificSettings().get(widgetToKeyMap.get(source)).put(OptimizerComponentConstants.VALUE_KEY,
+                "" + source.getSelection());
+        } else if (methodDescription.getResponsesSettings().containsKey(widgetToKeyMap.get(source))) {
+            methodDescription.getResponsesSettings().get(widgetToKeyMap.get(source)).put(OptimizerComponentConstants.VALUE_KEY,
+                "" + source.getSelection());
         }
     }
 }
