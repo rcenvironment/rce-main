@@ -134,12 +134,12 @@ public class MethodPropertiesDialogGenerator extends Dialog {
         return returnValue;
     }
 
-    private void createSettingsTab(Map<String, Map<String, String>> settings, Composite container, String identifier) {
+    private void createSettingsTab(Map<String, Map<String, String>> settings, Composite container, String tabIdentifier) {
         if (settings == null) {
             return;
         }
-        createWidgets(settings, container, identifier);
-        createRestoreDefaultsButton(settings, container);
+        createWidgets(settings, container, tabIdentifier);
+        createRestoreDefaultsButton(container);
     }
 
     private void createWidgets(Map<String, Map<String, String>> settings, Composite container, String identifier) {
@@ -152,11 +152,11 @@ public class MethodPropertiesDialogGenerator extends Dialog {
             }
             String swtWidget = settings.get(key).get(OptimizerComponentConstants.SWTWIDGET_KEY);
             if (swtWidget.equals(OptimizerComponentConstants.WIDGET_TEXT)) {
-                createTextField(container, key, currentSetting, identifier);
+                createTextField(container, currentSetting, identifier + SEPERATOR + key);
             } else if (swtWidget.equals(OptimizerComponentConstants.WIDGET_COMBO)) {
-                createComboBox(container, key, currentSetting, identifier);
+                createComboBox(container, currentSetting, identifier + SEPERATOR + key);
             } else if (swtWidget.equals(OptimizerComponentConstants.WIDGET_CHECK)) {
-                createCheckBox(container, key, currentSetting, identifier);
+                createCheckBox(container, currentSetting, identifier + SEPERATOR + key);
             }
         }
     }
@@ -188,7 +188,7 @@ public class MethodPropertiesDialogGenerator extends Dialog {
         return sortedSettings;
     }
 
-    private void createRestoreDefaultsButton(Map<String, Map<String, String>> settings, Composite container) {
+    private void createRestoreDefaultsButton(Composite container) {
         new Label(container, SWT.NONE).setText("");
         Label horizontalLine = new Label(container, SWT.SEPARATOR | SWT.HORIZONTAL);
         GridData lineGridData = new GridData(GridData.FILL_HORIZONTAL | SWT.END);
@@ -200,7 +200,7 @@ public class MethodPropertiesDialogGenerator extends Dialog {
         gridData.horizontalAlignment = SWT.RIGHT;
         loadDefaults.setLayoutData(gridData);
         loadDefaults.setText(Messages.restoreDefaultAlgorithmProperties);
-        loadDefaults.addSelectionListener(new DefaultSelectionListener(container, settings));
+        loadDefaults.addSelectionListener(new DefaultSelectionListener(container));
     }
 
     private String getValueOrDefault(Map<String, String> currentSetting) {
@@ -211,28 +211,28 @@ public class MethodPropertiesDialogGenerator extends Dialog {
         return value;
     }
 
-    private void createCheckBox(Composite container, String key, Map<String, String> currentSetting, String identifier) {
+    private void createCheckBox(Composite container, Map<String, String> currentSetting, String identifier) {
         Button newCheckbox = createLabelAndCheckbox(container, currentSetting.get(OptimizerComponentConstants.GUINAME_KEY),
             getValueOrDefault(currentSetting));
-        widgetToKeyMap.put(newCheckbox, identifier + SEPERATOR + key);
-        newCheckbox.setData(identifier + SEPERATOR + key);
+        widgetToKeyMap.put(newCheckbox, identifier);
+        newCheckbox.setData(identifier);
         newCheckbox.addSelectionListener(new SelectionChangedListener());
     }
 
-    private void createComboBox(Composite container, String key, Map<String, String> currentSetting, String identifier) {
+    private void createComboBox(Composite container, Map<String, String> currentSetting, String identifier) {
         Combo newCombo = createLabelAndCombo(container, currentSetting.get(OptimizerComponentConstants.GUINAME_KEY),
             currentSetting.get(OptimizerComponentConstants.CHOICES_KEY), getValueOrDefault(currentSetting));
-        widgetToKeyMap.put(newCombo, identifier + SEPERATOR + key);
-        newCombo.setData(identifier + SEPERATOR + key);
+        widgetToKeyMap.put(newCombo, identifier);
+        newCombo.setData(identifier);
         newCombo.addModifyListener(new MethodPropertiesModifyListener());
     }
 
-    private void createTextField(Composite container, String key, Map<String, String> currentSetting, String identifier) {
+    private void createTextField(Composite container, Map<String, String> currentSetting, String identifier) {
         Text newTextfield =
             createLabelAndTextfield(container, currentSetting.get(OptimizerComponentConstants.GUINAME_KEY),
                 currentSetting.get(OptimizerComponentConstants.DATA_TYPE_KEY), getValueOrDefault(currentSetting));
-        newTextfield.setData(identifier + SEPERATOR + key);
-        widgetToKeyMap.put(newTextfield, identifier + SEPERATOR + key);
+        newTextfield.setData(identifier);
+        widgetToKeyMap.put(newTextfield, identifier);
         newTextfield.addModifyListener(new MethodPropertiesModifyListener());
     }
 
@@ -241,16 +241,14 @@ public class MethodPropertiesDialogGenerator extends Dialog {
      * Implements the selection listener for the "load default" values button.
      *
      * @author Jascha Riedel
+     * @author Kathrin Schaffert (refactoring)
      */
     private class DefaultSelectionListener implements SelectionListener {
 
         private Composite container;
 
-        private Map<String, Map<String, String>> settings;
-
-        DefaultSelectionListener(Composite container, Map<String, Map<String, String>> settings) {
+        DefaultSelectionListener(Composite container) {
             this.container = container;
-            this.settings = settings;
         }
 
         @Override
@@ -259,12 +257,18 @@ public class MethodPropertiesDialogGenerator extends Dialog {
         @Override
         public void widgetSelected(SelectionEvent arg0) {
             for (Control field : container.getChildren()) {
-                String identifier = getSettingsIdentifer(field);
-                if (identifier == null) {
+                String settingsIdentifier = getSettingsIdentifer(field);
+                if (settingsIdentifier == null) {
                     continue;
                 }
-                String key = identifier.split(SEPERATOR)[1];
-                String value = settings.get(key).get(OptimizerComponentConstants.DEFAULT_VALUE_KEY);
+                
+                String[] identifier = settingsIdentifier.split(SEPERATOR);
+                
+                Map<String, String> settings = getSettings(identifier[0], identifier[1]);
+                if (settings == null) {
+                    continue;
+                }
+                String value = settings.get(OptimizerComponentConstants.DEFAULT_VALUE_KEY);
                 if (value == null) {
                     continue;
                 }
@@ -328,17 +332,10 @@ public class MethodPropertiesDialogGenerator extends Dialog {
      */
     public void validateInputs() {
         for (Entry<Widget, String> entry : widgetToKeyMap.entrySet()) {
-            Map<String, String> settings = null;
 
             String[] identifier = entry.getValue().split(SEPERATOR);
 
-            if (identifier[0].equals(COMMON) && methodDescription.getCommonSettings().containsKey(identifier[1])) {
-                settings = methodDescription.getCommonSettings().get(identifier[1]);
-            } else if (identifier[0].equals(SPECIFIC) && methodDescription.getSpecificSettings().containsKey(identifier[1])) {
-                settings = methodDescription.getSpecificSettings().get(identifier[1]);
-            } else if (identifier[0].equals(RESPONSES) && methodDescription.getResponsesSettings().containsKey(identifier[1])) {
-                settings = methodDescription.getResponsesSettings().get(identifier[1]);
-            }
+            Map<String, String> settings = getSettings(identifier[0], identifier[1]);
             if (settings == null) {
                 continue;
             }
@@ -352,6 +349,18 @@ public class MethodPropertiesDialogGenerator extends Dialog {
             }
         }
         getButton(IDialogConstants.OK_ID).setEnabled(true);
+    }
+
+    private Map<String, String> getSettings(String tabIdentifier, String value) {
+        Map<String, String> settings = null;
+        if (tabIdentifier.equals(COMMON) && methodDescription.getCommonSettings().containsKey(value)) {
+            settings = methodDescription.getCommonSettings().get(value);
+        } else if (tabIdentifier.equals(SPECIFIC) && methodDescription.getSpecificSettings().containsKey(value)) {
+            settings = methodDescription.getSpecificSettings().get(value);
+        } else if (tabIdentifier.equals(RESPONSES) && methodDescription.getResponsesSettings().containsKey(value)) {
+            settings = methodDescription.getResponsesSettings().get(value);
+        }
+        return settings;
     }
 
     private boolean validateTextField(Text textField, Map<String, String> settings) {
