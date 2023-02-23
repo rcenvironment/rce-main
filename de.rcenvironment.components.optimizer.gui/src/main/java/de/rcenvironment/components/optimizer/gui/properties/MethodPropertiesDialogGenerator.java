@@ -295,7 +295,6 @@ public class MethodPropertiesDialogGenerator extends Dialog {
      * Validated all current inputs in the dialog.
      */
     public void validateInputs() {
-        boolean isValid = true;
         for (Entry<Widget, String> entry : widgetToKeyMap.entrySet()) {
             Map<String, String> settings = null;
             if (methodDescription.getCommonSettings() != null
@@ -315,37 +314,37 @@ public class MethodPropertiesDialogGenerator extends Dialog {
             if (!swtWidget.equals(OptimizerComponentConstants.WIDGET_TEXT)) {
                 continue;
             }
-            isValid = validateTextField(isValid, (Text) entry.getKey(), settings);
+            if (!validateTextField((Text) entry.getKey(), settings)) {
+                getButton(IDialogConstants.OK_ID).setEnabled(false);
+                return;
+            }
         }
-        getButton(IDialogConstants.OK_ID).setEnabled(isValid);
+        getButton(IDialogConstants.OK_ID).setEnabled(true);
     }
 
-    private boolean validateTextField(boolean isValid, Text textField, Map<String, String> settings) {
+    private boolean validateTextField(Text textField, Map<String, String> settings) {
         String dataType = settings.get(OptimizerComponentConstants.DATA_TYPE_KEY);
         String validation = settings.get(OptimizerComponentConstants.VALIDATION_KEY);
         if (textField.getText().equals("") && (validation.contains("required"))) {
-            isValid = false;
+            return false;
         } else if (!textField.getText().equals("")) {
             if (dataType.equalsIgnoreCase(OptimizerComponentConstants.TYPE_INT)) {
-                int value = Integer.MAX_VALUE;
                 try {
-                    value = Integer.parseInt(textField.getText());
-                    isValid &= checkValidation(value, validation);
+                    int value = Integer.parseInt(textField.getText());
+                    return checkValidation(value, validation);
                 } catch (NumberFormatException e) {
-                    isValid &= false;
+                    return false;
                 }
-            }
-            if (dataType.equalsIgnoreCase(OptimizerComponentConstants.TYPE_REAL)) {
-                double value = Double.MAX_VALUE;
+            } else if (dataType.equalsIgnoreCase(OptimizerComponentConstants.TYPE_REAL)) {
                 try {
-                    value = Double.parseDouble(textField.getText());
-                    isValid &= checkValidation(value, validation);
+                    double value = Double.parseDouble(textField.getText());
+                    return checkValidation(value, validation);
                 } catch (NumberFormatException e) {
-                    isValid &= false;
+                    return false;
                 }
             }
         }
-        return isValid;
+        return true;
     }
 
     private boolean checkValidation(double value, String validation) {
