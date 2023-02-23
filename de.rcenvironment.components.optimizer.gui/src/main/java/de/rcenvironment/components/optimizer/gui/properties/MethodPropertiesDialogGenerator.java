@@ -84,7 +84,7 @@ public class MethodPropertiesDialogGenerator extends Dialog {
                 commonSettingsTab.setText("Common Settings");
                 Composite commonSettingsContainer = new Composite(settingsTabFolder, SWT.NONE);
                 commonSettingsContainer.setLayout(new GridLayout(2, true));
-                createSettings(methodDescription.getCommonSettings(), commonSettingsContainer);
+                createSettingsTab(methodDescription.getCommonSettings(), commonSettingsContainer);
                 commonSettingsTab.setControl(commonSettingsContainer);
             }
 
@@ -94,7 +94,7 @@ public class MethodPropertiesDialogGenerator extends Dialog {
                 specificSettingsTab.setText("Algorithm Specific Settings");
                 Composite specificSettingsContainer = new Composite(settingsTabFolder, SWT.NONE);
                 specificSettingsContainer.setLayout(new GridLayout(2, true));
-                createSettings(methodDescription.getSpecificSettings(), specificSettingsContainer);
+                createSettingsTab(methodDescription.getSpecificSettings(), specificSettingsContainer);
                 specificSettingsTab.setControl(specificSettingsContainer);
             }
             if (methodDescription.getResponsesSettings() != null
@@ -104,7 +104,7 @@ public class MethodPropertiesDialogGenerator extends Dialog {
                 responsesSettingsTab.setText("Responses Settings");
                 Composite responsesSettingsContainer = new Composite(settingsTabFolder, SWT.NONE);
                 responsesSettingsContainer.setLayout(new GridLayout(2, true));
-                createSettings(methodDescription.getResponsesSettings(), responsesSettingsContainer);
+                createSettingsTab(methodDescription.getResponsesSettings(), responsesSettingsContainer);
                 responsesSettingsTab.setControl(responsesSettingsContainer);
             }
         }
@@ -126,82 +126,106 @@ public class MethodPropertiesDialogGenerator extends Dialog {
         return returnValue;
     }
 
-    private void createSettings(Map<String, Map<String, String>> settings, Composite container) {
-        if (settings != null) {
-            String[] sortedSettings = new String[settings.keySet().size()];
-            int position = 0 - 1;
-            for (String key : settings.keySet()) {
-                String orderNumber = settings.get(key).get(OptimizerComponentConstants.GUI_ORDER_KEY);
-                if (orderNumber != null) {
-                    position = Integer.parseInt(orderNumber) - 1;
-                    if (position >= sortedSettings.length) {
-                        while (position >= sortedSettings.length || sortedSettings[position] != null) {
-                            position--;
-                        }
-                    } else {
-                        while (sortedSettings[position] != null) {
-                            position++;
-                        }
-                    }
-                } else {
-                    position = sortedSettings.length - 1;
-                    while (sortedSettings[position] != null) {
+    private void createSettingsTab(Map<String, Map<String, String>> settings, Composite container) {
+        if (settings == null) {
+            return;
+        }
+        createWidgets(settings, container);
+        createRestoreDefaultsButton(settings, container);
+    }
+
+    private void createWidgets(Map<String, Map<String, String>> settings, Composite container) {
+        String[] sortedSettings = sortSettings(settings);
+        for (String key : sortedSettings) {
+            Map<String, String> currentSetting = settings.get(key);
+            if (settings.get(key).get(OptimizerComponentConstants.DONT_SHOW_KEY) != null
+                && settings.get(key).get(OptimizerComponentConstants.DONT_SHOW_KEY).equalsIgnoreCase(TRUE)) {
+                continue;
+            }
+            String swtWidget = settings.get(key).get(OptimizerComponentConstants.SWTWIDGET_KEY);
+            if (swtWidget.equals(OptimizerComponentConstants.WIDGET_TEXT)) {
+                createTextField(container, key, currentSetting);
+            } else if (swtWidget.equals(OptimizerComponentConstants.WIDGET_COMBO)) {
+                createComboBox(container, key, currentSetting);
+            } else if (swtWidget.equals(OptimizerComponentConstants.WIDGET_CHECK)) {
+                createCheckBox(container, key, currentSetting);
+            }
+        }
+    }
+
+    private String[] sortSettings(Map<String, Map<String, String>> settings) {
+        String[] sortedSettings = new String[settings.keySet().size()];
+        int position = 0 - 1;
+        for (Entry<String, Map<String, String>> entry : settings.entrySet()) {
+            String orderNumber = entry.getValue().get(OptimizerComponentConstants.GUI_ORDER_KEY);
+            if (orderNumber != null) {
+                position = Integer.parseInt(orderNumber) - 1;
+                if (position >= sortedSettings.length) {
+                    while (position >= sortedSettings.length || sortedSettings[position] != null) {
                         position--;
                     }
-                }
-                sortedSettings[position] = key;
-            }
-            for (String key : sortedSettings) {
-                Map<String, String> currentSetting = settings.get(key);
-                if (settings.get(key).get(OptimizerComponentConstants.DONT_SHOW_KEY) == null
-                    || !settings.get(key).get(OptimizerComponentConstants.DONT_SHOW_KEY).equalsIgnoreCase(TRUE)) {
-                    String value = currentSetting.get(OptimizerComponentConstants.VALUE_KEY);
-                    if (value == null || value.equals("")) {
-                        value = currentSetting.get(OptimizerComponentConstants.DEFAULT_VALUE_KEY);
-                    }
-                    if (settings.get(key).get(OptimizerComponentConstants.SWTWIDGET_KEY).equals(OptimizerComponentConstants.WIDGET_TEXT)) {
-                        Text newTextfield =
-                            createLabelAndTextfield(container,
-                                currentSetting.get(OptimizerComponentConstants.GUINAME_KEY),
-                                currentSetting.get(OptimizerComponentConstants.DATA_TYPE_KEY),
-                                value);
-                        newTextfield.setData(key);
-                        widgetToKeyMap.put(newTextfield, key);
-                        newTextfield.addModifyListener(new MethodPropertiesModifyListener());
-                    } else if (settings.get(key).get(
-                        OptimizerComponentConstants.SWTWIDGET_KEY).equals(OptimizerComponentConstants.WIDGET_COMBO)) {
-                        Combo newCombo = createLabelAndCombo(
-                            container, currentSetting.get(OptimizerComponentConstants.GUINAME_KEY),
-                            currentSetting.get(OptimizerComponentConstants.CHOICES_KEY),
-                            value);
-                        widgetToKeyMap.put(newCombo, key);
-                        newCombo.setData(key);
-                        newCombo.addModifyListener(new MethodPropertiesModifyListener());
-                    } else if (settings.get(key).get(OptimizerComponentConstants.SWTWIDGET_KEY)
-                        .equals(OptimizerComponentConstants.WIDGET_CHECK)) {
-                        Button newCheckbox = createLabelAndCheckbox(container,
-                            currentSetting.get(OptimizerComponentConstants.GUINAME_KEY),
-                            value);
-                        widgetToKeyMap.put(newCheckbox, key);
-                        newCheckbox.setData(key);
-                        newCheckbox.addSelectionListener(new SelectionChangedListener());
+                } else {
+                    while (sortedSettings[position] != null) {
+                        position++;
                     }
                 }
+            } else {
+                position = sortedSettings.length - 1;
+                while (sortedSettings[position] != null) {
+                    position--;
+                }
             }
-
-            new Label(container, SWT.NONE).setText("");
-            Label horizontalLine = new Label(container, SWT.SEPARATOR | SWT.HORIZONTAL);
-            GridData lineGridData = new GridData(GridData.FILL_HORIZONTAL | SWT.END);
-            horizontalLine.setLayoutData(lineGridData);
-            new Label(container, SWT.NONE).setText("");
-            Button loadDefaults = new Button(container, SWT.PUSH);
-            loadDefaults.setImage(ImageManager.getInstance().getImageDescriptor(StandardImages.RESTORE_DEFAULT).createImage());
-            GridData gridData = new GridData();
-            gridData.horizontalAlignment = SWT.RIGHT;
-            loadDefaults.setLayoutData(gridData);
-            loadDefaults.setText(Messages.restoreDefaultAlgorithmProperties);
-            loadDefaults.addSelectionListener(new DefaultSelectionListener(container, settings));
+            sortedSettings[position] = entry.getKey();
         }
+        return sortedSettings;
+    }
+
+    private void createRestoreDefaultsButton(Map<String, Map<String, String>> settings, Composite container) {
+        new Label(container, SWT.NONE).setText("");
+        Label horizontalLine = new Label(container, SWT.SEPARATOR | SWT.HORIZONTAL);
+        GridData lineGridData = new GridData(GridData.FILL_HORIZONTAL | SWT.END);
+        horizontalLine.setLayoutData(lineGridData);
+        new Label(container, SWT.NONE).setText("");
+        Button loadDefaults = new Button(container, SWT.PUSH);
+        loadDefaults.setImage(ImageManager.getInstance().getImageDescriptor(StandardImages.RESTORE_DEFAULT).createImage());
+        GridData gridData = new GridData();
+        gridData.horizontalAlignment = SWT.RIGHT;
+        loadDefaults.setLayoutData(gridData);
+        loadDefaults.setText(Messages.restoreDefaultAlgorithmProperties);
+        loadDefaults.addSelectionListener(new DefaultSelectionListener(container, settings));
+    }
+
+    private String getValueOrDefault(Map<String, String> currentSetting) {
+        String value = currentSetting.get(OptimizerComponentConstants.VALUE_KEY);
+        if (value == null || value.equals("")) {
+            value = currentSetting.get(OptimizerComponentConstants.DEFAULT_VALUE_KEY);
+        }
+        return value;
+    }
+
+    private void createCheckBox(Composite container, String key, Map<String, String> currentSetting) {
+        Button newCheckbox = createLabelAndCheckbox(container, currentSetting.get(OptimizerComponentConstants.GUINAME_KEY),
+            getValueOrDefault(currentSetting));
+        widgetToKeyMap.put(newCheckbox, key);
+        newCheckbox.setData(key);
+        newCheckbox.addSelectionListener(new SelectionChangedListener());
+    }
+
+    private void createComboBox(Composite container, String key, Map<String, String> currentSetting) {
+        Combo newCombo = createLabelAndCombo(container, currentSetting.get(OptimizerComponentConstants.GUINAME_KEY),
+            currentSetting.get(OptimizerComponentConstants.CHOICES_KEY), getValueOrDefault(currentSetting));
+        widgetToKeyMap.put(newCombo, key);
+        newCombo.setData(key);
+        newCombo.addModifyListener(new MethodPropertiesModifyListener());
+    }
+
+    private void createTextField(Composite container, String key, Map<String, String> currentSetting) {
+        Text newTextfield =
+            createLabelAndTextfield(container, currentSetting.get(OptimizerComponentConstants.GUINAME_KEY),
+                currentSetting.get(OptimizerComponentConstants.DATA_TYPE_KEY), getValueOrDefault(currentSetting));
+        newTextfield.setData(key);
+        widgetToKeyMap.put(newTextfield, key);
+        newTextfield.addModifyListener(new MethodPropertiesModifyListener());
     }
 
     /**
@@ -226,7 +250,6 @@ public class MethodPropertiesDialogGenerator extends Dialog {
 
         @Override
         public void widgetSelected(SelectionEvent arg0) {
-
             for (Control field : container.getChildren()) {
                 String key = getFieldSettingsKey(field);
                 if (key == null) {
@@ -325,6 +348,9 @@ public class MethodPropertiesDialogGenerator extends Dialog {
     private boolean validateTextField(Text textField, Map<String, String> settings) {
         String dataType = settings.get(OptimizerComponentConstants.DATA_TYPE_KEY);
         String validation = settings.get(OptimizerComponentConstants.VALIDATION_KEY);
+        if (validation == null || validation.equals("")) {
+            return true;
+        }
         if (textField.getText().equals("") && (validation.contains("required"))) {
             return false;
         } else if (!textField.getText().equals("")) {
@@ -348,34 +374,31 @@ public class MethodPropertiesDialogGenerator extends Dialog {
     }
 
     private boolean checkValidation(double value, String validation) {
-        boolean result = true;
-        if (validation != null && !validation.equals("")) {
-            String[] splitValidations = validation.split(OptimizerComponentConstants.SEPARATOR);
-            for (String argument : splitValidations) {
-                if (argument.contains("<=")) {
-                    double restriction = Double.parseDouble(argument.substring(2));
-                    if (value > restriction) {
-                        result = false;
-                    }
-                } else if (argument.contains(">=")) {
-                    double restriction = Double.parseDouble(argument.substring(2));
-                    if (value < restriction) {
-                        result = false;
-                    }
-                } else if (argument.contains("<")) {
-                    double restriction = Double.parseDouble(argument.substring(1));
-                    if (value >= restriction) {
-                        result = false;
-                    }
-                } else if (argument.contains(">")) {
-                    double restriction = Double.parseDouble(argument.substring(1));
-                    if (value <= restriction) {
-                        result = false;
-                    }
+        String[] splitValidations = validation.split(OptimizerComponentConstants.SEPARATOR);
+        for (String argument : splitValidations) {
+            if (argument.contains("<=")) {
+                double restriction = Double.parseDouble(argument.substring(2));
+                if (value > restriction) {
+                    return false;
+                }
+            } else if (argument.contains(">=")) {
+                double restriction = Double.parseDouble(argument.substring(2));
+                if (value < restriction) {
+                    return false;
+                }
+            } else if (argument.contains("<")) {
+                double restriction = Double.parseDouble(argument.substring(1));
+                if (value >= restriction) {
+                    return false;
+                }
+            } else if (argument.contains(">")) {
+                double restriction = Double.parseDouble(argument.substring(1));
+                if (value <= restriction) {
+                    return false;
                 }
             }
         }
-        return result;
+        return true;
     }
 
     private boolean checkValidation(int value, String validation) {
