@@ -120,18 +120,16 @@ public class MethodPropertiesDialogGenerator extends Dialog {
     }
 
     private boolean checkIfSettingsAreGUIRelevant(Map<String, Map<String, String>> settings) {
-        boolean returnValue = true;
         if (settings.isEmpty()) {
-            returnValue = false;
+            return false;
         }
-
-        for (String key : settings.keySet()) {
-            if (settings.get(key).get(OptimizerComponentConstants.DONT_SHOW_KEY) != null) {
-                returnValue = false;
+        for (Entry<String, Map<String, String>> entry : settings.entrySet()) {
+            String doNotShow = entry.getValue().get(OptimizerComponentConstants.DONT_SHOW_KEY);
+            if (doNotShow == null || doNotShow.equals("false")) {
+                return true;
             }
         }
-
-        return returnValue;
+        return false;
     }
 
     private void createSettingsTab(Map<String, Map<String, String>> settings, Composite container, String tabIdentifier) {
