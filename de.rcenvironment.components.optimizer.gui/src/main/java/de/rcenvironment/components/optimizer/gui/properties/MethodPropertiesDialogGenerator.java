@@ -46,7 +46,7 @@ import de.rcenvironment.core.gui.utils.incubator.WidgetGroupFactory;
  * This class is for generating a properties {@link Dialog} for a given optimization method based on a json file.
  * 
  * @author Sascha Zur
- * @author Kathrin Schaffert (#17981 )
+ * @author Kathrin Schaffert (#17981, refactoring)
  */
 public class MethodPropertiesDialogGenerator extends Dialog {
 
@@ -226,50 +226,43 @@ public class MethodPropertiesDialogGenerator extends Dialog {
         @Override
         public void widgetSelected(SelectionEvent arg0) {
 
-            for (Object field : container.getChildren()) {
+            for (Control field : container.getChildren()) {
+                String key = getFieldSettingsKey(field);
+                if (key == null) {
+                    continue;
+                }
+                String value = settings.get(key).get(OptimizerComponentConstants.DEFAULT_VALUE_KEY);
+                if (value == null) {
+                    continue;
+                }
                 if (field instanceof Text) {
-                    String key = (String) ((Text) field).getData();
-                    if (key != null) {
-                        String value = settings.get(key).get(OptimizerComponentConstants.DEFAULT_VALUE_KEY);
-                        if (value != null) {
-                            ((Text) field).setText(value);
-                        }
-                    }
-                }
-                if (field instanceof Combo) {
-                    String key = (String) ((Combo) field).getData();
-                    if (key != null) {
-                        String value = settings.get(key).get(OptimizerComponentConstants.DEFAULT_VALUE_KEY);
-                        if (value != null) {
-                            ((Combo) field).setText(value);
-                        }
-                    }
-
-                }
-                if (field instanceof Button) {
-                    String key = (String) ((Button) field).getData();
-
-                    if (key != null) {
-                        String value = settings.get(key).get(OptimizerComponentConstants.DEFAULT_VALUE_KEY);
-                        if (value != null && (value.equals(TRUE) || value.equals("false"))) {
-                            ((Button) field).setSelection(Boolean.parseBoolean(value));
-                            updatePropertiesSettings((Button) field, value);
-                        }
-                    }
+                    ((Text) field).setText(value);
+                } else if (field instanceof Combo) {
+                    ((Combo) field).setText(value);
+                } else if (field instanceof Button && (value.equals(TRUE) || value.equals("false"))) {
+                    ((Button) field).setSelection(Boolean.parseBoolean(value));
+                    updatePropertiesSettings(field, value);
                 }
             }
         }
 
+        private String getFieldSettingsKey(Control field) {
+            String key = null;
+            if (field instanceof Text) {
+                key = (String) ((Text) field).getData();
+            } else if (field instanceof Combo) {
+                key = (String) ((Combo) field).getData();
+            } else if (field instanceof Button) {
+                key = (String) ((Button) field).getData();
+            }
+            return key;
+        }
     }
 
     private Button createLabelAndCheckbox(Composite container, String text, String value) {
         new Label(container, SWT.NONE).setText(text);
         Button result = new Button(container, SWT.CHECK);
-        if (value.equals(TRUE)) {
-            result.setSelection(true);
-        } else {
-            result.setSelection(false);
-        }
+        result.setSelection(value.equals(TRUE));
         return result;
     }
 
