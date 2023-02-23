@@ -11,6 +11,7 @@ package de.rcenvironment.components.optimizer.gui.properties;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -295,51 +296,56 @@ public class MethodPropertiesDialogGenerator extends Dialog {
      */
     public void validateInputs() {
         boolean isValid = true;
-        for (Widget widget : widgetToKeyMap.keySet()) {
+        for (Entry<Widget, String> entry : widgetToKeyMap.entrySet()) {
             Map<String, String> settings = null;
             if (methodDescription.getCommonSettings() != null
-                && methodDescription.getCommonSettings().containsKey(widgetToKeyMap.get(widget))) {
-                settings = methodDescription.getCommonSettings().get(widgetToKeyMap.get(widget));
+                && methodDescription.getCommonSettings().containsKey(entry.getValue())) {
+                settings = methodDescription.getCommonSettings().get(entry.getValue());
             } else if (methodDescription.getSpecificSettings() != null
-                && methodDescription.getSpecificSettings().containsKey(widgetToKeyMap.get(widget))) {
-                settings = methodDescription.getSpecificSettings().get(widgetToKeyMap.get(widget));
+                && methodDescription.getSpecificSettings().containsKey(entry.getValue())) {
+                settings = methodDescription.getSpecificSettings().get(entry.getValue());
             } else if (methodDescription.getResponsesSettings() != null
-                && methodDescription.getResponsesSettings().containsKey(widgetToKeyMap.get(widget))) {
-                settings = methodDescription.getResponsesSettings().get(widgetToKeyMap.get(widget));
+                && methodDescription.getResponsesSettings().containsKey(entry.getValue())) {
+                settings = methodDescription.getResponsesSettings().get(entry.getValue());
             }
-            if (settings != null) {
-                String dataType = settings.get(OptimizerComponentConstants.DATA_TYPE_KEY);
-                String swtWidget = settings.get(OptimizerComponentConstants.SWTWIDGET_KEY);
-                String validation = settings.get(OptimizerComponentConstants.VALIDATION_KEY);
-                if (swtWidget.equals(OptimizerComponentConstants.WIDGET_TEXT)) {
-                    if (((Text) widget).getText().equals("") && (validation.contains("required"))) {
-                        isValid = false;
-                    } else if (!((Text) widget).getText().equals("")) {
-                        if (dataType.equalsIgnoreCase(OptimizerComponentConstants.TYPE_INT)) {
-                            int value = Integer.MAX_VALUE;
-                            try {
-                                value = Integer.parseInt(((Text) widget).getText());
-                                isValid &= checkValidation(value, validation);
-                            } catch (NumberFormatException e) {
-                                value = Integer.MAX_VALUE;
-                                isValid &= false;
-                            }
-                        }
-                        if (dataType.equalsIgnoreCase(OptimizerComponentConstants.TYPE_REAL)) {
-                            double value = Double.MAX_VALUE;
-                            try {
-                                value = Double.parseDouble(((Text) widget).getText());
-                                isValid &= checkValidation(value, validation);
-                            } catch (NumberFormatException e) {
-                                value = Double.MAX_VALUE;
-                                isValid &= false;
-                            }
-                        }
-                    }
+            if (settings == null) {
+                continue;
+            }
+            String swtWidget = settings.get(OptimizerComponentConstants.SWTWIDGET_KEY);
+            if (!swtWidget.equals(OptimizerComponentConstants.WIDGET_TEXT)) {
+                continue;
+            }
+            isValid = validateTextField(isValid, (Text) entry.getKey(), settings);
+        }
+        getButton(IDialogConstants.OK_ID).setEnabled(isValid);
+    }
+
+    private boolean validateTextField(boolean isValid, Text textField, Map<String, String> settings) {
+        String dataType = settings.get(OptimizerComponentConstants.DATA_TYPE_KEY);
+        String validation = settings.get(OptimizerComponentConstants.VALIDATION_KEY);
+        if (textField.getText().equals("") && (validation.contains("required"))) {
+            isValid = false;
+        } else if (!textField.getText().equals("")) {
+            if (dataType.equalsIgnoreCase(OptimizerComponentConstants.TYPE_INT)) {
+                int value = Integer.MAX_VALUE;
+                try {
+                    value = Integer.parseInt(textField.getText());
+                    isValid &= checkValidation(value, validation);
+                } catch (NumberFormatException e) {
+                    isValid &= false;
+                }
+            }
+            if (dataType.equalsIgnoreCase(OptimizerComponentConstants.TYPE_REAL)) {
+                double value = Double.MAX_VALUE;
+                try {
+                    value = Double.parseDouble(textField.getText());
+                    isValid &= checkValidation(value, validation);
+                } catch (NumberFormatException e) {
+                    isValid &= false;
                 }
             }
         }
-        getButton(IDialogConstants.OK_ID).setEnabled(isValid);
+        return isValid;
     }
 
     private boolean checkValidation(double value, String validation) {
