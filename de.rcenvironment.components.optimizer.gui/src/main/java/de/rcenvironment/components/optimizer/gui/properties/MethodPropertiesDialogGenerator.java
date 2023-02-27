@@ -9,7 +9,9 @@
 package de.rcenvironment.components.optimizer.gui.properties;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -161,31 +163,33 @@ public class MethodPropertiesDialogGenerator extends Dialog {
 
     private String[] sortSettings(Map<String, Map<String, String>> settings) {
         String[] sortedSettings = new String[settings.keySet().size()];
-        int position = 0 - 1;
+        List<String> unknownOrder = new ArrayList<>();
         for (Entry<String, Map<String, String>> entry : settings.entrySet()) {
             String orderNumber = entry.getValue().get(OptimizerComponentConstants.GUI_ORDER_KEY);
             if (orderNumber != null) {
-                position = Integer.parseInt(orderNumber) - 1;
-                if (position >= sortedSettings.length) {
-                    while (position >= sortedSettings.length || sortedSettings[position] != null) {
-                        position--;
-                    }
+                int position = Integer.parseInt(orderNumber) - 1;
+                if (position < sortedSettings.length && sortedSettings[position] == null) {
+                    sortedSettings[position] = entry.getKey();
                 } else {
-                    while (sortedSettings[position] != null) {
-                        position++;
-                    }
+                    unknownOrder.add(entry.getKey());
                 }
             } else {
-                position = sortedSettings.length - 1;
-                while (sortedSettings[position] != null) {
-                    position--;
+                unknownOrder.add(entry.getKey());
+            }
+        }
+        
+        for (String str : unknownOrder) {
+            for (int i = 0; i < sortedSettings.length; i++) {
+                if (sortedSettings[i] == null) {
+                    sortedSettings[i] = str;
+                    break;
                 }
             }
-            sortedSettings[position] = entry.getKey();
         }
+
         return sortedSettings;
     }
-
+    
     private void createRestoreDefaultsButton(Composite container) {
         new Label(container, SWT.NONE).setText("");
         Label horizontalLine = new Label(container, SWT.SEPARATOR | SWT.HORIZONTAL);
@@ -259,9 +263,9 @@ public class MethodPropertiesDialogGenerator extends Dialog {
                 if (settingsIdentifier == null) {
                     continue;
                 }
-                
+
                 String[] identifier = settingsIdentifier.split(SEPERATOR);
-                
+
                 Map<String, String> settings = getSettings(identifier[0], identifier[1]);
                 if (settings == null) {
                     continue;
