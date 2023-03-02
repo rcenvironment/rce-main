@@ -295,7 +295,7 @@ from RCE_Optimizer_API import result</programlisting>
     }
 }</programlisting>
                 <note>
-                    <para>Property names must be unique.</para>
+                    <para>Property names must be unique on each tab. Otherwise the last configuration is used.</para>
                 </note>
                 <note><para>The field "GuiOrder" is optional. Use this field to specify or change easily the order of the widgets in the GUI.</para></note>
             </sect3>

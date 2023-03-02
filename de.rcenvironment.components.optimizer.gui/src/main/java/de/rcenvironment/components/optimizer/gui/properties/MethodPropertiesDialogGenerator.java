@@ -9,8 +9,11 @@
 package de.rcenvironment.components.optimizer.gui.properties;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -46,10 +49,19 @@ import de.rcenvironment.core.gui.utils.incubator.WidgetGroupFactory;
  * This class is for generating a properties {@link Dialog} for a given optimization method based on a json file.
  * 
  * @author Sascha Zur
+ * @author Kathrin Schaffert (#17981, refactoring)
  */
 public class MethodPropertiesDialogGenerator extends Dialog {
 
     private static final String TRUE = "true";
+
+    private static final String COMMON = "common";
+
+    private static final String SPECIFIC = "specific";
+
+    private static final String RESPONSES = "responses";
+
+    private static final String SEPERATOR = "/";
 
     private final MethodDescription methodDescription;
 
@@ -71,7 +83,7 @@ public class MethodPropertiesDialogGenerator extends Dialog {
 
     @Override
     protected Control createDialogArea(Composite parent) {
-        widgetToKeyMap = new HashMap<Widget, String>();
+        widgetToKeyMap = new HashMap<>();
 
         Composite dialogContainer = (Composite) super.createDialogArea(parent);
         CTabFolder settingsTabFolder = new CTabFolder(dialogContainer, SWT.BORDER);
@@ -82,7 +94,7 @@ public class MethodPropertiesDialogGenerator extends Dialog {
                 commonSettingsTab.setText("Common Settings");
                 Composite commonSettingsContainer = new Composite(settingsTabFolder, SWT.NONE);
                 commonSettingsContainer.setLayout(new GridLayout(2, true));
-                createSettings(methodDescription.getCommonSettings(), commonSettingsContainer);
+                createSettingsTab(methodDescription.getCommonSettings(), commonSettingsContainer, COMMON);
                 commonSettingsTab.setControl(commonSettingsContainer);
             }
 
@@ -92,7 +104,7 @@ public class MethodPropertiesDialogGenerator extends Dialog {
                 specificSettingsTab.setText("Algorithm Specific Settings");
                 Composite specificSettingsContainer = new Composite(settingsTabFolder, SWT.NONE);
                 specificSettingsContainer.setLayout(new GridLayout(2, true));
-                createSettings(methodDescription.getSpecificSettings(), specificSettingsContainer);
+                createSettingsTab(methodDescription.getSpecificSettings(), specificSettingsContainer, SPECIFIC);
                 specificSettingsTab.setControl(specificSettingsContainer);
             }
             if (methodDescription.getResponsesSettings() != null
@@ -102,7 +114,7 @@ public class MethodPropertiesDialogGenerator extends Dialog {
                 responsesSettingsTab.setText("Responses Settings");
                 Composite responsesSettingsContainer = new Composite(settingsTabFolder, SWT.NONE);
                 responsesSettingsContainer.setLayout(new GridLayout(2, true));
-                createSettings(methodDescription.getResponsesSettings(), responsesSettingsContainer);
+                createSettingsTab(methodDescription.getResponsesSettings(), responsesSettingsContainer, RESPONSES);
                 responsesSettingsTab.setControl(responsesSettingsContainer);
             }
         }
@@ -110,98 +122,120 @@ public class MethodPropertiesDialogGenerator extends Dialog {
     }
 
     private boolean checkIfSettingsAreGUIRelevant(Map<String, Map<String, String>> settings) {
-        boolean returnValue = true;
         if (settings.isEmpty()) {
-            returnValue = false;
+            return false;
         }
-
-        if (settings != null) {
-            for (String key : settings.keySet()) {
-                if (settings.get(key).get(OptimizerComponentConstants.DONT_SHOW_KEY) != null) {
-                    returnValue = false;
-                }
+        for (Entry<String, Map<String, String>> entry : settings.entrySet()) {
+            String doNotShow = entry.getValue().get(OptimizerComponentConstants.DONT_SHOW_KEY);
+            if (doNotShow == null || doNotShow.equals("false")) {
+                return true;
             }
         }
-
-        return returnValue;
+        return false;
     }
 
-    private void createSettings(Map<String, Map<String, String>> settings, Composite container) {
-        if (settings != null) {
-            String[] sortedSettings = new String[settings.keySet().size()];
-            int position = 0 - 1;
-            for (String key : settings.keySet()) {
-                String orderNumber = settings.get(key).get(OptimizerComponentConstants.GUI_ORDER_KEY);
-                if (orderNumber != null) {
-                    position = Integer.parseInt(orderNumber) - 1;
-                    if (position >= sortedSettings.length) {
-                        while (position >= sortedSettings.length || sortedSettings[position] != null) {
-                            position--;
-                        }
-                    } else {
-                        while (sortedSettings[position] != null) {
-                            position++;
-                        }
-                    }
-                } else {
-                    position = sortedSettings.length - 1;
-                    while (sortedSettings[position] != null) {
-                        position--;
-                    }
-                }
-                sortedSettings[position] = key;
-            }
-            for (String key : sortedSettings) {
-                Map<String, String> currentSetting = settings.get(key);
-                if (settings.get(key).get(OptimizerComponentConstants.DONT_SHOW_KEY) == null
-                    || !settings.get(key).get(OptimizerComponentConstants.DONT_SHOW_KEY).equalsIgnoreCase(TRUE)) {
-                    String value = currentSetting.get(OptimizerComponentConstants.VALUE_KEY);
-                    if (value == null || value.equals("")) {
-                        value = currentSetting.get(OptimizerComponentConstants.DEFAULT_VALUE_KEY);
-                    }
-                    if (settings.get(key).get(OptimizerComponentConstants.SWTWIDGET_KEY).equals(OptimizerComponentConstants.WIDGET_TEXT)) {
-                        Text newTextfield =
-                            createLabelAndTextfield(container,
-                                currentSetting.get(OptimizerComponentConstants.GUINAME_KEY),
-                                currentSetting.get(OptimizerComponentConstants.DATA_TYPE_KEY),
-                                value);
-                        newTextfield.setData(key);
-                        widgetToKeyMap.put(newTextfield, key);
-                        newTextfield.addModifyListener(new MethodPropertiesModifyListener());
-                    } else if (settings.get(key).get(
-                        OptimizerComponentConstants.SWTWIDGET_KEY).equals(OptimizerComponentConstants.WIDGET_COMBO)) {
-                        Combo newCombo = createLabelAndCombo(
-                            container, currentSetting.get(OptimizerComponentConstants.GUINAME_KEY),
-                            currentSetting.get(OptimizerComponentConstants.CHOICES_KEY),
-                            value);
-                        widgetToKeyMap.put(newCombo, key);
-                        newCombo.setData(key);
-                        newCombo.addModifyListener(new MethodPropertiesModifyListener());
-                    } else if (settings.get(key).get(OptimizerComponentConstants.SWTWIDGET_KEY)
-                        .equals(OptimizerComponentConstants.WIDGET_CHECK)) {
-                        Button newCheckbox = createLabelAndCheckbox(container,
-                            currentSetting.get(OptimizerComponentConstants.GUINAME_KEY),
-                            value);
-                        widgetToKeyMap.put(newCheckbox, key);
-                        newCheckbox.setData(key);
-                        newCheckbox.addSelectionListener(new SelectionChangedListener());
-                    }
-                }
-            }
-
-            new Label(container, SWT.NONE).setText("");
-            Label horizontalLine = new Label(container, SWT.SEPARATOR | SWT.HORIZONTAL);
-            GridData lineGridData = new GridData(GridData.FILL_HORIZONTAL | SWT.END);
-            horizontalLine.setLayoutData(lineGridData);
-            new Label(container, SWT.NONE).setText("");
-            Button loadDefaults = new Button(container, SWT.PUSH);
-            loadDefaults.setImage(ImageManager.getInstance().getImageDescriptor(StandardImages.RESTORE_DEFAULT).createImage());
-            GridData gridData = new GridData();
-            gridData.horizontalAlignment = SWT.RIGHT;
-            loadDefaults.setLayoutData(gridData);
-            loadDefaults.setText(Messages.restoreDefaultAlgorithmProperties);
-            loadDefaults.addSelectionListener(new DefaultSelectionListener(container, settings));
+    private void createSettingsTab(Map<String, Map<String, String>> settings, Composite container, String tabIdentifier) {
+        if (settings == null) {
+            return;
         }
+        createWidgets(settings, container, tabIdentifier);
+        createRestoreDefaultsButton(container);
+    }
+
+    private void createWidgets(Map<String, Map<String, String>> settings, Composite container, String identifier) {
+        String[] sortedSettings = sortSettings(settings);
+        for (String key : sortedSettings) {
+            Map<String, String> currentSetting = settings.get(key);
+            if (settings.get(key).get(OptimizerComponentConstants.DONT_SHOW_KEY) != null
+                && settings.get(key).get(OptimizerComponentConstants.DONT_SHOW_KEY).equalsIgnoreCase(TRUE)) {
+                continue;
+            }
+            String swtWidget = settings.get(key).get(OptimizerComponentConstants.SWTWIDGET_KEY);
+            if (swtWidget.equals(OptimizerComponentConstants.WIDGET_TEXT)) {
+                createTextField(container, currentSetting, identifier + SEPERATOR + key);
+            } else if (swtWidget.equals(OptimizerComponentConstants.WIDGET_COMBO)) {
+                createComboBox(container, currentSetting, identifier + SEPERATOR + key);
+            } else if (swtWidget.equals(OptimizerComponentConstants.WIDGET_CHECK)) {
+                createCheckBox(container, currentSetting, identifier + SEPERATOR + key);
+            }
+        }
+    }
+
+    private String[] sortSettings(Map<String, Map<String, String>> settings) {
+        String[] sortedSettings = new String[settings.keySet().size()];
+        List<String> unknownOrder = new ArrayList<>();
+        for (Entry<String, Map<String, String>> entry : settings.entrySet()) {
+            String orderNumber = entry.getValue().get(OptimizerComponentConstants.GUI_ORDER_KEY);
+            if (orderNumber != null) {
+                int position = Integer.parseInt(orderNumber) - 1;
+                if (position < sortedSettings.length && sortedSettings[position] == null) {
+                    sortedSettings[position] = entry.getKey();
+                } else {
+                    unknownOrder.add(entry.getKey());
+                }
+            } else {
+                unknownOrder.add(entry.getKey());
+            }
+        }
+        
+        for (String str : unknownOrder) {
+            for (int i = 0; i < sortedSettings.length; i++) {
+                if (sortedSettings[i] == null) {
+                    sortedSettings[i] = str;
+                    break;
+                }
+            }
+        }
+
+        return sortedSettings;
+    }
+    
+    private void createRestoreDefaultsButton(Composite container) {
+        new Label(container, SWT.NONE).setText("");
+        Label horizontalLine = new Label(container, SWT.SEPARATOR | SWT.HORIZONTAL);
+        GridData lineGridData = new GridData(GridData.FILL_HORIZONTAL | SWT.END);
+        horizontalLine.setLayoutData(lineGridData);
+        new Label(container, SWT.NONE).setText("");
+        Button loadDefaults = new Button(container, SWT.PUSH);
+        loadDefaults.setImage(ImageManager.getInstance().getImageDescriptor(StandardImages.RESTORE_DEFAULT).createImage());
+        GridData gridData = new GridData();
+        gridData.horizontalAlignment = SWT.RIGHT;
+        loadDefaults.setLayoutData(gridData);
+        loadDefaults.setText(Messages.restoreDefaultAlgorithmProperties);
+        loadDefaults.addSelectionListener(new DefaultSelectionListener(container));
+    }
+
+    private String getValueOrDefault(Map<String, String> currentSetting) {
+        String value = currentSetting.get(OptimizerComponentConstants.VALUE_KEY);
+        if (value == null || value.equals("")) {
+            value = currentSetting.get(OptimizerComponentConstants.DEFAULT_VALUE_KEY);
+        }
+        return value;
+    }
+
+    private void createCheckBox(Composite container, Map<String, String> currentSetting, String identifier) {
+        Button newCheckbox = createLabelAndCheckbox(container, currentSetting.get(OptimizerComponentConstants.GUINAME_KEY),
+            getValueOrDefault(currentSetting));
+        widgetToKeyMap.put(newCheckbox, identifier);
+        newCheckbox.setData(identifier);
+        newCheckbox.addSelectionListener(new SelectionChangedListener());
+    }
+
+    private void createComboBox(Composite container, Map<String, String> currentSetting, String identifier) {
+        Combo newCombo = createLabelAndCombo(container, currentSetting.get(OptimizerComponentConstants.GUINAME_KEY),
+            currentSetting.get(OptimizerComponentConstants.CHOICES_KEY), getValueOrDefault(currentSetting));
+        widgetToKeyMap.put(newCombo, identifier);
+        newCombo.setData(identifier);
+        newCombo.addModifyListener(new MethodPropertiesModifyListener());
+    }
+
+    private void createTextField(Composite container, Map<String, String> currentSetting, String identifier) {
+        Text newTextfield =
+            createLabelAndTextfield(container, currentSetting.get(OptimizerComponentConstants.GUINAME_KEY),
+                currentSetting.get(OptimizerComponentConstants.DATA_TYPE_KEY), getValueOrDefault(currentSetting));
+        newTextfield.setData(identifier);
+        widgetToKeyMap.put(newTextfield, identifier);
+        newTextfield.addModifyListener(new MethodPropertiesModifyListener());
     }
 
     /**
@@ -209,16 +243,14 @@ public class MethodPropertiesDialogGenerator extends Dialog {
      * Implements the selection listener for the "load default" values button.
      *
      * @author Jascha Riedel
+     * @author Kathrin Schaffert (refactoring)
      */
     private class DefaultSelectionListener implements SelectionListener {
 
         private Composite container;
 
-        private Map<String, Map<String, String>> settings;
-
-        DefaultSelectionListener(Composite container, Map<String, Map<String, String>> settings) {
+        DefaultSelectionListener(Composite container) {
             this.container = container;
-            this.settings = settings;
         }
 
         @Override
@@ -226,53 +258,50 @@ public class MethodPropertiesDialogGenerator extends Dialog {
 
         @Override
         public void widgetSelected(SelectionEvent arg0) {
-            for (Object field : container.getChildren()) {
+            for (Control field : container.getChildren()) {
+                String settingsIdentifier = getSettingsIdentifer(field);
+                if (settingsIdentifier == null) {
+                    continue;
+                }
+
+                String[] identifier = settingsIdentifier.split(SEPERATOR);
+
+                Map<String, String> settings = getSettings(identifier[0], identifier[1]);
+                if (settings == null) {
+                    continue;
+                }
+                String value = settings.get(OptimizerComponentConstants.DEFAULT_VALUE_KEY);
+                if (value == null) {
+                    continue;
+                }
                 if (field instanceof Text) {
-                    String key = (String) ((Text) field).getData();
-                    if (key != null) {
-                        String value = settings.get(key).get(OptimizerComponentConstants.DEFAULT_VALUE_KEY);
-                        if (value != null) {
-                            ((Text) field).setText(value);
-                        }
-                    }
-                }
-                if (field instanceof Combo) {
-                    String key = (String) ((Combo) field).getData();
-                    if (key != null) {
-                        String value = settings.get(key).get(OptimizerComponentConstants.DEFAULT_VALUE_KEY);
-                        if (value != null) {
-                            ((Combo) field).setText(value);
-                        }
-                    }
-
-                }
-                if (field instanceof Button) {
-                    String key = (String) ((Button) field).getData();
-
-                    if (key != null) {
-                        String value = settings.get(key).get(OptimizerComponentConstants.DEFAULT_VALUE_KEY);
-                        if (value != null) {
-                            if (value.equals(TRUE) || value.equals("false")) {
-                                ((Button) field).setSelection(Boolean.parseBoolean(value));
-                            } else {
-                                ((Button) field).setText(value);
-                            }
-                        }
-                    }
+                    ((Text) field).setText(value);
+                } else if (field instanceof Combo) {
+                    ((Combo) field).setText(value);
+                } else if (field instanceof Button && (value.equals(TRUE) || value.equals("false"))) {
+                    ((Button) field).setSelection(Boolean.parseBoolean(value));
+                    updatePropertiesSettings(field, value);
                 }
             }
         }
 
+        private String getSettingsIdentifer(Control field) {
+            String key = null;
+            if (field instanceof Text) {
+                key = (String) ((Text) field).getData();
+            } else if (field instanceof Combo) {
+                key = (String) ((Combo) field).getData();
+            } else if (field instanceof Button) {
+                key = (String) ((Button) field).getData();
+            }
+            return key;
+        }
     }
 
     private Button createLabelAndCheckbox(Composite container, String text, String value) {
         new Label(container, SWT.NONE).setText(text);
         Button result = new Button(container, SWT.CHECK);
-        if (value.equals(TRUE)) {
-            result.setSelection(true);
-        } else {
-            result.setSelection(false);
-        }
+        result.setSelection(value.equals(TRUE));
         return result;
     }
 
@@ -304,83 +333,92 @@ public class MethodPropertiesDialogGenerator extends Dialog {
      * Validated all current inputs in the dialog.
      */
     public void validateInputs() {
-        boolean isValid = true;
-        for (Widget widget : widgetToKeyMap.keySet()) {
-            Map<String, String> settings = null;
-            if (methodDescription.getCommonSettings() != null
-                && methodDescription.getCommonSettings().containsKey(widgetToKeyMap.get(widget))) {
-                settings = methodDescription.getCommonSettings().get(widgetToKeyMap.get(widget));
-            } else if (methodDescription.getSpecificSettings() != null
-                && methodDescription.getSpecificSettings().containsKey(widgetToKeyMap.get(widget))) {
-                settings = methodDescription.getSpecificSettings().get(widgetToKeyMap.get(widget));
-            } else if (methodDescription.getResponsesSettings() != null
-                && methodDescription.getResponsesSettings().containsKey(widgetToKeyMap.get(widget))) {
-                settings = methodDescription.getResponsesSettings().get(widgetToKeyMap.get(widget));
+        for (Entry<Widget, String> entry : widgetToKeyMap.entrySet()) {
+
+            String[] identifier = entry.getValue().split(SEPERATOR);
+
+            Map<String, String> settings = getSettings(identifier[0], identifier[1]);
+            if (settings == null) {
+                continue;
             }
-            if (settings != null) {
-                String dataType = settings.get(OptimizerComponentConstants.DATA_TYPE_KEY);
-                String swtWidget = settings.get(OptimizerComponentConstants.SWTWIDGET_KEY);
-                String validation = settings.get(OptimizerComponentConstants.VALIDATION_KEY);
-                if (swtWidget.equals(OptimizerComponentConstants.WIDGET_TEXT)) {
-                    if (((Text) widget).getText().equals("") && (validation.contains("required"))) {
-                        isValid = false;
-                    } else if (!((Text) widget).getText().equals("")) {
-                        if (dataType.equalsIgnoreCase(OptimizerComponentConstants.TYPE_INT)) {
-                            int value = Integer.MAX_VALUE;
-                            try {
-                                value = Integer.parseInt(((Text) widget).getText());
-                                isValid &= checkValidation(value, validation);
-                            } catch (NumberFormatException e) {
-                                value = Integer.MAX_VALUE;
-                                isValid &= false;
-                            }
-                        }
-                        if (dataType.equalsIgnoreCase(OptimizerComponentConstants.TYPE_REAL)) {
-                            double value = Double.MAX_VALUE;
-                            try {
-                                value = Double.parseDouble(((Text) widget).getText());
-                                isValid &= checkValidation(value, validation);
-                            } catch (NumberFormatException e) {
-                                value = Double.MAX_VALUE;
-                                isValid &= false;
-                            }
-                        }
-                    }
+            String swtWidget = settings.get(OptimizerComponentConstants.SWTWIDGET_KEY);
+            if (!swtWidget.equals(OptimizerComponentConstants.WIDGET_TEXT)) {
+                continue;
+            }
+            if (!validateTextField((Text) entry.getKey(), settings)) {
+                getButton(IDialogConstants.OK_ID).setEnabled(false);
+                return;
+            }
+        }
+        getButton(IDialogConstants.OK_ID).setEnabled(true);
+    }
+
+    private Map<String, String> getSettings(String tabIdentifier, String value) {
+        Map<String, String> settings = null;
+        if (tabIdentifier.equals(COMMON) && methodDescription.getCommonSettings().containsKey(value)) {
+            settings = methodDescription.getCommonSettings().get(value);
+        } else if (tabIdentifier.equals(SPECIFIC) && methodDescription.getSpecificSettings().containsKey(value)) {
+            settings = methodDescription.getSpecificSettings().get(value);
+        } else if (tabIdentifier.equals(RESPONSES) && methodDescription.getResponsesSettings().containsKey(value)) {
+            settings = methodDescription.getResponsesSettings().get(value);
+        }
+        return settings;
+    }
+
+    private boolean validateTextField(Text textField, Map<String, String> settings) {
+        String dataType = settings.get(OptimizerComponentConstants.DATA_TYPE_KEY);
+        String validation = settings.get(OptimizerComponentConstants.VALIDATION_KEY);
+        if (validation == null || validation.equals("")) {
+            return true;
+        }
+        if (textField.getText().equals("") && (validation.contains("required"))) {
+            return false;
+        } else if (!textField.getText().equals("")) {
+            if (dataType.equalsIgnoreCase(OptimizerComponentConstants.TYPE_INT)) {
+                try {
+                    int value = Integer.parseInt(textField.getText());
+                    return checkValidation(value, validation);
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+            } else if (dataType.equalsIgnoreCase(OptimizerComponentConstants.TYPE_REAL)) {
+                try {
+                    double value = Double.parseDouble(textField.getText());
+                    return checkValidation(value, validation);
+                } catch (NumberFormatException e) {
+                    return false;
                 }
             }
         }
-        getButton(IDialogConstants.OK_ID).setEnabled(isValid);
+        return true;
     }
 
     private boolean checkValidation(double value, String validation) {
-        boolean result = true;
-        if (validation != null && !validation.equals("")) {
-            String[] splitValidations = validation.split(OptimizerComponentConstants.SEPARATOR);
-            for (String argument : splitValidations) {
-                if (argument.contains("<=")) {
-                    double restriction = Double.parseDouble(argument.substring(2));
-                    if (value > restriction) {
-                        result = false;
-                    }
-                } else if (argument.contains(">=")) {
-                    double restriction = Double.parseDouble(argument.substring(2));
-                    if (value < restriction) {
-                        result = false;
-                    }
-                } else if (argument.contains("<")) {
-                    double restriction = Double.parseDouble(argument.substring(1));
-                    if (value >= restriction) {
-                        result = false;
-                    }
-                } else if (argument.contains(">")) {
-                    double restriction = Double.parseDouble(argument.substring(1));
-                    if (value <= restriction) {
-                        result = false;
-                    }
+        String[] splitValidations = validation.split(OptimizerComponentConstants.SEPARATOR);
+        for (String argument : splitValidations) {
+            if (argument.contains("<=")) {
+                double restriction = Double.parseDouble(argument.substring(2));
+                if (value > restriction) {
+                    return false;
+                }
+            } else if (argument.contains(">=")) {
+                double restriction = Double.parseDouble(argument.substring(2));
+                if (value < restriction) {
+                    return false;
+                }
+            } else if (argument.contains("<")) {
+                double restriction = Double.parseDouble(argument.substring(1));
+                if (value >= restriction) {
+                    return false;
+                }
+            } else if (argument.contains(">")) {
+                double restriction = Double.parseDouble(argument.substring(1));
+                if (value <= restriction) {
+                    return false;
                 }
             }
         }
-        return result;
+        return true;
     }
 
     private boolean checkValidation(int value, String validation) {
@@ -398,36 +436,13 @@ public class MethodPropertiesDialogGenerator extends Dialog {
         public void modifyText(ModifyEvent arg0) {
             Widget source = (Widget) arg0.getSource();
             if (source instanceof Text) {
-                if (methodDescription.getCommonSettings() != null
-                    && methodDescription.getCommonSettings().containsKey(widgetToKeyMap.get(source))) {
-                    methodDescription.getCommonSettings().get(widgetToKeyMap.get(source)).put(OptimizerComponentConstants.VALUE_KEY,
-                        ((Text) source).getText());
-                } else if (methodDescription.getSpecificSettings() != null
-                    && methodDescription.getSpecificSettings().containsKey(widgetToKeyMap.get(source))) {
-                    methodDescription.getSpecificSettings().get(widgetToKeyMap.get(source)).put(OptimizerComponentConstants.VALUE_KEY,
-                        ((Text) source).getText());
-                } else if (methodDescription.getResponsesSettings() != null
-                    && methodDescription.getResponsesSettings().containsKey(widgetToKeyMap.get(source))) {
-                    methodDescription.getResponsesSettings().get(widgetToKeyMap.get(source)).put(OptimizerComponentConstants.VALUE_KEY,
-                        ((Text) source).getText());
-                }
+                updatePropertiesSettings(source, ((Text) source).getText());
+                validateInputs();
             } else if (source instanceof Combo) {
-                if (methodDescription.getCommonSettings() != null
-                    && methodDescription.getCommonSettings().containsKey(widgetToKeyMap.get(source))) {
-                    methodDescription.getCommonSettings().get(widgetToKeyMap.get(source)).put(OptimizerComponentConstants.VALUE_KEY,
-                        ((Combo) source).getText());
-                } else if (methodDescription.getSpecificSettings() != null
-                    && methodDescription.getSpecificSettings().containsKey(widgetToKeyMap.get(source))) {
-                    methodDescription.getSpecificSettings().get(widgetToKeyMap.get(source)).put(OptimizerComponentConstants.VALUE_KEY,
-                        ((Combo) source).getText());
-                } else if (methodDescription.getResponsesSettings() != null
-                    && (methodDescription.getResponsesSettings().containsKey(widgetToKeyMap.get(source)))) {
-                    methodDescription.getResponsesSettings().get(widgetToKeyMap.get(source)).put(OptimizerComponentConstants.VALUE_KEY,
-                        ((Combo) source).getText());
-                }
+                updatePropertiesSettings(source, ((Combo) source).getText());
             }
-            validateInputs();
         }
+
     }
 
     /**
@@ -440,17 +455,7 @@ public class MethodPropertiesDialogGenerator extends Dialog {
         @Override
         public void widgetDefaultSelected(SelectionEvent e) {
             Button source = (Button) e.getSource();
-            if (methodDescription.getCommonSettings().containsKey(widgetToKeyMap.get(source))) {
-                methodDescription.getCommonSettings().get(widgetToKeyMap.get(source)).put(OptimizerComponentConstants.VALUE_KEY,
-                    "" + source.getSelection());
-            } else if (methodDescription.getSpecificSettings().containsKey(widgetToKeyMap.get(source))) {
-                methodDescription.getSpecificSettings().get(widgetToKeyMap.get(source)).put(OptimizerComponentConstants.VALUE_KEY,
-                    "" + source.getSelection());
-            } else if (methodDescription.getResponsesSettings().containsKey(widgetToKeyMap.get(source))) {
-                methodDescription.getResponsesSettings().get(widgetToKeyMap.get(source)).put(OptimizerComponentConstants.VALUE_KEY,
-                    "" + source.getSelection());
-            }
-            validateInputs();
+            updatePropertiesSettings(source, "" + source.getSelection());
         }
 
         @Override
@@ -458,4 +463,18 @@ public class MethodPropertiesDialogGenerator extends Dialog {
             widgetDefaultSelected(e);
         }
     }
+
+    private void updatePropertiesSettings(Widget source, String value) {
+
+        String[] identifier = widgetToKeyMap.get(source).split(SEPERATOR);
+
+        if (identifier[0].equals(COMMON) && methodDescription.getCommonSettings().containsKey(identifier[1])) {
+            methodDescription.getCommonSettings().get(identifier[1]).put(OptimizerComponentConstants.VALUE_KEY, value);
+        } else if (identifier[0].equals(SPECIFIC) && methodDescription.getSpecificSettings().containsKey(identifier[1])) {
+            methodDescription.getSpecificSettings().get(identifier[1]).put(OptimizerComponentConstants.VALUE_KEY, value);
+        } else if (identifier[0].equals(RESPONSES) && methodDescription.getResponsesSettings().containsKey(identifier[1])) {
+            methodDescription.getResponsesSettings().get(identifier[1]).put(OptimizerComponentConstants.VALUE_KEY, value);
+        }
+    }
+
 }
