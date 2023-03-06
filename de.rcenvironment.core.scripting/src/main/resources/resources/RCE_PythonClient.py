@@ -13,9 +13,9 @@ class SocketReader:
         if not len(self._nonreturned_messages) == 0:
             return self._pop_nonreturned_message()
 
+        data_buffer = bytearray()
         while len(self._nonreturned_messages) == 0:
             data = self._socket.recv(1024)
-            data_buffer = bytearray()
             for byte in data:
                 if byte != 0:
                     data_buffer.append(byte)
