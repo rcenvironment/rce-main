@@ -9,6 +9,7 @@
 package de.rcenvironment.core.gui.integration.toolintegration;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -214,7 +215,13 @@ public class WizardEndpointEditDialog extends Dialog {
                 guiNameToDataType.put(t.getDisplayName(), t);
             }
         }
-        dataTypeCombo.select(0);
+        String[] dataTypeArray = dataTypeCombo.getItems();
+        Arrays.sort(dataTypeArray);
+
+        dataTypeCombo.setItems(dataTypeArray);
+        dataTypeCombo.setText(DataType.Float.toString());
+
+//        dataTypeCombo.select(0);
         GridData dataTypeData = new GridData(GridData.GRAB_HORIZONTAL | GridData.FILL_HORIZONTAL);
         dataTypeCombo.setLayoutData(dataTypeData);
 
