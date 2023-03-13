@@ -11,7 +11,6 @@ package de.rcenvironment.core.gui.integration.toolintegration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +34,7 @@ import org.eclipse.swt.widgets.Text;
 import de.rcenvironment.core.component.model.endpoint.api.EndpointDefinition;
 import de.rcenvironment.core.datamodel.api.DataType;
 import de.rcenvironment.core.gui.utils.common.configuration.VariableNameVerifyListener;
+import de.rcenvironment.core.gui.utils.common.endpoint.DataTypeGuiSorter;
 import de.rcenvironment.core.utils.common.StringUtils;
 
 /**
@@ -43,11 +43,6 @@ import de.rcenvironment.core.utils.common.StringUtils;
  * @author Sascha Zur
  */
 public class WizardEndpointEditDialog extends Dialog {
-
-    /**
-     * Map for getting from the gui display name of a DataType back to the class name.
-     */
-    public static Map<String, DataType> guiNameToDataType = new HashMap<String, DataType>();
 
     private static final String NO_VALUE_STRING = "";
 
@@ -198,7 +193,9 @@ public class WizardEndpointEditDialog extends Dialog {
         nameText.setLayoutData(textGridData);
         nameText.addListener(SWT.Verify, new VariableNameVerifyListener(true));
 
-        List<DataType> supportedDataTypes = new LinkedList<DataType>();
+        new Label(propertyContainer, SWT.NONE).setText(Messages.dataTypeColon);
+        dataTypeCombo = new Combo(propertyContainer, SWT.READ_ONLY);
+        List<DataType> supportedDataTypes = new ArrayList<>();
         supportedDataTypes.add(DataType.ShortText);
         supportedDataTypes.add(DataType.Boolean);
         supportedDataTypes.add(DataType.Integer);
@@ -207,21 +204,12 @@ public class WizardEndpointEditDialog extends Dialog {
         supportedDataTypes.add(DataType.Matrix);
         supportedDataTypes.add(DataType.FileReference);
         supportedDataTypes.add(DataType.DirectoryReference);
-        new Label(propertyContainer, SWT.NONE).setText(Messages.dataTypeColon);
-        dataTypeCombo = new Combo(propertyContainer, SWT.READ_ONLY);
-        for (DataType t : DataType.values()) {
-            if (supportedDataTypes.contains(t)) {
-                dataTypeCombo.add(t.getDisplayName());
-                guiNameToDataType.put(t.getDisplayName(), t);
-            }
-        }
-        String[] dataTypeArray = dataTypeCombo.getItems();
-        Arrays.sort(dataTypeArray);
 
-        dataTypeCombo.setItems(dataTypeArray);
-        dataTypeCombo.setText(DataType.Float.toString());
+        dataTypeCombo.setItems(supportedDataTypes.stream().sorted(DataTypeGuiSorter.getComparator())
+            .filter(Arrays.asList(DataType.values())::contains).map(DataType::getDisplayName).toArray(String[]::new));
 
-//        dataTypeCombo.select(0);
+        dataTypeCombo.setText(DataTypeGuiSorter.getDefaultSelection().getDisplayName());
+
         GridData dataTypeData = new GridData(GridData.GRAB_HORIZONTAL | GridData.FILL_HORIZONTAL);
         dataTypeCombo.setLayoutData(dataTypeData);
 
@@ -335,7 +323,7 @@ public class WizardEndpointEditDialog extends Dialog {
             config.put(InOutputConfigurationPage.HANDLING, "-");
             config.put(InOutputConfigurationPage.CONSTRAINT, "-");
         }
-        config.put(InOutputConfigurationPage.DATA_TYPE, guiNameToDataType.get(dataTypeCombo.getText()).name());
+        config.put(InOutputConfigurationPage.DATA_TYPE, DataType.byDisplayName(dataTypeCombo.getText()).name());
         if (dataTypeCombo.getText().equals(DataType.FileReference.getDisplayName())
             || dataTypeCombo.getText().equals(DataType.DirectoryReference.getDisplayName())) {
             if (filenameText != null) {
