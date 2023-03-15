@@ -125,7 +125,7 @@ public class ScriptComponentValidatorTest {
             }
         });
 
-        if (matchingFiles.length == 0) {
+        if (matchingFiles == null || matchingFiles.length == 0) {
             return;
         } else {
             for (File configFile : matchingFiles) {
