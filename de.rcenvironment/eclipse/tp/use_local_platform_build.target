@@ -2,6 +2,6 @@
 <?pde version="3.8"?>
 <target name="local platform repository" sequenceNumber="1">
 <locations>
-	<location path="${project_loc:/de.rcenvironment.platform}/target/repository" type="Directory"/>
+	<location path="${project_loc:/de.rcenvironment}/../../rce-thirdparty/de.rcenvironment.platform/target/repository" type="Directory"/>
 </locations>
 </target>
