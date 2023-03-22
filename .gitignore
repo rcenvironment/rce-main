@@ -1,28 +1,55 @@
+# Copyright 2022-2023 DLR, Germany
+#
+# SPDX-License-Identifier: EPL-1.0
+#
+# https://rcenvironment.de/
+
+#
+# Common entries
+#
+
+# standard (relative) Java and Eclipse paths
+
 target/
 .settings/
-.svn/
+
+# Eclipse workspace data when using the git checkout path as workspace
+
+/.metadata/
+
+# standard (relative) Python and PyCharm paths
+
+.idea/
+venv/
+
+# special/suggested entries
+
 sys$command
 /.sonar/
+
+#
+# RCE-specific entries
+#
+
+# generated help content
+
 */help/generated/
-# ignore resources copied from git-lfs folders to these locations
-/de.rcenvironment.binaries.tiglviewer.win32.x86_64/resources/binaries
-/de.rcenvironment.binaries.dakota.win32.x86_64/resources/binaries
-/de.rcenvironment.binaries.dakota.linux.x86_64/resources/binaries
-# not necessary anymore, but kept until migration to git-lfs is complete
-/de.rcenvironment.platform/thirdparty/p2-mirrored
-# ignore Maven artifacts copied into bundles during the platform build
-/de.rcenvironment.platform/projects/**/lib/maven/*.jar
-/de.rcenvironment/eclipse/launch/profiles/common/
-/de.rcenvironment/eclipse/launch/profiles/*/internal/
-/de.rcenvironment/eclipse/launch/profiles/*/integration/
-/de.rcenvironment/eclipse/launch/profiles/*/storage/
-/de.rcenvironment/eclipse/launch/profiles/*/output/
-/de.rcenvironment/eclipse/launch/profiles/*/workspace/
-/de.rcenvironment/eclipse/launch/profiles/*/*.log
-/de.rcenvironment/eclipse/launch/profiles/*/*.lock
 /de.rcenvironment.core.gui.help.*/doc.zip
-# temporary fix for generated folders; see Mantis #11136
+
+# development test profiles; ignore everything except certain files
+
+/de.rcenvironment/eclipse/launch/profiles/
+! /de.rcenvironment/eclipse/launch/profiles/*/configuration.json
+
+# a common place to place unversioned files, e.g. analysis script output
+
+/.local/
+
+# a temporary fix for generated folders; see Mantis #11136
+
 /de.rcenvironment/maven/initial/workspace
 /de.rcenvironment/workspace
+
 # TODO check: still needed?
+
 /de.rcenvironment.core.scripting.tests/cachedir
