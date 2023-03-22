@@ -4,7 +4,7 @@
 
 	<artifactId>de.rcenvironment.core.gui.branding.default.versioninfo</artifactId>
 	<name>RCE Default Version Info Branding (Fragment)</name>
-	<version>10.4.0-SNAPSHOT</version>
+	<version>10.4.1-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<parent>
