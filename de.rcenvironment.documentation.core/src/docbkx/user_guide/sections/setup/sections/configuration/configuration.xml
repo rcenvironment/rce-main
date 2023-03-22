@@ -335,12 +335,12 @@
 					</row>
 					<row>
 						<entry>serverPorts/[id]/ip</entry>
-						<entry>IP address to which the local instance should be bound.</entry>
+						<entry>The IP address for other instances to connect to.</entry>
 						<entry>-</entry>
 					</row>
 					<row>
 						<entry>serverPorts/[id]/port</entry>
-						<entry>Port number to which other instances connect to.</entry>
+						<entry>The IP port number (1024-65535) for other instances to connect to.</entry>
 						<entry>-</entry>
 					</row>
 					<row>
@@ -534,7 +534,7 @@
 					</row>
 					<row>
 						<entry>port</entry>
-						<entry>The port number to which SSH clients can connect to.</entry>
+						<entry>The IP port number (1024-65535) for SSH or Uplink clients to connect to.</entry>
 						<entry>-</entry>
 					</row>
 					<row>

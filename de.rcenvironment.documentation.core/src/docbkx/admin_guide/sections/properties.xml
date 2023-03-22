@@ -30,8 +30,10 @@
 			latest release). </para>
 		<para> If RCE is configured to accept incoming network connections, the port number(s) to be used
 			can be freely chosen within the range permitted by the operating system. As RCE should
-			never be run with elevated privileges (SYSTEM, root, or equivalent), this typically
-			limits RCE to ports 1024 and above.</para>
+			never be run with elevated privileges (SYSTEM, root, or equivalent), the effective
+			range of usable ports is 1024 to 65535. Note that port values below 1024 are currently not 
+			explicitly refused by RCE, but will typically fail with a permission error. This may be
+			changed to an explicit check in a future update.</para>
 		<para> Incoming connections can be restricted to certain IPv4 addresses. However, these filters
 			are static, so this feature is only useful for either restricting connections to
 			localhost for local multi-instance setups, or setting up networks between few, static,
@@ -49,8 +51,12 @@
 				<uri>https://mina.apache.org/sshd-project/</uri> ). We regularily review this and
 			other related libraries for security updates, and issue new RCE releases when
 			necessary.</para>
-		<para> If RCE's SSH server port is enabled, the port number may be
-			freely chosen.
+		<para> If RCE's SSH server port is enabled, the port number(s) to be used
+			can be freely chosen within the range permitted by the operating system. As RCE should
+			never be run with elevated privileges (SYSTEM, root, or equivalent), the effective
+			range of usable ports is 1024 to 65535. Note that port values below 1024 are currently not 
+			explicitly refused by RCE, but will typically fail with a permission error. This may be
+			changed to an explicit check in a future update.
 		</para>
 		<para> The accounts used to log into this SSH port are completely
 			independent of system accounts; RCE provides its own account
