@@ -42,7 +42,10 @@
                 your own connector simply replace the connector file. It will automatically be
                 loaded when you restart RCE. As mentioned above: Only drivers for MySQL and
                 PostgreSQL database are supported currently. If you require a different driver class
-                feel free to contact us.</para>
+                feel free to contact us.<note>Since the supplied JDBC connector is quite outdated,
+                we strongly recommend using a current version as described in this section. In future
+                releases we will probably refrain from delivering a JDBC connector. Please inform us if
+                there are problems with the integration of newer versions of connectors.</note></para>
         </sect2>
         <sect2>
             <title>Database statements</title>
