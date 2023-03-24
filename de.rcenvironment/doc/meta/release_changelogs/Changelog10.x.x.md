@@ -1,3 +1,21 @@
+RCE 10.4.1 (March 24, 2023)
+
+# Script Component
+
+- Fixed a bug that caused an error when running the Script component with longer scripts using the Python Agent function.
+
+# Workflow as Component
+
+- Fixed a bug that prevented 'Workflow as Component' components from running when the component was integrated from the command line.
+
+# Optimizer Component
+
+- Some GUI fixes regarding the Generic Optimizer feature.
+
+# Other
+
+- Minor fixes and documentation 
+
 RCE 10.4.0 (December 20, 2022)
 
 # Workflow Integration Editor (Workflow as Component)
