@@ -14,7 +14,9 @@ RCE 10.4.1 (March 24, 2023)
 
 # Other
 
-- Minor fixes and documentation 
+- Clarified documentation regarding valid server port numbers.
+- Minor other fixes, documentation, and cleanup
+
 
 RCE 10.4.0 (December 20, 2022)
 
