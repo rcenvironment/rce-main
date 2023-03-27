@@ -35,7 +35,7 @@ import de.rcenvironment.core.utils.common.StringUtils;
  * @author Jan Flink
  */
 public class EditWorkflowIntegrationHandler extends AbstractHandler {
-    
+
     private static final Log LOG = LogFactory.getLog(EditWorkflowIntegrationHandler.class);
 
     private String integrationName;
@@ -56,6 +56,12 @@ public class EditWorkflowIntegrationHandler extends AbstractHandler {
         try {
             workflowIntegrationController = new WorkflowIntegrationController(integrationName);
         } catch (FileNotFoundException e) {
+
+            MessageDialog.openError(activeWorkbenchWindow.getShell(), "Workflow Integration Editor", StringUtils.format(
+                "The Workflow Integration Editor cannot be displayed. \nThe following file does not exist: \"%s\" "
+                    + "\nThe selected component may have been renamed or removed from local drive.",
+                e.getMessage()));
+
             LOG.error(StringUtils.format(
                 "The Workflow Integration Editor cannot be displayed. The following file does not exist: \"%s\" ",
                 e.getMessage()));
