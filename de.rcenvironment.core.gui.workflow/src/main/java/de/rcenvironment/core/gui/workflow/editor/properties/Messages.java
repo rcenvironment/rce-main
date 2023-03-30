@@ -62,9 +62,6 @@ public class Messages extends NLS {
     public static String configurationHeader;
 
     /** Constant. */
-    public static String noConfig;
-
-    /** Constant. */
     public static String invalidDataTypeDialogTitle;
 
     /** Constant. */
