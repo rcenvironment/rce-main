@@ -493,7 +493,7 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         return scriptArea;
     }
 
-    private LineNumberStyledText createScriptTabItem(String propertyKey, String name, int buttonIndex) {
+    private LineNumberStyledText createScriptTabItem(String propertyKey, String name, int tabIndex) {
         CTabItem item = new CTabItem(tabFolder, SWT.NONE);
         item.setText(name);
         Composite client = new Composite(tabFolder, SWT.NONE);
@@ -508,14 +508,14 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         scriptArea.setLayoutData(scriptAreaData);
         scriptArea.addModifyListener(new TextAreaModifyListener(propertyKey));
 
-        textFields[buttonIndex] = scriptArea;
+        textFields[tabIndex] = scriptArea;
 
-        createInsertFields(buttonIndex, client, null, scriptArea);
+        createInsertFields(tabIndex, client, scriptArea);
 
         Label jythonLabel = new Label(client, SWT.NONE);
         jythonLabel.setText(Messages.scriptLanguageHint);
 
-        if (buttonIndex == 3) {
+        if (tabIndex == 3) {
             mockScriptTabComposite = client;
         }
 
@@ -543,20 +543,37 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         }
     }
 
-    private void createInsertFields(int buttonIndex, Composite client,
-        final LineNumberStyledText scriptAreaWin, final LineNumberStyledText scriptArea) {
+    private void createInsertFields(int tabIndex, Composite client, final LineNumberStyledText scriptArea) {
         Composite buttonComposite = createButtonComposite(client);
         GridData insertButtonData = createInsertButtonGridData();
-        createInputsArea(buttonIndex, scriptAreaWin, scriptArea, buttonComposite, insertButtonData);
 
-        createOutputsArea(buttonIndex, scriptArea, buttonComposite, insertButtonData);
-        createPropertiesArea(buttonIndex, scriptAreaWin, scriptArea, buttonComposite, insertButtonData);
-        createDirectoriesArea(buttonIndex, scriptAreaWin, scriptArea, buttonComposite, insertButtonData);
-        if (buttonIndex == 2) {
-            createAdditionalPropertiesArea(scriptArea, buttonComposite, insertButtonData);
+        CCombo inputCombo = createInputsCombo(buttonComposite);
+        Button inputInsertButton = createInsertButton(buttonComposite, insertButtonData);
+        addInsertButtonSelectionListener(inputInsertButton, inputCombo, INPUT_COMBO, scriptArea);
+        inputCombos[tabIndex] = inputCombo;
+
+        CCombo outputCombo = createOutputsCombo(buttonComposite);
+        Button outputInsertButton = createInsertButton(buttonComposite, insertButtonData);
+        addInsertButtonSelectionListener(outputInsertButton, outputCombo, OUTPUT_COMBO, scriptArea);
+        outputCombos[tabIndex] = outputCombo;
+
+        CCombo propertiesCombo = createPropertiesCombo(buttonComposite);
+        Button propertyInsertButton = createInsertButton(buttonComposite, insertButtonData);
+        addInsertButtonSelectionListener(propertyInsertButton, propertiesCombo, PROPERTY_COMBO, scriptArea);
+        propertiesCombos[tabIndex] = propertiesCombo;
+
+        CCombo directoriesCombo = createDirectoriesCombo(buttonComposite);
+        Button directoryInsertButton = createInsertButton(buttonComposite, insertButtonData);
+        addInsertButtonSelectionListener(directoryInsertButton, directoriesCombo, DIRECTORY_COMBO, scriptArea);
+        directoryCombos[tabIndex] = directoriesCombo;
+
+        if (tabIndex == 2) {
+            CCombo addPropCombo = createAdditionalPropertiesCombo(buttonComposite);
+            Button addPropInsertButton = createInsertButton(buttonComposite, insertButtonData);
+            addInsertButtonSelectionListener(addPropInsertButton, addPropCombo, ADD_PROPERTY_COMBO, scriptArea);
         }
         createInsertCopyFileDirArea(scriptArea, buttonComposite);
-        if (buttonIndex == 3) {
+        if (tabIndex == 3) {
             mockScriptTabButtonComposite = buttonComposite;
         }
 
@@ -566,9 +583,21 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         final LineNumberStyledText scriptArea) {
         Composite buttonComposite = createButtonComposite(client);
         GridData insertButtonData = createInsertButtonGridData();
-        createInputsArea(0, scriptAreaWin, scriptArea, buttonComposite, insertButtonData);
-        createPropertiesArea(0, scriptAreaWin, scriptArea, buttonComposite, insertButtonData);
-        createDirectoriesArea(0, scriptAreaWin, scriptArea, buttonComposite, insertButtonData);
+
+        CCombo inputCombo = createInputsCombo(buttonComposite);
+        Button inputInsertButton = createInsertButton(buttonComposite, insertButtonData);
+        addInsertButtonSelectionListener(inputInsertButton, inputCombo, INPUT_COMBO, scriptAreaWin, scriptArea);
+        inputCombos[0] = inputCombo;
+
+        CCombo propertiesCombo = createPropertiesCombo(buttonComposite);
+        Button propertyInsertButton = createInsertButton(buttonComposite, insertButtonData);
+        addInsertButtonSelectionListener(propertyInsertButton, propertiesCombo, PROPERTY_COMBO, scriptAreaWin, scriptArea);
+        propertiesCombos[0] = propertiesCombo;
+
+        CCombo directoriesCombo = createDirectoriesCombo(buttonComposite);
+        Button directoryInsertButton = createInsertButton(buttonComposite, insertButtonData);
+        addInsertButtonSelectionListener(directoryInsertButton, directoriesCombo, DIRECTORY_COMBO, scriptAreaWin, scriptArea);
+        directoryCombos[0] = directoriesCombo;
     }
 
     private GridData createInsertButtonGridData() {
@@ -588,8 +617,7 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         return buttonComposite;
     }
 
-    private void createAdditionalPropertiesArea(final LineNumberStyledText scriptArea, Composite buttonComposite,
-        GridData insertButtonData) {
+    private CCombo createAdditionalPropertiesCombo(Composite buttonComposite) {
         GridData labelDataAddProp = new GridData();
         labelDataAddProp.horizontalSpan = 2;
         Label addPropLabel = new Label(buttonComposite, SWT.NONE);
@@ -601,10 +629,8 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         addPropCombo.setLayoutData(addPropComboData);
         addPropCombo.add(Messages.exitCodeLabel);
         addPropCombo.select(0);
-        Button addPropInsertButton = new Button(buttonComposite, SWT.PUSH);
-        addPropInsertButton.setLayoutData(insertButtonData);
-        addPropInsertButton.setText(Messages.insertButtonLabel);
-        addPropInsertButton.addSelectionListener(new InsertButtonListener(addPropCombo, scriptArea, 3));
+
+        return addPropCombo;
     }
 
     private void createInsertCopyFileDirArea(final LineNumberStyledText scriptArea, Composite buttonComposite) {
@@ -617,8 +643,7 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         insertCopyCommand.addSelectionListener(new CopyInputListener(scriptArea));
     }
 
-    private void createDirectoriesArea(int buttonIndex, final LineNumberStyledText scriptAreaWin, final LineNumberStyledText scriptArea,
-        Composite buttonComposite, GridData insertButtonData) {
+    private CCombo createDirectoriesCombo(Composite buttonComposite) {
         GridData labelDataDirectories = new GridData();
         labelDataDirectories.horizontalSpan = 2;
         Label directoryLabel = new Label(buttonComposite, SWT.NONE);
@@ -629,16 +654,11 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         directoriesComboData.widthHint = COMBO_WIDTH;
         directoriesCombo.setLayoutData(directoriesComboData);
         directoriesCombo.setItems(ToolIntegrationConstants.DIRECTORIES_PLACEHOLDERS_DISPLAYNAMES);
-        Button directoryInsertButton = new Button(buttonComposite, SWT.PUSH);
-        directoryInsertButton.setLayoutData(insertButtonData);
-        directoryInsertButton.setText(Messages.insertButtonLabel);
-        directoryCombos[buttonIndex] = directoriesCombo;
 
-        addInsertButtonSelectionListener(directoryInsertButton, directoriesCombo, DIRECTORY_COMBO, scriptAreaWin, scriptArea);
+        return directoriesCombo;
     }
 
-    private void createPropertiesArea(int buttonIndex, final LineNumberStyledText scriptAreaWin, final LineNumberStyledText scriptArea,
-        Composite buttonComposite, GridData insertButtonData) {
+    private CCombo createPropertiesCombo(Composite buttonComposite) {
         GridData labelDataProperties = new GridData();
         labelDataProperties.horizontalSpan = 2;
         Label propertiesLabel = new Label(buttonComposite, SWT.NONE);
@@ -648,16 +668,11 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         GridData propertiesComboData = new GridData(GridData.FILL_HORIZONTAL);
         propertiesComboData.widthHint = COMBO_WIDTH;
         propertiesCombo.setLayoutData(propertiesComboData);
-        Button propertyInsertButton = new Button(buttonComposite, SWT.PUSH);
-        propertyInsertButton.setLayoutData(insertButtonData);
-        propertyInsertButton.setText(Messages.insertButtonLabel);
-        propertiesCombos[buttonIndex] = propertiesCombo;
 
-        addInsertButtonSelectionListener(propertyInsertButton, propertiesCombo, PROPERTY_COMBO, scriptAreaWin, scriptArea);
+        return propertiesCombo;
     }
 
-    private void createInputsArea(int buttonIndex, final LineNumberStyledText scriptAreaWin, final LineNumberStyledText scriptArea,
-        Composite buttonComposite, GridData insertButtonData) {
+    private CCombo createInputsCombo(Composite buttonComposite) {
         GridData labelData = new GridData();
         labelData.horizontalSpan = 2;
         Label inputLabel = new Label(buttonComposite, SWT.NONE);
@@ -668,25 +683,28 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         inputComboData.horizontalSpan = 1;
         inputComboData.widthHint = COMBO_WIDTH;
         inputCombo.setLayoutData(inputComboData);
+        return inputCombo;
+
+    }
+
+    private Button createInsertButton(Composite buttonComposite, GridData insertButtonData) {
         Button inputInsertButton = new Button(buttonComposite, SWT.PUSH);
         inputInsertButton.setLayoutData(insertButtonData);
         inputInsertButton.setText(Messages.insertButtonLabel);
-        inputCombos[buttonIndex] = inputCombo;
-
-        addInsertButtonSelectionListener(inputInsertButton, inputCombo, INPUT_COMBO, scriptAreaWin, scriptArea);
+        return inputInsertButton;
     }
 
     private void addInsertButtonSelectionListener(Button button, CCombo combo,
         int identifier, final LineNumberStyledText scriptAreaWin, final LineNumberStyledText scriptArea) {
-        if (scriptAreaWin != null) {
-            button.addSelectionListener(new InsertButtonListener(combo, scriptArea, scriptAreaWin, identifier));
-        } else {
-            button.addSelectionListener(new InsertButtonListener(combo, scriptArea, identifier));
-        }
+        button.addSelectionListener(new InsertButtonListener(combo, scriptArea, scriptAreaWin, identifier));
+
     }
 
-    private void createOutputsArea(int buttonIndex, final LineNumberStyledText scriptArea, Composite buttonComposite,
-        GridData insertButtonData) {
+    private void addInsertButtonSelectionListener(Button button, CCombo combo, int identifier, final LineNumberStyledText scriptArea) {
+        button.addSelectionListener(new InsertButtonListener(combo, scriptArea, identifier));
+    }
+
+    private CCombo createOutputsCombo(Composite buttonComposite) {
         GridData labelDataOutput = new GridData();
         labelDataOutput.horizontalSpan = 2;
 
@@ -699,11 +717,7 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         outputComboData.widthHint = COMBO_WIDTH;
         outputCombo.setLayoutData(outputComboData);
 
-        Button outputInsertButton = new Button(buttonComposite, SWT.PUSH);
-        outputInsertButton.setLayoutData(insertButtonData);
-        outputInsertButton.setText(Messages.insertButtonLabel);
-        outputCombos[buttonIndex] = outputCombo;
-        outputInsertButton.addSelectionListener(new InsertButtonListener(outputCombo, scriptArea, OUTPUT_COMBO));
+        return outputCombo;
     }
 
     private void addScriptSelectButtonListener() {
