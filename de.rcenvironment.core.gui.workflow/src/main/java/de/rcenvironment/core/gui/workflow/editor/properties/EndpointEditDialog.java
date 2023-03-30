@@ -60,7 +60,7 @@ import de.rcenvironment.core.utils.common.StringUtils;
  * 
  * @author Robert Mischke
  * @author Sascha Zur
- * @author Kathrin Schaffert (refactoring, little bug fix)
+ * @author Kathrin Schaffert (refactoring, #17986, little bug fix)
  * @author Tim Rosenbach
  */
 public class EndpointEditDialog extends TitleAreaDialog {
@@ -105,7 +105,7 @@ public class EndpointEditDialog extends TitleAreaDialog {
 
     protected List<TypeSelectionOption> typeSelectionOptions;
 
-    protected Map<Widget, String> widgetToKeyMap;
+    protected Map<Widget, String> widgetToKeyMap = new HashMap<>();
 
     protected EndpointMetaDataDefinition metaData;
 
@@ -217,9 +217,18 @@ public class EndpointEditDialog extends TitleAreaDialog {
     @Override
     protected Control createDialogArea(Composite parent) {
         Composite container = (Composite) super.createDialogArea(parent);
-
         createEndpointSettings(container);
+        if (metaDataDefined()) {
+            createConfigurationArea(container);
+        }
+        return container;
+    }
 
+    private boolean metaDataDefined() {
+        return !metaData.getMetaDataKeys().isEmpty();
+    }
+
+    private void createConfigurationHeader(Composite container) {
         GridData g = new GridData(GridData.FILL_BOTH);
         g.grabExcessHorizontalSpace = true;
         g.horizontalAlignment = GridData.CENTER;
@@ -234,55 +243,49 @@ public class EndpointEditDialog extends TitleAreaDialog {
         Label sep2 = new Label(configHeader, SWT.SEPARATOR | SWT.HORIZONTAL | SWT.FILL);
         sep2.setLayoutData(g);
         configHeader.setLayoutData(g);
-
-        createConfigurationArea(container);
-        return container;
     }
 
     protected Control createConfigurationArea(Composite parent) {
-        widgetToKeyMap = new HashMap<>();
-        if (!metaData.getMetaDataKeys().isEmpty()) {
-            if (metaData != null) {
-                Map<String, Map<Integer, String>> groups = new TreeMap<>();
-                for (String key : metaData.getMetaDataKeys()) {
-                    String group = metaData.getGuiGroup(key);
+        createConfigurationHeader(parent);
+        Map<String, Map<Integer, String>> groups = sortKeysByConfigurationGroups();
+        createConfigurationGroups(parent, groups);
+        return parent;
+    }
 
-                    Map<Integer, String> groupTree = groups.getOrDefault(group, new TreeMap<>());
-
-                    int position = metaData.getGuiPosition(key);
-                    if (position < 0) {
-                        groupTree.put(groupTree.size(), key);
-                    } else {
-                        while (groupTree.containsKey(position)) {
-                            position++;
-                        }
-                        groupTree.put(position, key);
-                    }
-                    groups.put(group, groupTree);
-                }
-                for (Entry<String, Map<Integer, String>> entry : groups.entrySet()) {
-                    createSettingsTab(parent, entry.getKey(), entry.getValue());
-                }
-            }
-
-            return parent;
-        } else {
-            Label noMetaData = new Label(parent, SWT.NONE);
-            noMetaData.setText(StringUtils.format(Messages.noConfig, type));
-            GridData g = new GridData(GridData.FILL, GridData.FILL, true, true);
-            g.horizontalAlignment = SWT.CENTER;
-            noMetaData.setLayoutData(g);
-            return parent;
+    private void createConfigurationGroups(Composite parent, Map<String, Map<Integer, String>> groups) {
+        for (Entry<String, Map<Integer, String>> entry : groups.entrySet()) {
+            createGroupArea(parent, entry.getKey(), entry.getValue());
         }
     }
 
-    protected void createSettingsTab(Composite composite, String groupTitle, Map<Integer, String> sortedKeyMap) {
-        Group configGroup = new Group(composite, SWT.BEGINNING);
+    private Map<String, Map<Integer, String>> sortKeysByConfigurationGroups() {
+        Map<String, Map<Integer, String>> groups = new TreeMap<>();
+        for (String key : metaData.getMetaDataKeys()) {
+            String group = metaData.getGuiGroup(key);
+
+            Map<Integer, String> groupTree = groups.getOrDefault(group, new TreeMap<>());
+
+            int position = metaData.getGuiPosition(key);
+            if (position < 0) {
+                groupTree.put(groupTree.size(), key);
+            } else {
+                while (groupTree.containsKey(position)) {
+                    position++;
+                }
+                groupTree.put(position, key);
+            }
+            groups.put(group, groupTree);
+        }
+        return groups;
+    }
+
+    private void createGroupArea(Composite composite, String groupTitle, Map<Integer, String> sortedKeyMap) {
         GridData g = new GridData(GridData.FILL_BOTH);
-        configGroup.setLayoutData(g);
         g.grabExcessHorizontalSpace = true;
         g.grabExcessVerticalSpace = false;
         g.horizontalAlignment = GridData.FILL;
+        Group configGroup = new Group(composite, SWT.BEGINNING);
+        configGroup.setLayoutData(g);
         configGroup.setText(groupTitle);
         configGroup.setLayout(new GridLayout(2, false));
         createSettings(sortedKeyMap, configGroup);
