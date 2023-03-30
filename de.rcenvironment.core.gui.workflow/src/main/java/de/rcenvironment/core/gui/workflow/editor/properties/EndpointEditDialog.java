@@ -79,7 +79,7 @@ public class EndpointEditDialog extends TitleAreaDialog {
 
     private static final int COMBO_SETTINGS_WIDTH = 235;
 
-    private static final int COMBO_GROUP_WIDTH = 185;
+    private static final int COMBO_GROUP_WIDTH = 175;
 
     private static final int MAXLENGTH_SHORTTEXT = 140;
 
@@ -253,8 +253,14 @@ public class EndpointEditDialog extends TitleAreaDialog {
     }
 
     private void createConfigurationGroups(Composite parent, Map<String, Map<Integer, String>> groups) {
+
+        Composite container = new Composite(parent, SWT.NONE);
+        GridData g = new GridData(GridData.FILL, GridData.FILL, true, false);
+        container.setLayout(new GridLayout(1, false));
+        container.setLayoutData(g);
+
         for (Entry<String, Map<Integer, String>> entry : groups.entrySet()) {
-            createGroupArea(parent, entry.getKey(), entry.getValue());
+            createGroupArea(container, entry.getKey(), entry.getValue());
         }
     }
 
