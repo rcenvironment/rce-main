@@ -258,11 +258,7 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
 
     private void setComboEnabled(CCombo combo) {
         if (combo != null) {
-            if (combo.getItemCount() == 0) {
-                combo.setEnabled(false);
-            } else {
-                combo.setEnabled(true);
-            }
+            combo.setEnabled(combo.getItemCount() != 0);
         }
     }
 
@@ -650,7 +646,6 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         button.addSelectionListener(new InsertButtonListener(combo, scriptArea, comboType));
     }
 
-
     private void addScriptSelectButtonListener() {
         winEnabledButton.addSelectionListener(new SelectionListener() {
 
@@ -839,15 +834,16 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
                 currentText.setFocus();
             }
         }
+
+        private String createAddPropertyPlaceHolder(String addPropPlaceholder) {
+            return ToolIntegrationConstants.PLACEHOLDER_PREFIX
+                + ToolIntegrationConstants.PLACEHOLDER_ADDITIONAL_PROPERTIES_PREFIX
+                + ToolIntegrationConstants.PLACEHOLDER_SEPARATOR
+                + addPropPlaceholder
+                + ToolIntegrationConstants.PLACEHOLDER_SUFFIX;
+        }
     }
 
-    private String createAddPropertyPlaceHolder(String addPropPlaceholder) {
-        return ToolIntegrationConstants.PLACEHOLDER_PREFIX
-            + ToolIntegrationConstants.PLACEHOLDER_ADDITIONAL_PROPERTIES_PREFIX
-            + ToolIntegrationConstants.PLACEHOLDER_SEPARATOR
-            + addPropPlaceholder
-            + ToolIntegrationConstants.PLACEHOLDER_SUFFIX;
-    }
 
     /**
      * Listener for the insert copy command button.
