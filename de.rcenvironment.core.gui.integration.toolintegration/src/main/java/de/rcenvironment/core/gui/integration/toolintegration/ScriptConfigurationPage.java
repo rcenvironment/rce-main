@@ -45,24 +45,17 @@ import de.rcenvironment.core.gui.utils.common.widgets.LineNumberStyledText;
 
 /**
  * @author Sascha Zur
- * @author Kathrin Schaffert (#16533 changed to Combos into CCombo and added COMBO_WIDTH, INSERT_BUTTON_WIDTH)
+ * @author Kathrin Schaffert (#16533 changed Combos into CCombo and added COMBO_WIDTH, INSERT_BUTTON_WIDTH, refactoring)
  */
 public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
 
-    /** Constant. */
-    public static final int INPUT_COMBO = 0;
-
-    /** Constant. */
-    public static final int OUTPUT_COMBO = 1;
-
-    /** Constant. */
-    public static final int PROPERTY_COMBO = 2;
-
-    /** Constant. */
-    public static final int ADD_PROPERTY_COMBO = 3;
-
-    /** Constant. */
-    public static final int DIRECTORY_COMBO = 4;
+    enum ComboType {
+        INPUT_COMBO,
+        OUTPUT_COMBO,
+        PROPERTY_COMBO,
+        ADD_PROPERTY_COMBO,
+        DIRECTORY_COMBO
+    }
 
     private static final int COMBO_WIDTH = 125;
 
@@ -548,23 +541,23 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
 
         CCombo inputCombo = createCombo(buttonComposite, Messages.inputs);
         Button inputInsertButton = createInsertButton(buttonComposite);
-        addInsertButtonSelectionListener(inputInsertButton, inputCombo, INPUT_COMBO, scriptArea);
+        addInsertButtonSelectionListener(inputInsertButton, inputCombo, ComboType.INPUT_COMBO, scriptArea);
         inputCombos[tabIndex] = inputCombo;
 
         CCombo outputCombo = createCombo(buttonComposite, Messages.outputs);
         Button outputInsertButton = createInsertButton(buttonComposite);
-        addInsertButtonSelectionListener(outputInsertButton, outputCombo, OUTPUT_COMBO, scriptArea);
+        addInsertButtonSelectionListener(outputInsertButton, outputCombo, ComboType.OUTPUT_COMBO, scriptArea);
         outputCombos[tabIndex] = outputCombo;
 
         CCombo propertiesCombo = createCombo(buttonComposite, Messages.properties);
         Button propertyInsertButton = createInsertButton(buttonComposite);
-        addInsertButtonSelectionListener(propertyInsertButton, propertiesCombo, PROPERTY_COMBO, scriptArea);
+        addInsertButtonSelectionListener(propertyInsertButton, propertiesCombo, ComboType.PROPERTY_COMBO, scriptArea);
         propertiesCombos[tabIndex] = propertiesCombo;
 
         CCombo directoriesCombo = createCombo(buttonComposite, Messages.directory);
         directoriesCombo.setItems(ToolIntegrationConstants.DIRECTORIES_PLACEHOLDERS_DISPLAYNAMES);
         Button directoryInsertButton = createInsertButton(buttonComposite);
-        addInsertButtonSelectionListener(directoryInsertButton, directoriesCombo, DIRECTORY_COMBO, scriptArea);
+        addInsertButtonSelectionListener(directoryInsertButton, directoriesCombo, ComboType.DIRECTORY_COMBO, scriptArea);
         directoryCombos[tabIndex] = directoriesCombo;
 
         if (tabIndex == 2) {
@@ -572,7 +565,7 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
             addPropCombo.add(Messages.exitCodeLabel);
             addPropCombo.select(0);
             Button addPropInsertButton = createInsertButton(buttonComposite);
-            addInsertButtonSelectionListener(addPropInsertButton, addPropCombo, ADD_PROPERTY_COMBO, scriptArea);
+            addInsertButtonSelectionListener(addPropInsertButton, addPropCombo, ComboType.ADD_PROPERTY_COMBO, scriptArea);
         }
         createInsertCopyFileDirArea(scriptArea, buttonComposite);
         if (tabIndex == 3) {
@@ -587,18 +580,18 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
 
         CCombo inputCombo = createCombo(buttonComposite, Messages.inputs);
         Button inputInsertButton = createInsertButton(buttonComposite);
-        addInsertButtonSelectionListener(inputInsertButton, inputCombo, INPUT_COMBO, scriptAreaWin, scriptArea);
+        addInsertButtonSelectionListener(inputInsertButton, inputCombo, ComboType.INPUT_COMBO, scriptAreaWin, scriptArea);
         inputCombos[0] = inputCombo;
 
         CCombo propertiesCombo = createCombo(buttonComposite, Messages.properties);
         Button propertyInsertButton = createInsertButton(buttonComposite);
-        addInsertButtonSelectionListener(propertyInsertButton, propertiesCombo, PROPERTY_COMBO, scriptAreaWin, scriptArea);
+        addInsertButtonSelectionListener(propertyInsertButton, propertiesCombo, ComboType.PROPERTY_COMBO, scriptAreaWin, scriptArea);
         propertiesCombos[0] = propertiesCombo;
 
         CCombo directoriesCombo = createCombo(buttonComposite, Messages.directory);
         directoriesCombo.setItems(ToolIntegrationConstants.DIRECTORIES_PLACEHOLDERS_DISPLAYNAMES);
         Button directoryInsertButton = createInsertButton(buttonComposite);
-        addInsertButtonSelectionListener(directoryInsertButton, directoriesCombo, DIRECTORY_COMBO, scriptAreaWin, scriptArea);
+        addInsertButtonSelectionListener(directoryInsertButton, directoriesCombo, ComboType.DIRECTORY_COMBO, scriptAreaWin, scriptArea);
         directoryCombos[0] = directoriesCombo;
     }
 
@@ -647,13 +640,14 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
     }
 
     private void addInsertButtonSelectionListener(Button button, CCombo combo,
-        int identifier, final LineNumberStyledText scriptAreaWin, final LineNumberStyledText scriptArea) {
-        button.addSelectionListener(new InsertButtonListener(combo, scriptArea, scriptAreaWin, identifier));
+        ComboType comboType, final LineNumberStyledText scriptAreaWin, final LineNumberStyledText scriptArea) {
+        button.addSelectionListener(
+            new InsertButtonListener(combo, scriptArea, scriptAreaWin, comboType));
 
     }
 
-    private void addInsertButtonSelectionListener(Button button, CCombo combo, int identifier, final LineNumberStyledText scriptArea) {
-        button.addSelectionListener(new InsertButtonListener(combo, scriptArea, identifier));
+    private void addInsertButtonSelectionListener(Button button, CCombo combo, ComboType comboType, final LineNumberStyledText scriptArea) {
+        button.addSelectionListener(new InsertButtonListener(combo, scriptArea, comboType));
     }
 
 
@@ -745,17 +739,17 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
 
         private final LineNumberStyledText text;
 
-        private final int comboType;
+        private final ComboType comboType;
 
         private LineNumberStyledText text2;
 
-        InsertButtonListener(CCombo inputCombo, LineNumberStyledText scriptArea, int comboType) {
+        InsertButtonListener(CCombo inputCombo, LineNumberStyledText scriptArea, ComboType comboType) {
             combo = inputCombo;
             text = scriptArea;
             this.comboType = comboType;
         }
 
-        InsertButtonListener(CCombo inputCombo, LineNumberStyledText scriptArea, LineNumberStyledText scriptArea2, int comboType) {
+        InsertButtonListener(CCombo inputCombo, LineNumberStyledText scriptArea, LineNumberStyledText scriptArea2, ComboType comboType) {
             combo = inputCombo;
             text = scriptArea;
             text2 = scriptArea2;
@@ -777,7 +771,7 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
                 currentText = text2;
             }
             if (currentText.isEnabled()) {
-                if (comboType == INPUT_COMBO && insertText != null && !insertText.isEmpty()) {
+                if (comboType.equals(ComboType.INPUT_COMBO) && insertText != null && !insertText.isEmpty()) {
                     int distanceCaretPositionToTextLength = currentText.getText().length() - currentText.getSelection().x;
                     String possibleQuotes = "";
                     List<Map<String, Object>> endpointList =
@@ -801,13 +795,13 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
                         + possibleQuotes);
                     currentText.setSelection(currentText.getText().length() - distanceCaretPositionToTextLength);
                 }
-                if (comboType == OUTPUT_COMBO && insertText != null && !insertText.isEmpty()) {
+                if (comboType.equals(ComboType.OUTPUT_COMBO) && insertText != null && !insertText.isEmpty()) {
                     int distanceCaretPositionToTextLength = currentText.getText().length() - currentText.getSelection().x;
                     currentText.insert(ToolIntegrationConstants.PLACEHOLDER_PREFIX + ToolIntegrationConstants.PLACEHOLDER_OUTPUT_PREFIX
                         + ToolIntegrationConstants.PLACEHOLDER_SEPARATOR + insertText + ToolIntegrationConstants.PLACEHOLDER_SUFFIX);
                     currentText.setSelection(currentText.getText().length() - distanceCaretPositionToTextLength);
                 }
-                if (comboType == PROPERTY_COMBO && insertText != null && !insertText.isEmpty()
+                if (comboType.equals(ComboType.PROPERTY_COMBO) && insertText != null && !insertText.isEmpty()
                     && configurationMap.containsKey(IntegrationConstants.KEY_PROPERTIES)) {
                     int distanceCaretPositionToTextLength = currentText.getText().length() - currentText.getSelection().x;
                     Map<String, Object> properties = (Map<String, Object>) configurationMap.get(IntegrationConstants.KEY_PROPERTIES);
@@ -829,7 +823,7 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
                     }
                     currentText.setSelection(currentText.getText().length() - distanceCaretPositionToTextLength);
                 }
-                if (comboType == DIRECTORY_COMBO && insertText != null && !insertText.isEmpty()) {
+                if (comboType.equals(ComboType.DIRECTORY_COMBO) && insertText != null && !insertText.isEmpty()) {
                     int distanceCaretPositionToTextLength = currentText.getText().length() - currentText.getSelection().x;
                     currentText.insert(QUOTE + ToolIntegrationConstants.PLACEHOLDER_PREFIX
                         + ToolIntegrationConstants.PLACEHOLDER_DIRECTORY_PREFIX
@@ -839,7 +833,7 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
                     currentText.setSelection(currentText.getText().length() - distanceCaretPositionToTextLength);
                 }
 
-                if (comboType == ADD_PROPERTY_COMBO && insertText != null && !insertText.isEmpty()) {
+                if (comboType.equals(ComboType.ADD_PROPERTY_COMBO) && insertText != null && !insertText.isEmpty()) {
                     currentText.insert(createAddPropertyPlaceHolder(ToolIntegrationConstants.PLACEHOLDER_EXIT_CODE));
                 }
                 currentText.setFocus();
