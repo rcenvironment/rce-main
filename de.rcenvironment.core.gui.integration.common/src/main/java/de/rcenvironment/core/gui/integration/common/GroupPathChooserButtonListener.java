@@ -6,7 +6,7 @@
  * https://rcenvironment.de/
  */
 
-package de.rcenvironment.core.gui.integration.toolintegration;
+package de.rcenvironment.core.gui.integration.common;
 
 import java.util.List;
 
@@ -57,8 +57,8 @@ public class GroupPathChooserButtonListener implements SelectionListener {
         dlg.setHelpAvailable(false);
         dlg.setMultipleSelection(false);
         dlg.setStatusLineAboveButtons(false);
-        dlg.setMessage(Messages.chooseGroupDlgMessage);
-        dlg.setTitle(Messages.chooseGroupDlgTitle);
+        dlg.setMessage("Filter existing groups:");
+        dlg.setTitle("Choose Group");
         if (!groupPathText.getText().isEmpty() && groupNames.contains(groupPathText.getText())) {
             dlg.setInitialSelections(groupPathText.getText());
         }

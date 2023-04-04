@@ -36,10 +36,10 @@ import de.rcenvironment.core.component.integration.workflow.WorkflowConfiguratio
 import de.rcenvironment.core.component.integration.workflow.WorkflowIntegrationConstants;
 import de.rcenvironment.core.gui.integration.common.CommonIntegrationGUIConstants;
 import de.rcenvironment.core.gui.integration.common.ComponentDescriptionValidator;
+import de.rcenvironment.core.gui.integration.common.GroupPathChooserButtonListener;
 import de.rcenvironment.core.gui.integration.common.IntegrationHelper;
 import de.rcenvironment.core.gui.integration.common.PathChooserButtonListener;
 import de.rcenvironment.core.gui.integration.common.editor.IntegrationEditorPage;
-import de.rcenvironment.core.gui.integration.toolintegration.GroupPathChooserButtonListener;
 import de.rcenvironment.core.gui.integration.workflowintegration.WorkflowIntegrationController.ConfigurationContext;
 import de.rcenvironment.core.gui.integration.workflowintegration.editor.WorkflowIntegrationEditor;
 import de.rcenvironment.core.gui.resources.api.ColorManager;

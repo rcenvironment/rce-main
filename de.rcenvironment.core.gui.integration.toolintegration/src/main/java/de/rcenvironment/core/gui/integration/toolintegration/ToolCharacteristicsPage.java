@@ -34,6 +34,7 @@ import de.rcenvironment.core.component.integration.IntegrationConstants;
 import de.rcenvironment.core.component.integration.IntegrationContext;
 import de.rcenvironment.core.gui.integration.common.CommonIntegrationGUIConstants;
 import de.rcenvironment.core.gui.integration.common.ComponentDescriptionValidator;
+import de.rcenvironment.core.gui.integration.common.GroupPathChooserButtonListener;
 import de.rcenvironment.core.gui.integration.common.PathChooserButtonListener;
 import de.rcenvironment.core.gui.integration.toolintegration.api.ToolIntegrationWizardPage;
 
