@@ -390,12 +390,6 @@ public class Messages extends NLS {
     public static String newConfigurationFromTemplateButton;
 
     /** NLS Constant. */
-    public static String chooseGroupDlgTitle;
-
-    /** NLS Constant. */
-    public static String chooseGroupDlgMessage;
-
-    /** NLS Constant. */
     public static String copyIconButtonLabel;
 
     /** NLS Constant. */
