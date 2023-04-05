@@ -10,8 +10,8 @@ package de.rcenvironment.components.joiner.gui;
 
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -30,6 +30,7 @@ import de.rcenvironment.core.component.model.endpoint.api.EndpointDescription;
 import de.rcenvironment.core.component.model.endpoint.api.EndpointDescriptionsManager;
 import de.rcenvironment.core.datamodel.api.DataType;
 import de.rcenvironment.core.datamodel.api.EndpointType;
+import de.rcenvironment.core.gui.utils.common.endpoint.DataTypeGuiSorter;
 import de.rcenvironment.core.gui.workflow.EndpointHandlingHelper;
 import de.rcenvironment.core.gui.workflow.editor.properties.DefaultEndpointPropertySection;
 import de.rcenvironment.core.gui.workflow.editor.properties.EndpointSelectionPane;
@@ -51,7 +52,9 @@ public class JoinerInputSection extends DefaultEndpointPropertySection {
 
     private Spinner inputCountSpinner;
 
-    private final List<DataType> dataTypesInCombo = new ArrayList<DataType>();
+//    private final List<DataType> dataTypesInCombo = new ArrayList<DataType>();
+    private List<DataType> dataTypesInCombo= new ArrayList<DataType>();
+
 
     private final EndpointSelectionPane inputPane;
 
@@ -108,12 +111,19 @@ public class JoinerInputSection extends DefaultEndpointPropertySection {
     @Override
     public void aboutToBeShown() {
         super.aboutToBeShown();
+        List<DataType> supportedDataTypes = new ArrayList<>();
         if (dataTypeCombo.getItemCount() == 0) {
-            for (DataType dataType : getConfiguration().getInputDescriptionsManager()
-                .getDynamicEndpointDefinition(JoinerComponentConstants.DYNAMIC_INPUT_ID).getPossibleDataTypes()) {
-                dataTypeCombo.add(dataType.getDisplayName());
-                dataTypesInCombo.add(dataType);
-            }
+            supportedDataTypes = getConfiguration().getInputDescriptionsManager()
+            .getDynamicEndpointDefinition(JoinerComponentConstants.DYNAMIC_INPUT_ID).getPossibleDataTypes();
+            
+            dataTypeCombo.setItems(supportedDataTypes.stream().sorted(DataTypeGuiSorter.getComparator()).filter(Arrays.asList(DataType.values())::contains).map(DataType::getDisplayName).toArray(String[]::new));
+            dataTypesInCombo = supportedDataTypes.stream().sorted(DataTypeGuiSorter.getComparator()).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+            //            dataTypesInCombo.set().filter(Arrays.asList(DataType.values())::contains).
+                //            for (DataType dataType : getConfiguration().getInputDescriptionsManager()
+//                .getDynamicEndpointDefinition(JoinerComponentConstants.DYNAMIC_INPUT_ID).getPossibleDataTypes()) {
+//                dataTypeCombo.add(dataType.getDisplayName()); //setText
+//                dataTypesInCombo.add(dataType); //setItems
+//            }
         }
     }
 
@@ -135,7 +145,8 @@ public class JoinerInputSection extends DefaultEndpointPropertySection {
         @Override
         public void widgetSelected(SelectionEvent arg0) {
 
-            DataType newDataType = dataTypesInCombo.get(dataTypeCombo.getSelectionIndex());
+//            DataType newDataType = dataTypesInCombo.get(dataTypeCombo.getSelectionIndex());
+            DataType newDataType = DataType.byDisplayName(dataTypeCombo.getText());
 
             EndpointDescription oldInput = getConfiguration().getInputDescriptionsManager()
                 .getEndpointDescription(JoinerComponentConstants.INPUT_NAME + "001");
