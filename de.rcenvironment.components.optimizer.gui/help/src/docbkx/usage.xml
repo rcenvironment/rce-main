@@ -410,20 +410,48 @@ from RCE_Optimizer_API import result</programlisting>
                             <entry>Returns the optimization target of the given objective "name" or
                                 None if  an objective "name" does not exists</entry>
                         </row>
-                        <row>
-                            <entry>def get_properties()</entry>
-                            <entry>Returns a dictionary of the properties and their corresponding
-                                values</entry>
-                        </row>
-                        <row>
-                            <entry>def get_property(name)</entry>
-                            <entry>Returns the value of the given property "name" or None if a
-                                property "name" does not exists</entry>
-                        </row>
-                        <row>
-                            <entry>def get_property_keys()</entry>
-                            <entry>Returns a list of property keys</entry>
-                        </row>
+                            <row>
+                                <entry>def get_common_properties()</entry>
+                                <entry>Returns a dictionary of all common properties and their
+                                    corresponding values</entry>
+                            </row>
+                            <row>
+                                <entry>def get_common_property(name)</entry>
+                                <entry>Returns the value of the given common property "name" or None
+                                    if a property "name" does not exists</entry>
+                            </row>
+                            <row>
+                                <entry>def get_common_property_keys()</entry>
+                                <entry>Returns a list of all common property keys</entry>
+                            </row>
+                            <row>
+                                <entry>def get_specific_properties()</entry>
+                                <entry>Returns a dictionary of all specific properties and their
+                                    corresponding values</entry>
+                            </row>
+                            <row>
+                                <entry>def get_specific_property(name)</entry>
+                                <entry>Returns the value of the given specific property "name" or
+                                    None if a property "name" does not exists</entry>
+                            </row>
+                            <row>
+                                <entry>def get_specific_property_keys()</entry>
+                                <entry>Returns a list of all specific property keys</entry>
+                            </row>
+                            <row>
+                                <entry>def get_responses_properties()</entry>
+                                <entry>Returns a dictionary of all responses properties and their
+                                    corresponding values</entry>
+                            </row>
+                            <row>
+                                <entry>def get_responses_property(name)</entry>
+                                <entry>Returns the value of the given responses property "name" or
+                                    None if a property "name" does not exists</entry>
+                            </row>
+                            <row>
+                                <entry>def get_responses_property_keys()</entry>
+                                <entry>Returns a list of all responses property keys</entry>
+                            </row>
                     </tbody>
                 </tgroup>
             </table>

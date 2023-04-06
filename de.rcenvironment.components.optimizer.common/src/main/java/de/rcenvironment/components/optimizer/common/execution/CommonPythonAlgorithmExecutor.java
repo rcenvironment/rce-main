@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,7 +39,7 @@ import de.rcenvironment.core.utils.common.JsonUtils;
  * A part implementation for the algorithm executor which write config files in python.
  * 
  * @author Sascha Zur
- * @author Kathrin Schaffert (#17540)
+ * @author Kathrin Schaffert (#17540, #18064)
  */
 public abstract class CommonPythonAlgorithmExecutor extends OptimizerAlgorithmExecutor {
 
@@ -109,34 +110,23 @@ public abstract class CommonPythonAlgorithmExecutor extends OptimizerAlgorithmEx
         String[] algos = algorithm.split(comma);
 
         for (String algo : algos) {
-            Map<String, Map<String, String>> allSettings = methodConfiguration.get(algo).getSpecificSettings();
-            Map<String, Object> settings = new HashMap<>();
-            for (String key : allSettings.keySet()) {
-                Map<String, Object> set = new HashMap<>();
-                String dataType = allSettings.get(key).get("dataType");
-                String value = allSettings.get(key).get("Value");
-                if (value == null || value.isEmpty()) {
-                    value = allSettings.get(key).get("DefaultValue");
-                }
-                switch (dataType.toLowerCase()) {
-                case "real":
-                    set.put(VALUE, Double.parseDouble(value));
-
-                    break;
-                case "int":
-                    set.put(VALUE, Integer.parseInt(value));
-                    break;
-                case "bool":
-                    set.put(VALUE, Boolean.parseBoolean(value));
-                    break;
-                case "None":
-                default:
-                    set.put(VALUE, value);
-                }
-                settings.put(key, set);
+            Map<String, Map<String, String>> specificSettings = methodConfiguration.get(algo).getSpecificSettings();
+            if (specificSettings != null) {
+                Map<String, Object> specificSettingsMap = getSettingsConfiguration(specificSettings);
+                configuration.put("specificSettings", specificSettingsMap);
             }
-            configuration.put("algorithmSettings", settings);
+            Map<String, Map<String, String>> commonSettings = methodConfiguration.get(algo).getCommonSettings();
+            if (commonSettings != null) {
+                Map<String, Object> commonSettingsMap = getSettingsConfiguration(commonSettings);
+                configuration.put("commonSettings", commonSettingsMap);
+            }
+            Map<String, Map<String, String>> responsesSettings = methodConfiguration.get(algo).getResponsesSettings();
+            if (responsesSettings != null) {
+                Map<String, Object> responsesSettingsMap = getSettingsConfiguration(responsesSettings);
+                configuration.put("responsesSettings", responsesSettingsMap);
+            }
             configuration.put("algorithm", algo.substring(0, algo.lastIndexOf("[") - 1));
+
         }
 
         ObjectMapper mapper = JsonUtils.getDefaultObjectMapper();
@@ -146,6 +136,34 @@ public abstract class CommonPythonAlgorithmExecutor extends OptimizerAlgorithmEx
             throw new ComponentException("Failed to write configuration file", e);
         }
 
+    }
+
+    private Map<String, Object> getSettingsConfiguration(Map<String, Map<String, String>> allSettings) {
+        Map<String, Object> settings = new HashMap<>();
+        for (Entry<String, Map<String, String>> entry : allSettings.entrySet()) {
+            Map<String, Object> set = new HashMap<>();
+            String dataType = entry.getValue().get("dataType");
+            String value = entry.getValue().get("Value");
+            if (value == null || value.isEmpty()) {
+                value = entry.getValue().get("DefaultValue");
+            }
+            switch (dataType.toLowerCase()) {
+            case "real":
+                set.put(VALUE, Double.parseDouble(value));
+                break;
+            case "int":
+                set.put(VALUE, Integer.parseInt(value));
+                break;
+            case "bool":
+                set.put(VALUE, Boolean.parseBoolean(value));
+                break;
+            case "None":
+            default:
+                set.put(VALUE, value);
+            }
+            settings.put(entry.getKey(), set);
+        }
+        return settings;
     }
 
     private void addInputsToConfig(Map<String, Object> configuration) {
