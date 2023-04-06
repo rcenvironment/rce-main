@@ -116,8 +116,8 @@ public class JoinerInputSection extends DefaultEndpointPropertySection {
             supportedDataTypes = getConfiguration().getInputDescriptionsManager()
             .getDynamicEndpointDefinition(JoinerComponentConstants.DYNAMIC_INPUT_ID).getPossibleDataTypes();
             
-            dataTypeCombo.setItems(supportedDataTypes.stream().sorted(DataTypeGuiSorter.getComparator()).filter(Arrays.asList(DataType.values())::contains).map(DataType::getDisplayName).toArray(String[]::new));
-            dataTypesInCombo = supportedDataTypes.stream().sorted(DataTypeGuiSorter.getComparator()).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+            dataTypeCombo.setItems(supportedDataTypes.stream().sorted(DataTypeGuiSorter.getComparator()).map(DataType::getDisplayName).toArray(String[]::new));
+            dataTypesInCombo.addAll(supportedDataTypes.stream().sorted(DataTypeGuiSorter.getComparator()).collect(ArrayList::new, ArrayList::add, ArrayList::addAll));
             //            dataTypesInCombo.set().filter(Arrays.asList(DataType.values())::contains).
                 //            for (DataType dataType : getConfiguration().getInputDescriptionsManager()
 //                .getDynamicEndpointDefinition(JoinerComponentConstants.DYNAMIC_INPUT_ID).getPossibleDataTypes()) {
