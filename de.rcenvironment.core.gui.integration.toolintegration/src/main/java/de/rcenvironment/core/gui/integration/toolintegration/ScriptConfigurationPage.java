@@ -36,8 +36,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.IWorkbenchHelpSystem;
 
-import de.rcenvironment.core.component.integration.IntegrationContextType;
 import de.rcenvironment.core.component.integration.IntegrationConstants;
+import de.rcenvironment.core.component.integration.IntegrationContextType;
 import de.rcenvironment.core.component.integration.ToolIntegrationConstants;
 import de.rcenvironment.core.datamodel.api.DataType;
 import de.rcenvironment.core.gui.integration.toolintegration.api.ToolIntegrationWizardPage;
@@ -45,24 +45,17 @@ import de.rcenvironment.core.gui.utils.common.widgets.LineNumberStyledText;
 
 /**
  * @author Sascha Zur
- * @author Kathrin Schaffert (#16533 changed to Combos into CCombo and added COMBO_WIDTH, INSERT_BUTTON_WIDTH)
+ * @author Kathrin Schaffert (#16533 changed Combos into CCombo and added COMBO_WIDTH, INSERT_BUTTON_WIDTH, refactoring)
  */
 public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
 
-    /** Constant. */
-    public static final int INPUT_COMBO = 0;
-
-    /** Constant. */
-    public static final int OUTPUT_COMBO = 1;
-
-    /** Constant. */
-    public static final int PROPERTY_COMBO = 2;
-
-    /** Constant. */
-    public static final int ADD_PROPERTY_COMBO = 3;
-
-    /** Constant. */
-    public static final int DIRECTORY_COMBO = 4;
+    enum ComboType {
+        INPUT_COMBO,
+        OUTPUT_COMBO,
+        PROPERTY_COMBO,
+        ADD_PROPERTY_COMBO,
+        DIRECTORY_COMBO
+    }
 
     private static final int COMBO_WIDTH = 125;
 
@@ -142,7 +135,7 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
             | GridData.FILL_VERTICAL | GridData.GRAB_VERTICAL);
         layoutData.grabExcessVerticalSpace = true;
         tabFolder.setLayoutData(layoutData);
-        createScriptTabItem(ToolIntegrationConstants.KEY_COMMAND_SCRIPT_LINUX, Messages.commandScriptMessage, 0);
+        createScriptExecutionTabItem(ToolIntegrationConstants.KEY_COMMAND_SCRIPT_LINUX, Messages.commandScriptMessage);
         createScriptTabItem(ToolIntegrationConstants.KEY_PRE_SCRIPT, Messages.preScript, 1);
         createScriptTabItem(ToolIntegrationConstants.KEY_POST_SCRIPT, Messages.postScript, 2);
         createScriptTabItem(ToolIntegrationConstants.KEY_MOCK_SCRIPT, "Tool run imitation script", 3);
@@ -265,11 +258,7 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
 
     private void setComboEnabled(CCombo combo) {
         if (combo != null) {
-            if (combo.getItemCount() == 0) {
-                combo.setEnabled(false);
-            } else {
-                combo.setEnabled(true);
-            }
+            combo.setEnabled(combo.getItemCount() != 0);
         }
     }
 
@@ -373,141 +362,149 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         }
     }
 
-    private LineNumberStyledText createScriptTabItem(String propertyKey, String name, int buttonIndex) {
+    private LineNumberStyledText createScriptExecutionTabItem(String propertyKey, String name) {
         CTabItem item = new CTabItem(tabFolder, SWT.NONE);
         item.setText(name);
         Composite client = new Composite(tabFolder, SWT.NONE);
-        if (buttonIndex == 0) {
-            winEnabledButton = new Button(client, SWT.CHECK);
-            winEnabledButton.setText(Messages.winCommandUse);
-            linuxEnabledButton = new Button(client, SWT.CHECK);
-            linuxEnabledButton.setText(Messages.linuxCommandUse);
-            new Label(client, SWT.NONE);
-        }
+        winEnabledButton = new Button(client, SWT.CHECK);
+        winEnabledButton.setText(Messages.winCommandUse);
+        linuxEnabledButton = new Button(client, SWT.CHECK);
+        linuxEnabledButton.setText(Messages.linuxCommandUse);
+        new Label(client, SWT.NONE);
 
         final LineNumberStyledText scriptAreaWin;
-        if (buttonIndex == 0) {
-            client.setLayout(new GridLayout(3, false));
-            scriptAreaWin = new LineNumberStyledText(client, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
-            GridData scriptAreaWinData = new GridData(GridData.FILL_BOTH);
-            scriptAreaWinData.widthHint = TEXTFIELD_WIDTH / 2;
-            scriptAreaWinData.heightHint = TEXTFIELD_HEIGHT;
-            scriptAreaWin.setLayoutData(scriptAreaWinData);
-            scriptAreaWin.addModifyListener(new TextAreaModifyListener(ToolIntegrationConstants.KEY_COMMAND_SCRIPT_WINDOWS));
-            scriptAreaWin.addFocusListener(new FocusListener() {
+        client.setLayout(new GridLayout(3, false));
+        scriptAreaWin = new LineNumberStyledText(client, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
+        GridData scriptAreaWinData = new GridData(GridData.FILL_BOTH);
+        scriptAreaWinData.widthHint = TEXTFIELD_WIDTH / 2;
+        scriptAreaWinData.heightHint = TEXTFIELD_HEIGHT;
+        scriptAreaWin.setLayoutData(scriptAreaWinData);
+        scriptAreaWin.addModifyListener(new TextAreaModifyListener(ToolIntegrationConstants.KEY_COMMAND_SCRIPT_WINDOWS));
+        scriptAreaWin.addFocusListener(new FocusListener() {
 
-                @Override
-                public void focusLost(FocusEvent arg0) {}
+            @Override
+            public void focusLost(FocusEvent arg0) {}
 
-                @Override
-                public void focusGained(FocusEvent arg0) {
-                    winScriptHasFocus = true;
-                }
-            });
-            scriptAreaWin.setEditable(false);
-            textFields[textFields.length - 1] = scriptAreaWin;
-        } else {
-            scriptAreaWin = null;
-            client.setLayout(new GridLayout(2, false));
-        }
+            @Override
+            public void focusGained(FocusEvent arg0) {
+                winScriptHasFocus = true;
+            }
+        });
+        scriptAreaWin.setEditable(false);
+        textFields[textFields.length - 1] = scriptAreaWin;
+
         item.setControl(client);
         final LineNumberStyledText scriptArea = new LineNumberStyledText(client, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
         GridData scriptAreaData = new GridData(GridData.FILL_BOTH);
-        if (buttonIndex == 0) {
-            scriptArea.setEnabled(false);
-            scriptArea.setEditable(false);
-            scriptArea.addFocusListener(new FocusListener() {
+        scriptArea.setEnabled(false);
+        scriptArea.setEditable(false);
+        scriptArea.addFocusListener(new FocusListener() {
 
-                @Override
-                public void focusLost(FocusEvent arg0) {}
+            @Override
+            public void focusLost(FocusEvent arg0) {}
 
-                @Override
-                public void focusGained(FocusEvent arg0) {
-                    winScriptHasFocus = false;
-                }
-            });
-            scriptAreaData.widthHint = TEXTFIELD_WIDTH / 2;
-        } else {
-            scriptAreaData.widthHint = TEXTFIELD_WIDTH;
-        }
+            @Override
+            public void focusGained(FocusEvent arg0) {
+                winScriptHasFocus = false;
+            }
+        });
+        scriptAreaData.widthHint = TEXTFIELD_WIDTH / 2;
         scriptAreaData.heightHint = TEXTFIELD_HEIGHT;
         scriptArea.setLayoutData(scriptAreaData);
         scriptArea.addModifyListener(new TextAreaModifyListener(propertyKey));
 
-        textFields[buttonIndex] = scriptArea;
-        if (buttonIndex == 0) {
-            addScriptSelectButtonListener();
-        }
+        textFields[0] = scriptArea;
+        addScriptSelectButtonListener();
 
-        createInsertFields(buttonIndex, client, scriptAreaWin, scriptArea);
+        createInsertFieldsOnExecutionTab(client, scriptAreaWin, scriptArea);
 
-        if (buttonIndex > 0) {
-            Label jythonLabel = new Label(client, SWT.NONE);
-            jythonLabel.setText(Messages.scriptLanguageHint);
-        } else {
-            new Label(client, SWT.NONE).setText(Messages.scriptLanguageHintBatch);
-            new Label(client, SWT.NONE).setText(Messages.scriptLanguageHintBash);
-            new Label(client, SWT.NONE).setText("");
+        new Label(client, SWT.NONE).setText(Messages.scriptLanguageHintBatch);
+        new Label(client, SWT.NONE).setText(Messages.scriptLanguageHintBash);
+        new Label(client, SWT.NONE).setText("");
 
-            Group executionPropertiesGroup = new Group(client, SWT.NONE);
-            executionPropertiesGroup.setText("Execution Options");
-            executionPropertiesGroup.setLayout(new GridLayout(1, false));
-            GridData executionPropertiesData = new GridData(GridData.GRAB_HORIZONTAL | GridData.FILL_HORIZONTAL);
-            executionPropertiesData.horizontalSpan = 3;
-            executionPropertiesGroup.setLayoutData(executionPropertiesData);
+        Group executionPropertiesGroup = new Group(client, SWT.NONE);
+        executionPropertiesGroup.setText("Execution Options");
+        executionPropertiesGroup.setLayout(new GridLayout(1, false));
+        GridData executionPropertiesData = new GridData(GridData.GRAB_HORIZONTAL | GridData.FILL_HORIZONTAL);
+        executionPropertiesData.horizontalSpan = 3;
+        executionPropertiesGroup.setLayoutData(executionPropertiesData);
 
-            noErrorOnOtherExitCodeButton = new Button(executionPropertiesGroup, SWT.CHECK);
-            noErrorOnOtherExitCodeButton.setText(Messages.dontCrashOtherThanZeroLabel);
+        noErrorOnOtherExitCodeButton = new Button(executionPropertiesGroup, SWT.CHECK);
+        noErrorOnOtherExitCodeButton.setText(Messages.dontCrashOtherThanZeroLabel);
 
-            noErrorOnOtherExitCodeButton.addSelectionListener(new SelectionListener() {
+        noErrorOnOtherExitCodeButton.addSelectionListener(new SelectionListener() {
 
-                @Override
-                public void widgetSelected(SelectionEvent arg0) {
-                    configurationMap.put(ToolIntegrationConstants.DONT_CRASH_ON_NON_ZERO_EXIT_CODES,
-                        noErrorOnOtherExitCodeButton.getSelection());
-                }
+            @Override
+            public void widgetSelected(SelectionEvent arg0) {
+                configurationMap.put(ToolIntegrationConstants.DONT_CRASH_ON_NON_ZERO_EXIT_CODES,
+                    noErrorOnOtherExitCodeButton.getSelection());
+            }
 
-                @Override
-                public void widgetDefaultSelected(SelectionEvent arg0) {
-                    widgetSelected(arg0);
-                }
-            });
-            executionPathLabel = new Label(executionPropertiesGroup, SWT.NONE);
-            executionPathLabel.setText("Execute (command(s), pre execution/post execution/tool run imitation script) from");
-            setWorkingDirAsCwdButton = new Button(executionPropertiesGroup, SWT.RADIO);
-            setWorkingDirAsCwdButton.setSelection(true);
-            setWorkingDirAsCwdButton.setText("Working directory");
-            setWorkingDirAsCwdButton.addSelectionListener(new SelectionListener() {
+            @Override
+            public void widgetDefaultSelected(SelectionEvent arg0) {
+                widgetSelected(arg0);
+            }
+        });
+        executionPathLabel = new Label(executionPropertiesGroup, SWT.NONE);
+        executionPathLabel.setText("Execute (command(s), pre execution/post execution/tool run imitation script) from");
+        setWorkingDirAsCwdButton = new Button(executionPropertiesGroup, SWT.RADIO);
+        setWorkingDirAsCwdButton.setSelection(true);
+        setWorkingDirAsCwdButton.setText("Working directory");
+        setWorkingDirAsCwdButton.addSelectionListener(new SelectionListener() {
 
-                @Override
-                public void widgetSelected(SelectionEvent arg0) {
-                    configurationMap.put(ToolIntegrationConstants.KEY_SET_TOOL_DIR_AS_WORKING_DIR,
-                        !setWorkingDirAsCwdButton.getSelection());
-                }
+            @Override
+            public void widgetSelected(SelectionEvent arg0) {
+                configurationMap.put(ToolIntegrationConstants.KEY_SET_TOOL_DIR_AS_WORKING_DIR,
+                    !setWorkingDirAsCwdButton.getSelection());
+            }
 
-                @Override
-                public void widgetDefaultSelected(SelectionEvent arg0) {
-                    widgetSelected(arg0);
-                }
-            });
-            setToolDirAsCwdButton = new Button(executionPropertiesGroup, SWT.RADIO);
-            setToolDirAsCwdButton.setText("Tool directory");
-            setToolDirAsCwdButton.addSelectionListener(new SelectionListener() {
+            @Override
+            public void widgetDefaultSelected(SelectionEvent arg0) {
+                widgetSelected(arg0);
+            }
+        });
+        setToolDirAsCwdButton = new Button(executionPropertiesGroup, SWT.RADIO);
+        setToolDirAsCwdButton.setText("Tool directory");
+        setToolDirAsCwdButton.addSelectionListener(new SelectionListener() {
 
-                @Override
-                public void widgetSelected(SelectionEvent arg0) {
-                    configurationMap.put(ToolIntegrationConstants.KEY_SET_TOOL_DIR_AS_WORKING_DIR,
-                        setToolDirAsCwdButton.getSelection());
-                }
+            @Override
+            public void widgetSelected(SelectionEvent arg0) {
+                configurationMap.put(ToolIntegrationConstants.KEY_SET_TOOL_DIR_AS_WORKING_DIR,
+                    setToolDirAsCwdButton.getSelection());
+            }
 
-                @Override
-                public void widgetDefaultSelected(SelectionEvent arg0) {
-                    widgetSelected(arg0);
-                }
-            });
-        }
+            @Override
+            public void widgetDefaultSelected(SelectionEvent arg0) {
+                widgetSelected(arg0);
+            }
+        });
 
-        if (buttonIndex == 3) {
+        return scriptArea;
+    }
+
+    private LineNumberStyledText createScriptTabItem(String propertyKey, String name, int tabIndex) {
+        CTabItem item = new CTabItem(tabFolder, SWT.NONE);
+        item.setText(name);
+        Composite client = new Composite(tabFolder, SWT.NONE);
+        client.setLayout(new GridLayout(2, false));
+
+        item.setControl(client);
+        final LineNumberStyledText scriptArea = new LineNumberStyledText(client, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
+        GridData scriptAreaData = new GridData(GridData.FILL_BOTH);
+
+        scriptAreaData.widthHint = TEXTFIELD_WIDTH;
+        scriptAreaData.heightHint = TEXTFIELD_HEIGHT;
+        scriptArea.setLayoutData(scriptAreaData);
+        scriptArea.addModifyListener(new TextAreaModifyListener(propertyKey));
+
+        textFields[tabIndex] = scriptArea;
+
+        createInsertFields(tabIndex, client, scriptArea);
+
+        Label jythonLabel = new Label(client, SWT.NONE);
+        jythonLabel.setText(Messages.scriptLanguageHint);
+
+        if (tabIndex == 3) {
             mockScriptTabComposite = client;
         }
 
@@ -535,129 +532,118 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         }
     }
 
-    private void createInsertFields(int buttonIndex, Composite client,
-        final LineNumberStyledText scriptAreaWin, final LineNumberStyledText scriptArea) {
+    private void createInsertFields(int tabIndex, Composite client, final LineNumberStyledText scriptArea) {
+        Composite buttonComposite = createButtonComposite(client);
+
+        CCombo inputCombo = createCombo(buttonComposite, Messages.inputs);
+        Button inputInsertButton = createInsertButton(buttonComposite);
+        addInsertButtonSelectionListener(inputInsertButton, inputCombo, ComboType.INPUT_COMBO, scriptArea);
+        inputCombos[tabIndex] = inputCombo;
+
+        CCombo outputCombo = createCombo(buttonComposite, Messages.outputs);
+        Button outputInsertButton = createInsertButton(buttonComposite);
+        addInsertButtonSelectionListener(outputInsertButton, outputCombo, ComboType.OUTPUT_COMBO, scriptArea);
+        outputCombos[tabIndex] = outputCombo;
+
+        CCombo propertiesCombo = createCombo(buttonComposite, Messages.properties);
+        Button propertyInsertButton = createInsertButton(buttonComposite);
+        addInsertButtonSelectionListener(propertyInsertButton, propertiesCombo, ComboType.PROPERTY_COMBO, scriptArea);
+        propertiesCombos[tabIndex] = propertiesCombo;
+
+        CCombo directoriesCombo = createCombo(buttonComposite, Messages.directory);
+        directoriesCombo.setItems(ToolIntegrationConstants.DIRECTORIES_PLACEHOLDERS_DISPLAYNAMES);
+        Button directoryInsertButton = createInsertButton(buttonComposite);
+        addInsertButtonSelectionListener(directoryInsertButton, directoriesCombo, ComboType.DIRECTORY_COMBO, scriptArea);
+        directoryCombos[tabIndex] = directoriesCombo;
+
+        if (tabIndex == 2) {
+            CCombo addPropCombo = createCombo(buttonComposite, "Additional Properties");
+            addPropCombo.add(Messages.exitCodeLabel);
+            addPropCombo.select(0);
+            Button addPropInsertButton = createInsertButton(buttonComposite);
+            addInsertButtonSelectionListener(addPropInsertButton, addPropCombo, ComboType.ADD_PROPERTY_COMBO, scriptArea);
+        }
+        createInsertCopyFileDirArea(scriptArea, buttonComposite);
+        if (tabIndex == 3) {
+            mockScriptTabButtonComposite = buttonComposite;
+        }
+
+    }
+
+    private void createInsertFieldsOnExecutionTab(Composite client, final LineNumberStyledText scriptAreaWin,
+        final LineNumberStyledText scriptArea) {
+        Composite buttonComposite = createButtonComposite(client);
+
+        CCombo inputCombo = createCombo(buttonComposite, Messages.inputs);
+        Button inputInsertButton = createInsertButton(buttonComposite);
+        addInsertButtonSelectionListener(inputInsertButton, inputCombo, ComboType.INPUT_COMBO, scriptAreaWin, scriptArea);
+        inputCombos[0] = inputCombo;
+
+        CCombo propertiesCombo = createCombo(buttonComposite, Messages.properties);
+        Button propertyInsertButton = createInsertButton(buttonComposite);
+        addInsertButtonSelectionListener(propertyInsertButton, propertiesCombo, ComboType.PROPERTY_COMBO, scriptAreaWin, scriptArea);
+        propertiesCombos[0] = propertiesCombo;
+
+        CCombo directoriesCombo = createCombo(buttonComposite, Messages.directory);
+        directoriesCombo.setItems(ToolIntegrationConstants.DIRECTORIES_PLACEHOLDERS_DISPLAYNAMES);
+        Button directoryInsertButton = createInsertButton(buttonComposite);
+        addInsertButtonSelectionListener(directoryInsertButton, directoriesCombo, ComboType.DIRECTORY_COMBO, scriptAreaWin, scriptArea);
+        directoryCombos[0] = directoriesCombo;
+    }
+
+    private Composite createButtonComposite(Composite client) {
         Composite buttonComposite = new Composite(client, SWT.NONE);
         buttonComposite.setLayout(new GridLayout(2, false));
         GridData buttonCompositeData = new GridData();
         buttonCompositeData.verticalAlignment = GridData.BEGINNING;
         buttonCompositeData.horizontalSpan = 1;
         buttonComposite.setLayoutData(buttonCompositeData);
+        return buttonComposite;
+    }
+
+    private void createInsertCopyFileDirArea(final LineNumberStyledText scriptArea, Composite buttonComposite) {
+        new Label(buttonComposite, SWT.NONE).setText("");
+        new Label(buttonComposite, SWT.NONE).setText("");
+        Button insertCopyCommand = new Button(buttonComposite, SWT.PUSH);
+        GridData copyData = new GridData();
+        insertCopyCommand.setLayoutData(copyData);
+        insertCopyCommand.setText("Insert copy of file/dir...");
+        insertCopyCommand.addSelectionListener(new CopyInputListener(scriptArea));
+    }
+
+    private CCombo createCombo(Composite buttonComposite, String messageLabel) {
         GridData labelData = new GridData();
         labelData.horizontalSpan = 2;
-        Label inputLabel = new Label(buttonComposite, SWT.NONE);
-        inputLabel.setText(Messages.inputs);
-        inputLabel.setLayoutData(labelData);
-        CCombo inputCombo = new CCombo(buttonComposite, SWT.READ_ONLY | SWT.BORDER);
-        GridData inputComboData = new GridData(GridData.FILL_HORIZONTAL);
-        inputComboData.horizontalSpan = 1;
-        inputComboData.widthHint = COMBO_WIDTH;
-        inputCombo.setLayoutData(inputComboData);
-        Button inputInsertButton = new Button(buttonComposite, SWT.PUSH);
-        // GridData for insert buttons
+        Label label = new Label(buttonComposite, SWT.NONE);
+        label.setText(messageLabel);
+        label.setLayoutData(labelData);
+        CCombo combo = new CCombo(buttonComposite, SWT.READ_ONLY | SWT.BORDER);
+        GridData comboData = new GridData(GridData.FILL_HORIZONTAL);
+        comboData.widthHint = COMBO_WIDTH;
+        combo.setLayoutData(comboData);
+
+        return combo;
+    }
+
+    private Button createInsertButton(Composite buttonComposite) {
         GridData insertButtonData = new GridData();
         insertButtonData.horizontalSpan = 1;
         insertButtonData.widthHint = INSERT_BUTTON_WIDTH;
+        Button inputInsertButton = new Button(buttonComposite, SWT.PUSH);
         inputInsertButton.setLayoutData(insertButtonData);
         inputInsertButton.setText(Messages.insertButtonLabel);
-        if (buttonIndex == 0) {
-            inputInsertButton.addSelectionListener(new InsertButtonListener(inputCombo, scriptArea, scriptAreaWin, INPUT_COMBO));
-        } else {
-            inputInsertButton.addSelectionListener(new InsertButtonListener(inputCombo, scriptArea, INPUT_COMBO));
-        }
-        inputCombos[buttonIndex] = inputCombo;
-        if (buttonIndex > 0) {
-            GridData labelDataOutput = new GridData();
-            labelDataOutput.horizontalSpan = 2;
+        return inputInsertButton;
+    }
 
-            Label outputLabel = new Label(buttonComposite, SWT.NONE);
-            outputLabel.setText(Messages.outputs);
-            outputLabel.setLayoutData(labelDataOutput);
+    private void addInsertButtonSelectionListener(Button button, CCombo combo,
+        ComboType comboType, final LineNumberStyledText scriptAreaWin, final LineNumberStyledText scriptArea) {
+        button.addSelectionListener(
+            new InsertButtonListener(combo, scriptArea, scriptAreaWin, comboType));
 
-            CCombo outputCombo = new CCombo(buttonComposite, SWT.READ_ONLY | SWT.BORDER);
-            GridData outputComboData = new GridData(GridData.FILL_HORIZONTAL);
-            outputComboData.widthHint = COMBO_WIDTH;
-            outputCombo.setLayoutData(outputComboData);
+    }
 
-            Button outputInsertButton = new Button(buttonComposite, SWT.PUSH);
-            outputInsertButton.setLayoutData(insertButtonData);
-            outputInsertButton.setText(Messages.insertButtonLabel);
-            outputInsertButton.addSelectionListener(new InsertButtonListener(outputCombo, scriptArea, OUTPUT_COMBO));
-            outputCombos[buttonIndex] = outputCombo;
-
-        }
-        GridData labelDataProperties = new GridData();
-        labelDataProperties.horizontalSpan = 2;
-        Label propertiesLabel = new Label(buttonComposite, SWT.NONE);
-        propertiesLabel.setText(Messages.properties);
-        propertiesLabel.setLayoutData(labelDataProperties);
-        CCombo propertiesCombo = new CCombo(buttonComposite, SWT.READ_ONLY | SWT.BORDER);
-        GridData propertiesComboData = new GridData(GridData.FILL_HORIZONTAL);
-        propertiesComboData.widthHint = COMBO_WIDTH;
-        propertiesCombo.setLayoutData(propertiesComboData);
-        Button propertyInsertButton = new Button(buttonComposite, SWT.PUSH);
-        propertyInsertButton.setLayoutData(insertButtonData);
-        propertyInsertButton.setText(Messages.insertButtonLabel);
-        if (buttonIndex == 0) {
-            propertyInsertButton.addSelectionListener(new InsertButtonListener(propertiesCombo, scriptArea, scriptAreaWin, PROPERTY_COMBO));
-        } else {
-            propertyInsertButton.addSelectionListener(new InsertButtonListener(propertiesCombo, scriptArea, PROPERTY_COMBO));
-        }
-        propertiesCombos[buttonIndex] = propertiesCombo;
-        GridData labelDataDirectories = new GridData();
-        labelDataDirectories.horizontalSpan = 2;
-        Label directoryLabel = new Label(buttonComposite, SWT.NONE);
-        directoryLabel.setText(Messages.directory);
-        directoryLabel.setLayoutData(labelDataDirectories);
-        CCombo directoriesCombo = new CCombo(buttonComposite, SWT.READ_ONLY | SWT.BORDER);
-        GridData directoriesComboData = new GridData(GridData.FILL_HORIZONTAL);
-        directoriesComboData.widthHint = COMBO_WIDTH;
-        directoriesCombo.setLayoutData(directoriesComboData);
-        directoriesCombo.setItems(ToolIntegrationConstants.DIRECTORIES_PLACEHOLDERS_DISPLAYNAMES);
-        Button directoryInsertButton = new Button(buttonComposite, SWT.PUSH);
-        directoryInsertButton.setLayoutData(insertButtonData);
-        directoryInsertButton.setText(Messages.insertButtonLabel);
-        if (scriptAreaWin != null) {
-            directoryInsertButton.addSelectionListener(new InsertButtonListener(directoriesCombo, scriptArea, scriptAreaWin,
-                DIRECTORY_COMBO));
-        } else {
-            directoryInsertButton.addSelectionListener(new InsertButtonListener(directoriesCombo, scriptArea, DIRECTORY_COMBO));
-        }
-        directoryCombos[buttonIndex] = directoriesCombo;
-
-        if (buttonIndex == 2) {
-            GridData labelDataAddProp = new GridData();
-            labelDataAddProp.horizontalSpan = 2;
-            Label addPropLabel = new Label(buttonComposite, SWT.NONE);
-            addPropLabel.setText("Additional Properties");
-            addPropLabel.setLayoutData(labelDataAddProp);
-            CCombo addPropCombo = new CCombo(buttonComposite, SWT.READ_ONLY | SWT.BORDER);
-            GridData addPropComboData = new GridData(GridData.FILL_HORIZONTAL);
-            addPropComboData.widthHint = COMBO_WIDTH;
-            addPropCombo.setLayoutData(addPropComboData);
-            addPropCombo.add(Messages.exitCodeLabel);
-            addPropCombo.select(0);
-            Button addPropInsertButton = new Button(buttonComposite, SWT.PUSH);
-            addPropInsertButton.setLayoutData(insertButtonData);
-            addPropInsertButton.setText(Messages.insertButtonLabel);
-            addPropInsertButton.addSelectionListener(new InsertButtonListener(addPropCombo, scriptArea, 3));
-
-        }
-
-        if (buttonIndex > 0) {
-            new Label(buttonComposite, SWT.NONE).setText("");
-            new Label(buttonComposite, SWT.NONE).setText("");
-            Button insertCopyCommand = new Button(buttonComposite, SWT.PUSH);
-            GridData copyData = new GridData();
-            insertCopyCommand.setLayoutData(copyData);
-            insertCopyCommand.setText("Insert copy of file/dir...");
-            insertCopyCommand.addSelectionListener(new CopyInputListener(scriptArea));
-        }
-
-        if (buttonIndex == 3) {
-            mockScriptTabButtonComposite = buttonComposite;
-        }
-
+    private void addInsertButtonSelectionListener(Button button, CCombo combo, ComboType comboType, final LineNumberStyledText scriptArea) {
+        button.addSelectionListener(new InsertButtonListener(combo, scriptArea, comboType));
     }
 
     private void addScriptSelectButtonListener() {
@@ -748,17 +734,17 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
 
         private final LineNumberStyledText text;
 
-        private final int comboType;
+        private final ComboType comboType;
 
         private LineNumberStyledText text2;
 
-        InsertButtonListener(CCombo inputCombo, LineNumberStyledText scriptArea, int comboType) {
+        InsertButtonListener(CCombo inputCombo, LineNumberStyledText scriptArea, ComboType comboType) {
             combo = inputCombo;
             text = scriptArea;
             this.comboType = comboType;
         }
 
-        InsertButtonListener(CCombo inputCombo, LineNumberStyledText scriptArea, LineNumberStyledText scriptArea2, int comboType) {
+        InsertButtonListener(CCombo inputCombo, LineNumberStyledText scriptArea, LineNumberStyledText scriptArea2, ComboType comboType) {
             combo = inputCombo;
             text = scriptArea;
             text2 = scriptArea2;
@@ -780,7 +766,7 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
                 currentText = text2;
             }
             if (currentText.isEnabled()) {
-                if (comboType == INPUT_COMBO && insertText != null && !insertText.isEmpty()) {
+                if (comboType.equals(ComboType.INPUT_COMBO) && insertText != null && !insertText.isEmpty()) {
                     int distanceCaretPositionToTextLength = currentText.getText().length() - currentText.getSelection().x;
                     String possibleQuotes = "";
                     List<Map<String, Object>> endpointList =
@@ -804,13 +790,13 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
                         + possibleQuotes);
                     currentText.setSelection(currentText.getText().length() - distanceCaretPositionToTextLength);
                 }
-                if (comboType == OUTPUT_COMBO && insertText != null && !insertText.isEmpty()) {
+                if (comboType.equals(ComboType.OUTPUT_COMBO) && insertText != null && !insertText.isEmpty()) {
                     int distanceCaretPositionToTextLength = currentText.getText().length() - currentText.getSelection().x;
                     currentText.insert(ToolIntegrationConstants.PLACEHOLDER_PREFIX + ToolIntegrationConstants.PLACEHOLDER_OUTPUT_PREFIX
                         + ToolIntegrationConstants.PLACEHOLDER_SEPARATOR + insertText + ToolIntegrationConstants.PLACEHOLDER_SUFFIX);
                     currentText.setSelection(currentText.getText().length() - distanceCaretPositionToTextLength);
                 }
-                if (comboType == PROPERTY_COMBO && insertText != null && !insertText.isEmpty()
+                if (comboType.equals(ComboType.PROPERTY_COMBO) && insertText != null && !insertText.isEmpty()
                     && configurationMap.containsKey(IntegrationConstants.KEY_PROPERTIES)) {
                     int distanceCaretPositionToTextLength = currentText.getText().length() - currentText.getSelection().x;
                     Map<String, Object> properties = (Map<String, Object>) configurationMap.get(IntegrationConstants.KEY_PROPERTIES);
@@ -832,7 +818,7 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
                     }
                     currentText.setSelection(currentText.getText().length() - distanceCaretPositionToTextLength);
                 }
-                if (comboType == DIRECTORY_COMBO && insertText != null && !insertText.isEmpty()) {
+                if (comboType.equals(ComboType.DIRECTORY_COMBO) && insertText != null && !insertText.isEmpty()) {
                     int distanceCaretPositionToTextLength = currentText.getText().length() - currentText.getSelection().x;
                     currentText.insert(QUOTE + ToolIntegrationConstants.PLACEHOLDER_PREFIX
                         + ToolIntegrationConstants.PLACEHOLDER_DIRECTORY_PREFIX
@@ -842,21 +828,22 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
                     currentText.setSelection(currentText.getText().length() - distanceCaretPositionToTextLength);
                 }
 
-                if (comboType == ADD_PROPERTY_COMBO && insertText != null && !insertText.isEmpty()) {
+                if (comboType.equals(ComboType.ADD_PROPERTY_COMBO) && insertText != null && !insertText.isEmpty()) {
                     currentText.insert(createAddPropertyPlaceHolder(ToolIntegrationConstants.PLACEHOLDER_EXIT_CODE));
                 }
                 currentText.setFocus();
             }
         }
+
+        private String createAddPropertyPlaceHolder(String addPropPlaceholder) {
+            return ToolIntegrationConstants.PLACEHOLDER_PREFIX
+                + ToolIntegrationConstants.PLACEHOLDER_ADDITIONAL_PROPERTIES_PREFIX
+                + ToolIntegrationConstants.PLACEHOLDER_SEPARATOR
+                + addPropPlaceholder
+                + ToolIntegrationConstants.PLACEHOLDER_SUFFIX;
+        }
     }
 
-    private String createAddPropertyPlaceHolder(String addPropPlaceholder) {
-        return ToolIntegrationConstants.PLACEHOLDER_PREFIX
-            + ToolIntegrationConstants.PLACEHOLDER_ADDITIONAL_PROPERTIES_PREFIX
-            + ToolIntegrationConstants.PLACEHOLDER_SEPARATOR
-            + addPropPlaceholder
-            + ToolIntegrationConstants.PLACEHOLDER_SUFFIX;
-    }
 
     /**
      * Listener for the insert copy command button.
