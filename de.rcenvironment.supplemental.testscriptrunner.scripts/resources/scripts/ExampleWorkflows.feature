@@ -22,52 +22,83 @@ Feature: ExampleWorkflows
 
 # workflow 2.3 (Workflow Examples Project\\02_Component Groups\\02_03_XML_Components.wf [02_03_XML_Components.json]) is not tested as it produces errors.
 
+#@ExampleWorkflowsFeature
+#@ExampleWorkflow02
+#@NoGUITestSuite
+#@BasicIntegrationTestSuite
+#Scenario: Execute all example workflows
+#
+#    Given instance "NodeA" using the default build
+#    
+#    When  starting instance "NodeA"
+#    And   adding tool "common/Example" to "NodeA"
+#    And   executing workflows "Workflow Examples Project/01_First Steps/01_01_Hello_World.wf, Workflow Examples Project/01_First Steps/01_02_Coupling_Components.wf, Workflow Examples Project/01_First Steps/01_03_Data_Types.wf, Workflow Examples Project/01_First Steps/01_04_Component_Execution_Scheduling.wf, Workflow Examples Project/02_Component Groups/02_01_Data_Flow.wf [02_01_Data_Flow.json], Workflow Examples Project/02_Component Groups/02_02_Evaluation_Drivers.wf, Workflow Examples Project/02_Component Groups/02_03_XML_Components.wf [02_03_XML_Components.json], Workflow Examples Project/02_Component Groups/02_04_EvaluationMemory.wf [02_04_EvaluationMemory.json], Workflow Examples Project/03_Workflow Logic/03_01_Simple_Loop.wf, Workflow Examples Project/03_Workflow Logic/03_02_Forwarding_Values.wf, Workflow Examples Project/03_Workflow Logic/03_03_Nested_Loop.wf, Workflow Examples Project/03_Workflow Logic/03_04_Fault-tolerant_Loop.wf, Workflow Examples Project/04_Tool Integration/04_01_Example_Integration.wf, Workflow Examples Project/04_Tool Integration/04_02_Script_And_Tool_Integration_API.wf" on "NodeA"
+#    And   stopping instance "NodeA"
+#
+#    Then   the log output of "NodeA" should contain the pattern "(?:de.rcenvironment.core.component.api.ComponentException: Script execution error: Exception: Example failure in <script> at line number 2)"
+#    And    the log output of "NodeA" should contain 1 error
+
 @ExampleWorkflowsFeature
 @ExampleWorkflow02
+@ExampleWorkflow0201
 @NoGUITestSuite
 @BasicIntegrationTestSuite
 Scenario: Execute all example workflows
 
-    Given instance "NodeA" using the default build
+    Given instance "NodeA1" using the default build
     
-    When  starting instance "NodeA"
-    And   adding tool "common/Example" to "NodeA"
-    And   executing workflows "Workflow Examples Project/01_First Steps/01_01_Hello_World.wf, Workflow Examples Project/01_First Steps/01_02_Coupling_Components.wf, Workflow Examples Project/01_First Steps/01_03_Data_Types.wf, Workflow Examples Project/01_First Steps/01_04_Component_Execution_Scheduling.wf, Workflow Examples Project/02_Component Groups/02_01_Data_Flow.wf [02_01_Data_Flow.json], Workflow Examples Project/02_Component Groups/02_02_Evaluation_Drivers.wf, Workflow Examples Project/02_Component Groups/02_03_XML_Components.wf [02_03_XML_Components.json], Workflow Examples Project/02_Component Groups/02_04_EvaluationMemory.wf [02_04_EvaluationMemory.json], Workflow Examples Project/03_Workflow Logic/03_01_Simple_Loop.wf, Workflow Examples Project/03_Workflow Logic/03_02_Forwarding_Values.wf, Workflow Examples Project/03_Workflow Logic/03_03_Nested_Loop.wf, Workflow Examples Project/03_Workflow Logic/03_04_Fault-tolerant_Loop.wf, Workflow Examples Project/04_Tool Integration/04_01_Example_Integration.wf, Workflow Examples Project/04_Tool Integration/04_02_Script_And_Tool_Integration_API.wf" on "NodeA"
-    And   stopping instance "NodeA"
+    When  starting instance "NodeA1"
+    And   executing workflows "Workflow Examples Project/01_First Steps/01_01_Hello_World.wf, Workflow Examples Project/01_First Steps/01_02_Coupling_Components.wf, Workflow Examples Project/01_First Steps/01_03_Data_Types.wf, Workflow Examples Project/01_First Steps/01_04_Component_Execution_Scheduling.wf" on "NodeA1"
+    And   stopping instance "NodeA1"
 
-    Then   the log output of "NodeA" should contain the pattern "(?:de.rcenvironment.core.component.api.ComponentException: Script execution error: Exception: Example failure in <script> at line number 2)"
-    And    the log output of "NodeA" should contain 1 error
+    Then  the log output of "NodeA1" should indicate a clean shutdown with no warnings or errors
+    
+@ExampleWorkflowsFeature
+@ExampleWorkflow02
+@ExampleWorkflow0202
+@NoGUITestSuite
+@BasicIntegrationTestSuite
+Scenario: Execute all example workflows
 
-# Currently disabled for suite @ExampleWorkflow03, see Mantis #17767
-@ExampleWorkflow03
-@ExampleWorkflows_02_ComponentGroups
+    Given instance "NodeA2" using the default build
+    
+    When  starting instance "NodeA2"
+    And   executing workflows "Workflow Examples Project/02_Component Groups/02_01_Data_Flow.wf [02_01_Data_Flow.json], Workflow Examples Project/02_Component Groups/02_02_Evaluation_Drivers.wf, Workflow Examples Project/02_Component Groups/02_03_XML_Components.wf [02_03_XML_Components.json], Workflow Examples Project/02_Component Groups/02_04_EvaluationMemory.wf [02_04_EvaluationMemory.json]" on "NodeA2"
+    And   waiting for 60 seconds
+    And   stopping instance "NodeA2"
+
+    Then  the log output of "NodeA2" should indicate a clean shutdown with no warnings or errors
+
+@ExampleWorkflowsFeature
+@ExampleWorkflow02
 @ExampleWorkflow0203
-Scenario: Execute example workflow 02_03
+@NoGUITestSuite
+@BasicIntegrationTestSuite
+Scenario: Execute all example workflows
 
-    Given instance "NodeA" using the default build
+    Given instance "NodeA3" using the default build
     
-    When  starting instance "NodeA"
-    And   executing workflows "Workflow Examples Project/02_Component Groups/02_03_XML_Components.wf [02_03_XML_Components.json]" on "NodeA"
-    And   waiting for 60 seconds
-    And   stopping instance "NodeA"
-    And   waiting for 60 seconds
-    Then  the log output of "NodeA" should indicate a clean shutdown with no warnings or errors
-    And   the log output of "NodeA" should contain the pattern "Received workflow life-cycle event: NEW_STATE:RUNNING"
-    And   the log output of "NodeA" should contain the pattern "Received workflow life-cycle event: NEW_STATE:FINISHED"
-
-@ExampleWorkflow03
-@ExampleWorkflows_03_WorkflowLogic
-@ExampleWorkflow0304
-Scenario: Execute example workflow 03_04
-
-    Given instance "NodeA" using the default build
+    When  starting instance "NodeA3"
+    And   executing workflows "Workflow Examples Project/03_Workflow Logic/03_01_Simple_Loop.wf, Workflow Examples Project/03_Workflow Logic/03_02_Forwarding_Values.wf, Workflow Examples Project/03_Workflow Logic/03_03_Nested_Loop.wf, Workflow Examples Project/03_Workflow Logic/03_04_Fault-tolerant_Loop.wf" on "NodeA3"
+    And   stopping instance "NodeA3"
     
-    When  starting instance "NodeA"
-    And   executing workflows "Workflow Examples Project/03_Workflow Logic/03_04_Fault-tolerant_Loop.wf" on "NodeA"
-    And   stopping instance "NodeA"
+    Then   the log output of "NodeA3" should contain the pattern "(?:de.rcenvironment.core.component.api.ComponentException: Script execution error: Exception: Example failure in <script> at line number 2)"
+    #Then   the log output of "NodeA" should indicate a clean shutdown with these allowed warnings or errors: "(?:de.rcenvironment.core.component.api.ComponentException: Script execution error: Exception: Example failure in <script> at line number 2)"
+    And    the log output of "NodeA3" should contain 1 error
 
-    Then   the log output of "NodeA" should contain the pattern "(?:de.rcenvironment.core.component.api.ComponentException: Script execution error: Exception: Example failure in <script> at line number 2)"
-    And    the log output of "NodeA" should contain 1 error
+@ExampleWorkflowsFeature
+@ExampleWorkflow02
+@ExampleWorkflow0204
+@NoGUITestSuite
+@BasicIntegrationTestSuite
+Scenario: Execute all example workflows
 
-# Current workaround for the problem that NodeB may still be finishing its restart on test shutdown, causing an irrelevant failure
-#When  waiting for 5 second
+    Given instance "NodeA4" using the default build
+    
+    When  starting instance "NodeA4"
+    And   adding tool "common/Example" to "NodeA4"
+    And   executing workflows "Workflow Examples Project/04_Tool Integration/04_01_Example_Integration.wf, Workflow Examples Project/04_Tool Integration/04_02_Script_And_Tool_Integration_API.wf" on "NodeA4"
+    And   stopping instance "NodeA4"
+    
+    Then  the log output of "NodeA4" should indicate a clean shutdown with no warnings or errors
+
