@@ -83,6 +83,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -90,6 +91,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 import org.apache.commons.exec.OS;
 import org.apache.commons.io.FileUtils;
@@ -193,7 +195,7 @@ public class DakotaAlgorithm extends OptimizerAlgorithmExecutor {
                     }
                     dakotaExecutablePath.setExecutable(true);
                 } catch (ConfigurationException e) {
-                    // TODO check: avoid "log and re-throw" here by adding information to the thrown exception instead? 
+                    // TODO check: avoid "log and re-throw" here by adding information to the thrown exception instead?
                     LOGGER.error("Exception getting dakota executable path: " + e.toString());
                     throw new ComponentException("Could not find dakota binaries.");
                 }
@@ -629,21 +631,16 @@ public class DakotaAlgorithm extends OptimizerAlgorithmExecutor {
         return count;
     }
 
-    private String replacePlaceholderInSamplefile(String filePath, Map<String, String> valuesForSampleFile) throws IOException {
-        String content = IOUtils.toString(DakotaAlgorithm.class.getResourceAsStream(filePath));
-        String[] splitted = content.split(NEWLINE);
-        for (String key : valuesForSampleFile.keySet()) {
-            if (valuesForSampleFile.get(key) == null || valuesForSampleFile.get(key).isEmpty()) {
-                for (String s : splitted) {
-                    if (s.contains(key)) {
-                        content = content.replace(s, "");
-                    }
-                }
-            } else {
-                content = content.replaceAll(key, valuesForSampleFile.get(key));
-            }
+    private String replacePlaceholderInSamplefile(String filePath, Map<String, String> valuesForSampleFile) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(DakotaAlgorithm.class.getResourceAsStream(filePath)));
+        String content = reader.lines().filter(line -> valuesForSampleFile.keySet().stream()
+            .filter(key -> valuesForSampleFile.get(key) == null || valuesForSampleFile.get(key).isEmpty()).noneMatch(line::contains))
+            .collect(Collectors.joining(NEWLINE));
+        List<String> valuesForSampleFileKeys = valuesForSampleFile.keySet().stream()
+            .filter(key -> valuesForSampleFile.get(key) != null && !valuesForSampleFile.get(key).isEmpty()).collect(Collectors.toList());
+        for (String key : valuesForSampleFileKeys) {
+            content = content.replaceAll(key, valuesForSampleFile.get(key));
         }
-
         return content;
     }
 
@@ -756,7 +753,7 @@ public class DakotaAlgorithm extends OptimizerAlgorithmExecutor {
         return result;
     }
 
-    private String getGradientString(MethodDescription description) throws IOException {
+    private String getGradientString(MethodDescription description) {
         Map<String, String> gradientStrings = new HashMap<>();
         String gradients = "";
         if (description.getResponsesSettings() != null
