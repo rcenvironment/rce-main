@@ -49,8 +49,8 @@ public class WorkflowNodeDeleteHandler extends AbstractWorkflowNodeEditHandler {
             if (element instanceof ConnectionPart) {
                 ConnectionPart part = (ConnectionPart) element;
                 ConnectionWrapper wrapper = (ConnectionWrapper) part.getModel();
-                wfConnections = ConnectionUtils.getConnectionsFromSourceToTarget(wrapper.getSource(), wrapper.getTarget(), 
-                    (WorkflowDescription) viewer.getContents().getModel());
+                wfConnections.addAll(ConnectionUtils.getConnectionsFromSourceToTarget(wrapper.getSource(), wrapper.getTarget(), 
+                    (WorkflowDescription) viewer.getContents().getModel()));
             }
         }
 

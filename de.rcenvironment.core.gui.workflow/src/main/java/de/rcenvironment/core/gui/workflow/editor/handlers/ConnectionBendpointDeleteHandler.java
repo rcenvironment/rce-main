@@ -40,6 +40,7 @@ public class ConnectionBendpointDeleteHandler extends AbstractHandler {
     @Override
     public Object execute(ExecutionEvent event) throws ExecutionException {
 
+        
         final IWorkbenchPart activePart = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart();
         if (activePart instanceof WorkflowEditor) {
             WorkflowEditor editor = (WorkflowEditor) activePart;
@@ -61,7 +62,6 @@ public class ConnectionBendpointDeleteHandler extends AbstractHandler {
                 bendpointDeleteCommand.setReferencedModel(connectionWrapper);
                 bendpointDeleteCommand.setWorkflowDescription(model);
                 commandStack.execute(bendpointDeleteCommand);
-                break;
             }
         }
 
