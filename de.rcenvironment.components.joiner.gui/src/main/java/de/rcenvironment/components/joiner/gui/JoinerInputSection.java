@@ -11,6 +11,7 @@ package de.rcenvironment.components.joiner.gui;
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -38,6 +39,7 @@ import de.rcenvironment.core.gui.workflow.editor.properties.EndpointSelectionPan
  * Provides a configuration GUI for the Merger component.
  * 
  * @author Sascha Zur
+ * @author Devika Jalgaonkar (alphabetical sorting of combo box options: Mantis ID 16949)
  */
 public class JoinerInputSection extends DefaultEndpointPropertySection {
 
@@ -203,7 +205,7 @@ public class JoinerInputSection extends DefaultEndpointPropertySection {
         public void updateControl(final Control control, final String propertyName, final String newValue,
             final String oldValue) {
             if (propertyName.equals(JoinerComponentConstants.DATATYPE) && newValue != null) {
-                dataTypeCombo.select(dataTypeCombo.indexOf(DataType.valueOf(newValue).toString()));
+                dataTypeCombo.select(dataTypeCombo.indexOf(DataType.valueOf(newValue).getDisplayName()));
             } else {
                 super.updateControl(control, propertyName, newValue, oldValue);
             }
@@ -221,7 +223,7 @@ public class JoinerInputSection extends DefaultEndpointPropertySection {
         @Override
         protected void handlePropertyChange(Control control, String key, String newValue, String oldValue) {
             if (key.equals(JoinerComponentConstants.DATATYPE)) {
-                dataTypeCombo.select(dataTypeCombo.indexOf(DataType.valueOf(newValue).toString()));
+                dataTypeCombo.select(dataTypeCombo.indexOf(DataType.valueOf(newValue).getDisplayName()));
                 inputPane.refresh();
                 outputPane.refresh();
                 return;
