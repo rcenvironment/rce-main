@@ -11,6 +11,7 @@ package de.rcenvironment.components.optimizer.gui.properties;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -18,8 +19,9 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Widget;
 
 import de.rcenvironment.components.optimizer.common.OptimizerComponentConstants;
 import de.rcenvironment.components.optimizer.gui.properties.commands.OptimizerAddDynamicEndpointCommand;
@@ -34,7 +36,9 @@ import de.rcenvironment.core.datamodel.api.EndpointType;
 import de.rcenvironment.core.gui.utils.common.configuration.VariableNameVerifyListener;
 import de.rcenvironment.core.gui.workflow.editor.properties.EndpointEditDialog;
 import de.rcenvironment.core.gui.workflow.editor.properties.EndpointSelectionPane;
+import de.rcenvironment.core.gui.workflow.editor.properties.Messages;
 import de.rcenvironment.core.gui.workflow.editor.properties.WorkflowNodeCommand;
+import de.rcenvironment.core.utils.common.StringUtils;
 
 /**
  * A UI part to display and edit a set of endpoints managed by a {@link DynamicEndpointManager).
@@ -178,6 +182,57 @@ public class OptimizerEndpointSelectionPane extends EndpointSelectionPane {
             getButton(IDialogConstants.OK_ID).setEnabled(isValid);
 
         }
+
+        /**
+         * 
+         * {@inheritDoc}
+         * 
+         * We add custom validation to check if the lower bound of the optimizer is less than the upper bound.
+         *
+         * @see de.rcenvironment.core.gui.workflow.editor.properties.EndpointEditDialog#validateMetaDataInputs()
+         * @author Devika Jalgaonkar
+         */
+        @Override
+        protected boolean validateMetaDataInputs() {
+            boolean validUpperLowerBounds = false;
+
+            boolean validMetaDataInputs = super.validateMetaDataInputs();
+            Map<String, Widget> invertedWidgetToKeyMap =
+                widgetToKeyMap.entrySet().stream()
+                    .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+
+            if (invertedWidgetToKeyMap.containsKey(OptimizerComponentConstants.META_LOWERBOUND)
+                && invertedWidgetToKeyMap.containsKey(OptimizerComponentConstants.META_UPPERBOUND) && validMetaDataInputs) {
+                float upperBound = 0;
+                float lowerBound = 0;
+
+                String upperBoundText = ((Text) invertedWidgetToKeyMap.get(OptimizerComponentConstants.META_UPPERBOUND)).getText();
+                String lowerBoundText = ((Text) invertedWidgetToKeyMap.get(OptimizerComponentConstants.META_LOWERBOUND)).getText();
+
+
+                if (!upperBoundText.isEmpty() && !upperBoundText.isBlank()) {
+
+                    upperBound = Float.parseFloat(upperBoundText);
+                }
+
+
+                if (!lowerBoundText.isEmpty() && !lowerBoundText.isBlank()) {
+
+                    lowerBound = Float.parseFloat(lowerBoundText);
+                }
+                if (upperBound <= lowerBound && validMetaDataInputs) {
+                    validUpperLowerBounds = false;
+                    updateMessage(StringUtils.format(Messages.boundCheckMessage, lowerBound, upperBound), true);
+                } else {
+                    validUpperLowerBounds = true;
+
+                }
+
+            }
+
+
+            return validMetaDataInputs && validUpperLowerBounds;
+        }
     }
 
     protected void removeMetaDataColumns() {
@@ -189,4 +244,7 @@ public class OptimizerEndpointSelectionPane extends EndpointSelectionPane {
             table.getColumn(table.getColumnCount() - 1).dispose();
         }
     }
+
+
+
 }
