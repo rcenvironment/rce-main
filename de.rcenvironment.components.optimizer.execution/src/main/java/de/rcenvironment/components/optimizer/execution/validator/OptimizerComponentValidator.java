@@ -10,7 +10,6 @@ package de.rcenvironment.components.optimizer.execution.validator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import de.rcenvironment.components.optimizer.common.OptimizerComponentConstants;
@@ -18,7 +17,6 @@ import de.rcenvironment.core.component.model.api.ComponentDescription;
 import de.rcenvironment.core.component.model.endpoint.api.EndpointDescription;
 import de.rcenvironment.core.component.validation.api.ComponentValidationMessage;
 import de.rcenvironment.core.component.validation.spi.AbstractLoopComponentValidator;
-import de.rcenvironment.core.utils.common.StringUtils;
 
 /**
  * Validator for optimizer component.
@@ -28,9 +26,6 @@ import de.rcenvironment.core.utils.common.StringUtils;
  */
 public class OptimizerComponentValidator extends AbstractLoopComponentValidator {
 
-    public static final String ENDPOINT_LOWER_BOUND = "lower";
-
-    public static final String ENDPOINT_UPPER_BOUND = "upper";
 
     @Override
     public String getIdentifier() {
@@ -88,10 +83,6 @@ public class OptimizerComponentValidator extends AbstractLoopComponentValidator 
             messages.add(noAlgorithmMessage);
         }
 
-        Set<EndpointDescription> inputs = getInputs(componentDescription);
-        Set<EndpointDescription> outputs = getOutputs(componentDescription);
-        messages.addAll(checkLowerBoundLessThanUpperBound(inputs));
-        messages.addAll(checkLowerBoundLessThanUpperBound(outputs));
 
         return messages;
     }
@@ -100,31 +91,6 @@ public class OptimizerComponentValidator extends AbstractLoopComponentValidator 
     protected List<ComponentValidationMessage> validateOnWorkflowStartComponentSpecific(
         ComponentDescription componentDescription) {
         return null;
-    }
-
-    protected List<ComponentValidationMessage> checkLowerBoundLessThanUpperBound(
-        Set<EndpointDescription> endPointDescriptionList) {
-        List<ComponentValidationMessage> messagesTemp = new ArrayList<>();
-
-        for (EndpointDescription endPoint : endPointDescriptionList) {
-            Map<String, String> metaData = endPoint.getMetaData();
-            if (metaData.containsKey(ENDPOINT_LOWER_BOUND) && metaData.containsKey(ENDPOINT_UPPER_BOUND)) {
-                float lowerBound = Float.parseFloat(metaData.get(ENDPOINT_LOWER_BOUND));
-                float upperBound = Float.parseFloat(metaData.get(ENDPOINT_UPPER_BOUND));
-                if (lowerBound >= upperBound) {
-                    final ComponentValidationMessage lowerBoundGreaterThanUpperBoundMessage = new ComponentValidationMessage(
-                        ComponentValidationMessage.Type.ERROR, null, "Lower Bound Greater Than Upper Bound",
-                        StringUtils.format(
-                            "The %s '%s' has lower bound '%.2f' greater than upper bound '%.2f'",
-                            endPoint.getEndpointDefinition().getEndpointType().name().toLowerCase(), endPoint.getName(), lowerBound,
-                            upperBound));
-                    messagesTemp.add(lowerBoundGreaterThanUpperBoundMessage);
-
-                }
-
-            }
-        }
-        return messagesTemp;
     }
 
 }
