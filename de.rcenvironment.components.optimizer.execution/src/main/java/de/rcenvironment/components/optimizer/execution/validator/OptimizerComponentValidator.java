@@ -26,7 +26,6 @@ import de.rcenvironment.core.component.validation.spi.AbstractLoopComponentValid
  */
 public class OptimizerComponentValidator extends AbstractLoopComponentValidator {
 
-
     @Override
     public String getIdentifier() {
         return OptimizerComponentConstants.COMPONENT_ID;
@@ -82,8 +81,6 @@ public class OptimizerComponentValidator extends AbstractLoopComponentValidator 
                 "There is no algorithm chosen.");
             messages.add(noAlgorithmMessage);
         }
-
-
         return messages;
     }
 

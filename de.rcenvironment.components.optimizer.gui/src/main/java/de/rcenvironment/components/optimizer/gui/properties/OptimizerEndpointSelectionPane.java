@@ -244,7 +244,4 @@ public class OptimizerEndpointSelectionPane extends EndpointSelectionPane {
             table.getColumn(table.getColumnCount() - 1).dispose();
         }
     }
-
-
-
 }
