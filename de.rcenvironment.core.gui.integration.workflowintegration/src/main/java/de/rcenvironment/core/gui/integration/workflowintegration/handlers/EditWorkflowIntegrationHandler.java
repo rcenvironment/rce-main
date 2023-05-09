@@ -56,12 +56,6 @@ public class EditWorkflowIntegrationHandler extends AbstractHandler {
         try {
             workflowIntegrationController = new WorkflowIntegrationController(integrationName);
         } catch (FileNotFoundException e) {
-
-            // Should never happen -> TODO: remove Dialog
-            MessageDialog.openError(activeWorkbenchWindow.getShell(), "Workflow Integration Editor",
-                "The Workflow Integration Editor cannot be displayed."
-                    + "\nEither the selected component is a remote component, or it may have been renamed or removed from local drive.");
-
             LOG.error(StringUtils.format(
                 "The Workflow Integration Editor cannot be displayed. The following file does not exist: \"%s\" ",
                 e.getMessage()));
