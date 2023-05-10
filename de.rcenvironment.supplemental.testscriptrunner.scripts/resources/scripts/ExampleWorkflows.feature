@@ -40,10 +40,10 @@ Feature: ExampleWorkflows
 
 @ExampleWorkflowsFeature
 @ExampleWorkflow02
-@ExampleWorkflow0201
 @NoGUITestSuite
 @BasicIntegrationTestSuite
-Scenario: Execute all example workflows
+@ExampleWorkflow0201
+Scenario: Execute example workflows of the group 01_First Steps
 
     Given instance "NodeA1" using the default build
     
@@ -55,10 +55,10 @@ Scenario: Execute all example workflows
     
 @ExampleWorkflowsFeature
 @ExampleWorkflow02
-@ExampleWorkflow0202
 @NoGUITestSuite
 @BasicIntegrationTestSuite
-Scenario: Execute all example workflows
+@ExampleWorkflow0202
+Scenario: Execute example workflows of the group 02_Component Groups
 
     Given instance "NodeA2" using the default build
     
@@ -71,10 +71,10 @@ Scenario: Execute all example workflows
 
 @ExampleWorkflowsFeature
 @ExampleWorkflow02
-@ExampleWorkflow0203
 @NoGUITestSuite
 @BasicIntegrationTestSuite
-Scenario: Execute all example workflows
+@ExampleWorkflow0203
+Scenario: Execute example workflows of the group 03_Workflow Logic
 
     Given instance "NodeA3" using the default build
     
@@ -88,10 +88,10 @@ Scenario: Execute all example workflows
 
 @ExampleWorkflowsFeature
 @ExampleWorkflow02
-@ExampleWorkflow0204
 @NoGUITestSuite
 @BasicIntegrationTestSuite
-Scenario: Execute all example workflows
+@ExampleWorkflow0204
+Scenario: Execute example workflows of the group 04_Tool Integration
 
     Given instance "NodeA4" using the default build
     
