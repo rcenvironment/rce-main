@@ -35,7 +35,7 @@ import de.rcenvironment.core.utils.common.StringUtils;
  * @author Jan Flink
  */
 public class EditWorkflowIntegrationHandler extends AbstractHandler {
-    
+
     private static final Log LOG = LogFactory.getLog(EditWorkflowIntegrationHandler.class);
 
     private String integrationName;
