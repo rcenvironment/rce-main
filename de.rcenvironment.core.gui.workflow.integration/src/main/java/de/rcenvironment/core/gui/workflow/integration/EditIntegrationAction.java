@@ -8,14 +8,10 @@
 
 package de.rcenvironment.core.gui.workflow.integration;
 
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import de.rcenvironment.core.communication.api.PlatformService;
-import de.rcenvironment.core.communication.common.LogicalNodeId;
-import de.rcenvironment.core.component.api.ComponentUtils;
 import de.rcenvironment.core.component.api.DistributedComponentKnowledgeService;
 import de.rcenvironment.core.component.management.api.DistributedComponentEntry;
 import de.rcenvironment.core.gui.workflow.editor.WorkflowEditorAction;
@@ -28,42 +24,26 @@ import de.rcenvironment.core.utils.incubator.ServiceRegistry;
  */
 public abstract class EditIntegrationAction extends WorkflowEditorAction {
 
-    private Set<DistributedComponentEntry> currentToolInstallations;
-
-    protected EditIntegrationAction() {
-
-        DistributedComponentKnowledgeService distributedComponentKnowledgeService = ServiceRegistry.createPublisherAccessFor(this)
-            .getService(DistributedComponentKnowledgeService.class);
-
-        LogicalNodeId localNode = ServiceRegistry.createAccessFor(this).getService(PlatformService.class).getLocalDefaultLogicalNodeId();
-
-        this.currentToolInstallations = getCurrentToolInstallations(distributedComponentKnowledgeService, localNode);
-
-    }
-
     @Override
     public boolean isEnabled() {
         if (!super.isEnabled()) {
             return false;
         }
 
-        String id = workflowNode.getComponentDescription().getComponentInstallation().getInstallationId();
+        DistributedComponentKnowledgeService distributedComponentKnowledgeService = ServiceRegistry.createPublisherAccessFor(this)
+            .getService(DistributedComponentKnowledgeService.class);
+
+        Collection<DistributedComponentEntry> currentToolInstallations =
+            distributedComponentKnowledgeService.getCurrentSnapshot().getAllLocalInstallations();
+
+        String componentName = workflowNode.getComponentDescription().getName();
 
         List<DistributedComponentEntry> list =
-            currentToolInstallations.stream().filter(entry -> entry.getComponentInstallation().getInstallationId().equals(id))
+            currentToolInstallations.stream().filter(entry -> !entry.getComponentInstallation().isMappedComponent())
+                .filter(entry -> entry.getDisplayName().equals(componentName))
                 .collect(Collectors.toList());
 
-        if (!list.isEmpty()) {
-            return list.get(0).getType().isLocal() && !list.get(0).getComponentInstallation().isMappedComponent();
-        }
-
-        return false;
-    }
-
-    protected Set<DistributedComponentEntry> getCurrentToolInstallations(
-        DistributedComponentKnowledgeService distributedComponentKnowledgeService, LogicalNodeId localNode) {
-        return new HashSet<>(ComponentUtils.eliminateComponentInterfaceDuplicates(
-            distributedComponentKnowledgeService.getCurrentSnapshot().getLocalAccessInstallations(), localNode));
+        return !list.isEmpty();
     }
 
 }
