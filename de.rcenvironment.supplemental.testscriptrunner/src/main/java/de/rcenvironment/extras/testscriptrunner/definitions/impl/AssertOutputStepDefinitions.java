@@ -13,6 +13,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import cucumber.api.DataTable;
@@ -368,16 +369,22 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
     private int countErrorsOrWarnings(final ManagedInstance instance, final Pattern typePattern) {
         String warningLog = getWarningsLog(instance);
 
-        if (warningLog.contains("ERROR")) {
-            return warningLog.split("ERROR").length - 1;
-        } else {
-            return 0;
-        }
+        Scanner logScanner = new Scanner(warningLog);
 
-//        Matcher m = typePattern.matcher(warningLog);
-//        while (m.find()) {
-//            numberErrorsOrWarnings++;
-//        }
+        int logCount = 0;
+        String nextLine;
+        
+
+        while (logScanner.hasNextLine()){
+            nextLine = logScanner.nextLine();
+            if (nextLine.contains(" ERROR ") || nextLine.contains(" WARN ")) {
+                logCount++;
+            }
+        }
+        logScanner.close();
+
+        return logCount;
+
     }
 
     private String getWarningsLog(final ManagedInstance instance) {
