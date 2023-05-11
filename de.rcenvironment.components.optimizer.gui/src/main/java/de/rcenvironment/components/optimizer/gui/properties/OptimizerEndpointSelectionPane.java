@@ -210,13 +210,13 @@ public class OptimizerEndpointSelectionPane extends EndpointSelectionPane {
                 String lowerBoundText = ((Text) invertedWidgetToKeyMap.get(OptimizerComponentConstants.META_LOWERBOUND)).getText();
 
 
-                if (!upperBoundText.isEmpty() && !upperBoundText.isBlank()) {
+                if (!StringUtils.isNullorEmpty(upperBoundText)) {
 
                     upperBound = Float.parseFloat(upperBoundText);
                 }
 
 
-                if (!lowerBoundText.isEmpty() && !lowerBoundText.isBlank()) {
+                if (!StringUtils.isNullorEmpty(lowerBoundText)) {
 
                     lowerBound = Float.parseFloat(lowerBoundText);
                 }
