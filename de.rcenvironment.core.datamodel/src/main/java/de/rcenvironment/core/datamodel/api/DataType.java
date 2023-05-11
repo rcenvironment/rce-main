@@ -206,6 +206,9 @@ public enum DataType {
         throw new IllegalArgumentException("No match for classname " + displayName);
     }
 
+    /**
+     * Method might be obsolete due to the getDisplayName() method.
+     */
     @Override
     public String toString() {
         return displayName; // preliminary; change as necessary

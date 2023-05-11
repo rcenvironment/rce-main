@@ -49,6 +49,7 @@ import de.rcenvironment.core.component.workflow.model.spi.ComponentInstancePrope
 import de.rcenvironment.core.datamodel.api.DataType;
 import de.rcenvironment.core.datamodel.api.EndpointActionType;
 import de.rcenvironment.core.datamodel.api.EndpointType;
+import de.rcenvironment.core.gui.utils.common.endpoint.DataTypeGuiSorter;
 import de.rcenvironment.core.gui.utils.common.endpoint.EndpointHelper;
 import de.rcenvironment.core.gui.utils.incubator.AlphanumericalTextContraintListener;
 import de.rcenvironment.core.gui.utils.incubator.NumericalTextConstraintListener;
@@ -118,8 +119,6 @@ public class EndpointEditDialog extends TitleAreaDialog {
     private final String id;
 
     private final boolean isStatic;
-
-    private Map<String, DataType> guiNameToDataType;
 
     private Combo comboInputDatumHandling;
 
@@ -463,14 +462,9 @@ public class EndpointEditDialog extends TitleAreaDialog {
                 possibleDataTypes = new LinkedList<>();
             }
         }
-        guiNameToDataType = new HashMap<>();
-        List<String> dataTypesGuiNames = new LinkedList<>();
-        for (DataType t : possibleDataTypes) {
-            dataTypesGuiNames.add(t.getDisplayName());
-            guiNameToDataType.put(t.getDisplayName(), t);
-        }
-        Collections.sort(dataTypesGuiNames);
-        comboDataType.setItems(dataTypesGuiNames.toArray(new String[dataTypesGuiNames.size()]));
+
+        comboDataType.setItems(possibleDataTypes.stream().sorted(DataTypeGuiSorter.getComparator())
+            .map(DataType::getDisplayName).toArray(String[]::new));
 
         if (currentDataType != null) {
             comboDataType.select(comboDataType.indexOf(currentDataType.getDisplayName()));
@@ -659,7 +653,7 @@ public class EndpointEditDialog extends TitleAreaDialog {
             Widget widget = entry.getKey();
             String dataType = metaData.getDataType(key);
             String validation = metaData.getValidation(key);
-            boolean visible = metaData.isDefinedForDataType(key, guiNameToDataType.get(comboDataType.getText()));
+            boolean visible = metaData.isDefinedForDataType(key, DataType.byDisplayName(comboDataType.getText()));
             visible &= EndpointHelper.checkMetadataFilter(metaData.getGuiVisibilityFilter(key), metadataValues, configDesc);
             boolean enabled =
                 EndpointHelper.checkMetadataFilter(metaData.getGuiActivationFilter(key), metadataValues, configDesc) && visible;
@@ -863,7 +857,7 @@ public class EndpointEditDialog extends TitleAreaDialog {
     }
 
     protected DataType getTypeSelectionFromUI() {
-        return guiNameToDataType.get(comboDataType.getText());
+        return DataType.byDisplayName(comboDataType.getText());
     }
 
     @Override
