@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 DLR, Germany
+ * Copyright 2021-2023 DLR, Germany
  * 
  * SPDX-License-Identifier: EPL-1.0
  * 
