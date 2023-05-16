@@ -226,7 +226,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
     }
 
     /**
-     * Convenience shortcut to test all relevant log files for a clean shutdown.
+     * Convenience shortcut to test all relevant log files for a clean shutdown, including the absence of any warnings.
      * 
      * @param allFlag a phrase whose presence (non-null) influences which instances are effected. How it does that depends on the value of
      *        {@code instanceIds} and is defined in {@link #resolveInstanceList()}
@@ -234,7 +234,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
      *        does that depends on the value of {@code allFlag} and is defined in {@link #resolveInstanceList()}
      */
     @Then("^the log output of( all)?(?: instance[s]?)?(?: \"([^\"]*)\")? should indicate a clean shutdown with no warnings or errors$")
-    public void thenLogOutputCleanShutdown(String allFlag, String instanceIds) throws Exception {
+    public void thenLogOutputCleanShutdownWithoutWarnings(String allFlag, String instanceIds) throws Exception {
         AssertFileEmpty warningLogEmpty = new AssertFileEmpty(StepDefinitionConstants.WARNINGS_LOG_FILE_NAME);
         AssertFileContains debugLogContainsNoneUnfinished =
             new AssertFileContains(true, false, "Known unfinished operations on shutdown: <none>",
@@ -268,6 +268,28 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
             new AssertFileContains(true, false, "Main application shutdown complete, exit code: 0",
                 StepDefinitionConstants.DEBUG_LOG_FILE_NAME);
         iterateInstances(warningLogContainOnly, allFlag, instanceIds);
+        iterateInstances(debugLogContainsNoneUnfinished, allFlag, instanceIds);
+        iterateInstances(debugLogContainsExitCode0, allFlag, instanceIds);
+    }
+
+    /**
+     * Convenience shortcut to test all relevant log files for a clean shutdown, i. e. for the absence
+     * of unfinished operations and the exit code has to be 0.
+     * 
+     * @param allFlag a phrase whose presence (non-null) influences which instances are effected. How it does that depends on the value of
+     *        {@code instanceIds} and is defined in {@link #resolveInstanceList()}
+     * @param instanceIds a comma-separated list of instances, which when present (non-null) influences which instances are effected. How it
+     *        does that depends on the value of {@code allFlag} and is defined in {@link #resolveInstanceList()}
+     */
+    @Then("^the log output of( all)?(?: instance[s]?)?(?: \"([^\"]*)\")? should indicate a clean shutdown")
+
+    public void thenLogOutputCleanShutdown(String allFlag, String instanceIds) throws Exception {
+        AssertFileContains debugLogContainsNoneUnfinished =
+            new AssertFileContains(true, false, "Known unfinished operations on shutdown: <none>",
+                StepDefinitionConstants.DEBUG_LOG_FILE_NAME);
+        AssertFileContains debugLogContainsExitCode0 =
+            new AssertFileContains(true, false, "Main application shutdown complete, exit code: 0",
+                StepDefinitionConstants.DEBUG_LOG_FILE_NAME);
         iterateInstances(debugLogContainsNoneUnfinished, allFlag, instanceIds);
         iterateInstances(debugLogContainsExitCode0, allFlag, instanceIds);
     }
