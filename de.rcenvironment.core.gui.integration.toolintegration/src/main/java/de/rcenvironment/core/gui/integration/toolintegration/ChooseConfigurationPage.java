@@ -96,7 +96,7 @@ public class ChooseConfigurationPage extends ToolIntegrationWizardPage {
     private final Map<String, Map<String, Object>> allConfigurations;
 
     private Map<String, String> displayedToolNamesToToolNames;
-    
+
     private IntegrationHelper integrationHelper = new IntegrationHelper();
 
     protected static ChooseConfigurationPage createWithoutPreselectedTool(String pageName,
@@ -252,14 +252,24 @@ public class ChooseConfigurationPage extends ToolIntegrationWizardPage {
     }
 
     public void selectToolConfiguration(String toolname) {
-        this.loadToolConfigurationIntoWizard(toolname);
-        this.selectTool(toolname);
+        if (this.loadToolConfigurationIntoWizard(toolname)) {
+            this.selectTool(toolname);
+        }
     }
 
-    private void loadToolConfigurationIntoWizard(String toolName) {
+    private boolean loadToolConfigurationIntoWizard(String toolName) {
         final Map<String, String> configs = readExistingConfigurations();
-        File configJson = new File(configs.get(toolName));
-        loadConfigurationFromFile(configJson);
+
+        if (configs.get(toolName) != null) {
+            File configJson = new File(configs.get(toolName));
+            loadConfigurationFromFile(configJson);
+            return true;
+        } else {
+            // should never happen; K.Schaffert 2023
+            LOGGER.error(StringUtils
+                .format("Could not find the configuration for tool %s in the profile directory. It may have been deleted.", toolName));
+            return false;
+        }
     }
 
     private String getToolNameFromDisplayedToolName(String displayedToolName) {
@@ -607,7 +617,7 @@ public class ChooseConfigurationPage extends ToolIntegrationWizardPage {
             return toolFolder != null && toolFolder.isDirectory() && !toolFolder.getName().equals("null")
                 && toolFolder.listFiles() != null && toolFolder.listFiles().length > 0;
         }
-        
+
         public File getToolFolder() {
             return toolFolder;
         }
