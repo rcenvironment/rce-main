@@ -18,7 +18,10 @@
 		<internal.java.targetLevel>1.8</internal.java.targetLevel>
 		<internal.java.encoding>UTF8</internal.java.encoding>
 
-		<internal.tycho.version>1.7.0</internal.tycho.version>
+		<!-- Note: As of 3.0.4, the 3.x.x releases of Tycho have potentially unstable dependencies
+			(see https://github.com/eclipse-tycho/tycho/issues/1464 and related). To avoid this, 
+			we stick to the latest 2.x.x release for now. -->
+		<internal.tycho.version>2.7.5</internal.tycho.version>
 
 		<!-- default artifact naming; overridden in RC and Release builds -->
 		<internal.qualifier.prefix>'0'</internal.qualifier.prefix>
