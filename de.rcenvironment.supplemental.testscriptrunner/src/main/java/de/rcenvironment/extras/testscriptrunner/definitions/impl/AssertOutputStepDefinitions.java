@@ -281,7 +281,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
      * @param instanceIds a comma-separated list of instances, which when present (non-null) influences which instances are effected. How it
      *        does that depends on the value of {@code allFlag} and is defined in {@link #resolveInstanceList()}
      */
-    @Then("^the log output of( all)?(?: instance[s]?)?(?: \"([^\"]*)\")? should indicate a clean shutdown")
+    @Then("^the log output of( all)?(?: instance[s]?)?(?: \"([^\"]*)\")? should indicate a clean shutdown without checking for further warnings or errors")
 
     public void thenLogOutputCleanShutdown(String allFlag, String instanceIds) throws Exception {
         AssertFileContains debugLogContainsNoneUnfinished =

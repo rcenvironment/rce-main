@@ -83,7 +83,7 @@ Scenario: Execute example workflows of the group 03_Workflow Logic
     And   stopping instance "NodeA3"
     
     Then   the log output of "NodeA3" should contain the pattern "(?:de.rcenvironment.core.component.api.ComponentException: Script execution error: Exception: Example failure in <script> at line number 2)"
-    And    the log output of "NodeA3" should indicate a clean shutdown
+    And    the log output of "NodeA3" should indicate a clean shutdown without checking for further warnings or errors
     And    the log output of "NodeA3" should contain 1 error
 
 @ExampleWorkflowsFeature
