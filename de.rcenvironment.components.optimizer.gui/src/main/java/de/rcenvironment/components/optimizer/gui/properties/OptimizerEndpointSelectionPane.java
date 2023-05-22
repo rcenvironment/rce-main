@@ -198,15 +198,16 @@ public class OptimizerEndpointSelectionPane extends EndpointSelectionPane {
 
             if (widgetToKeyMap.containsValue(OptimizerComponentConstants.META_LOWERBOUND)
                 && widgetToKeyMap.containsValue(OptimizerComponentConstants.META_UPPERBOUND) && validMetaDataInputs) {
-                String upperBoundText = "";
-                String lowerBoundText = "";
+                String upperBoundText = null;
+                String lowerBoundText = null;
                 for (Entry<Widget, String> entry : widgetToKeyMap.entrySet()) {
-                    if (upperBoundText.equals("") || lowerBoundText.equals("")) {
-                        if (entry.getValue().equals(OptimizerComponentConstants.META_UPPERBOUND)) {
-                            upperBoundText = ((Text) entry.getKey()).getText();
-                        } else if (entry.getValue().equals(OptimizerComponentConstants.META_LOWERBOUND)) {
-                            lowerBoundText = ((Text) entry.getKey()).getText();
-                        }
+                    if (upperBoundText != null && lowerBoundText != null) {
+                        break;
+                    }
+                    if (entry.getValue().equals(OptimizerComponentConstants.META_UPPERBOUND)) {
+                        upperBoundText = ((Text) entry.getKey()).getText();
+                    } else if (entry.getValue().equals(OptimizerComponentConstants.META_LOWERBOUND)) {
+                        lowerBoundText = ((Text) entry.getKey()).getText();
                     }
                 }
                 float upperBound = Float.parseFloat(upperBoundText);
@@ -214,8 +215,8 @@ public class OptimizerEndpointSelectionPane extends EndpointSelectionPane {
                 if (upperBound <= lowerBound) {
                     validUpperLowerBounds = false;
                     updateMessage(StringUtils.format(Messages.boundCheckMessage, lowerBound, upperBound), true);
-                } 
-            } 
+                }
+            }
             return validMetaDataInputs && validUpperLowerBounds;
         }
     }
