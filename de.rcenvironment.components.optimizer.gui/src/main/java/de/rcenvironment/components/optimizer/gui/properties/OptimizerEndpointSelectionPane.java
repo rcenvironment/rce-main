@@ -11,7 +11,7 @@ package de.rcenvironment.components.optimizer.gui.properties;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -185,52 +185,37 @@ public class OptimizerEndpointSelectionPane extends EndpointSelectionPane {
 
         /**
          * 
-         * {@inheritDoc}
-         * 
-         * We add custom validation to check if the lower bound of the optimizer is less than the upper bound.
+         * Extended super class method to validate Optimizer specific inputs. (check if the lower bound of the optimizer is less than the
+         * upper bound)
          *
-         * @see de.rcenvironment.core.gui.workflow.editor.properties.EndpointEditDialog#validateMetaDataInputs()
          * @author Devika Jalgaonkar
          */
         @Override
         protected boolean validateMetaDataInputs() {
-            boolean validUpperLowerBounds = false;
+            boolean validUpperLowerBounds = true;
 
             boolean validMetaDataInputs = super.validateMetaDataInputs();
-            Map<String, Widget> invertedWidgetToKeyMap =
-                widgetToKeyMap.entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
 
-            if (invertedWidgetToKeyMap.containsKey(OptimizerComponentConstants.META_LOWERBOUND)
-                && invertedWidgetToKeyMap.containsKey(OptimizerComponentConstants.META_UPPERBOUND) && validMetaDataInputs) {
-                float upperBound = 0;
-                float lowerBound = 0;
-
-                String upperBoundText = ((Text) invertedWidgetToKeyMap.get(OptimizerComponentConstants.META_UPPERBOUND)).getText();
-                String lowerBoundText = ((Text) invertedWidgetToKeyMap.get(OptimizerComponentConstants.META_LOWERBOUND)).getText();
-
-
-                if (!StringUtils.isNullorEmpty(upperBoundText)) {
-
-                    upperBound = Float.parseFloat(upperBoundText);
+            if (widgetToKeyMap.containsValue(OptimizerComponentConstants.META_LOWERBOUND)
+                && widgetToKeyMap.containsValue(OptimizerComponentConstants.META_UPPERBOUND) && validMetaDataInputs) {
+                String upperBoundText = "";
+                String lowerBoundText = "";
+                for (Entry<Widget, String> entry : widgetToKeyMap.entrySet()) {
+                    if (upperBoundText.equals("") || lowerBoundText.equals("")) {
+                        if (entry.getValue().equals(OptimizerComponentConstants.META_UPPERBOUND)) {
+                            upperBoundText = ((Text) entry.getKey()).getText();
+                        } else if (entry.getValue().equals(OptimizerComponentConstants.META_LOWERBOUND)) {
+                            lowerBoundText = ((Text) entry.getKey()).getText();
+                        }
+                    }
                 }
-
-
-                if (!StringUtils.isNullorEmpty(lowerBoundText)) {
-
-                    lowerBound = Float.parseFloat(lowerBoundText);
-                }
-                if (upperBound <= lowerBound && validMetaDataInputs) {
+                float upperBound = Float.parseFloat(upperBoundText);
+                float lowerBound = Float.parseFloat(lowerBoundText);
+                if (upperBound <= lowerBound) {
                     validUpperLowerBounds = false;
                     updateMessage(StringUtils.format(Messages.boundCheckMessage, lowerBound, upperBound), true);
-                } else {
-                    validUpperLowerBounds = true;
-
-                }
-
-            }
-
-
+                } 
+            } 
             return validMetaDataInputs && validUpperLowerBounds;
         }
     }
