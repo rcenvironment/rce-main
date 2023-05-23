@@ -5,7 +5,7 @@ Bundle-SymbolicName: de.rcenvironment.components.outputwriter.execution.tests
 Bundle-Version: 10.4.1.qualifier
 Fragment-Host: de.rcenvironment.components.outputwriter.execution
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: de.rcenvironment.core.utils.testing;bundle-version="6.0.0"
+Require-Bundle: de.rcenvironment.core.utils.testing
 Import-Package: de.rcenvironment.core.component.datamanagement.stateful,
  de.rcenvironment.core.component.testutils,
  de.rcenvironment.core.datamanagement,

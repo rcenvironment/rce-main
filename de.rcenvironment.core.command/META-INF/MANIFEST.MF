@@ -8,7 +8,7 @@ Export-Package: de.rcenvironment.core.command.api,
  de.rcenvironment.core.command.common,
  de.rcenvironment.core.command.internal.handlers;comment="for deserialization",
  de.rcenvironment.core.command.spi
-Require-Bundle: org.eclipse.core.runtime;bundle-version="3.6.0",
+Require-Bundle: org.eclipse.core.runtime,
  de.rcenvironment.platform.maven.ssh.server,
  org.apache.felix.gogo.runtime
 Import-Package: de.rcenvironment.core.authentication,
