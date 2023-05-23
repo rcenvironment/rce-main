@@ -10,7 +10,7 @@
    </description>
 
    <copyright url="http://www.rcenvironment.de">
-	Copyright (C) 2006-2016 DLR, Germany.
+      Copyright (C) 2006-2016 DLR, Germany.
 All rights reserved. This program and the accompanying materials
 are made available under the terms of the Eclipse Public License
 v1.0 which accompanies this distribution, and is available at
@@ -115,30 +115,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
       <discovery label="RCE (Remote Component Environment)" url="http://www.rcenvironment.de"/>
       <discovery label="Eclipse" url="http://www.eclipse.org"/>
    </url>
-
-   <requires>
-      <import plugin="de.rcenvironment.core.component"/>
-      <import plugin="de.rcenvironment.core.utils.common"/>
-      <import plugin="de.rcenvironment.core.authentication"/>
-      <import plugin="de.rcenvironment.core.communication"/>
-      <import plugin="de.rcenvironment.core.component.datamanagement"/>
-      <import plugin="de.rcenvironment.core.component.executor"/>
-      <import plugin="de.rcenvironment.core.configuration"/>
-      <import plugin="de.rcenvironment.core.notification"/>
-      <import plugin="de.rcenvironment.core.utils.cluster"/>
-      <import plugin="de.rcenvironment.core.utils.executor"/>
-      <import plugin="de.rcenvironment.core.utils.ssh"/>
-      <import plugin="de.rcenvironment.core.component.workflow"/>
-      <import plugin="de.rcenvironment.core.gui.datamanagement"/>
-      <import plugin="de.rcenvironment.core.gui.workflow"/>
-      <import plugin="de.rcenvironment.core.gui.workflow.executor"/>
-      <import plugin="org.apache.commons.io"/>
-      <import plugin="org.ops4j.pax.logging.pax-logging-api"/>
-      <import plugin="de.rcenvironment.platform.maven.other"/>
-      <import plugin="org.eclipse.osgi"/>
-      <import plugin="org.eclipse.osgi.services"/>
-      <import plugin="org.eclipse.ui.views.properties.tabbed"/>
-   </requires>
 
    <plugin
          id="de.rcenvironment.components.cluster.common"

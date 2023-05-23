@@ -116,70 +116,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
       <discovery label="Eclipse" url="http://www.eclipse.org"/>
    </url>
 
-   <requires>
-      <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.ui.views.properties.tabbed"/>
-      <import plugin="org.eclipse.core.filesystem"/>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.eclipse.ui.ide"/>
-      <import plugin="de.rcenvironment.core.component"/>
-      <import plugin="de.rcenvironment.core.component.workflow"/>
-      <import plugin="de.rcenvironment.core.configuration"/>
-      <import plugin="de.rcenvironment.core.datamodel"/>
-      <import plugin="de.rcenvironment.core.utils.common"/>
-      <import plugin="de.rcenvironment.core.utils.incubator"/>
-      <import plugin="org.ops4j.pax.logging.pax-logging-api"/>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="de.rcenvironment.platform.maven.other"/>
-      <import plugin="de.rcenvironment.core.authorization"/>
-      <import plugin="de.rcenvironment.core.communication"/>
-      <import plugin="de.rcenvironment.core.monitoring"/>
-      <import plugin="org.apache.commons.io"/>
-      <import plugin="org.eclipse.help"/>
-      <import plugin="org.eclipse.gef"/>
-      <import plugin="org.eclipse.jface"/>
-      <import plugin="org.eclipse.ui.workbench" version="3.5.2" match="greaterOrEqual"/>
-      <import plugin="de.rcenvironment.core.authentication"/>
-      <import plugin="de.rcenvironment.core.component.datamanagement"/>
-      <import plugin="de.rcenvironment.core.datamanagement"/>
-      <import plugin="org.eclipse.compare"/>
-      <import plugin="org.eclipse.ui.navigator.resources"/>
-      <import plugin="de.rcenvironment.core.log"/>
-      <import plugin="de.rcenvironment.core.login"/>
-      <import plugin="de.rcenvironment.core.component.integration"/>
-      <import plugin="org.eclipse.osgi"/>
-      <import plugin="org.eclipse.swt"/>
-      <import plugin="org.eclipse.ui.forms"/>
-      <import plugin="org.eclipse.core.commands"/>
-      <import plugin="de.rcenvironment.core.notification"/>
-      <import plugin="de.rcenvironment.core.start.common"/>
-      <import plugin="de.rcenvironment.core.component.executor"/>
-      <import plugin="org.eclipse.ui.ide" version="3.6.2" match="greaterOrEqual"/>
-      <import plugin="de.rcenvironment.core.command"/>
-      <import plugin="de.rcenvironment.core.utils.cluster"/>
-      <import plugin="de.rcenvironment.core.configuration.bootstrap"/>
-      <import plugin="de.rcenvironment.core.start"/>
-      <import plugin="org.eclipse.ui.navigator"/>
-      <import plugin="org.eclipse.equinox.security" version="1.1.1" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.equinox.security.ui" version="1.1.0" match="greaterOrEqual"/>
-      <import plugin="de.rcenvironment.core.communication.uplink"/>
-      <import plugin="de.rcenvironment.core.component.sshremoteaccess"/>
-      <import plugin="de.rcenvironment.core.toolkitbridge"/>
-      <import plugin="de.rcenvironment.core.utils.ssh"/>
-      <import plugin="de.rcenvironment.toolkit.modules.common"/>
-      <import plugin="org.apache.commons.codec"/>
-      <import plugin="de.rcenvironment.core.gui.tiglviewer"/>
-      <import plugin="org.eclipse.osgi.services"/>
-      <import plugin="de.rcenvironment.platform.maven.mail"/>
-      <import plugin="org.junit"/>
-      <import plugin="de.rcenvironment.core.component.integration.documentation"/>
-      <import plugin="org.eclipse.core.runtime" version="3.7.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.ui" version="3.7.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.ui.intro"/>
-      <import plugin="org.apache.servicemix.bundles.saxon"/>
-      <import plugin="org.eclipse.equinox.preferences"/>
-   </requires>
-
    <plugin
          id="de.rcenvironment.core.gui.utils.common"
          download-size="0"
@@ -347,7 +283,7 @@ This Agreement is governed by the laws of the State of New York and the intellec
          download-size="0"
          install-size="0"
          version="0.0.0"/>
-         
+
    <plugin
          id="de.rcenvironment.core.gui.workflow.integration.workflow"
          download-size="0"

@@ -111,40 +111,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
       <discovery label="Eclipse" url="http://www.eclipse.org"/>
    </url>
 
-   <requires>
-      <import plugin="org.apache.servicemix.bundles.saxon"/>
-      <import plugin="de.rcenvironment.platform.maven.other"/>
-      <import plugin="org.apache.commons.io"/>
-      <import plugin="org.ops4j.pax.logging.pax-logging-api"/>
-      <import plugin="org.eclipse.osgi"/>
-      <import plugin="de.rcenvironment.platform.maven.auth"/>
-      <import plugin="org.eclipse.equinox.security"/>
-      <import plugin="org.eclipse.osgi.services"/>
-      <import plugin="de.rcenvironment.platform.maven.native.common"/>
-      <import plugin="de.rcenvironment.platform.maven.graph"/>
-      <import plugin="de.rcenvironment.platform.maven.ssh.server"/>
-      <import plugin="de.rcenvironment.core.datamodel"/>
-      <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="de.rcenvironment.platform.maven.database"/>
-      <import plugin="org.eclipse.core.filesystem"/>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.junit" version="4.8.2" match="greaterOrEqual"/>
-      <import plugin="de.rcenvironment.platform.maven.testing"/>
-      <import plugin="org.eclipse.draw2d"/>
-      <import plugin="org.eclipse.equinox.preferences"/>
-      <import plugin="org.eclipse.equinox.app"/>
-      <import plugin="de.rcenvironment.platform.maven.jms"/>
-      <import plugin="org.eclipse.core.runtime" version="3.6.0" match="greaterOrEqual"/>
-      <import plugin="org.apache.commons.codec"/>
-      <import plugin="de.rcenvironment.core.configuration.ui"/>
-      <import plugin="org.ops4j.pax.logging.pax-logging-log4j2"/>
-      <import plugin="com.jcraft.jsch"/>
-      <import plugin="de.rcenvironment.platform.maven.mail"/>
-      <import plugin="org.eclipse.equinox.launcher"/>
-      <import plugin="org.apache.ant"/>
-      <import plugin="org.apache.felix.gogo.runtime"/>
-   </requires>
-
    <plugin
          id="de.rcenvironment.core.utils.common"
          download-size="0"
