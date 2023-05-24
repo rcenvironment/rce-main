@@ -11,6 +11,7 @@ package de.rcenvironment.components.optimizer.gui.properties;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -18,8 +19,9 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Widget;
 
 import de.rcenvironment.components.optimizer.common.OptimizerComponentConstants;
 import de.rcenvironment.components.optimizer.gui.properties.commands.OptimizerAddDynamicEndpointCommand;
@@ -34,7 +36,9 @@ import de.rcenvironment.core.datamodel.api.EndpointType;
 import de.rcenvironment.core.gui.utils.common.configuration.VariableNameVerifyListener;
 import de.rcenvironment.core.gui.workflow.editor.properties.EndpointEditDialog;
 import de.rcenvironment.core.gui.workflow.editor.properties.EndpointSelectionPane;
+import de.rcenvironment.core.gui.workflow.editor.properties.Messages;
 import de.rcenvironment.core.gui.workflow.editor.properties.WorkflowNodeCommand;
+import de.rcenvironment.core.utils.common.StringUtils;
 
 /**
  * A UI part to display and edit a set of endpoints managed by a {@link DynamicEndpointManager).
@@ -177,6 +181,43 @@ public class OptimizerEndpointSelectionPane extends EndpointSelectionPane {
 
             getButton(IDialogConstants.OK_ID).setEnabled(isValid);
 
+        }
+
+        /**
+         * 
+         * Extended super class method to validate Optimizer specific inputs. (check if the lower bound of the optimizer is less than the
+         * upper bound)
+         *
+         * @author Devika Jalgaonkar
+         */
+        @Override
+        protected boolean validateMetaDataInputs() {
+            boolean validUpperLowerBounds = true;
+
+            boolean validMetaDataInputs = super.validateMetaDataInputs();
+
+            if (widgetToKeyMap.containsValue(OptimizerComponentConstants.META_LOWERBOUND)
+                && widgetToKeyMap.containsValue(OptimizerComponentConstants.META_UPPERBOUND) && validMetaDataInputs) {
+                String upperBoundText = null;
+                String lowerBoundText = null;
+                for (Entry<Widget, String> entry : widgetToKeyMap.entrySet()) {
+                    if (upperBoundText != null && lowerBoundText != null) {
+                        break;
+                    }
+                    if (entry.getValue().equals(OptimizerComponentConstants.META_UPPERBOUND)) {
+                        upperBoundText = ((Text) entry.getKey()).getText();
+                    } else if (entry.getValue().equals(OptimizerComponentConstants.META_LOWERBOUND)) {
+                        lowerBoundText = ((Text) entry.getKey()).getText();
+                    }
+                }
+                float upperBound = Float.parseFloat(upperBoundText);
+                float lowerBound = Float.parseFloat(lowerBoundText);
+                if (upperBound <= lowerBound) {
+                    validUpperLowerBounds = false;
+                    updateMessage(StringUtils.format(Messages.boundCheckMessage, lowerBound, upperBound), true);
+                }
+            }
+            return validMetaDataInputs && validUpperLowerBounds;
         }
     }
 

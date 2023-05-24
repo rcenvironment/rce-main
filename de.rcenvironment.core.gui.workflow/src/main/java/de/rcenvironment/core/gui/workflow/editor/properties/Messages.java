@@ -117,6 +117,9 @@ public class Messages extends NLS {
 
     /** Constant. */
     public static String invalidNameMessage;
+    
+    /** Constant. */
+    public static String boundCheckMessage;
 
     private static final String BUNDLE_NAME = Messages.class.getPackage().getName() + ".messages";
 
