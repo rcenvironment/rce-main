@@ -15,15 +15,19 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  * Checks the availability of the HTTP download server.
  * 
+ * The @Ignore annotation prevents this test from being run as part of automated test runs.
+ * 
  * @author Martin Misiak
  * @author Robert Mischke
  */
-public class HttpDownloadUrlsTest {
+@Ignore
+public class HttpDownloadUrlsManualTest {
 
     // TODO (p2) also check HTTPS and more specific download URLs - misc_ro
 

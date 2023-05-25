@@ -30,10 +30,13 @@ import de.rcenvironment.core.utils.common.textstream.receivers.LoggingTextOutRec
 /**
  * Manual integration tests for {@link InstanceManagementServiceImpl}.
  * 
+ * The @Ignore annotation prevents this test from being run as part of automated test runs.
+ * 
  * @author Robert Mischke
  * @author David Scholz
  * @author Lukas Rosenbach
  */
+@Ignore
 public class InstanceManagementServiceImplManualTests {
 
     private static final int ONE_MINUTE_IN_MILLISECONDS = 60000;

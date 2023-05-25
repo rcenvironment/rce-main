@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.jcraft.jsch.JSchException;
@@ -33,11 +34,12 @@ import de.rcenvironment.core.utils.testing.ParameterizedTestUtils;
 import de.rcenvironment.core.utils.testing.TestParametersProvider;
 
 /**
- * Manual test case.
+ * Manual test case. The @Ignore annotation prevents it from being run as part of automated test runs.
  * 
  * @author Brigitte Boden
  */
-public class JSchFileTransferTest {
+@Ignore
+public class JSchFileTransferManualTest {
 
     private static final String WORKDIR_LOCAL = "local-workdir/";
 

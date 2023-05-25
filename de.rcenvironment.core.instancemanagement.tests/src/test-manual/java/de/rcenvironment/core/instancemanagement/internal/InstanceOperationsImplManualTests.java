@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import de.rcenvironment.core.instancemanagement.InstanceStatus;
@@ -31,9 +32,12 @@ import de.rcenvironment.core.utils.testing.TestParametersProvider;
  * Integration tests for {@link InstanceOperationsImpl} that are not intended to be run within the automated test battery, usually because
  * it requires certain external resources.
  * 
+ * The @Ignore annotation prevents this test from being run as part of automated test runs.
+ * 
  * @author Robert Mischke
  * @author Lukas Rosenbach
  */
+@Ignore
 public class InstanceOperationsImplManualTests {
 
     private TestParametersProvider testParameters;
