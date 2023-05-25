@@ -26,10 +26,13 @@ import de.rcenvironment.core.utils.common.TempFileServiceAccess;
 /**
  * Manual integration tests for {@link DeploymentOperationsImpl}.
  * 
+ * The @Ignore annotation prevents this test from being run as part of automated test runs.
+ * 
  * @author Robert Mischke
  * @author Lukas Rosenbach
  */
-public class DeploymentOperationsImplTest {
+@Ignore
+public class DeploymentOperationsImplManualTest {
 
     private static final int ONE_MINUTE_IN_MILLISECONDS = 60000;
 

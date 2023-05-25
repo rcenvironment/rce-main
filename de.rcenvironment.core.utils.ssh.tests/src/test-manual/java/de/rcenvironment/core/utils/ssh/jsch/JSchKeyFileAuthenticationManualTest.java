@@ -15,6 +15,7 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.jcraft.jsch.JSchException;
@@ -24,11 +25,12 @@ import de.rcenvironment.core.utils.testing.ParameterizedTestUtils;
 import de.rcenvironment.core.utils.testing.TestParametersProvider;
 
 /**
- * Manual test case.
+ * Manual test case. The @Ignore annotation prevents it from being run as part of automated test runs.
  * 
  * @author Brigitte Boden
  */
-public class JSchKeyFileAuthenticationTest {
+@Ignore
+public class JSchKeyFileAuthenticationManualTest {
 
     private String ip;
     
