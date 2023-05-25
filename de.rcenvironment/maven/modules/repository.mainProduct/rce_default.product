@@ -27,11 +27,7 @@
       <linux icon="/resources/icons/rce_logo.xpm"/>
       <win useIco="true">
          <ico path="/resources/icons/rce_logo.ico"/>
-         <bmp
-            winSmallHigh="/resources/icons/icon16_32bit.bmp"
-            winSmallLow="/resources/icons/icon16_8bit.bmp"
-            winMediumHigh="/resources/icons/icon32_32bit.bmp"
-            winMediumLow="/resources/icons/icon32_8bit.bmp"/>
+         <bmp/>
       </win>
    </launcher>
 
