@@ -142,7 +142,7 @@ public class WorkflowEditorHelpContextProviderTests {
             .gettingContext();
         
         testHarness.then()
-            .queriedContextIdWas("de.rcenvironment.workflow");
+            .queriedContextIdWas(workflowComponentIdentifier());
     }
 
     protected static String someComponentIdentifier() {
@@ -165,4 +165,7 @@ public class WorkflowEditorHelpContextProviderTests {
         return "de.rcenvironment.integration.workflow.Fibonacci/0.0";
     }
 
+    protected static String workflowComponentIdentifier() {
+        return "de.rcenvironment.integration.workflow.Fibonacci";
+    }
 }
