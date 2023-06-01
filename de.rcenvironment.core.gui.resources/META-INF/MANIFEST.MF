@@ -16,5 +16,5 @@ Import-Package:
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: DLR
 Export-Package: de.rcenvironment.core.gui.resources.api
-Require-Bundle: org.eclipse.ui.ide;bundle-version="3.6.2"
+Require-Bundle: org.eclipse.ui.ide
 Automatic-Module-Name: de.rcenvironment.core.gui.resources

@@ -26,6 +26,6 @@ Import-Package: de.rcenvironment.components.joiner.common,
 Require-Bundle: org.eclipse.ui.views.properties.tabbed,
  org.eclipse.core.runtime,
  de.rcenvironment.core.gui.workflow,
- org.eclipse.gef;bundle-version="3.6.2"
+ org.eclipse.gef
 RCE-Component: true
 Automatic-Module-Name: de.rcenvironment.components.joiner.gui

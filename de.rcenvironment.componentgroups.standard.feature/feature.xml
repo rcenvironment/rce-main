@@ -111,49 +111,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
       <discovery label="Eclipse" url="http://www.eclipse.org"/>
    </url>
 
-   <requires>
-      <import plugin="de.rcenvironment.core.gui.workflow"/>
-      <import plugin="de.rcenvironment.core.component"/>
-      <import plugin="de.rcenvironment.core.component.workflow"/>
-      <import plugin="de.rcenvironment.core.gui.utils.incubator"/>
-      <import plugin="de.rcenvironment.core.authentication"/>
-      <import plugin="de.rcenvironment.core.communication"/>
-      <import plugin="de.rcenvironment.core.component.datamanagement"/>
-      <import plugin="de.rcenvironment.core.gui.utils.common"/>
-      <import plugin="de.rcenvironment.core.notification"/>
-      <import plugin="de.rcenvironment.core.utils.common"/>
-      <import plugin="de.rcenvironment.core.component.executor"/>
-      <import plugin="de.rcenvironment.core.gui.datamanagement"/>
-      <import plugin="de.rcenvironment.core.gui.workflow.executor"/>
-      <import plugin="de.rcenvironment.core.utils.scripting"/>
-      <import plugin="de.rcenvironment.core.component.scripting"/>
-      <import plugin="de.rcenvironment.core.scripting"/>
-      <import plugin="de.rcenvironment.core.utils.executor"/>
-      <import plugin="de.rcenvironment.core.configuration"/>
-      <import plugin="de.rcenvironment.core.component.wrapper"/>
-      <import plugin="de.rcenvironment.core.utils.cluster"/>
-      <import plugin="de.rcenvironment.core.utils.ssh"/>
-      <import plugin="org.eclipse.ui.views.properties.tabbed"/>
-      <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.gef" version="3.6.2" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.swt"/>
-      <import plugin="org.eclipse.ui.forms"/>
-      <import plugin="de.rcenvironment.platform.maven.other"/>
-      <import plugin="org.ops4j.pax.logging.pax-logging-api"/>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.eclipse.core.jobs"/>
-      <import plugin="de.rcenvironment.core.gui.resources"/>
-      <import plugin="de.rcenvironment.core.utils.incubator"/>
-      <import plugin="de.rcenvironment.platform.maven.gui"/>
-      <import plugin="org.eclipse.draw2d"/>
-      <import plugin="org.eclipse.ui.ide"/>
-      <import plugin="org.apache.commons.io"/>
-      <import plugin="org.eclipse.jface"/>
-      <import plugin="org.eclipse.osgi"/>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.osgi.services"/>
-   </requires>
-
    <plugin
          id="de.rcenvironment.components.joiner.gui"
          download-size="0"
@@ -422,7 +379,8 @@ This Agreement is governed by the laws of the State of New York and the intellec
          version="0.0.0"
          fragment="true"
          unpack="false"/>
-  <plugin
+
+   <plugin
          id="de.rcenvironment.components.optimizer.generic.execution"
          download-size="0"
          install-size="0"
@@ -513,8 +471,8 @@ This Agreement is governed by the laws of the State of New York and the intellec
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
-    <plugin
+
+   <plugin
          id="de.rcenvironment.components.scpinputloader.common"
          download-size="0"
          install-size="0"
@@ -534,8 +492,8 @@ This Agreement is governed by the laws of the State of New York and the intellec
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-         
-    <plugin
+
+   <plugin
          id="de.rcenvironment.components.scpoutputcollector.common"
          download-size="0"
          install-size="0"
@@ -555,6 +513,5 @@ This Agreement is governed by the laws of the State of New York and the intellec
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-   
 
 </feature>

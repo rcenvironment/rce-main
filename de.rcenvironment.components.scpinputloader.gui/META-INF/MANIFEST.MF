@@ -34,7 +34,7 @@ Import-Package: de.rcenvironment.components.scpinputloader.common,
  org.eclipse.swt.widgets
 Require-Bundle: org.eclipse.ui.views.properties.tabbed,
  org.eclipse.core.runtime,
- org.eclipse.gef;bundle-version="3.6.2"
+ org.eclipse.gef
 Export-Package: de.rcenvironment.components.scpinputloader.gui
 RCE-Component: true
 Automatic-Module-Name: de.rcenvironment.components.scpinputloader.gui
