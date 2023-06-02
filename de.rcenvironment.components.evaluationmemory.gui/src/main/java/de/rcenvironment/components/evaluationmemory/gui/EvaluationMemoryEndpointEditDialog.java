@@ -41,7 +41,7 @@ import de.rcenvironment.core.gui.workflow.editor.properties.EndpointEditDialog;
  */
 public class EvaluationMemoryEndpointEditDialog extends EndpointEditDialog {
 
-    private static final String TOLERANCE_MESSAGE = "Define a value for the tolerance";
+    private static final String TOLERANCE_MESSAGE = "Define a valid value for the tolerance from 0 to 100";
 
     private Button useToleranceButton;
 
@@ -211,14 +211,24 @@ public class EvaluationMemoryEndpointEditDialog extends EndpointEditDialog {
      * tolerance. This information is not present anymore in the stored metadata.
      *
      * @see de.rcenvironment.core.gui.workflow.editor.properties.EndpointEditDialog#validateMetaDataInputs()
+     * 
+     * Added validation check for tolerance value to be between 0 to 100 percent (MANTIS-17994)
+     * @author Devika Jalgaonkar (for MANTIS-17994)
      */
     @Override
     protected boolean validateMetaDataInputs() {
         // Read this condition as "useTolerance -> !toleranceValue.isEmpty". Since Java does not support implication, we rewrite this to
         // "!useTolerance || !toleranceValue.isEmpty"
         final String toleranceValue = toleranceField.getText();
-        final boolean validTolerance = !useTolerance() || !toleranceValue.isEmpty();
-
+        boolean validTolerance =
+            !useTolerance() || (!toleranceValue.isEmpty() && !toleranceValue.equals("-") && !toleranceValue.equals("+"));
+        if (validTolerance && !toleranceValue.isEmpty()) {
+            float toleranceValueFloat = Float.parseFloat(toleranceValue);
+            if (toleranceValueFloat < 0 || toleranceValueFloat > 100) {
+                validTolerance = false;
+            }
+        }
+       
         if (!validTolerance) {
             updateMessage(TOLERANCE_MESSAGE, true);
         }
