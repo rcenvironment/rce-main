@@ -132,7 +132,7 @@ public class DMLabelProvider extends ColumnLabelProvider {
     public Color getForeground(Object element) {
         DMBrowserNode node = (DMBrowserNode) element;
         if (!node.isEnabled()) {
-            return Display.getCurrent().getSystemColor(SWT.COLOR_TITLE_INACTIVE_FOREGROUND);
+            return Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY);
         }
         return super.getForeground(element);
     }
