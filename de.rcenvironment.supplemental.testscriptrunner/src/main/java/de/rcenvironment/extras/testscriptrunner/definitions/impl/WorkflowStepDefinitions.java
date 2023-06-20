@@ -799,7 +799,7 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
         // The Example Workflow 02_03_XML_Components.wf contains file inputs located in the project.
         // These files are copied into the temp dir when running the test.
         // The path to these input files have to be updated in the workflow file.
-        if (workflowName.equals("Workflow Examples Project\\02_Component Groups\\02_03_XML_Components.wf")) {
+        if (workflowName.equals("Workflow Examples Project" + File.separator + "02_Component Groups" + File.separator + "02_03_XML_Components.wf")) {
             correctPathToInputFiles(wfFileLocation);
         }
 
