@@ -7,7 +7,8 @@ Bundle-ManifestVersion: 2
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
-Import-Package: com.fasterxml.jackson.databind;version="2.9.9",
+Import-Package: com.fasterxml.jackson.core;version="2.14.0",
+ com.fasterxml.jackson.databind;version="2.14.0",
  com.icegreen.greenmail.util;version="1.5.1",
  de.rcenvironment.core.command.common,
  de.rcenvironment.core.command.spi,
