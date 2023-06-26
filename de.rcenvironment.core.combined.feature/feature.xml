@@ -120,39 +120,47 @@ This Agreement is governed by the laws of the State of New York and the intellec
          version="0.0.0"/>
 
    <includes
-         id="de.rcenvironment.modules.thirdparty.dakota.binaries.common.feature"
+         id="de.rcenvironment.thirdparty.modules.binaries.dakota.feature"
          version="0.0.0"/>
 
    <includes
-         id="de.rcenvironment.modules.thirdparty.eclipse.platform.common.feature"
+         id="de.rcenvironment.thirdparty.modules.imageviewer.feature"
          version="0.0.0"/>
 
    <includes
-         id="de.rcenvironment.modules.thirdparty.eclipse.platform.gui.feature"
+         id="de.rcenvironment.thirdparty.modules.libraries.common.feature"
          version="0.0.0"/>
 
    <includes
-         id="de.rcenvironment.modules.thirdparty.imageviewer.gui.feature"
+         id="de.rcenvironment.thirdparty.modules.libraries.gui.feature"
          version="0.0.0"/>
 
    <includes
-         id="de.rcenvironment.modules.thirdparty.libraries.bdd.common.feature"
+         id="de.rcenvironment.thirdparty.modules.libraries.native.feature"
          version="0.0.0"/>
 
    <includes
-         id="de.rcenvironment.modules.thirdparty.libraries.generic.common.feature"
+         id="de.rcenvironment.thirdparty.modules.libraries.other.feature"
          version="0.0.0"/>
 
    <includes
-         id="de.rcenvironment.modules.thirdparty.libraries.generic.gui.feature"
+         id="de.rcenvironment.thirdparty.modules.libraries.testing.bdd.feature"
          version="0.0.0"/>
 
    <includes
-         id="de.rcenvironment.modules.thirdparty.paxlogging.common.feature"
+         id="de.rcenvironment.thirdparty.modules.libraries.testing.feature"
          version="0.0.0"/>
 
    <includes
-         id="de.rcenvironment.modules.thirdparty.pdfviewer.gui.feature"
+         id="de.rcenvironment.thirdparty.modules.pdfviewer.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="de.rcenvironment.thirdparty.modules.platform.common.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="de.rcenvironment.thirdparty.modules.platform.gui.feature"
          version="0.0.0"/>
 
 </feature>

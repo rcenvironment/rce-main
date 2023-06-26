@@ -75,12 +75,12 @@ public final class ScriptingUtils {
      * Name of the bundle containing the Jython jar. The bundle de.rcenvironment.platform.maven.other is specified as required in the
      * MANIFEST.MF of this scriping bundle.
      */
-    private static final String BUNDLE_CONTAINING_JYTHON_JAR = "de.rcenvironment.platform.maven.other";
+    private static final String BUNDLE_CONTAINING_JYTHON_JAR = "de.rcenvironment.thirdparty.wrappers.jython";
 
     /**
      * Path to the Jython jar within the bundle containing the jar.
      */
-    private static final String PATH_TO_JYTHON_JAR = "lib/maven/jython-standalone-2.5.1.jar";
+    private static final String PATH_TO_JYTHON_JAR = "lib/maven/jython-standalone-2.7.3.jar";
 
     private static final String NOT_A_VALUE_UUID = "not_a_value_7fdc603e";
 
@@ -128,6 +128,9 @@ public final class ScriptingUtils {
             // We need to use the 3-arg constructor of URI in order to properly escape file
             // system chars
             URI resolvedURI;
+            if (resolvedFileURL == null) {
+                throw new IOException("Failed to resolve the path to the embedded Jython JAR");
+            }
             try {
                 resolvedURI = new URI(resolvedFileURL.getProtocol(), resolvedFileURL.getPath(), null);
             } catch (URISyntaxException e) {
@@ -147,14 +150,14 @@ public final class ScriptingUtils {
     public static synchronized void setJythonPath(File path) {
         jythonPath = path;
     }
-    
-    // /**
-    // * Set JVM properties required for proper Jython 2.7.0 support.
-    // */
-    // public static void setJVMPropertiesForJython270Support() {
-    // System.setProperty("python.import.site", "false");
-    // System.setProperty("python.console.encoding", "UTF-8");
-    // }
+
+    /**
+     * Set JVM properties required for proper Jython 2.7.0 support.
+     */
+    public static void setJVMPropertiesForJython270Support() {
+        System.setProperty("python.import.site", "false");
+        System.setProperty("python.console.encoding", "UTF-8");
+    }
 
     /**
      * Prepares the Ordered Dictionary Script to be used with Jython < 2.7. Will become obsolete with Jython 2.7.
@@ -173,7 +176,7 @@ public final class ScriptingUtils {
                 "Internal error: Failed to intialize trak config factory script that is wrapped around the actual script",
                 e);
         }
-        
+
         return orderedDictScript;
     }
 
@@ -187,7 +190,7 @@ public final class ScriptingUtils {
      */
     public static String prepareInputFileFactoryScript(String path) throws ComponentException {
         String inputFileFactoryScript = "";
-        
+
         try (InputStream in = ScriptingUtils.class.getResourceAsStream("/resources/input_file_factory.py")) {
             inputFileFactoryScript = IOUtils.toString(in);
         } catch (IOException e) {
