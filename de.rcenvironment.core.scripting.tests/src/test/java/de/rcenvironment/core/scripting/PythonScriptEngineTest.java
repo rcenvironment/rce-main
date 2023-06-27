@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.script.ScriptException;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.python.jsr223.PyScriptEngine;
 import org.python.jsr223.PyScriptEngineFactory;
@@ -60,14 +61,14 @@ public class PythonScriptEngineTest {
 
     private final AtomicInteger wrongOutputCount = new AtomicInteger(0);
 
-//    /**
-//     * Sets JVM properties required for Jython script execution.
-//     */
-//    @BeforeClass
-//    public static void setUp() {
-//        ScriptingUtils.setJVMPropertiesForJython270Support();
-//    }
-    
+    /**
+     * Sets JVM properties required for Jython script execution.
+     */
+    @BeforeClass
+    public static void setUp() {
+        ScriptingUtils.setJVMPropertiesForJython270Support();
+    }
+
     /**
      * Tests correct output handling of multiple scripts are executed in parallel threads but synchronized.
      * 
@@ -95,16 +96,14 @@ public class PythonScriptEngineTest {
             final String suffix = String.valueOf(i);
             threadPool.execute("Execute script", () -> {
 
-
-                    if (isSynchronized) {
-                        synchronized (PythonScriptEngineTest.this) {
-                            executePythonScript(suffix, iterationFinishedLatch);
-                        }
-                    } else {
+                if (isSynchronized) {
+                    synchronized (PythonScriptEngineTest.this) {
                         executePythonScript(suffix, iterationFinishedLatch);
                     }
+                } else {
+                    executePythonScript(suffix, iterationFinishedLatch);
                 }
-            );
+            });
         }
 
         assertTrue(iterationFinishedLatch.await(waitInterval, TimeUnit.SECONDS));
