@@ -20,9 +20,9 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import cucumber.api.Scenario;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 import de.rcenvironment.core.utils.executor.testutils.IntegrationTestExecutorUtils.ExecutionResult;
+import io.cucumber.java.Scenario;
 
 /**
  * A context holder for execution of a single {@link Scenario}.

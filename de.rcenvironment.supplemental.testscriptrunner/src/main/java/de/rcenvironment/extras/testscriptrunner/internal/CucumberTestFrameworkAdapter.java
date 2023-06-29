@@ -25,27 +25,26 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import cucumber.api.Pending;
-import cucumber.api.java.After;
-import cucumber.api.java.Before;
-import cucumber.api.java.ObjectFactory;
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
-import cucumber.runtime.Backend;
 import cucumber.runtime.ClassFinder;
-import cucumber.runtime.Runtime;
-import cucumber.runtime.RuntimeOptions;
 import cucumber.runtime.io.ClasspathResourceLoader;
 import cucumber.runtime.io.FileResourceLoader;
 import cucumber.runtime.io.ResourceLoader;
 import cucumber.runtime.io.ResourceLoaderClassFinder;
 import cucumber.runtime.java.JavaBackend;
-import cucumber.runtime.java.picocontainer.PicoFactory;
 import cucumber.runtime.model.CucumberFeature;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
+import io.cucumber.core.backend.Backend;
+import io.cucumber.core.backend.ObjectFactory;
+import io.cucumber.core.backend.Pending;
+import io.cucumber.core.options.RuntimeOptions;
+import io.cucumber.java.After;
+import io.cucumber.java.Before;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+import io.cucumber.picocontainer.PicoFactory;
 
 /**
  * A wrapper around the Cucumber BDD test framework to encapsulate various setup, classloader and file location issues. It is intended to

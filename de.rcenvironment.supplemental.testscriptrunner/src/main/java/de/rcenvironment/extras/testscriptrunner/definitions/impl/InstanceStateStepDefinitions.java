@@ -13,14 +13,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
 import de.rcenvironment.core.toolkitbridge.transitional.ConcurrencyUtils;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.InstanceManagementStepDefinitionBase;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ManagedInstance;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
 import de.rcenvironment.extras.testscriptrunner.definitions.helper.StepDefinitionConstants;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 
 /**
  * Step definitions altering the state of an instance (e.g starting/stopping/...).

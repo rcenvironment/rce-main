@@ -14,11 +14,12 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import cucumber.api.Scenario;
-import cucumber.api.java.After;
-import cucumber.api.java.Before;
+import org.junit.After;
+import org.junit.Before;
+
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.extras.testscriptrunner.definitions.helper.StepDefinitionConstants;
+import io.cucumber.java.Scenario;
 
 /**
  * Definitions of test life-cycle hooks.

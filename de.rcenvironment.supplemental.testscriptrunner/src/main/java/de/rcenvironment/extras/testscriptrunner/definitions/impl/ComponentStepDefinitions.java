@@ -25,15 +25,14 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 
-import cucumber.api.DataTable;
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.InstanceManagementStepDefinitionBase;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ManagedInstance;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
 import de.rcenvironment.extras.testscriptrunner.definitions.helper.StepDefinitionConstants;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 
 /**
  * Step definitions for adding, removing, altering, etc. commponents.

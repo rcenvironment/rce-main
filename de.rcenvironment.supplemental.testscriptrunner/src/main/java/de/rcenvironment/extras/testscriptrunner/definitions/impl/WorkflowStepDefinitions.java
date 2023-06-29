@@ -36,8 +36,6 @@ import org.eclipse.core.runtime.jobs.Job;
 
 import com.jcraft.jsch.JSchException;
 
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.common.TempFileServiceAccess;
 import de.rcenvironment.core.utils.common.textstream.receivers.CapturingTextOutReceiver;
@@ -49,6 +47,8 @@ import de.rcenvironment.extras.testscriptrunner.definitions.helper.StepDefinitio
 import de.rcenvironment.extras.testscriptrunner.internal.GildedManagedInstance;
 import de.rcenvironment.extras.testscriptrunner.internal.GoldenMaster;
 import de.rcenvironment.extras.testscriptrunner.internal.GoldenMasters;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import junit.framework.AssertionFailedError;
 
 /**

@@ -10,9 +10,9 @@ package de.rcenvironment.extras.testscriptrunner.definitions.impl;
 
 import java.util.concurrent.TimeUnit;
 
-import cucumber.api.java.en.When;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.AbstractStepDefinitionBase;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
+import io.cucumber.java.en.When;
 
 /**
  * collection of common step definitions.

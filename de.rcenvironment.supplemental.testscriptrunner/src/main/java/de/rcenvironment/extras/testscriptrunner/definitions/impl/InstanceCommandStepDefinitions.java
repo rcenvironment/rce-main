@@ -17,11 +17,11 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import cucumber.api.java.en.When;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.InstanceManagementStepDefinitionBase;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ManagedInstance;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
+import io.cucumber.java.en.When;
 
 /**
  * Step definitons for executing commands on instances.

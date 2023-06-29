@@ -20,7 +20,6 @@ import java.util.regex.Matcher;
 
 import org.apache.commons.exec.OS;
 
-import cucumber.api.java.en.Given;
 import de.rcenvironment.core.instancemanagement.InstanceConfigurationOperationSequence;
 import de.rcenvironment.core.instancemanagement.InstanceManagementService.InstallationPolicy;
 import de.rcenvironment.core.instancemanagement.internal.DeploymentOperationsImpl;
@@ -31,6 +30,7 @@ import de.rcenvironment.extras.testscriptrunner.definitions.common.InstanceManag
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ManagedInstance;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
 import de.rcenvironment.extras.testscriptrunner.definitions.helper.StepDefinitionConstants;
+import io.cucumber.java.en.Given;
 
 /**
  * Steps controlling and querying the RCE "instance management", which is used to provision and run test instances using configured RCE
