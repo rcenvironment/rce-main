@@ -8,41 +8,17 @@
 
 package de.rcenvironment.core.component.workflow.command.api;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.easymock.Capture;
-import org.easymock.CaptureType;
 import org.easymock.EasyMock;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.rcenvironment.core.authentication.Session;
 import de.rcenvironment.core.command.common.CommandException;
-import de.rcenvironment.core.command.common.CommandException.Type;
-import de.rcenvironment.core.command.spi.CommandContext;
-import de.rcenvironment.core.communication.api.PlatformService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileException;
-import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowDescriptionLoaderCallback;
-import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionService;
-import de.rcenvironment.core.component.workflow.update.api.PersistentWorkflowDescription;
-import de.rcenvironment.core.component.workflow.update.api.PersistentWorkflowDescriptionUpdateService;
-import de.rcenvironment.core.notification.DistributedNotificationService;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowVerificationService;
 import de.rcenvironment.core.utils.common.TempFileServiceAccess;
-import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
-import de.rcenvironment.core.utils.common.textstream.receivers.LoggingTextOutReceiver;
 
 /**
  * {@link WfCommandPlugin} test.
@@ -53,17 +29,7 @@ import de.rcenvironment.core.utils.common.textstream.receivers.LoggingTextOutRec
  */
 public class WfCommandPluginTest {
 
-    private static final String MESSAGE_EXPECTED_COMMAND_EXCEPTION = "Expected command exception";
-
-    private static final String STRING_RUN = "run";
-
-    private static final String STRING_WF = "wf";
-
-    private static final Log LOGGER = LogFactory.getLog(WfCommandPluginTest.class);
-
     private WfCommandPlugin wfCommandPlugin;
-
-    private HeadlessWorkflowExecutionService workflowExecutionService;
 
     /**
      * Creates a Session for testing.
@@ -79,12 +45,9 @@ public class WfCommandPluginTest {
      */
     @Before
     public void setUp() {
-//        workflowExecutionService = new HeadlessWorkflowExecutionServiceImpl();
-//        workflowExecutionService.bindWorkflowExecutionService(EasyMock.createNiceMock(WorkflowExecutionService.class));
-//        workflowExecutionService.bindDistributedNotificationService(EasyMock.createNiceMock(DistributedNotificationService.class));
-//        workflowExecutionService.bindPlatformService(EasyMock.createNiceMock(PlatformService.class));
         wfCommandPlugin = new WfCommandPlugin();
-        wfCommandPlugin.bindWorkflowExecutionService(EasyMock.createNiceMock(HeadlessWorkflowExecutionService.class));
+        wfCommandPlugin.bindWorkflowExecutionService(EasyMock.createNiceMock(WorkflowExecutionService.class));
+        wfCommandPlugin.bindWorkflowVerificationService(EasyMock.createNiceMock(WorkflowVerificationService.class));
     }
 
     /**

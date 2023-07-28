@@ -67,6 +67,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import de.rcenvironment.core.component.workflow.execution.api.PersistentWorkflowDescriptionLoaderService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileException;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowDescription;
@@ -152,8 +153,9 @@ public class ShowWorkflowExecutionWizardHandler extends AbstractHandler {
         try {
             File wfFile2 = new File(wfFile.getLocation().toOSString());
             if (wfFile2.exists()) {
-                wfDescription = workflowExecutionService.loadWorkflowDescriptionFromFile(
-                    wfFile2, new GUIWorkflowDescriptionLoaderCallback());
+                wfDescription = ServiceRegistry.createAccessFor(this) 
+                    .getService(PersistentWorkflowDescriptionLoaderService.class)
+                    .loadWorkflowDescriptionFromFile(wfFile2, new GUIWorkflowDescriptionLoaderCallback());
             }
         } catch (RuntimeException | WorkflowFileException e) {
             // caught and only logged as an error dialog already pops up if an error occur
@@ -178,7 +180,8 @@ public class ShowWorkflowExecutionWizardHandler extends AbstractHandler {
                 try {
                     monitor.beginTask("Loading workflow components", 2);
                     monitor.worked(1);
-                    final WorkflowDescription wfDescription = workflowExecutionService
+                    final WorkflowDescription wfDescription = ServiceRegistry.createAccessFor(this)
+                        .getService(PersistentWorkflowDescriptionLoaderService.class)
                         .loadWorkflowDescriptionFromFileConsideringUpdates(
                             new File(finalWfFile.getRawLocation().toOSString()), new GUIWorkflowDescriptionLoaderCallback());
                     monitor.worked(1);

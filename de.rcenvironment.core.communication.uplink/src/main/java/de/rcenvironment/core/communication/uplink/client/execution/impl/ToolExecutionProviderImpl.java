@@ -40,7 +40,6 @@ import de.rcenvironment.core.component.api.DistributedComponentKnowledgeService;
 import de.rcenvironment.core.component.api.UserComponentIdMappingService;
 import de.rcenvironment.core.component.execution.api.ConsoleRow;
 import de.rcenvironment.core.component.execution.api.ExecutionControllerException;
-import de.rcenvironment.core.component.execution.api.SingleConsoleRowsProcessor;
 import de.rcenvironment.core.component.management.api.DistributedComponentEntry;
 import de.rcenvironment.core.component.model.api.ComponentDescription;
 import de.rcenvironment.core.component.model.api.ComponentInstallation;
@@ -49,13 +48,14 @@ import de.rcenvironment.core.component.model.endpoint.api.EndpointDefinitionCons
 import de.rcenvironment.core.component.model.endpoint.api.EndpointDescription;
 import de.rcenvironment.core.component.model.endpoint.api.EndpointDescriptionsManager;
 import de.rcenvironment.core.component.workflow.execution.api.FinalWorkflowState;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContext;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContextBuilder;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionException;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionInformation;
-import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionContext;
-import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionContextBuilder;
-import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionService;
-import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionService.DeletionBehavior;
-import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionService.DisposalBehavior;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionService;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileException;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileLoaderFacade;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileLoaderFacade.PlaceholderFileException;
 import de.rcenvironment.core.component.workflow.model.api.Connection;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowDescription;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowDescriptionPersistenceHandler;
@@ -68,6 +68,7 @@ import de.rcenvironment.core.utils.common.TempFileServiceAccess;
 import de.rcenvironment.core.utils.common.exception.OperationFailureException;
 import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
 import de.rcenvironment.core.utils.incubator.ServiceRegistry;
+import de.rcenvironment.core.utils.incubator.ServiceRegistryAccess;
 
 /**
  * Implementation of ToolExecutionProvider.
@@ -107,7 +108,9 @@ public class ToolExecutionProviderImpl implements ToolExecutionProvider {
 
     private UserComponentIdMappingService userComponentIdMappingService;
 
-    private HeadlessWorkflowExecutionService workflowExecutionService;
+    private WorkflowExecutionService workflowExecutionService;
+
+    private WorkflowFileLoaderFacade workflowFileLoader;
 
     private final TempFileService tempFileService = TempFileServiceAccess.getInstance();
 
@@ -122,9 +125,11 @@ public class ToolExecutionProviderImpl implements ToolExecutionProvider {
         } catch (IOException e) {
             // TODO Auto-generated catch block
         }
-        componentKnowledgeService = ServiceRegistry.createAccessFor(this).getService(DistributedComponentKnowledgeService.class);
-        userComponentIdMappingService = ServiceRegistry.createAccessFor(this).getService(UserComponentIdMappingService.class);
-        workflowExecutionService = ServiceRegistry.createAccessFor(this).getService(HeadlessWorkflowExecutionService.class);
+        final ServiceRegistryAccess serviceRegistryAccess = ServiceRegistry.createAccessFor(this);
+        componentKnowledgeService = serviceRegistryAccess.getService(DistributedComponentKnowledgeService.class);
+        userComponentIdMappingService = serviceRegistryAccess.getService(UserComponentIdMappingService.class);
+        workflowExecutionService = serviceRegistryAccess.getService(WorkflowExecutionService.class);
+        workflowFileLoader = serviceRegistryAccess.getService(WorkflowFileLoaderFacade.class);
     }
 
     @Override
@@ -307,8 +312,6 @@ public class ToolExecutionProviderImpl implements ToolExecutionProvider {
 
     private FinalWorkflowState executeConfiguredWorkflow(ToolExecutionProviderEventCollector eventCollector)
         throws OperationFailureException {
-        HeadlessWorkflowExecutionContextBuilder exeContextBuilder;
-
         // move the output directory if it already exists to avoid collisions
         if (outputDir.isDirectory()) {
             renameAsOld(outputDir);
@@ -323,45 +326,17 @@ public class ToolExecutionProviderImpl implements ToolExecutionProvider {
         // File for collecting console output
         // File consoleLogFile = new File(outputDir, "console.log");
 
-        try {
-            exeContextBuilder = new HeadlessWorkflowExecutionContextBuilder(createdWorkflowFile).setLogDirectory(logDir);
-            exeContextBuilder.setSingleConsoleRowsProcessor(new SingleConsoleRowsProcessor() {
-
-                @Override
-                public void onConsoleRow(ConsoleRow consoleRow) {
-                    // as a first step, these events are simply forwarded with their internal event types;
-                    // consider whether these should be mapped/filtered -- misc_ro
-                    // For now, only filter out the life cycle events --bode_br
-                    if (!consoleRow.getType().equals(ConsoleRow.Type.LIFE_CYCLE_EVENT)) {
-                        eventCollector.submitEvent(consoleRow.getType().name(), consoleRow.getPayload());
-                    }
-                    /*
-                     * try { ConsoleRow.Type type = consoleRow.getType(); switch (type) { case TOOL_OUT: case TOOL_ERROR: case
-                     * COMPONENT_ERROR: case COMPONENT_WARN: case COMPONENT_INFO: FileUtils.writeStringToFile(consoleLogFile,
-                     * consoleRow.getPayload() + "\n", true); break; case LIFE_CYCLE_EVENT: break; default: break; }
-                     * 
-                     * } catch (IOException e) { log.warn("Could not write console row to log file."); }
-                     */
-
-                }
-            });
-            // Delete workflows on success
-            exeContextBuilder.setDeletionBehavior(DeletionBehavior.OnExpected);
-            exeContextBuilder.setDisposalBehavior(DisposalBehavior.OnExpected);
-        } catch (InvalidFilenameException e) {
-            // This exception should never occur since the name of the workflow file used
-            // here is generated by the
-            // generateWorkflowExecutionSetup method and is always valid
-            throw new IllegalStateException();
-        }
-
-        WorkflowExecutionException executionException = null;
+        Exception executionException = null;
         FinalWorkflowState finalState = FinalWorkflowState.FAILED;
         try {
-            HeadlessWorkflowExecutionContext context = exeContextBuilder.buildExtended();
-            wfExecInf = workflowExecutionService.startHeadlessWorkflowExecution(context);
-            finalState = workflowExecutionService.waitForWorkflowTerminationAndCleanup(context);
-        } catch (WorkflowExecutionException e) {
+
+            final WorkflowDescription workflowDescription =
+                workflowFileLoader.loadAndValidateWorkflowDescription(createdWorkflowFile, null, false, null);
+
+            WorkflowExecutionContext context = buildExecutionContext(eventCollector, logDir, workflowDescription);
+            wfExecInf = workflowExecutionService.start(context);
+            finalState = workflowExecutionService.waitForWorkflowTermination(context);
+        } catch (WorkflowExecutionException | WorkflowFileException | PlaceholderFileException e) {
             executionException = e;
             File exceptionLogFile = new File(logDir, "error.log");
             // create a log file so the error cause is accessible via the log directory
@@ -371,6 +346,11 @@ public class ToolExecutionProviderImpl implements ToolExecutionProvider {
             } catch (IOException e1) {
                 log.error("Failed to write exception log file " + exceptionLogFile.getAbsolutePath());
             }
+        } catch (InvalidFilenameException e) {
+            // This exception should never occur since the name of the workflow file used
+            // here is generated by the
+            // generateWorkflowExecutionSetup method and is always valid
+            throw new IllegalStateException();
         }
         log.debug("Finished remote access workflow.");
 
@@ -389,6 +369,25 @@ public class ToolExecutionProviderImpl implements ToolExecutionProvider {
         }
 
         return finalState;
+    }
+
+    private WorkflowExecutionContext buildExecutionContext(ToolExecutionProviderEventCollector eventCollector,
+        File logDir, final WorkflowDescription workflowDescription) {
+
+        return WorkflowExecutionContextBuilder.createContextBuilder(workflowDescription)
+            .setOriginDisplayName(createdWorkflowFile.getName(), createdWorkflowFile.getAbsolutePath())
+            .setLogDirectory(logDir)
+            .setSingleConsoleRowsProcessor(consoleRow -> {
+                // as a first step, these events are simply forwarded with their internal event types;
+                // consider whether these should be mapped/filtered -- misc_ro
+                // For now, only filter out the life cycle events --bode_br
+                if (!consoleRow.getType().equals(ConsoleRow.Type.LIFE_CYCLE_EVENT)) {
+                    eventCollector.submitEvent(consoleRow.getType().name(), consoleRow.getPayload());
+                }
+            })
+            .setDeletionBehavior(WorkflowExecutionContext.DeletionBehavior.OnExpected)
+            .setDisposalBehavior(WorkflowExecutionContext.DisposalBehavior.OnExpected)
+            .buildHeadless();
     }
 
     private DistributedComponentEntry getMatchingComponentInstallationForTool(String toolId, String toolVersion,

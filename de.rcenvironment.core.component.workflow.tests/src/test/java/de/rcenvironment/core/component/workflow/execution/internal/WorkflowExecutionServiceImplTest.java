@@ -8,122 +8,156 @@
 
 package de.rcenvironment.core.component.workflow.execution.internal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static de.rcenvironment.core.utils.testing.CollectionMatchers.contains;
+import static de.rcenvironment.core.utils.testing.CollectionMatchers.isEmpty;
+import static de.rcenvironment.core.utils.testing.CollectionMatchers.size;
+import static org.hamcrest.CoreMatchers.allOf;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.easymock.EasyMock;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
-import de.rcenvironment.core.communication.api.PlatformService;
 import de.rcenvironment.core.communication.common.LogicalNodeId;
-import de.rcenvironment.core.component.workflow.api.WorkflowConstants;
-import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileException;
-import de.rcenvironment.core.component.workflow.execution.spi.WorkflowDescriptionLoaderCallback;
+import de.rcenvironment.core.component.api.ComponentUtils;
+import de.rcenvironment.core.component.execution.api.ExecutionControllerException;
+import de.rcenvironment.core.component.model.api.ComponentDescription;
+import de.rcenvironment.core.component.model.api.ComponentInstallation;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContext;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionException;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionInformation;
+import de.rcenvironment.core.component.workflow.execution.impl.WorkflowExecutionContextImpl;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowDescription;
-import de.rcenvironment.core.component.workflow.model.api.WorkflowDescriptionPersistenceHandlerTestUtils;
-import de.rcenvironment.core.component.workflow.update.api.PersistentWorkflowDescriptionUpdateUtils;
-import de.rcenvironment.core.utils.common.TempFileService;
-import de.rcenvironment.core.utils.common.TempFileServiceAccess;
+import de.rcenvironment.core.component.workflow.model.api.WorkflowNode;
+import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
 
-/**
- * Test cases for {@link WorkflowExecutionServiceImpl}.
- * 
- * @author Doreen Seider
- * @author Robert Mischke (minor fix)
- */
 public class WorkflowExecutionServiceImplTest {
 
-    private TempFileService tempFileService = TempFileServiceAccess.getInstance();
-
-    private File tempDir;
-
-    /**
-     * Temp file environment setup.
-     * 
-     * @throws IOException on unexpected error
-     */
-    @BeforeClass
-    public static void setUpTempFileEnvironment() throws IOException {
-        TempFileServiceAccess.setupUnitTestEnvironment();
-    }
-
-    /**
-     * Creates a temp directory used for workflow test files.
-     * 
-     * @throws IOException on unexpected error
-     */
-    @Before
-    public void setUp() throws IOException {
-        tempDir = tempFileService.createManagedTempDir();
-        WorkflowDescriptionPersistenceHandlerTestUtils.initializeStaticFieldsOfWorkflowDescriptionPersistenceHandler();
-    }
-
-    /**
-     * Deletes the temp directory created in {@link #setUp()}.
-     * 
-     * @throws IOException on unexpected error
-     */
-    @After
-    public void tearDown() throws IOException {
-        tempFileService.disposeManagedTempDirOrFile(tempDir);
-    }
-
-    /**
-     * Tests error case: Workflow file cannot be parsed completely. Some parts are skipped. Expected behavior: Original workflow file is
-     * copied into a backup file and it only contains the valid parts of the workflow description now.
-     * 
-     * @throws WorkflowFileException on unexpected error
-     * @throws IOException on unexpected error
-     */
     @Test
-    public void testLoadWorkflowDescriptionFromFile() throws WorkflowFileException, IOException {
+    public void whenControllingWorkflow_thenWorkflowControllerIsCalled()
+        throws WorkflowExecutionException, ExecutionControllerException, RemoteOperationException {
+        final LogicalNodeId localNodeId = localNodeId();
 
-        LogicalNodeId logicalNodeIdMock = EasyMock.createStrictMock(LogicalNodeId.class);
+        final Map<String, String> authTokens = new HashMap<>();
 
-        final PlatformService platformServiceMock = EasyMock.createStrictMock(PlatformService.class);
-        EasyMock.expect(platformServiceMock.getLocalDefaultLogicalNodeId()).andStubReturn(logicalNodeIdMock);
-        EasyMock.replay(platformServiceMock);
+        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+        description.setControllerNode(localNodeId);
 
-        WorkflowDescriptionPersistenceHandlerTestUtils.createWorkflowDescriptionPersistenceHandlerTestInstance();
+        final WorkflowExecutionContext context = new WorkflowExecutionContextImpl(executionIdentifier(), description);
+        context.setNodeIdentifierStartedExecution(localNodeId);
 
-        WorkflowExecutionServiceImpl wfExeService = new WorkflowExecutionServiceImpl();
-        wfExeService.bindPersistentWorkflowDescriptionLoaderService(new PersistentWorkflowDescriptionLoaderServiceImpl());
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .withLocalNodeId(localNodeId)
+            .expectAuthorizationTokenAcquisition(isEmpty(), authTokens)
+            .expectControllerServiceCreation(localNodeId)
+            .expectLocalControllerCreation(localNodeId, context, authTokens)
+            .expectStartOnController(localNodeId, executionIdentifier())
+            .expectPauseOnController(localNodeId, executionIdentifier())
+            .expectResumeOnController(localNodeId, executionIdentifier())
+            .expectCancelOnController(localNodeId, executionIdentifier())
+            .expectDisposeOnController(localNodeId, executionIdentifier())
+            .build();
 
-        File wfFileOrigin = new File(tempDir, "test_origin.wf");
-        File wfFile = new File(tempDir, "test.wf");
-        FileUtils.writeStringToFile(wfFileOrigin,
-            IOUtils.toString(getClass().getResourceAsStream("/workflows_unit_test/Parsing_error.wf")));
-        FileUtils.copyFile(wfFileOrigin, wfFile);
+        final WorkflowExecutionInformation info = service.start(context);
+        service.pause(info.getWorkflowExecutionHandle());
+        service.resume(info.getWorkflowExecutionHandle());
+        service.cancel(info.getWorkflowExecutionHandle());
+        service.dispose(info.getWorkflowExecutionHandle());
 
-        String expectedBackupFileName =
-            PersistentWorkflowDescriptionUpdateUtils.getFilenameForBackupFile(wfFile) + WorkflowConstants.WORKFLOW_FILE_ENDING;
-        WorkflowDescriptionLoaderCallback callbackMock = EasyMock.createStrictMock(WorkflowDescriptionLoaderCallback.class);
-        EasyMock.expect(callbackMock.arePartlyParsedWorkflowConsiderValid()).andReturn(true);
-        callbackMock.onWorkflowFileParsingPartlyFailed(expectedBackupFileName);
-        EasyMock.expectLastCall();
-        EasyMock.replay(callbackMock);
+        builder.verifyAllDependencies();
+    }
 
-        wfExeService.loadWorkflowDescriptionFromFile(wfFile, callbackMock);
+    @Test
+    public void whenWorkflowHostIsRemote_thenWorkflowControllerIsRemote()
+        throws ExecutionControllerException, RemoteOperationException, WorkflowExecutionException {
+        final LogicalNodeId localNodeId = localNodeId();
+        final LogicalNodeId remoteNodeId = remoteNodeId();
 
-        EasyMock.verify(callbackMock);
+        final Map<String, String> authTokens = new HashMap<>();
 
-        File backupFile = new File(tempDir, expectedBackupFileName);
-        assertTrue(backupFile.exists());
+        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+        description.setControllerNode(remoteNodeId);
 
-        FileUtils.contentEquals(wfFileOrigin, backupFile);
-        assertTrue(FileUtils.sizeOf(wfFile) < FileUtils.sizeOf(wfFileOrigin));
+        final WorkflowExecutionContext context = new WorkflowExecutionContextImpl(executionIdentifier(), description);
+        context.setNodeIdentifierStartedExecution(localNodeId);
 
-        WorkflowDescription wd =
-            wfExeService.loadWorkflowDescriptionFromFile(wfFile, EasyMock.createStrictMock(WorkflowDescriptionLoaderCallback.class));
-        assertEquals(0, wd.getWorkflowLabels().size());
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .withLocalNodeId(localNodeId)
+            .expectAuthorizationTokenAcquisition(CoreMatchers.any(Collection.class), authTokens)
+            .expectControllerServiceCreation(remoteNodeId)
+            .expectRemoteControllerCreation(remoteNodeId, context, authTokens)
+            .expectStartOnController(remoteNodeId, executionIdentifier())
+            .build();
+
+        service.start(context);
+
+        builder.verifyAllDependencies();
+    }
+    
+    @Test
+    public void whenWorkflowContainsNodes_thenAuthorizationTokensAreAcquiredForEachNode() throws WorkflowExecutionException {
+        final LogicalNodeId localNodeId = localNodeId();
+        final LogicalNodeId remoteNodeId = remoteNodeId();
+
+        final Map<String, String> authTokens = new HashMap<>();
+        authTokens.put(localNodeId().toString(), "localAuthToken");
+        authTokens.put(remoteNodeId().toString(), "remoteAuthToken");
+
+        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+        description.setControllerNode(remoteNodeId);
+
+        final ComponentInstallation localInstallation = ComponentUtils.createPlaceholderComponentInstallation("localComponent", "v1", "localComponent", localNodeId);
+        final ComponentDescription localDescription = new ComponentDescription(localInstallation);
+        final WorkflowNode localNode = new WorkflowNode(localDescription);
+        description.addWorkflowNode(localNode);
+
+        final ComponentInstallation remoteInstallation = ComponentUtils.createPlaceholderComponentInstallation("remoteComponent", "v1", "remoteComponent", remoteNodeId);
+        final ComponentDescription remoteDescription = new ComponentDescription(remoteInstallation);
+        final WorkflowNode remoteNode = new WorkflowNode(remoteDescription);
+        description.addWorkflowNode(remoteNode);
+
+        final WorkflowExecutionContext context = new WorkflowExecutionContextImpl(executionIdentifier(), description);
+        context.setNodeIdentifierStartedExecution(localNodeId);
+        
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .withLocalNodeId(localNodeId)
+            .expectAuthorizationTokenAcquisition(allOf(size(2), contains(localNode), contains(remoteNode)), authTokens)
+            .expectControllerServiceCreation(remoteNodeId)
+            .expectRemoteControllerCreation(remoteNodeId, context, authTokens)
+            .expectStartOnController(remoteNodeId, executionIdentifier())
+            .build();
+
+        service.start(context);
+
+        builder.verifyAllDependencies();
+    }
+
+    private static String workflowIdentifier() {
+        return "workflowIdentifier";
+    }
+
+    private static String executionIdentifier() {
+        return "executionIdentifier";
+    }
+
+    private static LogicalNodeId localNodeId() {
+        final LogicalNodeId localNodeId = EasyMock.createStrictMock(LogicalNodeId.class);
+        EasyMock.expect(localNodeId.getLogicalNodeIdString()).andStubReturn("localNodeId");
+        EasyMock.replay(localNodeId);
+        return localNodeId;
+    }
+
+    private static LogicalNodeId remoteNodeId() {
+        final LogicalNodeId localNodeId = EasyMock.createStrictMock(LogicalNodeId.class);
+        EasyMock.expect(localNodeId.getLogicalNodeIdString()).andStubReturn("remoteNodeId");
+        EasyMock.replay(localNodeId);
+        return localNodeId;
     }
 
 }

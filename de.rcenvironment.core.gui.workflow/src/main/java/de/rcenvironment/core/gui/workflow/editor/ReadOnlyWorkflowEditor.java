@@ -41,9 +41,11 @@ import org.eclipse.ui.views.properties.tabbed.ITabSelectionListener;
 import org.eclipse.ui.views.properties.tabbed.ITabbedPropertySheetPageContributor;
 import org.eclipse.ui.views.properties.tabbed.TabbedPropertySheetPage;
 
+import de.rcenvironment.core.component.workflow.execution.api.PersistentWorkflowDescriptionLoaderService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileException;
 import de.rcenvironment.core.gui.workflow.GUIWorkflowDescriptionLoaderCallback;
 import de.rcenvironment.core.gui.workflow.parts.ReadOnlyWorkflowEditorEditPartFactory;
+import de.rcenvironment.core.utils.incubator.ServiceRegistry;
 
 /**
  * WorkflowEditor operating in read-only mode.
@@ -149,7 +151,9 @@ public class ReadOnlyWorkflowEditor extends WorkflowEditor {
                     try {
                         monitor.beginTask(Messages.loadingComponents, 2);
                         monitor.worked(1);
-                        workflowDescription = workflowExecutionService
+                        workflowDescription = ServiceRegistry
+                            .createAccessFor(this)
+                            .getService(PersistentWorkflowDescriptionLoaderService.class)
                             .loadWorkflowDescriptionFromFileConsideringUpdates(wfFile, wfdc, true);
                         initializeWorkflowDescriptionListener();
                         monitor.worked(1);

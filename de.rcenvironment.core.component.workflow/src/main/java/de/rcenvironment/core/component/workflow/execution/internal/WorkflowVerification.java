@@ -19,16 +19,24 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.logging.LogFactory;
+
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContext;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContextBuilder;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionException;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionService;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionService.WorkflowExecutionCallback;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileException;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileLoaderFacade;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileLoaderFacade.PlaceholderFileException;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowVerificationBuilder;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowVerificationBuilder.LogFolderFactory;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowVerificationResults;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowVerificationService;
-import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionContext;
-import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionContextBuilder;
-import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionService;
 import de.rcenvironment.core.component.workflow.execution.headless.internal.HeadlessWorkflowExecutionVerification;
 import de.rcenvironment.core.component.workflow.execution.headless.internal.HeadlessWorkflowExecutionVerificationRecorder;
 import de.rcenvironment.core.component.workflow.execution.headless.internal.HeadlessWorkflowExecutionVerificationResult;
+import de.rcenvironment.core.component.workflow.model.api.WorkflowDescription;
 import de.rcenvironment.core.utils.common.InvalidFilenameException;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 import de.rcenvironment.core.utils.common.textstream.receivers.PrefixingTextOutForwarder;
@@ -51,20 +59,22 @@ public class WorkflowVerification {
 
     private int sequentialRuns;
 
-    private HeadlessWorkflowExecutionService.DisposalBehavior dispose;
+    private WorkflowExecutionContext.DisposalBehavior dispose;
 
-    private HeadlessWorkflowExecutionService.DeletionBehavior delete;
+    private WorkflowExecutionContext.DeletionBehavior delete;
 
-    private HeadlessWorkflowExecutionService workflowExecutionService;
+    private WorkflowExecutionService workflowExecutionService;
 
     private WorkflowVerificationService workflowVerificationService;
+
+    private WorkflowFileLoaderFacade workflowLoaderFacade;
 
     public static final class Builder implements WorkflowVerificationBuilder {
 
         private final WorkflowVerification product = new WorkflowVerification();
 
         public Builder() {};
-        
+
         @Override
         public WorkflowVerificationBuilder outputReceiver(TextOutputReceiver receiver) {
             product.outputReceiver = receiver;
@@ -126,25 +136,31 @@ public class WorkflowVerification {
         }
 
         @Override
-        public WorkflowVerificationBuilder disposalBehavior(HeadlessWorkflowExecutionService.DisposalBehavior disposeParam) {
+        public WorkflowVerificationBuilder disposalBehavior(WorkflowExecutionContext.DisposalBehavior disposeParam) {
             product.dispose = disposeParam;
             return this;
         }
 
         @Override
-        public WorkflowVerificationBuilder deletionBehavior(HeadlessWorkflowExecutionService.DeletionBehavior deleteParam) {
+        public WorkflowVerificationBuilder deletionBehavior(WorkflowExecutionContext.DeletionBehavior deleteParam) {
             product.delete = deleteParam;
             return this;
         }
-        
+
         public WorkflowVerificationBuilder workflowVerificationService(WorkflowVerificationService service) {
             product.workflowVerificationService = service;
             return this;
         }
-        
+
         @Override
-        public WorkflowVerificationBuilder workflowExecutionService(HeadlessWorkflowExecutionService service) {
+        public WorkflowVerificationBuilder workflowExecutionService(WorkflowExecutionService service) {
             product.workflowExecutionService = service;
+            return this;
+        }
+
+        @Override
+        public WorkflowVerificationBuilder workflowFileLoaderFacade(WorkflowFileLoaderFacade service) {
+            product.workflowLoaderFacade = service;
             return this;
         }
 
@@ -153,6 +169,26 @@ public class WorkflowVerification {
             return product.verify();
         }
 
+    }
+
+    private class LoadedWorkflowExecutionContext {
+
+        private final File file;
+
+        private final WorkflowExecutionContext description;
+
+        LoadedWorkflowExecutionContext(File file, WorkflowExecutionContext description) {
+            this.file = file;
+            this.description = description;
+        }
+
+        public File getFile() {
+            return file;
+        }
+
+        public WorkflowExecutionContext getContext() {
+            return description;
+        }
     }
 
     public WorkflowVerificationResults verify() throws IOException {
@@ -164,32 +200,69 @@ public class WorkflowVerification {
         final Collection<File> wfFiles =
             Stream.concat(wfFilesExpectedToSucceed.stream(), wfFilesExpectedToFail.stream()).collect(Collectors.toList());
         for (int j = 0; j < sequentialRuns; j++) {
-            Set<HeadlessWorkflowExecutionContext> headlessWfExeContexts = new HashSet<>();
+            Set<LoadedWorkflowExecutionContext> executionContexts = new HashSet<>();
             for (int i = 0; i < parallelRuns; i++) {
                 for (final File wfFile : wfFiles) {
                     if (workflowVerificationService.preValidateWorkflow(outputReceiver, wfFile, false)) { // false = do not print
-                                                                                                                // pre-verification output
+                                                                                                          // pre-verification output
                         try {
                             // TODO specify log directory?
-                            HeadlessWorkflowExecutionContextBuilder exeContextBuilder =
-                                new HeadlessWorkflowExecutionContextBuilder(wfFile);
-                            exeContextBuilder.setLogDirectory(logfolderFactory.constructLogFolderForWorkflowFile(wfFile));
-                            exeContextBuilder.setPlaceholdersFile(placeholdersFile);
-                            exeContextBuilder
-                                .setTextOutputReceiver(new PrefixingTextOutForwarder("[workflow execution] ", outputReceiver));
-                            exeContextBuilder.setDisposalBehavior(dispose);
-                            exeContextBuilder.setDeletionBehavior(delete);
-                            headlessWfExeContexts.add(exeContextBuilder.build());
-                        } catch (IOException | InvalidFilenameException e) {
+                            final WorkflowDescription workflowDescription = workflowLoaderFacade.loadAndValidateWorkflowDescription(
+                                wfFile, placeholdersFile, false, new PrefixingTextOutForwarder("[workflow execution] ", outputReceiver));
+
+                            final WorkflowExecutionContextBuilder exeContextBuilder =
+                                WorkflowExecutionContextBuilder.createContextBuilder(workflowDescription)
+                                    .setOriginDisplayName(wfFile.getName(), wfFile.getAbsolutePath())
+                                    .setLogDirectory(logfolderFactory.constructLogFolderForWorkflowFile(wfFile))
+                                    .setTextOutputReceiver(new PrefixingTextOutForwarder("[workflow execution] ", outputReceiver))
+                                    .setDisposalBehavior(dispose)
+                                    .setDeletionBehavior(delete);
+                            executionContexts.add(new LoadedWorkflowExecutionContext(wfFile, exeContextBuilder.buildHeadless()));
+                        } catch (IOException | InvalidFilenameException | WorkflowFileException | PlaceholderFileException
+                            | WorkflowExecutionException e) {
                             wfVerificationResultRecorder.addWorkflowError(wfFile, e.getMessage());
                         }
                     }
                 }
             }
-            workflowExecutionService.executeWorkflowsAndVerify(headlessWfExeContexts, wfVerificationResultRecorder);
+            executeAndVerifyWorkflows(executionContexts, wfVerificationResultRecorder);
         }
         wfVerificationResultRecorder.setStartAndEndTime(startTime, new Date());
         return WorkflowVerificationResults
             .fromHeadlessWorkflowExecutionVerificationResult((HeadlessWorkflowExecutionVerificationResult) wfVerificationResultRecorder);
+    }
+
+    private void executeAndVerifyWorkflows(Set<LoadedWorkflowExecutionContext> loadedContexts,
+        final HeadlessWorkflowExecutionVerificationRecorder wfVerificationResultRecorder) {
+
+        for (LoadedWorkflowExecutionContext executionContext : loadedContexts) {
+            try {
+                workflowExecutionService.start(executionContext.getContext());
+            } catch (WorkflowExecutionException e) {
+                wfVerificationResultRecorder.addWorkflowError(executionContext.getFile(), e.getMessage());
+            }
+        }
+
+        for (LoadedWorkflowExecutionContext loadedContext : loadedContexts) {
+            final WorkflowExecutionCallback callback =
+                createWorkflowExecutionCallback(wfVerificationResultRecorder, loadedContext.getFile());
+            try {
+                workflowExecutionService.waitForWorkflowTermination(loadedContext.getContext(), callback);
+            } catch (WorkflowExecutionException e) {
+                wfVerificationResultRecorder.addWorkflowError(loadedContext.getFile(), e.getMessage());
+            }
+        }
+    }
+
+    private WorkflowExecutionCallback createWorkflowExecutionCallback(
+        final HeadlessWorkflowExecutionVerificationRecorder wfVerificationResultRecorder, final File wfFile) {
+        return (logFiles, finalState, executionDuration) -> {
+            try {
+                return wfVerificationResultRecorder.addWorkflowExecutionResult(wfFile, logFiles, finalState, executionDuration);
+            } catch (IOException e) {
+                wfVerificationResultRecorder.addWorkflowError(wfFile, e.getMessage());
+                return false;
+            }
+        };
     }
 }

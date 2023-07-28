@@ -21,7 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public final class JsonMatchers {
-    
+
     private JsonMatchers() {}
 
     public static <T> Matcher<String> isJsonList(Matcher<List<T>> matcher) {
@@ -63,7 +63,7 @@ public final class JsonMatchers {
         };
 
     }
-    
+
     public static Matcher<String> isJsonObject() {
         return isJsonObject(CoreMatchers.anything());
     }

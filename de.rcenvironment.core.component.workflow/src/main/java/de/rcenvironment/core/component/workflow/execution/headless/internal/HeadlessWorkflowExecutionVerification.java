@@ -230,7 +230,6 @@ public final class HeadlessWorkflowExecutionVerification
         wfsWithExecutionDurationSec.get(wfFile).add(executionDuration / THOUSAND);
         if (behavedAsExpected) {
             registerWorkflowRelatedFilesForDeletion(wfFile);
-
         }
         return behavedAsExpected;
     }
