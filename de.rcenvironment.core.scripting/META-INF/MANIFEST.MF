@@ -41,6 +41,5 @@ Import-Package: de.rcenvironment.core.communication.common,
  org.python.jsr223;version="2.5.1"
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
-Require-Bundle: org.eclipse.core.runtime,
- de.rcenvironment.platform.maven.other
+Require-Bundle: org.eclipse.core.runtime
 Automatic-Module-Name: de.rcenvironment.core.scripting

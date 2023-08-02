@@ -5,7 +5,9 @@ Bundle-SymbolicName: de.rcenvironment.components.switch.gui;singleton:=true
 Bundle-Version: 10.4.1.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: DLR
-Import-Package: de.rcenvironment.components.switchcmp.common,
+Import-Package: com.fasterxml.jackson.core;version="2.14.0",
+ com.fasterxml.jackson.databind;version="2.14.0",
+ de.rcenvironment.components.switchcmp.common,
  de.rcenvironment.components.switchcmp.execution,
  de.rcenvironment.components.switchcmp.execution.validator,
  de.rcenvironment.core.component.api,
@@ -29,18 +31,14 @@ Import-Package: de.rcenvironment.components.switchcmp.common,
  de.rcenvironment.core.gui.workflow.editor.validator,
  de.rcenvironment.core.utils.common,
  de.rcenvironment.core.utils.incubator,
- com.fasterxml.jackson.core;version="2.14.0",
- com.fasterxml.jackson.databind;version="2.14.0",
  org.apache.commons.lang3;version="3.1.0",
  org.apache.commons.logging;version="1.1.1",
- org.apache.xmlbeans;version="2.3.0",
  org.eclipse.core.runtime;version="3.4.0",
  org.eclipse.gef.commands,
  org.eclipse.osgi.util;version="1.1.0",
  org.eclipse.ui
 Export-Package: de.rcenvironment.components.switchcmp.gui
 Require-Bundle: org.eclipse.ui.views.properties.tabbed,
- org.eclipse.jface,
- de.rcenvironment.platform.maven.other
+ org.eclipse.jface
 RCE-Component: true
 Automatic-Module-Name: de.rcenvironment.components.switch.gui
