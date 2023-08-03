@@ -14,6 +14,7 @@ import javax.script.ScriptEngineManager;
 import org.python.jsr223.PyScriptEngineFactory;
 
 import de.rcenvironment.core.scripting.ScriptingService;
+import de.rcenvironment.core.scripting.ScriptingUtils;
 import de.rcenvironment.core.scripting.python.PythonScriptEngineFactory;
 import de.rcenvironment.core.utils.scripting.ScriptLanguage;
 import de.rcenvironment.core.utils.scripting.ScriptLanguage.NoEngineException;
@@ -33,7 +34,7 @@ public class ScriptingServiceImpl implements ScriptingService {
     public ScriptingServiceImpl() {
         // assertion: Jython should not be registered yet
         if (!supportsScriptLanguage(ScriptLanguage.Jython)) {
-//            ScriptingUtils.setJVMPropertiesForJython270Support();
+            ScriptingUtils.setJVMPropertiesForJython270Support();
             engineManager.registerEngineName(ScriptLanguage.Jython.getName(), new PyScriptEngineFactory());
         }
 

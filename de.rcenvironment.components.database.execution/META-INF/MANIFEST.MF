@@ -6,7 +6,10 @@ Bundle-SymbolicName: de.rcenvironment.components.database.execution
 Bundle-Version: 10.4.1.qualifier
 Bundle-Vendor: DLR
 Bundle-ClassPath: .
-Import-Package: de.rcenvironment.components.database.common,
+Import-Package: com.fasterxml.jackson.core;version="2.14.0",
+ com.fasterxml.jackson.databind;version="2.14.0",
+ com.fasterxml.jackson.databind.type;version="2.14.0",
+ de.rcenvironment.components.database.common,
  de.rcenvironment.components.database.common.jdbc,
  de.rcenvironment.core.component.api,
  de.rcenvironment.core.component.datamanagement.api,
@@ -24,5 +27,4 @@ Import-Package: de.rcenvironment.components.database.common,
 Export-Package: de.rcenvironment.components.database.execution
 Service-Component: OSGI-INF/*.xml
 RCE-Component: true
-Require-Bundle: de.rcenvironment.platform.maven.other
 Automatic-Module-Name: de.rcenvironment.components.database.execution

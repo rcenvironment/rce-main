@@ -14,6 +14,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -105,7 +106,7 @@ public class PaletteViewStorageTest {
             if (inputStream != null) {
                 try {
                     lines = IOUtils.readLines(inputStream, "UTF-8");
-                } catch (IOException | NullPointerException e) {
+                } catch (UncheckedIOException | NullPointerException e) {
                     LogFactory.getLog(getClass()).info(StringUtils.format("Test resource %s could not be read.", resourceFilename), e);
                 }
             }
@@ -235,7 +236,8 @@ public class PaletteViewStorageTest {
         List<String> linesForVerification = null;
         try {
             linesForVerification = IOUtils.readLines(inputStream, "UTF-8");
-        } catch (IOException e) {
+        } catch (UncheckedIOException e) {
+            // TODO (p1) this looks suspicious - shouldn't the test fail in this case?
             LogFactory.getLog(getClass()).info(
                 "Test resource ToolGroupAssignmentVerification could not be read.", e);
         }

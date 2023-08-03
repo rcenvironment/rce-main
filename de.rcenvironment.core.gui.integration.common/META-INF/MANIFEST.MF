@@ -6,7 +6,8 @@ Bundle-Version: 10.4.1.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: DLR
 Automatic-Module-Name: de.rcenvironment.core.gui.integration.common
-Import-Package: com.fasterxml.jackson.databind;version="2.11.1",
+Import-Package: com.fasterxml.jackson.core;version="2.14.0",
+ com.fasterxml.jackson.databind;version="2.14.0",
  de.rcenvironment.core.communication.api,
  de.rcenvironment.core.communication.common,
  de.rcenvironment.core.component.api,

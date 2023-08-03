@@ -7,7 +7,9 @@ Fragment-Host: de.rcenvironment.core.mail
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: de.rcenvironment.core.utils.testing
 Bundle-Vendor: DLR
-Import-Package: de.rcenvironment.core.configuration.testutils,
+Import-Package: com.icegreen.greenmail;version="1.5.1",
+ com.icegreen.greenmail.user;version="1.5.1",
+ de.rcenvironment.core.configuration.testutils,
  de.rcenvironment.core.utils.common,
  javax.mail.internet;version="1.5.6"
 Automatic-Module-Name: de.rcenvironment.core.mail.tests

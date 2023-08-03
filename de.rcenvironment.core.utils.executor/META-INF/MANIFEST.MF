@@ -4,7 +4,8 @@ Bundle-Name: RCE Core Utils Executor
 Bundle-SymbolicName: de.rcenvironment.core.utils.executor
 Bundle-Version: 10.4.1.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.sun.jna;version="5.0.0",
+Import-Package: com.sun.jna;version="5.9.0",
+ com.sun.jna.win32;version="5.9.0",
  de.rcenvironment.core.toolkitbridge.transitional,
  de.rcenvironment.core.utils.common,
  de.rcenvironment.core.utils.common.textstream,
@@ -22,4 +23,3 @@ Export-Package: de.rcenvironment.core.utils.executor,
  de.rcenvironment.core.utils.executor.testutils
 Bundle-Vendor: DLR
 Automatic-Module-Name: de.rcenvironment.core.utils.executor
-Require-Bundle: de.rcenvironment.platform.maven.native.common
