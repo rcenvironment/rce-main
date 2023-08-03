@@ -3,7 +3,7 @@
 <target includeMode="feature" name="default_release_or_snapshot.all" sequenceNumber="82">
 <locations>
 	<location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		<repository location="https://software.dlr.de/updates/rce/10.x/repositories/platform/snapshots/dev-mantis-17948-18092-library-upgrades-java-11"/>
+		<repository location="https://software.dlr.de/updates/rce/10.x/repositories/platform/snapshots/integration-10"/>
 		<unit id="de.rcenvironment.thirdparty.modules.binaries.dakota.feature.feature.group" version="0.0.0"/>
 		<unit id="de.rcenvironment.thirdparty.modules.imageviewer.feature.feature.group" version="0.0.0"/>
 		<unit id="de.rcenvironment.thirdparty.modules.libraries.common.feature.feature.group" version="0.0.0"/>

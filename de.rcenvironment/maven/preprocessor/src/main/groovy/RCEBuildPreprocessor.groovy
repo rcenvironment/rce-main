@@ -22,8 +22,8 @@ class RCEBuildPreprocessor {
 
     final defaultRepositoryUrlSuffixes = [
         'snapshot': [
-            'platform': 'snapshots/dev-mantis-17948-18092-library-upgrades-java-11',
-            'intermediate': 'snapshots/dev-mantis-17948-18092-library-upgrades-java-11'
+            'platform': 'snapshots/integration-10',
+            'intermediate': 'snapshots/integration-10'
         ],
         'rc_or_release': [
             'platform': 'releases/10.5.0', // not used yet
