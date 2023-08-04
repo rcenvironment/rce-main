@@ -30,23 +30,25 @@ fi
 
 # set derived properties
 
-case "$RCE_USE_LOCAL_THIRD_PARTY_REPOSITORY" in
-    "no")
-        RCE_THIRD_PARTY_REPOSITORY_URL="$RCE_THIRD_PARTY_REPOSITORY_REMOTE_MODE_ROOT_URL/$RCE_THIRD_PARTY_REPOSITORY_REFERENCE"
+case "$RCE_THIRD_PARTY_REPOSITORY_SOURCE" in
+    "remote")
+        RCE_THIRD_PARTY_REPOSITORY_URL="$RCE_THIRD_PARTY_REPOSITORY_REMOTE_SOURCE_ROOT_URL/$RCE_THIRD_PARTY_REPOSITORY_REFERENCE"
         ;;
-    "yes")
+    "local")
         # this URI pattern for relative paths is not generally valid but accepted by Tycho
-        RCE_THIRD_PARTY_REPOSITORY_URL="file:$RCE_THIRD_PARTY_REPOSITORY_LOCAL_MODE_RELATIVE_PATH"
+        RCE_THIRD_PARTY_REPOSITORY_URL="file:$RCE_THIRD_PARTY_REPOSITORY_LOCAL_SOURCE_RELATIVE_PATH"
         ;;
     *)
-        echo "Invalid RCE_USE_LOCAL_THIRD_PARTY_REPOSITORY setting: $RCE_USE_LOCAL_THIRD_PARTY_REPOSITORY"
+        echo "Invalid RCE_THIRD_PARTY_REPOSITORY_SOURCE setting: $RCE_THIRD_PARTY_REPOSITORY_SOURCE"
         exit 1
 esac
 
-# TODO determine git branch/status/commit and pass it to the build process?
+MAVEN_SETTINGS="--batch-mode --show-version --errors --fail-at-end"
+if [ ! -z "$MAVEN_REPOSITORY_LOCATION" ]; then
+    MAVEN_SETTINGS="$MAVEN_SETTINGS -Dmaven.repo.local=$MAVEN_REPOSITORY_LOCATION"
+fi
 
-# set up the common build log directory
-mkdir -p target/logs
+# TODO determine git branch/status/commit and pass it to the build process?
 
 # after this point, fail on undefined variables, too
 set -u
@@ -55,6 +57,20 @@ set -u
 #-----------------------
 # Function Definitions
 #-----------------------
+
+fail_with_log_tail_if_non_zero() {
+    EXIT_CODE="$1"
+    LOG_FILE="$2"
+    # log tail lines to print; arbitrary, can be adjusted or made a parameter
+    TAIL_COUNT=80
+    
+    if [ $EXIT_CODE != 0 ]; then
+        echo "Operation failed with exit code $EXIT_CODE; last lines of log file:"
+        echo
+        tail -n "$TAIL_COUNT" "$LOG_FILE"
+        exit $EXIT_CODE
+    fi
+}
 
 build_intermediate_repo() {
     # Generated output:
@@ -77,7 +93,8 @@ build_intermediate_repo() {
     set +e
     # TODO make help content generation optional?
     # TODO inject build timestamp from here for consistency between stages and reproducible builds
-    mvn -B -f ../de.rcenvironment/maven/secondStage/pom.xml \
+    mvn $MAVEN_SETTINGS \
+    -f ../de.rcenvironment/maven/secondStage/pom.xml \
     -Drce.maven.buildScope=intermediateRepo \
     -Drce.maven.buildType="$RCE_BUILD_TYPE" \
     -Drce.maven.repositories.foundation.url="$RCE_THIRD_PARTY_REPOSITORY_URL" \
@@ -85,13 +102,8 @@ build_intermediate_repo() {
     >"$BUILD_LOG_FILE" 2>&1
     EXIT_CODE=$?
     set -e
-
-    if [ $EXIT_CODE != 0 ]; then
-        echo "Build failed with exit code $EXIT_CODE; last lines of log file:"
-        # line count is arbitrary; adjust as needed
-        tail -n 80 "$BUILD_LOG_FILE"
-        exit $EXIT_CODE
-    fi
+    
+    fail_with_log_tail_if_non_zero $EXIT_CODE "$BUILD_LOG_FILE"
     
     mv ../de.rcenvironment/target/de.rcenvironment.modules.repository.intermediate/repository \
        target/intermediate/
@@ -101,7 +113,6 @@ build_intermediate_repo() {
 }
 
 
-# TODO not working yet as the intermediate repository must be updated/fixed (#16808)
 build_products_from_repo() {
     # Generated output:
     # - target/products/zip:        the zipped executable product builds
@@ -124,7 +135,8 @@ build_products_from_repo() {
     set +e
     # This build stage currently includes documentation, branding, filesets,
     # and the "versioninfo" bundle
-    mvn -B -f ../de.rcenvironment/maven/secondStage/pom.xml \
+    mvn $MAVEN_SETTINGS \
+    -f ../de.rcenvironment/maven/secondStage/pom.xml \
     -Drce.maven.buildScope=product.usingIntermediateRepo \
     -Drce.maven.buildType="$RCE_BUILD_TYPE" \
     -Drce.maven.repositories.foundation.url="file:target/intermediate/repository" \
@@ -135,18 +147,59 @@ build_products_from_repo() {
     EXIT_CODE=$?
     set -e
     
-    if [ $EXIT_CODE != 0 ]; then
-        echo "Build failed with exit code $EXIT_CODE; last lines of log file:"
-        # line count is arbitrary; adjust as needed
-        tail -n 80 "$BUILD_LOG_FILE"
-        exit $EXIT_CODE
-    fi
+    fail_with_log_tail_if_non_zero $EXIT_CODE "$BUILD_LOG_FILE"
     
     mkdir target/products/zip
     mv ../de.rcenvironment/target/de.rcenvironment.modules.repository.mainProduct/products/*.zip \
        target/products/zip
     mv ../de.rcenvironment/target/de.rcenvironment.modules.repository.mainProduct/repository \
        target/products/
+
+    # 6 lines for clean output in the BUILD SUCCESS case
+    tail -n 6 "$BUILD_LOG_FILE"
+}
+
+run_unit_tests() {
+    # Generated output:
+    # - target/unit-tests/reports/xml:  JUnit XML report files
+    # - target/unit-tests/build.log:    the output of the Maven build process
+
+    # delete previous output
+    rm -rf "target/unit-tests"
+    mkdir -p "target/unit-tests"
+
+    echo "Running Unit Tests (Build Scope '$RCE_UNIT_TESTS_BUILD_SCOPE')"
+
+    BUILD_LOG_FILE="target/unit-tests/build.log"
+    echo "Capturing log output in $(pwd)/$BUILD_LOG_FILE"
+
+    # TODO consider compiling and running tests against the intermediate repository
+    # TODO consider making the test scope more configurable, e.g. per bundle
+
+    set +e
+    mvn $MAVEN_SETTINGS \
+    -f ../de.rcenvironment/maven/secondStage/pom.xml \
+    -Drce.maven.buildScope="$RCE_UNIT_TESTS_BUILD_SCOPE" \
+    -Drce.maven.buildType="snapshot" \
+    -Drce.maven.repositories.foundation.url="$RCE_THIRD_PARTY_REPOSITORY_URL" \
+    -Drce.maven.skipDocumentation \
+    -P !generateHelpFromDocbook \
+    clean verify \
+    >"$BUILD_LOG_FILE" 2>&1
+    EXIT_CODE=$?
+    set -e
+    
+    fail_with_log_tail_if_non_zero $EXIT_CODE "$BUILD_LOG_FILE"
+
+    # collect individual XML report files
+    mkdir -p target/unit-tests/reports/xml
+    find .. -name '*.xml' -path '*/target/surefire-reports/*' \
+      -exec cp {} target/unit-tests/reports/xml/ \;
+      
+    # a first quick-and-dirty check for test errors, but better than nothing
+    # TODO generate a proper overview/report from these files
+    echo "Checking for test errors (preliminary approach)"
+    grep "<error" target/unit-tests/reports/xml/*
 
     # 6 lines for clean output in the BUILD SUCCESS case
     tail -n 6 "$BUILD_LOG_FILE"
