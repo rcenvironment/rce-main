@@ -130,7 +130,12 @@ public class TempFileServiceAccess {
     }
 
     protected static File getDefaultTestRootDir() {
-        return new File(System.getProperty("java.io.tmpdir"), UNIT_TEST_RELATIVE_GLOBAL_ROOT_DIR_PATH);
+        String subdirForTestTempFiles = UNIT_TEST_RELATIVE_GLOBAL_ROOT_DIR_PATH;
+        if (OSFamily.isLinux()) {
+            // as /tmp is shared, create a subdirectory per user to avoid permission issues
+            subdirForTestTempFiles += "-" + System.getProperty("user.name");
+        }
+        return new File(System.getProperty("java.io.tmpdir"), subdirForTestTempFiles);
     }
 
     /**
