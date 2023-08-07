@@ -17,9 +17,11 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.easymock.EasyMock;
+import org.junit.Before;
 import org.junit.Test;
 
 import de.rcenvironment.core.instancemanagement.InstanceManagementService;
+import de.rcenvironment.core.utils.common.TempFileServiceAccess;
 import de.rcenvironment.core.utils.common.textstream.receivers.LoggingTextOutReceiver;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ExternalServiceHolder;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.RceTestLifeCycleHooks;
@@ -50,6 +52,11 @@ public class TestScriptRunnerBackendTest {
             SelfTestSteps.class);
     }
 
+    @Before
+    public void setUp() throws Exception {
+        TempFileServiceAccess.setupUnitTestEnvironment();
+    }
+
     /**
      * Uses the test framework adapter to run scripts in src/test/resources/scripts.
      * 
@@ -61,9 +68,8 @@ public class TestScriptRunnerBackendTest {
 
         new ExternalServiceHolder().bindInstanceManagementService(EasyMock.createNiceMock(InstanceManagementService.class));
 
-        final String systemTempPath = System.getProperty("java.io.tmpdir");
-        final File reportDir = new File(systemTempPath, "testscriptrunner-selftest");
-        log.info("Test report output directory: " + reportDir);
+        final File reportDir = TempFileServiceAccess.getInstance().createManagedTempDir("tsr-selftest-report");
+        log.debug("Test report output directory: " + reportDir);
 
         final LoggingTextOutReceiver outputReceiver = new LoggingTextOutReceiver("(Test output) ");
         final String buildUnderTestId = "dummyBuild";
@@ -94,6 +100,9 @@ public class TestScriptRunnerBackendTest {
                 errorCaseDetected = true;
             }
         }
+
+        TempFileServiceAccess.getInstance().disposeManagedTempDirOrFile(reportDir);
+
         log.info(SEPARATOR_TEXT_LINE);
         if (errorCaseDetected) {
             fail("Error case detected - check captured Standard Output for details");
