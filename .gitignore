@@ -50,6 +50,10 @@ sys$command
 /de.rcenvironment/maven/initial/workspace
 /de.rcenvironment/workspace
 
+# other plugins and tools
+
+.asciidoctorconfig.adoc
+
 # TODO check: still needed?
 
 /de.rcenvironment.core.scripting.tests/cachedir
