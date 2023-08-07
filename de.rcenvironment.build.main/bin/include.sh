@@ -163,6 +163,8 @@ run_unit_tests() {
     # Generated output:
     # - target/unit-tests/reports/xml:  JUnit XML report files
     # - target/unit-tests/build.log:    the output of the Maven build process
+    #
+    # Note: The report files are also collected if the Maven run returns a non-zero exit code.
 
     # delete previous output
     rm -rf "target/unit-tests"
@@ -189,8 +191,6 @@ run_unit_tests() {
     EXIT_CODE=$?
     set -e
     
-    fail_with_log_tail_if_non_zero $EXIT_CODE "$BUILD_LOG_FILE"
-
     # collect individual XML report files
     mkdir -p target/unit-tests/reports/xml
     find .. -name '*.xml' -path '*/target/surefire-reports/*' \
@@ -199,7 +199,9 @@ run_unit_tests() {
     # a first quick-and-dirty check for test errors, but better than nothing
     # TODO generate a proper overview/report from these files
     echo "Checking for test errors (preliminary approach)"
-    grep "<error" target/unit-tests/reports/xml/*
+    grep "<error" target/unit-tests/reports/xml/* || true
+
+    fail_with_log_tail_if_non_zero $EXIT_CODE "$BUILD_LOG_FILE"
 
     # 6 lines for clean output in the BUILD SUCCESS case
     tail -n 6 "$BUILD_LOG_FILE"
