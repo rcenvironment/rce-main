@@ -168,6 +168,7 @@ public class EvaluationMemoryEndpointEditDialog extends EndpointEditDialog {
         percentageSignLabel.setVisible(true);
 
         // Since tolerance is always given relative, we have to expect and enforce floats in this field
+        // enforces float value in tolerenceField which is parsed (Text -> Float) in validateMetadataInputs() method
         toleranceField.addVerifyListener(new NumericalTextConstraintListener(WidgetGroupFactory.GREATER_OR_EQUAL_ZERO));
     }
 
@@ -222,6 +223,7 @@ public class EvaluationMemoryEndpointEditDialog extends EndpointEditDialog {
         final String toleranceValue = toleranceField.getText();
         boolean validTolerance = false;
         if (!toleranceValue.isEmpty()) {
+            // toleranceField has Float value due to verifyListner in appendToleranceFieldAndLabel() method
             float toleranceValueFloat = Float.parseFloat(toleranceValue);
             validTolerance = toleranceValueFloat <= MAX_TOLERANCE;
         }
