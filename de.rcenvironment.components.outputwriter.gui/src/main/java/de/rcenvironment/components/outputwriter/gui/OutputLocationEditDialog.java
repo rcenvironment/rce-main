@@ -12,6 +12,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -52,6 +53,7 @@ import de.rcenvironment.core.gui.workflow.executor.properties.WhitespaceShowList
  * @author Brigitte Boden
  * @author Dominik Schneider
  * @author Kathrin Schaffert (#17016, #14895, #17673)
+ * @author Devika Jalgaonkar (#17349)
  */
 
 public class OutputLocationEditDialog extends Dialog {
@@ -244,6 +246,7 @@ public class OutputLocationEditDialog extends Dialog {
         fileName.addModifyListener(ignoredEvent -> {
             chosenFilename = fileName.getText();
             setOKButtonActivation();
+            updateWarningLabel();
         });
 
         new Label(configGroup, SWT.NONE).setText("");
@@ -290,6 +293,7 @@ public class OutputLocationEditDialog extends Dialog {
                 chosenFolderForSaving = OutputWriterComponentConstants.ROOT_DISPLAY_NAME;
             }
             setOKButtonActivation();
+            updateWarningLabel();
         });
 
         new Label(configGroup, SWT.NONE).setText("");
@@ -322,12 +326,16 @@ public class OutputLocationEditDialog extends Dialog {
                     .equals(OutputWriterComponentConstants.ROOT_DISPLAY_NAME));
                 dirInsertButton.setEnabled(((Combo) arg0.getSource()).getText().equals(OutputWriterComponentConstants.ROOT_DISPLAY_NAME));
                 setOKButtonActivation();
+                updateWarningLabel();
+
             }
 
             @Override
             public void widgetDefaultSelected(SelectionEvent arg0) {
                 widgetSelected(arg0);
                 setOKButtonActivation();
+                updateWarningLabel();
+
             }
         });
         additionalFolder.addListener(SWT.Verify, new AlphanumericalTextContraintListener(FORBIDDEN_CHARS));
@@ -469,20 +477,34 @@ public class OutputLocationEditDialog extends Dialog {
         updateWarningLabel();
     }
 
-    protected Boolean validateTargetFileName() {
-
+    protected List<String> validateTargetFileName() {
+        final List<String> validationErrors = new LinkedList<>();
+        boolean isValid = true;
         // Check if input fields are empty
-        boolean isValid = !chosenFilename.isEmpty();
+        if (chosenFilename.isEmpty()) {
+            validationErrors.add("Enter Target file name");
+            isValid = false;
+        }
 
-        isValid = isValid && !otherOutputLocationFileNamesWithPaths.contains(chosenFolderForSaving + File.separator + chosenFilename);
+        if (otherOutputLocationFileNamesWithPaths.contains(chosenFolderForSaving + File.separator + chosenFilename)) {
+            validationErrors.add("Target File already exists");
+
+            isValid = false;
+
+        }
 
         List<String> forbiddenFilenames = Arrays.asList(OutputWriterComponentConstants.PROBLEMATICFILENAMES_WIN);
-        isValid = isValid && !forbiddenFilenames.contains(chosenFilename.toUpperCase());
+        if (forbiddenFilenames.contains(chosenFilename.toUpperCase())) {
+            validationErrors.add("Target file name is forbidden. Enter a valid filename");
+
+            isValid = false;
+
+        }
 
         // enable/disable "ok"
         getButton(IDialogConstants.OK_ID).setEnabled(isValid);
 
-        return isValid;
+        return validationErrors;
     }
 
     /**
@@ -557,10 +579,11 @@ public class OutputLocationEditDialog extends Dialog {
     private void setOKButtonActivation() {
         final List<String> headerValidationErrors = OutputWriterValidatorHelper.getValidationErrors(chosenHeader);
         final List<String> formatValidationErrors = OutputWriterValidatorHelper.getValidationErrors(chosenFormatString);
+        final List<String> targetFileNameValidationErrors = validateTargetFileName();
 
         final boolean headerValidationFailed = !headerValidationErrors.isEmpty();
         final boolean formatValidationFailed = !formatValidationErrors.isEmpty();
-        final boolean targetFileNameValidationFailed = !validateTargetFileName();
+        final boolean targetFileNameValidationFailed = !targetFileNameValidationErrors.isEmpty();
         final boolean validationFailed = headerValidationFailed || formatValidationFailed || targetFileNameValidationFailed;
         final Button okButton = getButton(OK);
         okButton.setEnabled(!validationFailed);
@@ -572,9 +595,11 @@ public class OutputLocationEditDialog extends Dialog {
 
         final List<String> headerValidationErrors = OutputWriterValidatorHelper.getValidationErrors(chosenHeader);
         final List<String> formatValidationErrors = OutputWriterValidatorHelper.getValidationErrors(chosenFormatString);
+        final List<String> targetFileNameValidationErrors = validateTargetFileName();
 
         final boolean headerValidationFailed = !headerValidationErrors.isEmpty();
         final boolean formatValidationFailed = !formatValidationErrors.isEmpty();
+        final boolean targetFileNameValidationFailed = !targetFileNameValidationErrors.isEmpty();
 
         if (!headerValidationFailed) {
             final StringBuilder warningBuilder = new StringBuilder();
@@ -616,6 +641,12 @@ public class OutputLocationEditDialog extends Dialog {
             errorMessageBuilder.append(String.join(SEMICOLON + SPACE, formatValidationErrors));
             warningLabel.addError(errorMessageBuilder.toString());
         }
+        if (targetFileNameValidationFailed) {
+            final StringBuilder errorMessageBuilder = new StringBuilder();
+            errorMessageBuilder.append("Target file section:\n");
+            errorMessageBuilder.append(String.join(SEMICOLON + SPACE, targetFileNameValidationErrors));
+            warningLabel.addError(errorMessageBuilder.toString());
+        }
     }
 
     private void createWarningLabel(Group configGroup) {
@@ -625,6 +656,7 @@ public class OutputLocationEditDialog extends Dialog {
 
     private KeyAdapter createHandleLinebreaksKeyAdapter(StyledText text) {
         return new KeyAdapter() {
+
             @Override
             public void keyPressed(KeyEvent e) {
                 if (text.getText().length() > 0 && (e.keyCode == SWT.CR || e.keyCode == SWT.LF)) {
