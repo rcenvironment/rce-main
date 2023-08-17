@@ -38,10 +38,13 @@ import de.rcenvironment.core.gui.workflow.editor.properties.EndpointEditDialog;
  *
  * @author Alexander Weinert
  * @author Tim Rosenbach
+ * @author Jan Flink (MANTIS 17994)
  */
 public class EvaluationMemoryEndpointEditDialog extends EndpointEditDialog {
 
-    private static final String TOLERANCE_MESSAGE = "Define a value for the tolerance";
+    private static final int MAX_TOLERANCE = 100;
+
+    private static final String TOLERANCE_MESSAGE = "Define a value for the tolerance from 0 to 100";
 
     private Button useToleranceButton;
 
@@ -84,16 +87,15 @@ public class EvaluationMemoryEndpointEditDialog extends EndpointEditDialog {
 
         // Since the only metadata for which we create an input control in this component is the tolerance, we can skip checking the text
         // and the data type, but only need to check whether some tolerance has been set, i.e., whether the value is nonempty
+        previousDataType = getTypeSelectionFromUI();
+        setUseToleranceButtonEnabled(dataTypeSupportsTolerance(previousDataType));
         if (value.isEmpty()) {
-            enableUseToleranceButton();
-            disableToleranceField();
+            setToleranceFieldEnabled(false);
         } else {
-            enableUseToleranceButton();
             useToleranceButton.setSelection(true);
             toleranceField.setText(value);
         }
 
-        previousDataType = getTypeSelectionFromUI();
 
         return toleranceField;
     }
@@ -132,11 +134,7 @@ public class EvaluationMemoryEndpointEditDialog extends EndpointEditDialog {
             @Override
             public void widgetSelected(SelectionEvent event) {
                 final boolean useTolerance = useToleranceButton.getSelection();
-                if (useTolerance) {
-                    enableToleranceField();
-                } else {
-                    disableToleranceField();
-                }
+                setToleranceFieldEnabled(useTolerance);
                 // We need to explicitly validate the inputs at this point, as the change listener usually doing this upon changes to
                 // the interface only fires when the text value in some field has changed
                 validateInput();
@@ -170,7 +168,8 @@ public class EvaluationMemoryEndpointEditDialog extends EndpointEditDialog {
         percentageSignLabel.setVisible(true);
 
         // Since tolerance is always given relative, we have to expect and enforce floats in this field
-        toleranceField.addVerifyListener(new NumericalTextConstraintListener(WidgetGroupFactory.ONLY_FLOAT));
+        // enforces float value in tolerenceField which is parsed (Text -> Float) in validateMetadataInputs() method
+        toleranceField.addVerifyListener(new NumericalTextConstraintListener(WidgetGroupFactory.GREATER_OR_EQUAL_ZERO));
     }
 
     private boolean dataTypeSupportsTolerance(DataType dataType) {
@@ -188,11 +187,11 @@ public class EvaluationMemoryEndpointEditDialog extends EndpointEditDialog {
         final boolean currentSupportsTolerance = dataTypeSupportsTolerance(newDataType);
 
         if (previousSupportsTolerance && !currentSupportsTolerance) {
-            disableUseToleranceButton();
-            disableToleranceField();
+            setUseToleranceButtonEnabled(false);
+            setToleranceFieldEnabled(false);
         } else if (!previousSupportsTolerance && currentSupportsTolerance) {
-            enableUseToleranceButton();
-            disableToleranceField();
+            setUseToleranceButtonEnabled(true);
+            setToleranceFieldEnabled(false);
         }
         /*
          * Only remaining cases: supporting tolerance did not change. In this case, we also do not change the controls: If the previous and
@@ -211,14 +210,24 @@ public class EvaluationMemoryEndpointEditDialog extends EndpointEditDialog {
      * tolerance. This information is not present anymore in the stored metadata.
      *
      * @see de.rcenvironment.core.gui.workflow.editor.properties.EndpointEditDialog#validateMetaDataInputs()
+     * 
+     * Added validation check for tolerance value to be between 0 to 100 percent (MANTIS-17994)
+     * @author Devika Jalgaonkar (for MANTIS-17994)
      */
     @Override
     protected boolean validateMetaDataInputs() {
-        // Read this condition as "useTolerance -> !toleranceValue.isEmpty". Since Java does not support implication, we rewrite this to
-        // "!useTolerance || !toleranceValue.isEmpty"
-        final String toleranceValue = toleranceField.getText();
-        final boolean validTolerance = !useTolerance() || !toleranceValue.isEmpty();
+        if (!useTolerance()) {
+            return super.validateMetaDataInputs();
+        }
 
+        final String toleranceValue = toleranceField.getText();
+        boolean validTolerance = false;
+        if (!toleranceValue.isEmpty()) {
+            // toleranceField has Float value due to verifyListner in appendToleranceFieldAndLabel() method
+            float toleranceValueFloat = Float.parseFloat(toleranceValue);
+            validTolerance = toleranceValueFloat <= MAX_TOLERANCE;
+        }
+       
         if (!validTolerance) {
             updateMessage(TOLERANCE_MESSAGE, true);
         }
@@ -226,28 +235,16 @@ public class EvaluationMemoryEndpointEditDialog extends EndpointEditDialog {
         return validTolerance && super.validateMetaDataInputs();
     }
 
-    private void disableUseToleranceButton() {
+    private void setUseToleranceButtonEnabled(boolean enabled) {
         useToleranceButton.setSelection(false);
-        useToleranceButton.setEnabled(false);
+        useToleranceButton.setEnabled(enabled);
     }
 
-    private void enableUseToleranceButton() {
-        useToleranceButton.setSelection(false);
-        useToleranceButton.setEnabled(true);
-    }
-
-    private void disableToleranceField() {
-        toleranceFieldLabel.setEnabled(false);
-        toleranceField.setEnabled(false);
-        toleranceField.setEditable(false);
-        percentageSignLabel.setEnabled(false);
-    }
-
-    private void enableToleranceField() {
-        toleranceFieldLabel.setEnabled(true);
-        toleranceField.setEnabled(true);
-        toleranceField.setEditable(true);
-        percentageSignLabel.setEnabled(true);
+    private void setToleranceFieldEnabled(boolean enabled) {
+        toleranceFieldLabel.setEnabled(enabled);
+        toleranceField.setEnabled(enabled);
+        toleranceField.setEditable(enabled);
+        percentageSignLabel.setEnabled(enabled);
     }
 
 }
