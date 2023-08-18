@@ -28,6 +28,7 @@ import io.cucumber.java.Scenario;
  * A context holder for execution of a single {@link Scenario}.
  *
  * @author Robert Mischke
+ * @author Devika Jalgaonkar (#17806)
  */
 public final class TestScenarioExecutionContext {
 
@@ -116,16 +117,16 @@ public final class TestScenarioExecutionContext {
         if (scenario.isFailed()) {
             outputReceiver
                 .addOutput("*** Error in test scenario \"" + scenario.getName() + "\"; dumping any captured StdOut/StdErr output");
-            scenario.write("*** Error in test scenario \"" + scenario.getName() + "\"; dumping any captured StdOut/StdErr output");
+            scenario.log("*** Error in test scenario \"" + scenario.getName() + "\"; dumping any captured StdOut/StdErr output");
             if (currentExecutionResult != null) {
                 for (String line : currentExecutionResult.stdoutLines) {
                     String logLine = "[StdOut] " + line;
-                    scenario.write(logLine);
+                    scenario.log(logLine);
                     log.error(logLine);
                 }
                 for (String line : currentExecutionResult.stderrLines) {
                     String logLine = "[StdErr] " + line;
-                    scenario.write(logLine);
+                    scenario.log(logLine);
                     log.error(logLine);
                 }
             }

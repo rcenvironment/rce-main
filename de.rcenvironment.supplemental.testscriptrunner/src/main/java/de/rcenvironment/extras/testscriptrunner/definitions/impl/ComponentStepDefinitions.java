@@ -30,6 +30,7 @@ import de.rcenvironment.extras.testscriptrunner.definitions.common.InstanceManag
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ManagedInstance;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
 import de.rcenvironment.extras.testscriptrunner.definitions.helper.StepDefinitionConstants;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -41,6 +42,7 @@ import io.cucumber.java.en.When;
  * @author Robert Mischke (based on code from)
  * @author Alexander Weinert (component information steps)
  * @author Kathrin Schaffert (#17502, #17506)
+ * @author Devika Jalgaonkar (#17806)
  */
 public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBase {
 
@@ -238,7 +240,7 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
 
     @When("^integrating workflow \"([^\"]*)\" as component \"([^\"]*)\" on instance \"([^\"]*)\" with the following endpoint definitions:$")
     public void whenIntegratingWorkflow(String workflowName, String componentName, String instanceId, DataTable endpointDefinitionTable) {
-        final List<List<String>> endpointDefinitions = endpointDefinitionTable.cells(0);
+        final List<List<String>> endpointDefinitions = endpointDefinitionTable.cells();
 
         final String endpointsDefinitionsString = "--expose " + endpointDefinitions.stream()
             .map(row -> (row.get(0)))
@@ -265,7 +267,7 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
         Map<String, ComponentVisibilityState> visibilityMap = new HashMap<>();
 
         // parse expectations
-        for (List<String> criteriaRow : componentsTable.cells(0)) {
+        for (List<String> criteriaRow : componentsTable.cells()) {
             String argNodeName = criteriaRow.get(0);
             String argCompName = criteriaRow.get(1);
             String expectedState = criteriaRow.get(2);
