@@ -147,17 +147,11 @@ public class CucumberTestFrameworkAdapter {
     }
 
     private void initialiseRuntime(ReportOutputFormat reportFormat, String reportDirUriString, String reportFileName,
-        String tagNameFilter) {
+        String tagNameFilter, File scriptLocationRoot) {
         EventBus eventBus = synchronize(new TimeServiceEventBus(Clock.systemUTC(), UUID::randomUUID));
-        File scriptLocationRoot =
-//            new File("C:/RCEMain/rce-main/de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts"); // remove
-
-            new File("C:/RCEMain/rce-main/de.rcenvironment.supplemental.testscriptrunner.tests/src/test/resources/scripts"); // remove
-                                                                                                                             // hard-coded
         String reportType = "html";
         String htmlReportPath = "target/report/";
         String htmlReportName = "Report";
-        // path
         RuntimeOptionsBuilder cucumberRuntimeOptionsBuilder =
             new RuntimeOptionsBuilder().addGlue(GluePath.parse("de.rcenvironment.extras.testscriptrunner"))
                 .setMonochrome(true)
@@ -245,7 +239,7 @@ public class CucumberTestFrameworkAdapter {
         if (reportFile.isFile()) {
             throw new IOException("Failed to delete pre-existing report file " + reportFile.getAbsolutePath());
         }
-        initialiseRuntime(reportFormat, reportDirUriString, reportFileName, tagNameFilter);
+        initialiseRuntime(reportFormat, reportDirUriString, reportFileName, tagNameFilter, scriptLocationRoot);
         ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();
 
         TestScenarioExecutionContext.setThreadLocalParameters(outputReceiver, buildUnderTestId, scriptLocationRoot);
