@@ -45,11 +45,7 @@ public class TestScriptRunnerBackendTest {
     private final Log log = LogFactory.getLog(getClass());
 
     public TestScriptRunnerBackendTest() {
-        testFrameworkAdapter = new CucumberTestFrameworkAdapter(
-            RceTestLifeCycleHooks.class,
-            InstanceInstantiationStepDefinitions.class,
-            WorkflowStepDefinitions.class,
-            SelfTestSteps.class);
+        testFrameworkAdapter = new CucumberTestFrameworkAdapter();
     }
 
     @Before

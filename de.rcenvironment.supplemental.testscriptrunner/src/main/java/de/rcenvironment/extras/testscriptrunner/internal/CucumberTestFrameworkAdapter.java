@@ -16,8 +16,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.AbstractExecutorService;
@@ -25,7 +29,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import org.apache.commons.io.Charsets;
@@ -33,6 +37,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
@@ -77,19 +83,7 @@ public class CucumberTestFrameworkAdapter {
 
     private final Log log = LogFactory.getLog(getClass());
 
-    private final ClassLoader classLoader = getClass().getClassLoader();
-
-    private Predicate<Pickle> tagFilters;
-
-    private CucumberExecutionContext cucumberExecutionContext;
-
-    private List<Feature> features;
-
-    private ExecutorService executor;
-
-    private PickleOrder pickleOrder;
-
-    private Supplier<ClassLoader> classloaderSupplier = () -> classLoader;
+    private final List<URL> classFileUrlsForRedirectingGlueCodeSearch;
 
     public enum ReportOutputFormat {
 
@@ -142,68 +136,230 @@ public class CucumberTestFrameworkAdapter {
 
     }
 
-    public CucumberTestFrameworkAdapter(final Class<?>... stepDefinitions) {
-        // TODO document rationale behind this
-    }
+    /**
+     * A holder for all data that is related to a specific invocation, and data-related execution methods. This class makes
+     * {@link CucumberTestFrameworkAdapter} thread safe again after the Cucumber 7.x upgrade.
+     * 
+     * @author Robert Mischke
+     */
+    private final class ExecutionContext {
 
-    private void initialiseRuntime(ReportOutputFormat reportFormat, String reportDirUriString, String reportFileName,
-        String tagNameFilter, File scriptLocationRoot) {
-        EventBus eventBus = synchronize(new TimeServiceEventBus(Clock.systemUTC(), UUID::randomUUID));
-        String reportType = "html";
-        String htmlReportPath = "target/report/";
-        String htmlReportName = "Report";
-        RuntimeOptionsBuilder cucumberRuntimeOptionsBuilder =
-            new RuntimeOptionsBuilder().addGlue(GluePath.parse("de.rcenvironment.extras.testscriptrunner"))
-                .setMonochrome(true)
-                .setSnippetType(SnippetType.CAMELCASE).setPickleOrder(StandardPickleOrders.lexicalUriOrder())
-                .addTagFilter(TagExpressionParser.parse("not @disabled or not @Disabled"))
-                .addPluginName(StringUtils.format("%s:%s/%s", reportFormat.getFormatSpecifier(), reportDirUriString, reportFileName))
-                .setObjectFactoryClass(PicoFactory.class).addPluginName("pretty")
-                .addPluginName(reportType + ":" + htmlReportPath + htmlReportName + "." + reportType)
-                .addFeature(FeatureWithLines.parse(scriptLocationRoot.getAbsolutePath()));
-        if (!StringUtils.isNullorEmpty(tagNameFilter)) {
-            // normalize filter parts and prepend "@" character
-            final StringBuilder buffer = new StringBuilder();
-            for (String filterPart : tagNameFilter.split(",")) {
-                if (buffer.length() != 0) {
-                    buffer.append(",");
-                }
-                final String trimmedPart = filterPart.trim();
-                if (!trimmedPart.startsWith("@")) {
-                    buffer.append("@");
-                }
-                buffer.append(trimmedPart);
+        private final class ClassLoaderWrapper extends ClassLoader {
+
+            /**
+             * A wrapper to intercept and rewrite certain Cucumber classloader calls that fail in an OSGi environment.
+             * 
+             * @author Robert Mischke
+             */
+            private ClassLoaderWrapper(ClassLoader parent) {
+                super(parent);
+
             }
-            if (buffer.length() != 0) {
-                cucumberRuntimeOptionsBuilder.addTagFilter(TagExpressionParser.parse(buffer.toString()));
+
+            @Override
+            public Enumeration<URL> getResources(String name) throws IOException {
+                // intercept the resource-to-URL resolution which normally returns a bundle URL, which cannot be used by Cucumber
+
+                Enumeration<URL> originalResult = super.getResources(name);
+                List<URL> originalResultAsList = new ArrayList<>();
+                // IMPORTANT: this consumes the original enumeration, so it cannot be returned anymore
+                originalResult.asIterator().forEachRemaining(originalResultAsList::add);
+
+                List<URL> resultList = new ArrayList<>();
+                log.debug("Original classloader result of getResources(\"" + name + "\"):");
+                AtomicBoolean modified = new AtomicBoolean();
+
+                originalResultAsList.forEach((url) -> {
+                    log.debug("  " + url);
+                    if ("bundleresource".equals(url.getProtocol()) && !url.getPath().contains("META-INF")) {
+                        // cucumber cannot handle this kind of URL for searching for glue code classes, so we need to rewrite it
+                        if (classFileUrlsForRedirectingGlueCodeSearch.isEmpty()) {
+                            log.error("No URL registered to redirect the glue code class file search to");
+                        }
+                        // only add the redirect URLs once
+                        if (!modified.get()) {
+                            resultList.addAll(classFileUrlsForRedirectingGlueCodeSearch);
+                            modified.set(true);
+                        }
+                    } else {
+                        // keep original result
+                        resultList.add(url);
+                    }
+                });
+
+                if (modified.get()) {
+                    log.debug("Result substituted with:");
+                    resultList.forEach((u) -> log.debug("  " + u));
+                }
+                return Collections.enumeration(resultList);
             }
         }
-        RuntimeOptions cucumberRuntimeOptions = cucumberRuntimeOptionsBuilder.build();
-        Supplier<UUID> uuidSupplier = () -> eventBus.generateId();
 
-        FeatureParser featureParser = new FeatureParser(uuidSupplier);
-        FeaturePathFeatureSupplier featureSupplier = new FeaturePathFeatureSupplier(classloaderSupplier,
-            cucumberRuntimeOptions, featureParser);
-        features = featureSupplier.get();
+        private final ReportOutputFormat reportFormat;
 
-        this.tagFilters = new Filters(cucumberRuntimeOptions);
-        this.pickleOrder = cucumberRuntimeOptions.getPickleOrder();
-        ExitStatus exitStatus = new ExitStatus(cucumberRuntimeOptions);
-        Plugins cucumberPlugins = new Plugins(new PluginFactory(), cucumberRuntimeOptions);
+        private final String reportDirUriString;
 
-        cucumberPlugins.addPlugin(exitStatus);
-        ObjectFactoryServiceLoader cucumberObjectFactoryServiceLoader = new ObjectFactoryServiceLoader(
-            classloaderSupplier, cucumberRuntimeOptions);
-        ObjectFactorySupplier cucumberObjectFactorySupplier = new SingletonObjectFactorySupplier(cucumberObjectFactoryServiceLoader);
-        BackendServiceLoader cucumberBackendSupplier = new BackendServiceLoader(classloaderSupplier,
-            cucumberObjectFactorySupplier);
+        private final String reportFileName;
 
-        RunnerSupplier cucumberRunnerSupplier = new SingletonRunnerSupplier(cucumberRuntimeOptions, eventBus, cucumberBackendSupplier,
-            cucumberObjectFactorySupplier);
-        cucumberExecutionContext = new CucumberExecutionContext(eventBus, exitStatus, cucumberRunnerSupplier);
-        // Start test execution now.
-        cucumberPlugins.setEventBusOnEventListenerPlugins(eventBus);
-        executor = new SingleThreadedExecutionService();
+        private final String tagNameFilter;
+
+        private final File scriptLocationRoot;
+
+        private final Supplier<ClassLoader> classloaderSupplier;
+
+        // set by initializeCucumberRuntime()
+        private Filters tagFilters;
+
+        // set by initializeCucumberRuntime()
+        private PickleOrder pickleOrder;
+
+        // set by initializeCucumberRuntime()
+        private CucumberExecutionContext cucumberExecutionContext;
+
+        // set by initializeCucumberRuntime()
+        private List<Feature> features;
+
+        // set by initializeCucumberRuntime()
+        private ExecutorService executor;
+
+        private ExecutionContext(ReportOutputFormat reportFormat, String reportDirUriString, String reportFileName, String tagNameFilter,
+            File scriptLocationRoot) {
+            this.reportFormat = reportFormat;
+            this.reportDirUriString = reportDirUriString;
+            this.reportFileName = reportFileName;
+            this.tagNameFilter = tagNameFilter;
+            this.scriptLocationRoot = scriptLocationRoot;
+
+            // patch the OSGi classloader by wrapping it
+            ClassLoader upstreamClassLoader = getClass().getClassLoader();
+            ClassLoader classLoader = new ClassLoaderWrapper(upstreamClassLoader);
+            classloaderSupplier = () -> classLoader;
+
+            initializeCucumberRuntime();
+        }
+
+        private void initializeCucumberRuntime() {
+            EventBus eventBus = synchronize(new TimeServiceEventBus(Clock.systemUTC(), UUID::randomUUID));
+            String reportType = "html";
+            String htmlReportPath = "target/report/";
+            String htmlReportName = "Report";
+            RuntimeOptionsBuilder cucumberRuntimeOptionsBuilder =
+                new RuntimeOptionsBuilder().addGlue(GluePath.parse("de.rcenvironment.extras.testscriptrunner"))
+                    .setMonochrome(true)
+                    .setSnippetType(SnippetType.CAMELCASE).setPickleOrder(StandardPickleOrders.lexicalUriOrder())
+                    .addTagFilter(TagExpressionParser.parse("not @disabled or not @Disabled"))
+                    .addPluginName(StringUtils.format("%s:%s/%s", reportFormat.getFormatSpecifier(),
+                        reportDirUriString, reportFileName))
+                    .setObjectFactoryClass(PicoFactory.class).addPluginName("pretty")
+                    .addPluginName(reportType + ":" + htmlReportPath + htmlReportName + "." + reportType)
+                    .addFeature(FeatureWithLines.parse(scriptLocationRoot.getAbsolutePath()));
+            if (!StringUtils.isNullorEmpty(tagNameFilter)) {
+                // normalize filter parts and prepend "@" character
+                final StringBuilder buffer = new StringBuilder();
+                for (String filterPart : tagNameFilter.split(",")) {
+                    if (buffer.length() != 0) {
+                        buffer.append(",");
+                    }
+                    final String trimmedPart = filterPart.trim();
+                    if (!trimmedPart.startsWith("@")) {
+                        buffer.append("@");
+                    }
+                    buffer.append(trimmedPart);
+                }
+                if (buffer.length() != 0) {
+                    cucumberRuntimeOptionsBuilder.addTagFilter(TagExpressionParser.parse(buffer.toString()));
+                }
+            }
+            RuntimeOptions cucumberRuntimeOptions = cucumberRuntimeOptionsBuilder.build();
+            Supplier<UUID> uuidSupplier = () -> eventBus.generateId();
+
+            FeatureParser featureParser = new FeatureParser(uuidSupplier);
+            FeaturePathFeatureSupplier featureSupplier = new FeaturePathFeatureSupplier(classloaderSupplier,
+                cucumberRuntimeOptions, featureParser);
+            features = featureSupplier.get();
+
+            tagFilters = new Filters(cucumberRuntimeOptions);
+            pickleOrder = cucumberRuntimeOptions.getPickleOrder();
+            ExitStatus exitStatus = new ExitStatus(cucumberRuntimeOptions);
+            Plugins cucumberPlugins = new Plugins(new PluginFactory(), cucumberRuntimeOptions);
+
+            cucumberPlugins.addPlugin(exitStatus);
+            ObjectFactoryServiceLoader cucumberObjectFactoryServiceLoader = new ObjectFactoryServiceLoader(
+                classloaderSupplier, cucumberRuntimeOptions);
+            ObjectFactorySupplier cucumberObjectFactorySupplier = new SingletonObjectFactorySupplier(cucumberObjectFactoryServiceLoader);
+            BackendServiceLoader cucumberBackendSupplier = new BackendServiceLoader(classloaderSupplier,
+                cucumberObjectFactorySupplier);
+
+            RunnerSupplier cucumberRunnerSupplier = new SingletonRunnerSupplier(cucumberRuntimeOptions, eventBus, cucumberBackendSupplier,
+                cucumberObjectFactorySupplier);
+            cucumberExecutionContext = new CucumberExecutionContext(eventBus, exitStatus, cucumberRunnerSupplier);
+            // Start test execution now.
+            cucumberPlugins.setEventBusOnEventListenerPlugins(eventBus);
+            executor = new SingleThreadedExecutionService();
+        }
+
+        private void runFeatureFiles() {
+            cucumberExecutionContext.runFeatures(() -> runFeatureFiles(features));
+
+        }
+
+        private Runnable runPickle(Pickle pickleToRun) {
+            return () -> cucumberExecutionContext.runTestCase(cucumberRunner -> cucumberRunner.runPickle(pickleToRun));
+        }
+
+        private void runFeatureFiles(List<Feature> featuresList) {
+            featuresList.forEach(cucumberExecutionContext::beforeFeature);
+            List<Future<?>> pickleList = featuresList.stream().flatMap(feature -> feature.getPickles().stream()).filter(tagFilters)
+                .collect(collectingAndThen(
+                    toList(), orderedPickleList -> pickleOrder.orderPickles(orderedPickleList).stream()))
+                .map(pickle -> executor.submit(runPickle(pickle))).collect(toList());
+
+            executor.shutdown();
+
+            for (Future<?> pickle : pickleList) {
+                try {
+                    pickle.get();
+                } catch (ExecutionException e) {
+                    log.error(e);
+                } catch (InterruptedException e) {
+                    log.error(e);
+                    executor.shutdownNow();
+                }
+            }
+        }
+    }
+
+    public CucumberTestFrameworkAdapter() {
+        // generate replacement URLs to support the way Cucumber 7.x loads glue code class files
+        this.classFileUrlsForRedirectingGlueCodeSearch = new ArrayList<>();
+        Bundle containingBundle = FrameworkUtil.getBundle(getClass());
+        if (containingBundle != null) {
+            String locationInfo = containingBundle.getLocation();
+            if (locationInfo.startsWith("reference:file:")) {
+                // when run from Eclipse, location has the format
+                // "reference:file:<...>/de.rcenvironment.supplemental.testscriptrunner/"
+                String rewrittenUrlString =
+                    locationInfo.replace("reference:", "") + "target/classes/de/rcenvironment/extras/testscriptrunner";
+                log.debug("Using rewritten class file location " + rewrittenUrlString);
+                try {
+                    this.classFileUrlsForRedirectingGlueCodeSearch.add(new URL(rewrittenUrlString));
+                    this.classFileUrlsForRedirectingGlueCodeSearch
+                        .add(new URL(rewrittenUrlString.replace("testscriptrunner/", "testscriptrunner.tests/")));
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException("Failed to recreate URL from string " + rewrittenUrlString);
+                }
+            } else if (locationInfo.startsWith("reference:jar:")) {
+                // TODO the standalone pattern was not tested yet; assuming "reference:jar:file:<...>.jar"
+                String rewrittenUrlString = locationInfo.replace("reference:", "");
+                log.debug("Using rewritten class file location " + rewrittenUrlString);
+                try {
+                    this.classFileUrlsForRedirectingGlueCodeSearch.add(new URL(rewrittenUrlString));
+                    // unlike the Eclipse case, do not add a reference to the test bundle as it is absent in the standalone build
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException("Failed to recreate URL from string " + rewrittenUrlString);
+                }
+            }
+        }
     }
 
     /**
@@ -239,12 +395,16 @@ public class CucumberTestFrameworkAdapter {
         if (reportFile.isFile()) {
             throw new IOException("Failed to delete pre-existing report file " + reportFile.getAbsolutePath());
         }
-        initialiseRuntime(reportFormat, reportDirUriString, reportFileName, tagNameFilter, scriptLocationRoot);
+        ExecutionContext executionContext =
+            new ExecutionContext(reportFormat, reportDirUriString, reportFileName, tagNameFilter, scriptLocationRoot);
+
+        // TODO check: it looks like this is never attached to any data source, only consumed
         ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();
 
         TestScenarioExecutionContext.setThreadLocalParameters(outputReceiver, buildUnderTestId, scriptLocationRoot);
+
         try {
-            runFeatureFiles();
+            executionContext.runFeatureFiles();
         } finally {
             TestScenarioExecutionContext.discardThreadLocalParameters();
         }
@@ -258,37 +418,9 @@ public class CucumberTestFrameworkAdapter {
         }
     }
 
-    private void runFeatureFiles() {
-        cucumberExecutionContext.runFeatures(() -> runFeatureFiles(features));
+    // TODO consider moving this into ExecutionContext, potentially as its constructor
 
-    }
-
-    private Runnable runPickle(Pickle pickleToRun) {
-        return () -> cucumberExecutionContext.runTestCase(cucumberRunner -> cucumberRunner.runPickle(pickleToRun));
-    }
-
-    private void runFeatureFiles(List<Feature> featuresList) {
-        featuresList.forEach(cucumberExecutionContext::beforeFeature);
-        List<Future<?>> pickleList = featuresList.stream().flatMap(feature -> feature.getPickles().stream()).filter(tagFilters)
-            .collect(collectingAndThen(
-                toList(), orderedPickleList -> pickleOrder.orderPickles(orderedPickleList).stream()))
-            .map(pickle -> executor.submit(runPickle(pickle))).collect(toList());
-
-        executor.shutdown();
-
-        for (Future<?> pickle : pickleList) {
-            try {
-                pickle.get();
-            } catch (ExecutionException e) {
-                log.error(e);
-            } catch (InterruptedException e) {
-                log.error(e);
-                executor.shutdownNow();
-            }
-        }
-    }
-
-    private static final class SingleThreadedExecutionService extends AbstractExecutorService {
+    private final class SingleThreadedExecutionService extends AbstractExecutorService {
 
         @Override
         public void execute(Runnable commandd) {
@@ -317,8 +449,7 @@ public class CucumberTestFrameworkAdapter {
 
         @Override
         public void shutdown() {
-            System.out.println("Thread shutting down");
-
+            log.debug("Cucumber execution thread shutting down");
         }
 
     }

@@ -94,10 +94,7 @@ public class TestScriptRunnerCommandPlugin implements CommandPlugin {
     private final File reportsRootDir;
 
     public TestScriptRunnerCommandPlugin() throws IOException {
-        testFrameworkAdapter = new CucumberTestFrameworkAdapter(AssertOutputStepDefinitions.class,
-                CommonStepDefinitions.class, ComponentStepDefinitions.class, InstanceCommandStepDefinitions.class,
-                InstanceInstantiationStepDefinitions.class, InstanceNetworkingStepDefinitions.class,
-                InstanceStateStepDefinitions.class, RceTestLifeCycleHooks.class, WorkflowStepDefinitions.class);
+        testFrameworkAdapter = new CucumberTestFrameworkAdapter();
         if (RuntimeDetection.isImplicitServiceActivationDenied()) {
             // avoid breaking when activated in a default test environment
             TempFileServiceAccess.setupUnitTestEnvironment();
