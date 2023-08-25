@@ -163,7 +163,10 @@ public class CucumberTestFrameworkAdapter {
                 Enumeration<URL> originalResult = super.getResources(name);
                 List<URL> originalResultAsList = new ArrayList<>();
                 // IMPORTANT: this consumes the original enumeration, so it cannot be returned anymore
-                originalResult.asIterator().forEachRemaining(originalResultAsList::add);
+                while (originalResult.hasMoreElements()) {
+                    originalResultAsList.add(originalResult.nextElement());
+                }
+                originalResult = null; // avoid accidental usage
 
                 List<URL> resultList = new ArrayList<>();
                 log.debug("Original classloader result of getResources(\"" + name + "\"):");
