@@ -22,7 +22,7 @@ class RCEBuildPreprocessor {
 
     final defaultRepositoryUrlSuffixes = [
         'snapshot': [
-            'platform': 'snapshots/integration-10',
+            'platform': 'snapshots/dev-mantis-17800-cucumber-upgrade',
             'intermediate': 'snapshots/integration-10'
         ],
         'rc_or_release': [
