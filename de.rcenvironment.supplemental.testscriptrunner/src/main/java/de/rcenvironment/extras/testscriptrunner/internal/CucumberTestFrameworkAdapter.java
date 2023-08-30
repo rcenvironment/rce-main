@@ -17,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -40,8 +41,11 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
+import de.rcenvironment.core.configuration.ConfigurationService;
+import de.rcenvironment.core.configuration.ConfigurationService.ConfigurablePathId;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
+import de.rcenvironment.core.utils.incubator.ServiceRegistry;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
 import io.cucumber.core.eventbus.EventBus;
 import io.cucumber.core.feature.FeatureParser;
@@ -338,12 +342,17 @@ public class CucumberTestFrameworkAdapter {
         Bundle containingBundle = FrameworkUtil.getBundle(getClass());
         if (containingBundle != null) {
             String locationInfo = containingBundle.getLocation();
-            if (locationInfo.startsWith("reference:file:")) {
-                // when run from Eclipse, location has the format
+            log.debug("Original OSGi bundle location value: " + locationInfo);
+            if (!locationInfo.startsWith("reference:file:")) {
+                throw new RuntimeException("Unexpected bundle location format (expected a 'reference:file:' prefix): " + locationInfo);
+            }
+            if (locationInfo.endsWith("/")) {
+                // when run from Eclipse, locationInfo has the format
                 // "reference:file:<...>/de.rcenvironment.supplemental.testscriptrunner/"
                 String rewrittenUrlString =
                     locationInfo.replace("reference:", "") + "target/classes/de/rcenvironment/extras/testscriptrunner";
-                log.debug("Using rewritten class file location " + rewrittenUrlString);
+                log.debug("Apparently running from an IDE; using rewritten class files location " + rewrittenUrlString);
+                // in this case, add both the main and self-test glue code locations
                 try {
                     this.classFileUrlsForRedirectingGlueCodeSearch.add(new URL(rewrittenUrlString));
                     this.classFileUrlsForRedirectingGlueCodeSearch
@@ -351,16 +360,29 @@ public class CucumberTestFrameworkAdapter {
                 } catch (MalformedURLException e) {
                     throw new RuntimeException("Failed to recreate URL from string " + rewrittenUrlString);
                 }
-            } else if (locationInfo.startsWith("reference:jar:")) {
-                // TODO the standalone pattern was not tested yet; assuming "reference:jar:file:<...>.jar"
-                String rewrittenUrlString = locationInfo.replace("reference:", "");
-                log.debug("Using rewritten class file location " + rewrittenUrlString);
-                try {
-                    this.classFileUrlsForRedirectingGlueCodeSearch.add(new URL(rewrittenUrlString));
-                    // unlike the Eclipse case, do not add a reference to the test bundle as it is absent in the standalone build
-                } catch (MalformedURLException e) {
-                    throw new RuntimeException("Failed to recreate URL from string " + rewrittenUrlString);
+            } else if (locationInfo.endsWith(".jar")) {
+                // when run from a standalone build, locationInfo has the format
+                // "reference:file:plugins/de.rcenvironment.supplemental.testscriptrunner_<...>.jar";
+                // unfortunately, the path is relative, so for robustness, we need to resolve it against the installation dir
+                String relativePathPart = locationInfo.replace("reference:file:", "");
+                File installationDir = ServiceRegistry.createAccessFor(this).getService(ConfigurationService.class)
+                    .getConfigurablePath(ConfigurablePathId.INSTALLATION_DATA_ROOT);
+                File absolutePath = new File(installationDir, relativePathPart);
+                if (!absolutePath.isFile()) {
+                    throw new RuntimeException(
+                        "Derived the absolute bundle path " + absolutePath + ", but it does not point at a JAR file");
                 }
+                // TODO test a path suffix like "!de/rcenvironment/extras/testscriptrunner" to prevent Cucumber scanning the whole JAR
+                URI rewrittenUri = absolutePath.toURI();
+                log.debug("Apparently running from a standalone build, using rewritten class files location " + rewrittenUri.toString());
+                try {
+                    this.classFileUrlsForRedirectingGlueCodeSearch.add(rewrittenUri.toURL());
+                    // unlike the Eclipse case, do not add a reference to the self-test bundle as it is absent in the standalone build
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException("Failed to recreate URL from URI " + rewrittenUri.toString());
+                }
+            } else {
+                throw new RuntimeException("Unrecognized bundle location format: " + locationInfo);
             }
         }
     }
