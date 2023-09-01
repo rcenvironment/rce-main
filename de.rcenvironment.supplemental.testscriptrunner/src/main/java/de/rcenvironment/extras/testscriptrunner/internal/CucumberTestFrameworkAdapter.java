@@ -16,6 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -72,6 +73,12 @@ import io.cucumber.core.runtime.SingletonRunnerSupplier;
 import io.cucumber.core.runtime.TimeServiceEventBus;
 import io.cucumber.core.snippets.SnippetType;
 import io.cucumber.picocontainer.PicoFactory;
+import io.cucumber.plugin.event.EventHandler;
+import io.cucumber.plugin.event.PickleStepTestStep;
+import io.cucumber.plugin.event.Result;
+import io.cucumber.plugin.event.Status;
+import io.cucumber.plugin.event.TestCaseFinished;
+import io.cucumber.plugin.event.TestStepFinished;
 import io.cucumber.tagexpressions.TagExpressionParser;
 
 /**
@@ -148,6 +155,10 @@ public class CucumberTestFrameworkAdapter {
      */
     private final class ExecutionContext {
 
+        private final EventHandler<TestStepFinished> cucumberTestStepFinishedHandler = this::cucumberTestStepFinished;
+
+        private final EventHandler<TestCaseFinished> cucumberTestCaseFinishedHandler = this::cucumberTestCaseResult;
+
         private final class ClassLoaderWrapper extends ClassLoader {
 
             /**
@@ -175,7 +186,6 @@ public class CucumberTestFrameworkAdapter {
                 List<URL> resultList = new ArrayList<>();
                 log.debug("Original classloader result of getResources(\"" + name + "\"):");
                 AtomicBoolean modified = new AtomicBoolean();
-
                 originalResultAsList.forEach((url) -> {
                     log.debug("  " + url);
                     if ("bundleresource".equals(url.getProtocol()) && !url.getPath().contains("META-INF")) {
@@ -250,6 +260,9 @@ public class CucumberTestFrameworkAdapter {
             String reportType = "html";
             String htmlReportPath = "target/report/";
             String htmlReportName = "Report";
+
+            eventBus.registerHandlerFor(TestStepFinished.class, cucumberTestStepFinishedHandler);
+            eventBus.registerHandlerFor(TestCaseFinished.class, cucumberTestCaseFinishedHandler);
             RuntimeOptionsBuilder cucumberRuntimeOptionsBuilder =
                 new RuntimeOptionsBuilder().addGlue(GluePath.parse("de.rcenvironment.extras.testscriptrunner"))
                     .setMonochrome(true)
@@ -257,7 +270,7 @@ public class CucumberTestFrameworkAdapter {
                     .addTagFilter(TagExpressionParser.parse("not @disabled or not @Disabled"))
                     .addPluginName(StringUtils.format("%s:%s/%s", reportFormat.getFormatSpecifier(),
                         reportDirUriString, reportFileName))
-                    .setObjectFactoryClass(PicoFactory.class).addPluginName("pretty")
+                    .setObjectFactoryClass(PicoFactory.class).addPluginName("pretty").addDefaultSummaryPrinterIfNotDisabled()
                     .addPluginName(reportType + ":" + htmlReportPath + htmlReportName + "." + reportType)
                     .addFeature(FeatureWithLines.parse(scriptLocationRoot.getAbsolutePath()));
             if (!StringUtils.isNullorEmpty(tagNameFilter)) {
@@ -300,9 +313,43 @@ public class CucumberTestFrameworkAdapter {
             RunnerSupplier cucumberRunnerSupplier = new SingletonRunnerSupplier(cucumberRuntimeOptions, eventBus, cucumberBackendSupplier,
                 cucumberObjectFactorySupplier);
             cucumberExecutionContext = new CucumberExecutionContext(eventBus, exitStatus, cucumberRunnerSupplier);
-            // Start test execution now.
             cucumberPlugins.setEventBusOnEventListenerPlugins(eventBus);
             executor = new SingleThreadedExecutionService();
+        }
+
+        private void cucumberTestStepFinished(TestStepFinished event) {
+            if (event.getTestStep() instanceof PickleStepTestStep) {
+                PickleStepTestStep testStep = (PickleStepTestStep) event.getTestStep();
+                cucumberStepResult(testStep, event.getResult());
+            }
+        }
+
+        private void cucumberStepResult(PickleStepTestStep testStep, Result result) {
+            Status testStepResult = result.getStatus();
+            if (testStepResult.equals(Status.SKIPPED)) {
+                log.warn("Step Execution Skipped [" + testStep.getStep().getKeyword() + testStep.getStep().getText() + "]");
+            } else if (testStepResult.equals(Status.UNDEFINED)) {
+                log.error("Undefined Step [" + testStep.getStep().getKeyword() + testStep.getStep().getText() + "]");
+            } else if (testStepResult.equals(Status.FAILED)) {
+                log.error("Step Execution Failed");
+            } else if (!(testStepResult.equals(Status.PASSED) || testStepResult.equals(Status.AMBIGUOUS)
+                || testStepResult.equals(Status.PENDING))) {
+
+                throw new IllegalStateException("Unexpected status: " + testStepResult);
+            }
+
+        }
+
+        private void cucumberTestCaseResult(TestCaseFinished scenario) {
+            Status testCaseStatus = scenario.getResult().getStatus();
+            if (testCaseStatus.equals(Status.SKIPPED)) {
+                log.info("Skipped");
+            } else if (testCaseStatus.equals(Status.UNDEFINED)) {
+                log.error("Undefined Scenario");
+            } else if (testCaseStatus.equals(Status.FAILED)) {
+                log.error("Failed Scenario");
+            }
+
         }
 
         private void runFeatureFiles() {
@@ -424,8 +471,10 @@ public class CucumberTestFrameworkAdapter {
             new ExecutionContext(reportFormat, reportDirUriString, reportFileName, tagNameFilter, scriptLocationRoot);
 
         // TODO check: it looks like this is never attached to any data source, only consumed
+        PrintStream oldStdOut = System.out;
         ByteArrayOutputStream outputBuffer = new ByteArrayOutputStream();
-
+        final PrintStream outputWriter = new PrintStream(outputBuffer, false, "UTF-8");
+        System.setOut(outputWriter);
         TestScenarioExecutionContext.setThreadLocalParameters(outputReceiver, buildUnderTestId, scriptLocationRoot);
 
         try {
@@ -433,6 +482,9 @@ public class CucumberTestFrameworkAdapter {
         } finally {
             TestScenarioExecutionContext.discardThreadLocalParameters();
         }
+        System.setOut(oldStdOut);
+        outputWriter.close();
+
         if (reportFile.isFile()) {
             final List<String> reportLines = FileUtils.readLines(reportFile, Charsets.UTF_8); // TODO charset correct?
             final List<String> capturedStdOutLines =
