@@ -60,6 +60,14 @@ import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
 @Component
 public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
 
+    /** Exception Message. */
+    public static final String WORKFLOW_INTERRUPTED_EXCEPTION_MESSAGE =
+        "Received interruption signal while waiting for workflow to terminate";
+
+    /** Exception Message. */
+    public static final String FINAL_STATE_UNKNOWN_EXCEPTION_MESSAGE =
+        "Most likely because the connection to the workflow host node was interupted. See logs for more details.";
+
     /**
      * The interval (in msec) between the "heartbeat" notifications sent for active workflows. Workflows are considered active when they are
      * running or paused, or in the transitional states in-between.
@@ -325,7 +333,7 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
         try {
             finalState = executionContext.waitForTermination();
         } catch (InterruptedException e) {
-            throw new WorkflowExecutionException("Received interruption signal while waiting for workflow to terminate");
+            throw new WorkflowExecutionException(WORKFLOW_INTERRUPTED_EXCEPTION_MESSAGE);
         }
         executionContext.reportFinalWorkflowState(finalState);
         executionContext.closeResourcesQuietly();
@@ -340,8 +348,7 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
         case RESULTS_REJECTED:
             return FinalWorkflowState.RESULTS_REJECTED;
         case UNKNOWN:
-            throw new WorkflowExecutionException(StringUtils.format("Final state of '%s' is %s. "
-                + "Most likely because the connection to the workflow host node was interupted. See logs for more details.",
+            throw new WorkflowExecutionException(StringUtils.format("Final state of '%s' is %s. " + FINAL_STATE_UNKNOWN_EXCEPTION_MESSAGE,
                 executionContext.getWorkflowOriginDisplayName(), finalState.getDisplayName()));
         default:
             throw new WorkflowExecutionException(StringUtils.format("Unexpected value '%s' for final state for '%s'",

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2023 DLR, Germany
+ * Copyright 2022-2023 DLR, Germany
  * 
  * SPDX-License-Identifier: EPL-1.0
  * 
@@ -12,6 +12,7 @@ import static de.rcenvironment.core.utils.testing.CollectionMatchers.contains;
 import static de.rcenvironment.core.utils.testing.CollectionMatchers.isEmpty;
 import static de.rcenvironment.core.utils.testing.CollectionMatchers.size;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,22 +20,37 @@ import java.util.Map;
 
 import org.easymock.EasyMock;
 import org.hamcrest.CoreMatchers;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import de.rcenvironment.core.communication.common.LogicalNodeId;
 import de.rcenvironment.core.component.api.ComponentUtils;
 import de.rcenvironment.core.component.execution.api.ExecutionControllerException;
 import de.rcenvironment.core.component.model.api.ComponentDescription;
 import de.rcenvironment.core.component.model.api.ComponentInstallation;
+import de.rcenvironment.core.component.workflow.execution.api.FinalWorkflowState;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContext;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionException;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionInformation;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowState;
+import de.rcenvironment.core.component.workflow.execution.headless.internal.HeadlessWorkflowExecutionContextMock;
 import de.rcenvironment.core.component.workflow.execution.impl.WorkflowExecutionContextImpl;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowDescription;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowNode;
 import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
 
+/**
+ * Tests for {@link WorkflowExecutionServiceImpl}.
+ * 
+ * @author Alexander Weinert
+ * @author Kathrin Schaffert
+ */
 public class WorkflowExecutionServiceImplTest {
+
+    /** Rule for expecting an Exception during test run. */
+    @Rule
+    public ExpectedException exceptionRule = ExpectedException.none();
 
     @Test
     public void whenControllingWorkflow_thenWorkflowControllerIsCalled()
@@ -98,7 +114,8 @@ public class WorkflowExecutionServiceImplTest {
 
         builder.verifyAllDependencies();
     }
-    
+
+
     @Test
     public void whenWorkflowContainsNodes_thenAuthorizationTokensAreAcquiredForEachNode() throws WorkflowExecutionException {
         final LogicalNodeId localNodeId = localNodeId();
@@ -111,19 +128,21 @@ public class WorkflowExecutionServiceImplTest {
         final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
         description.setControllerNode(remoteNodeId);
 
-        final ComponentInstallation localInstallation = ComponentUtils.createPlaceholderComponentInstallation("localComponent", "v1", "localComponent", localNodeId);
+        final ComponentInstallation localInstallation =
+            ComponentUtils.createPlaceholderComponentInstallation("localComponent", "v1", "localComponent", localNodeId);
         final ComponentDescription localDescription = new ComponentDescription(localInstallation);
         final WorkflowNode localNode = new WorkflowNode(localDescription);
         description.addWorkflowNode(localNode);
 
-        final ComponentInstallation remoteInstallation = ComponentUtils.createPlaceholderComponentInstallation("remoteComponent", "v1", "remoteComponent", remoteNodeId);
+        final ComponentInstallation remoteInstallation =
+            ComponentUtils.createPlaceholderComponentInstallation("remoteComponent", "v1", "remoteComponent", remoteNodeId);
         final ComponentDescription remoteDescription = new ComponentDescription(remoteInstallation);
         final WorkflowNode remoteNode = new WorkflowNode(remoteDescription);
         description.addWorkflowNode(remoteNode);
 
         final WorkflowExecutionContext context = new WorkflowExecutionContextImpl(executionIdentifier(), description);
         context.setNodeIdentifierStartedExecution(localNodeId);
-        
+
         final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
             .withLocalNodeId(localNodeId)
@@ -136,6 +155,91 @@ public class WorkflowExecutionServiceImplTest {
         service.start(context);
 
         builder.verifyAllDependencies();
+    }
+
+    @Test
+    public void whenWaitingForWorkflowExecutionTermination() throws WorkflowExecutionException {
+        final LogicalNodeId localNodeId = localNodeId();
+
+        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+        description.setControllerNode(localNodeId);
+
+        final HeadlessWorkflowExecutionContextMock context = new HeadlessWorkflowExecutionContextMock(executionIdentifier(), description);
+        context.setNodeIdentifierStartedExecution(localNodeId);
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder.build();
+
+        context.setFinalState(WorkflowState.FINISHED);
+        FinalWorkflowState finished = service.waitForWorkflowTermination(context);
+        assertEquals(FinalWorkflowState.FINISHED, finished);
+        context.setFinalState(WorkflowState.CANCELLED);
+        FinalWorkflowState cancelled = service.waitForWorkflowTermination(context);
+        assertEquals(FinalWorkflowState.CANCELLED, cancelled);
+        context.setFinalState(WorkflowState.FAILED);
+        FinalWorkflowState failed = service.waitForWorkflowTermination(context);
+        assertEquals(FinalWorkflowState.FAILED, failed);
+        context.setFinalState(WorkflowState.RESULTS_REJECTED);
+        FinalWorkflowState rejected = service.waitForWorkflowTermination(context);
+        assertEquals(FinalWorkflowState.RESULTS_REJECTED, rejected);
+    }
+
+    @Test
+    public void whenWaitingForWorkflowExecutionTerminationAndFinalStateUnknown() throws WorkflowExecutionException {
+        final LogicalNodeId localNodeId = localNodeId();
+
+        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+        description.setControllerNode(localNodeId);
+
+        final HeadlessWorkflowExecutionContextMock context = new HeadlessWorkflowExecutionContextMock(executionIdentifier(), description);
+        context.setNodeIdentifierStartedExecution(localNodeId);
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder.build();
+
+        context.setFinalState(WorkflowState.UNKNOWN);
+
+        exceptionRule.expect(WorkflowExecutionException.class);
+        exceptionRule.expectMessage(WorkflowExecutionServiceImpl.FINAL_STATE_UNKNOWN_EXCEPTION_MESSAGE);
+        service.waitForWorkflowTermination(context);
+    }
+
+    @Test
+    public void whenWaitingForWorkflowExecutionTerminationAndStateIsNotFinal() throws WorkflowExecutionException {
+        final LogicalNodeId localNodeId = localNodeId();
+
+        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+        description.setControllerNode(localNodeId);
+
+        final HeadlessWorkflowExecutionContextMock context = new HeadlessWorkflowExecutionContextMock(executionIdentifier(), description);
+        context.setNodeIdentifierStartedExecution(localNodeId);
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder.build();
+
+        context.setFinalState(WorkflowState.PAUSED);
+
+        exceptionRule.expect(WorkflowExecutionException.class);
+        exceptionRule.expectMessage("Unexpected value");
+        service.waitForWorkflowTermination(context);
+    }
+
+    @Test
+    public void whenWaitingForWorkflowExecutionTerminationAndInterruptedExceptionIsThrown() throws WorkflowExecutionException {
+        final LogicalNodeId localNodeId = localNodeId();
+
+        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+        description.setControllerNode(localNodeId);
+
+        final HeadlessWorkflowExecutionContextMock context = new HeadlessWorkflowExecutionContextMock(executionIdentifier(), description);
+        context.setNodeIdentifierStartedExecution(localNodeId);
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder.build();
+
+        exceptionRule.expect(WorkflowExecutionException.class);
+        exceptionRule.expectMessage(WorkflowExecutionServiceImpl.WORKFLOW_INTERRUPTED_EXCEPTION_MESSAGE);
+        service.waitForWorkflowTermination(context);
     }
 
     private static String workflowIdentifier() {
