@@ -3,8 +3,9 @@ package de.rcenvironment.core.component.workflow.validation.impl;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Set;
 
 import org.easymock.EasyMock;
 import org.junit.Test;
@@ -63,7 +64,8 @@ public class WorkflowDescriptionValidationServiceImplTest {
         serviceUnderTest.bindPlatformService(EasyMock.createNiceMock(PlatformService.class));
         serviceUnderTest.bindComponentKnowledgeService(EasyMock.createNiceMock(DistributedComponentKnowledgeService.class));
         final WorkflowHostService workflowHostService = EasyMock.createNiceMock(WorkflowHostService.class);
-        EasyMock.expect(workflowHostService.getLogicalWorkflowHostNodesAndSelf()).andStubReturn(Set.of(controllerNode));
+        EasyMock.expect(workflowHostService.getLogicalWorkflowHostNodesAndSelf())
+            .andStubReturn(Collections.unmodifiableSet(new HashSet<>(Arrays.asList(controllerNode))));
         EasyMock.replay(workflowHostService);
         serviceUnderTest.bindWorkflowHostService(workflowHostService);
         
