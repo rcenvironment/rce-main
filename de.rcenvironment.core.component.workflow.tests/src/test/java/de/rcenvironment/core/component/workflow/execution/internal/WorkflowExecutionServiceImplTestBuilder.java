@@ -10,6 +10,7 @@ package de.rcenvironment.core.component.workflow.execution.internal;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.easymock.Capture;
@@ -182,6 +183,27 @@ class WorkflowExecutionServiceImplTestBuilder {
             // Will not be thrown, as we only call this method on a mock
         }
 
+    }
+
+    public WorkflowExecutionServiceImplTestBuilder expectControllerServiceCreationAndComponentVisibilityVerification(
+        LogicalNodeId targetNode, List<String> componentRefs) {
+        EasyMock
+            .expect(communicationService.getRemotableService(RemotableWorkflowExecutionControllerService.class, targetNode))
+            .andStubAnswer(() -> {
+                final RemotableWorkflowExecutionControllerService controllerService =
+                    EasyMock.createMock(RemotableWorkflowExecutionControllerService.class);
+                EasyMock.expect(controllerService.verifyComponentVisibility(componentRefs)).andStubReturn(new HashMap<>());
+                EasyMock.replay(controllerService);
+                return controllerService;
+            });
+
+        return this;
+    }
+
+    public WorkflowExecutionServiceImplTestBuilder bindWorkflowExecutionControllerService(
+        RemotableWorkflowExecutionControllerService controllerService) {
+        service.bindWorkflowExecutionControllerService(controllerService);
+        return this;
     }
 
     private RemotableWorkflowExecutionControllerService getOrComputeControllerService(LogicalNodeId localNodeId) {

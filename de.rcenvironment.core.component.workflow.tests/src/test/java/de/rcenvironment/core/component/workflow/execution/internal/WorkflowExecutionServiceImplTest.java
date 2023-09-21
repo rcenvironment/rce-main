@@ -14,8 +14,10 @@ import static de.rcenvironment.core.utils.testing.CollectionMatchers.size;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.easymock.EasyMock;
@@ -38,6 +40,8 @@ import de.rcenvironment.core.component.workflow.execution.headless.internal.Head
 import de.rcenvironment.core.component.workflow.execution.impl.WorkflowExecutionContextImpl;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowDescription;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowNode;
+import de.rcenvironment.core.component.workflow.model.api.WorkflowNodeIdentifier;
+import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
 
 /**
@@ -242,6 +246,28 @@ public class WorkflowExecutionServiceImplTest {
         service.waitForWorkflowTermination(context);
     }
 
+    @Test
+    public void whenVailidatingRemoteWorkflowControllerVisibility() throws WorkflowExecutionException {
+
+        final LogicalNodeId localNodeId = localNodeId();
+        final WorkflowNode node = workflowNode();
+
+        final WorkflowDescriptionMock description = new WorkflowDescriptionMock(workflowIdentifier());
+        description.setControllerNode(localNodeId);
+        description.addNode(node);
+
+        List<String> componentRefs = new ArrayList<>();
+        componentRefs.add(StringUtils.escapeAndConcat("workflowNodeIdentifier", "identifierWithVersion", "localNodeId"));
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .withLocalNodeId(localNodeId)
+            .expectControllerServiceCreationAndComponentVisibilityVerification(localNodeId, componentRefs)
+            .build();
+
+        service.validateRemoteWorkflowControllerVisibilityOfComponents(description);
+    }
+
     private static String workflowIdentifier() {
         return "workflowIdentifier";
     }
@@ -262,6 +288,33 @@ public class WorkflowExecutionServiceImplTest {
         EasyMock.expect(localNodeId.getLogicalNodeIdString()).andStubReturn("remoteNodeId");
         EasyMock.replay(localNodeId);
         return localNodeId;
+    }
+
+    private static WorkflowNode workflowNode() {
+        final WorkflowNode node = EasyMock.createMock(WorkflowNode.class);
+
+        EasyMock.expect(node.getComponentDescription()).andStubAnswer(() -> {
+            final ComponentDescription description = EasyMock.createMock(ComponentDescription.class);
+            EasyMock.expect(description.getNode()).andStubAnswer(() -> {
+                final LogicalNodeId logicalNodeId = EasyMock.createStrictMock(LogicalNodeId.class);
+                EasyMock.expect(logicalNodeId.getLogicalNodeIdString()).andStubReturn("logicalNodeId");
+                EasyMock.replay(logicalNodeId);
+                return logicalNodeId;
+            });
+            EasyMock.replay(description);
+            return description;
+        });
+
+        EasyMock.expect(node.getIdentifierAsObject()).andStubAnswer(() -> {
+            return new WorkflowNodeIdentifier("workflowNodeIdentifier");
+        });
+        
+        EasyMock.expect(node.getComponentIdentifierWithVersion()).andStubAnswer(() -> {
+            return "identifierWithVersion";
+        });
+
+        EasyMock.replay(node);
+        return node;
     }
 
 }
