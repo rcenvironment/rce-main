@@ -109,7 +109,7 @@ class WorkflowExecutionServiceImplTestBuilder {
     }
 
     public WorkflowExecutionServiceImplTestBuilder expectControllerServiceCreation(LogicalNodeId targetNode) {
-        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerService(targetNode);
+        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerServiceMock(targetNode);
 
         EasyMock
             .expect(communicationService.getRemotableService(RemotableWorkflowExecutionControllerService.class, targetNode))
@@ -130,7 +130,7 @@ class WorkflowExecutionServiceImplTestBuilder {
 
     private WorkflowExecutionServiceImplTestBuilder expectControllerCreation(LogicalNodeId targetNodeId, WorkflowExecutionContext context,
         Map<String, String> authTokens, boolean isRemote) {
-        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerService(targetNodeId);
+        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerServiceMock(targetNodeId);
 
         final WorkflowExecutionInformation info = new WorkflowExecutionInformationImpl(context);
 
@@ -146,31 +146,47 @@ class WorkflowExecutionServiceImplTestBuilder {
     }
 
     public WorkflowExecutionServiceImplTestBuilder expectStartOnController(LogicalNodeId localNodeId, String executionId) {
-        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerService(localNodeId);
+        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerServiceMock(localNodeId);
         expectCallOnController(controllerService::performStart, executionId);
         return this;
     }
 
+    // TODO dicuss with Alex, if needed
+//    public WorkflowExecutionServiceImplTestBuilder expectStartOnController(LogicalNodeId localNodeId, String executionId) {
+//        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerService(localNodeId);
+//        try {
+//            controllerService.performStart(executionId);
+//        } catch (ExecutionControllerException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        } catch (RemoteOperationException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+////        expectCallOnController(controllerService::performStart, executionId);
+//        return this;
+//    }
+
     public WorkflowExecutionServiceImplTestBuilder expectPauseOnController(LogicalNodeId localNodeId, String executionId) {
-        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerService(localNodeId);
+        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerServiceMock(localNodeId);
         expectCallOnController(controllerService::performPause, executionId);
         return this;
     }
 
     public WorkflowExecutionServiceImplTestBuilder expectResumeOnController(LogicalNodeId localNodeId, String executionId) {
-        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerService(localNodeId);
+        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerServiceMock(localNodeId);
         expectCallOnController(controllerService::performResume, executionId);
         return this;
     }
 
     public WorkflowExecutionServiceImplTestBuilder expectCancelOnController(LogicalNodeId localNodeId, String executionId) {
-        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerService(localNodeId);
+        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerServiceMock(localNodeId);
         expectCallOnController(controllerService::performCancel, executionId);
         return this;
     }
 
     public WorkflowExecutionServiceImplTestBuilder expectDisposeOnController(LogicalNodeId localNodeId, String executionId) {
-        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerService(localNodeId);
+        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerServiceMock(localNodeId);
         expectCallOnController(controllerService::performDispose, executionId);
         return this;
     }
@@ -191,7 +207,7 @@ class WorkflowExecutionServiceImplTestBuilder {
             .expect(communicationService.getRemotableService(RemotableWorkflowExecutionControllerService.class, targetNode))
             .andStubAnswer(() -> {
                 final RemotableWorkflowExecutionControllerService controllerService =
-                    EasyMock.createMock(RemotableWorkflowExecutionControllerService.class);
+                    EasyMock.createNiceMock(RemotableWorkflowExecutionControllerService.class);
                 EasyMock.expect(controllerService.verifyComponentVisibility(componentRefs)).andStubReturn(new HashMap<>());
                 EasyMock.replay(controllerService);
                 return controllerService;
@@ -206,8 +222,18 @@ class WorkflowExecutionServiceImplTestBuilder {
         return this;
     }
 
-    private RemotableWorkflowExecutionControllerService getOrComputeControllerService(LogicalNodeId localNodeId) {
+    // TODO: ggf wieder umbenennen ohne Mock
+    private RemotableWorkflowExecutionControllerService getOrComputeControllerServiceMock(LogicalNodeId localNodeId) {
         return this.controllerServices.computeIfAbsent(localNodeId,
             ignored -> EasyMock.createMock(RemotableWorkflowExecutionControllerService.class));
     }
+
+    // TODO dicuss with Alex, if needed
+//    private RemotableWorkflowExecutionControllerService getOrComputeControllerService(LogicalNodeId localNodeId) {
+//
+//        WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
+//
+//        return this.controllerServices.computeIfAbsent(localNodeId,
+//            ignored -> builder.build());
+//    }
 }

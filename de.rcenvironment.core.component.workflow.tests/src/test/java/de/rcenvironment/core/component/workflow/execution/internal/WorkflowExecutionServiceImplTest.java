@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ import de.rcenvironment.core.component.execution.api.ExecutionControllerExceptio
 import de.rcenvironment.core.component.model.api.ComponentDescription;
 import de.rcenvironment.core.component.model.api.ComponentInstallation;
 import de.rcenvironment.core.component.workflow.execution.api.FinalWorkflowState;
+import de.rcenvironment.core.component.workflow.execution.api.RemotableWorkflowExecutionControllerService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContext;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionException;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionInformation;
@@ -56,8 +58,9 @@ public class WorkflowExecutionServiceImplTest {
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
 
+    // TODO ggf wieder umbenennen ohne Mock
     @Test
-    public void whenControllingWorkflow_thenWorkflowControllerIsCalled()
+    public void whenControllingWorkflow_thenWorkflowControllerMockIsCalled()
         throws WorkflowExecutionException, ExecutionControllerException, RemoteOperationException {
         final LogicalNodeId localNodeId = localNodeId();
 
@@ -90,6 +93,38 @@ public class WorkflowExecutionServiceImplTest {
 
         builder.verifyAllDependencies();
     }
+    // TODO dicuss with Alex, if needed
+//    @Test
+//    public void whenControllingWorkflow_thenWorkflowControllerIsCalled()
+//        throws WorkflowExecutionException, ExecutionControllerException, RemoteOperationException {
+//        final LogicalNodeId localNodeId = localNodeId();
+//
+//        final Map<String, String> authTokens = new HashMap<>();
+//
+//        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+//        description.setControllerNode(localNodeId);
+//
+//        final WorkflowExecutionContext context = new WorkflowExecutionContextImpl(executionIdentifier(), description);
+//        context.setNodeIdentifierStartedExecution(localNodeId);
+//
+//        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+//        final WorkflowExecutionServiceImpl service = builder
+//            .withLocalNodeId(localNodeId)
+//            .expectAuthorizationTokenAcquisition(isEmpty(), authTokens)
+//            .expectControllerServiceCreation(localNodeId)
+//            .expectLocalControllerCreation(localNodeId, context, authTokens)
+////            .expectStartOnController(localNodeId, executionIdentifier())
+//            .build();
+//
+//        final WorkflowExecutionInformation info = service.start(context);
+//
+////        service.pause(info.getWorkflowExecutionHandle());
+////        service.resume(info.getWorkflowExecutionHandle());
+////        service.cancel(info.getWorkflowExecutionHandle());
+////        service.dispose(info.getWorkflowExecutionHandle());
+//
+////        builder.verifyAllDependencies();
+//    }
 
     @Test
     public void whenWorkflowHostIsRemote_thenWorkflowControllerIsRemote()
@@ -118,7 +153,6 @@ public class WorkflowExecutionServiceImplTest {
 
         builder.verifyAllDependencies();
     }
-
 
     @Test
     public void whenWorkflowContainsNodes_thenAuthorizationTokensAreAcquiredForEachNode() throws WorkflowExecutionException {
@@ -246,6 +280,7 @@ public class WorkflowExecutionServiceImplTest {
         service.waitForWorkflowTermination(context);
     }
 
+    // TODO add test that passes through catch clause
     @Test
     public void whenVailidatingRemoteWorkflowControllerVisibility() throws WorkflowExecutionException {
 
@@ -261,11 +296,39 @@ public class WorkflowExecutionServiceImplTest {
 
         final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
-            .withLocalNodeId(localNodeId)
             .expectControllerServiceCreationAndComponentVisibilityVerification(localNodeId, componentRefs)
             .build();
 
         service.validateRemoteWorkflowControllerVisibilityOfComponents(description);
+    }
+
+    @Test
+    public void whenGetLocalWorkflowExecutionInformations() throws ExecutionControllerException, RemoteOperationException {
+
+        final RemotableWorkflowExecutionControllerService controllerService = controllerService();
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .bindWorkflowExecutionControllerService(controllerService)
+            .build();
+
+        service.getLocalWorkflowExecutionInformations();
+    }
+
+    @Test
+    public void whenGetLocalWorkflowExecutionInformationsThrowsException() throws ExecutionControllerException, RemoteOperationException {
+
+        final RemotableWorkflowExecutionControllerService controllerService = controllerServiceThrowsException();
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .bindWorkflowExecutionControllerService(controllerService)
+            .build();
+
+        exceptionRule.expect(IllegalStateException.class);
+        exceptionRule.expectMessage("Failed to get local workflow execution information");
+
+        service.getLocalWorkflowExecutionInformations();
     }
 
     private static String workflowIdentifier() {
@@ -308,13 +371,33 @@ public class WorkflowExecutionServiceImplTest {
         EasyMock.expect(node.getIdentifierAsObject()).andStubAnswer(() -> {
             return new WorkflowNodeIdentifier("workflowNodeIdentifier");
         });
-        
+
         EasyMock.expect(node.getComponentIdentifierWithVersion()).andStubAnswer(() -> {
             return "identifierWithVersion";
         });
 
         EasyMock.replay(node);
         return node;
+    }
+
+    private static RemotableWorkflowExecutionControllerService controllerService()
+        throws ExecutionControllerException, RemoteOperationException {
+        final RemotableWorkflowExecutionControllerService controllerService =
+            EasyMock.createMock(RemotableWorkflowExecutionControllerService.class);
+
+        EasyMock.expect(controllerService.getWorkflowExecutionInformations()).andStubReturn(new HashSet<>());
+        EasyMock.replay(controllerService);
+        return controllerService;
+    }
+
+    private static RemotableWorkflowExecutionControllerService controllerServiceThrowsException()
+        throws ExecutionControllerException, RemoteOperationException {
+        final RemotableWorkflowExecutionControllerService controllerService =
+            EasyMock.createMock(RemotableWorkflowExecutionControllerService.class);
+
+        EasyMock.expect(controllerService.getWorkflowExecutionInformations()).andThrow(new ExecutionControllerException("Test Exception"));
+        EasyMock.replay(controllerService);
+        return controllerService;
     }
 
 }
