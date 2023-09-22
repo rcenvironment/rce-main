@@ -419,14 +419,16 @@ public class CucumberTestFrameworkAdapter {
                     throw new RuntimeException(
                         "Derived the absolute bundle path " + absolutePath + ", but it does not point at a JAR file");
                 }
-                // TODO test a path suffix like "!de/rcenvironment/extras/testscriptrunner" to prevent Cucumber scanning the whole JAR
-                URI rewrittenUri = absolutePath.toURI();
-                log.debug("Apparently running from a standalone build, using rewritten class files location " + rewrittenUri.toString());
+                final URI jarFileUri = absolutePath.toURI();
+                final String assembledJarUrlStringWithInternalPath =
+                    "jar:" + jarFileUri.toString() + "!/de/rcenvironment/extras/testscriptrunner";
+                log.debug("Apparently running from a standalone build, rewriting class file search URL to "
+                    + assembledJarUrlStringWithInternalPath);
                 try {
-                    this.classFileUrlsForRedirectingGlueCodeSearch.add(rewrittenUri.toURL());
+                    this.classFileUrlsForRedirectingGlueCodeSearch.add(new URL(assembledJarUrlStringWithInternalPath));
                     // unlike the Eclipse case, do not add a reference to the self-test bundle as it is absent in the standalone build
                 } catch (MalformedURLException e) {
-                    throw new RuntimeException("Failed to recreate URL from URI " + rewrittenUri.toString());
+                    throw new RuntimeException("Failed to recreate URL from URI " + assembledJarUrlStringWithInternalPath);
                 }
             } else {
                 throw new RuntimeException("Unrecognized bundle location format: " + locationInfo);
