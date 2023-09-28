@@ -8,7 +8,7 @@
 
 package de.rcenvironment.extras.testscriptrunner.definitions.common;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.io.File;
 import java.util.HashMap;
@@ -45,7 +45,9 @@ public final class TestScenarioExecutionContext {
     // TODO rename or replace with multi-instance setup
     private ExecutionResult currentExecutionResult;
 
-    private Scenario scenario;
+    private Scenario initialScenarioObject;
+
+    private Thread initialExecutionThread;
 
     private final Log log = LogFactory.getLog(getClass());
 
@@ -98,41 +100,60 @@ public final class TestScenarioExecutionContext {
     }
 
     /**
-     * Prints a log header before each test.
+     * Performs common tasks before the actual execution of this {@link Scenario}. Currently, it prevents accidental duplicate
+     * initializations of the same {@link TestScenarioExecutionContext} object, abd prints an output line indicating the start the
+     * {@link Scenario}.
      * 
      * @param newScenario the injected {@link Scenario} object
      */
-    public void beforeEach(Scenario newScenario) {
-        this.scenario = newScenario;
+    public synchronized void beforeExecution(Scenario newScenario) {
+        // fail on duplicate calls
+        assertNull(initialScenarioObject);
+        assertNull(initialExecutionThread);
+
+        this.initialScenarioObject = newScenario;
+        this.initialExecutionThread = Thread.currentThread();
         outputReceiver.addOutput("> Starting test scenario \"" + newScenario.getName() + "\"");
     }
 
     /**
-     * Prints a log footer after each test, and potentially appends error information to any generated reports.
+     * Performs common tasks after attempting to execute the {@link Scenario} associated with this {@link TestScenarioExecutionContext}.
+     * Currently, it performs consistency checks between the calls to {@link #beforeExecution()} and this method, and prints an output line
+     * indicating the termination of this {@link Scenario}. It also potentially appends error information to any generated reports.
      * 
      * @param finishedScenario the injected {@link Scenario} object
      */
-    public void afterEach(Scenario finishedScenario) {
-        // TODO 10.5.0 (p1): Investigate why this check fails; disabled for now
-        // assertEquals(finishedScenario, this.scenario); // internal consistency check
-        if (scenario.isFailed()) {
+    public synchronized void afterExecution(Scenario finishedScenario) {
+        // run internal consistency checks to verify that the before and after calls match, and use the expected threading behavior
+        if (!finishedScenario.getId().equals(this.initialScenarioObject.getId())) {
+            // note that since Cucumber 7.x, the Scenario objects passed to @Before and @After are not identical, but have the same UUID
+            throw new IllegalArgumentException("Before and after calls provided different scenario ids");
+        }
+        if (Thread.currentThread() != this.initialExecutionThread) {
+            // only warn for now
+            log.warn("Unexpected threading behavior: The before and after methods were called from different threads");
+        }
+
+        if (initialScenarioObject.isFailed()) {
             outputReceiver
-                .addOutput("*** Error in test scenario \"" + scenario.getName() + "\"; dumping any captured StdOut/StdErr output");
-            scenario.log("*** Error in test scenario \"" + scenario.getName() + "\"; dumping any captured StdOut/StdErr output");
+                .addOutput(
+                    "*** Error in test scenario \"" + initialScenarioObject.getName() + "\"; dumping any captured StdOut/StdErr output");
+            initialScenarioObject
+                .log("*** Error in test scenario \"" + initialScenarioObject.getName() + "\"; dumping any captured StdOut/StdErr output");
             if (currentExecutionResult != null) {
                 for (String line : currentExecutionResult.stdoutLines) {
                     String logLine = "[StdOut] " + line;
-                    scenario.log(logLine);
+                    initialScenarioObject.log(logLine);
                     log.error(logLine);
                 }
                 for (String line : currentExecutionResult.stderrLines) {
                     String logLine = "[StdErr] " + line;
-                    scenario.log(logLine);
+                    initialScenarioObject.log(logLine);
                     log.error(logLine);
                 }
             }
         } else {
-            outputReceiver.addOutput("< Completed test scenario \"" + scenario.getName() + "\"");
+            outputReceiver.addOutput("< Completed test scenario \"" + initialScenarioObject.getName() + "\"");
         }
     }
 
@@ -145,7 +166,7 @@ public final class TestScenarioExecutionContext {
     }
 
     public String getScenarioName() {
-        return scenario.getName();
+        return initialScenarioObject.getName();
     }
 
     public File getTestScriptLocation() {

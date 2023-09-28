@@ -16,9 +16,9 @@ import java.util.concurrent.TimeUnit;
 
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.extras.testscriptrunner.definitions.helper.StepDefinitionConstants;
-import io.cucumber.java.Scenario;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.cucumber.java.Scenario;
 
 /**
  * Definitions of test life-cycle hooks.
@@ -38,8 +38,9 @@ public class RceTestLifeCycleHooks extends InstanceManagementStepDefinitionBase 
      */
     @Before
     public void before(Scenario scenario) {
+        // TODO move this into the execution context
         initialize();
-        executionContext.beforeEach(scenario);
+        executionContext.beforeExecution(scenario);
     }
 
     /**
@@ -49,11 +50,11 @@ public class RceTestLifeCycleHooks extends InstanceManagementStepDefinitionBase 
      */
     @After
     public void after(Scenario scenario) {
+        // TODO move this into the execution context
         tearDownLeftoverRunningInstances();
-        executionContext.afterEach(scenario);
+        executionContext.afterExecution(scenario);
     }
-    
-    
+
     private void initialize() {
         assertTrue(executionContext.getInstancesById().isEmpty());
         assertTrue(executionContext.getEnabledInstances().isEmpty());
