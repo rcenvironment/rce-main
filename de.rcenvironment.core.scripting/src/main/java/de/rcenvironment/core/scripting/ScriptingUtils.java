@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,6 +60,7 @@ import de.rcenvironment.core.utils.common.StringUtils;
  * @author Jascha Riedel (#14029)
  * @author David Scholz (#14550, #14548)
  * @author Kathrin Schaffert (#17088)
+ * @author Robert Mischke
  */
 public final class ScriptingUtils {
 
@@ -80,7 +82,7 @@ public final class ScriptingUtils {
     /**
      * Path to the Jython jar within the bundle containing the jar.
      */
-    private static final String PATH_TO_JYTHON_JAR = "lib/maven/jython-standalone-2.7.3.jar";
+    private static final String PATH_CONTAINING_EMBEDDED_JYTHON_JAR = "/lib/maven";
 
     private static final String NOT_A_VALUE_UUID = "not_a_value_7fdc603e";
 
@@ -115,18 +117,25 @@ public final class ScriptingUtils {
      * @return path if found, else null
      */
     public static synchronized File getJythonPath() throws IOException {
+        // The path to the original JAR is needed to import libraries to the jython script, e.g. "os" or "re".
         if (jythonPath == null) {
-            // getting the Path where the Jython.jar is located. This is needed to
-            // import Libraries to the jython script, e.g. os or re.
-
+            // First, identity the relative path of the original Jython JAR inside the wrapper bundle
             Bundle bundle = Platform.getBundle(BUNDLE_CONTAINING_JYTHON_JAR);
-            URL fileURL = bundle.getEntry(PATH_TO_JYTHON_JAR); // TODO write a test case for this, in case the path or
-                                                               // the plugin bundles
-                                                               // changes
-            // resolves the searched file in the temp. unpacked JAR
-            URL resolvedFileURL = FileLocator.toFileURL(fileURL);
-            // We need to use the 3-arg constructor of URI in order to properly escape file
-            // system chars
+            Enumeration<String> pathEnum = bundle.getEntryPaths(PATH_CONTAINING_EMBEDDED_JYTHON_JAR);
+            // we expect a single returned path here
+            if (!pathEnum.hasMoreElements()) {
+                throw new IOException("Found no path for the embedded Jython JAR");
+            }
+            final String jarPath = pathEnum.nextElement();
+            if (pathEnum.hasMoreElements()) {
+                throw new IOException("Found more than one path for the embedded Jython JAR");
+            }
+            final URL embeddedJythonJarUrl = bundle.getEntry(jarPath);
+
+            // Then, resolve the Jython JAR's file location within the unpacked wrapper bundle
+            URL resolvedFileURL = FileLocator.toFileURL(embeddedJythonJarUrl);
+
+            // We need to use the 3-arg constructor of URI in order to properly escape file system chars
             URI resolvedURI;
             if (resolvedFileURL == null) {
                 throw new IOException("Failed to resolve the path to the embedded Jython JAR");
