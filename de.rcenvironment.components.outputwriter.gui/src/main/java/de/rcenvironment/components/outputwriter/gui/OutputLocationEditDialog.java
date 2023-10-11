@@ -61,9 +61,22 @@ public class OutputLocationEditDialog extends Dialog {
 
     private static final char SPACE = ' ';
 
+    private static final char[] FORBIDDEN_CHARS = new char[] { '/', '\\', ':',
+        '*', '?', '\"', '>', '<', '|' };
+
+    private static final String STRING_TARGET_FILE = "Target file:\n";
+
+    private static final String STRING_VALUE_FORMAT = "Value(s) format:\n";
+
+    private static final String STRING_FILE_HEADER = "File header:\n";
+
+    private static final String STRING_UNKNOWN_PLACEHOLDER = "Contains unknown placeholder: ";
+
+    private static final String COLON = ":";
+
     private static final String SEMICOLON = ";";
 
-    private static final String LINE_SEP = System.getProperty("line.separator");
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     private static final int GROUPS_MIN_WIDTH = 550;
 
@@ -71,12 +84,7 @@ public class OutputLocationEditDialog extends Dialog {
 
     private static final int FORMAT_HEIGHT = 50;
 
-    private static final char[] FORBIDDEN_CHARS = new char[] { '/', '\\', ':',
-        '*', '?', '\"', '>', '<', '|' };
-
     private static final int MINUS_ONE = -1;
-
-    private static final String COLON = ":";
 
     private String chosenFilename;
 
@@ -604,20 +612,20 @@ public class OutputLocationEditDialog extends Dialog {
 
         if (!headerValidationFailed) {
             final StringBuilder warningBuilder = new StringBuilder();
-            warningBuilder.append("Contains unknown placeholder: ");
+            warningBuilder.append(STRING_UNKNOWN_PLACEHOLDER);
             final List<String> headerValidationWarnings =
                 OutputWriterValidatorHelper.getValidationWarnings(warningBuilder, chosenHeader, generalHeaderPlaceholderList);
 
             if (!headerValidationWarnings.isEmpty()) {
                 final StringBuilder warningMessageBuilder = new StringBuilder();
-                warningMessageBuilder.append("Header section:\n");
+                warningMessageBuilder.append(STRING_FILE_HEADER);
                 warningMessageBuilder.append(String.join(SEMICOLON + SPACE, headerValidationWarnings));
 
                 warningLabel.addWarning(warningMessageBuilder.toString());
             }
         } else {
             final StringBuilder errorMessageBuilder = new StringBuilder();
-            errorMessageBuilder.append("Header section:\n");
+            errorMessageBuilder.append(STRING_FILE_HEADER);
             errorMessageBuilder.append(String.join(SEMICOLON + SPACE, headerValidationErrors));
 
             warningLabel.addError(errorMessageBuilder.toString());
@@ -625,26 +633,26 @@ public class OutputLocationEditDialog extends Dialog {
 
         if (!formatValidationFailed) {
             final StringBuilder warningBuilder = new StringBuilder();
-            warningBuilder.append("Contains unknown placeholder: ");
+            warningBuilder.append(STRING_UNKNOWN_PLACEHOLDER);
             final List<String> formatValidationWarnings =
                 OutputWriterValidatorHelper.getValidationWarnings(warningBuilder, chosenFormatString, generalFormatPlaceholderList);
 
             if (!formatValidationWarnings.isEmpty()) {
                 final StringBuilder warningMessageBuilder = new StringBuilder();
-                warningMessageBuilder.append("Format section:\n");
+                warningMessageBuilder.append(STRING_VALUE_FORMAT);
                 warningMessageBuilder.append(String.join(SEMICOLON + SPACE, formatValidationWarnings));
 
                 warningLabel.addWarning(warningMessageBuilder.toString());
             }
         } else {
             final StringBuilder errorMessageBuilder = new StringBuilder();
-            errorMessageBuilder.append("Format section:\n");
+            errorMessageBuilder.append(STRING_VALUE_FORMAT);
             errorMessageBuilder.append(String.join(SEMICOLON + SPACE, formatValidationErrors));
             warningLabel.addError(errorMessageBuilder.toString());
         }
         if (targetFileNameValidationFailed) {
             final StringBuilder errorMessageBuilder = new StringBuilder();
-            errorMessageBuilder.append("Target file:\n");
+            errorMessageBuilder.append(STRING_TARGET_FILE);
             errorMessageBuilder.append(String.join(SEMICOLON + SPACE, targetFileNameValidationErrors));
             warningLabel.addError(errorMessageBuilder.toString());
         }
@@ -672,7 +680,7 @@ public class OutputLocationEditDialog extends Dialog {
         tmp = tmp.replace("\r", "");
         tmp = tmp.replace("\n", "");
         tmp = tmp.replace(Matcher.quoteReplacement(OutputWriterComponentConstants.PH_LINEBREAK),
-            Matcher.quoteReplacement(OutputWriterComponentConstants.PH_LINEBREAK + LINE_SEP));
+            Matcher.quoteReplacement(OutputWriterComponentConstants.PH_LINEBREAK + LINE_SEPARATOR));
         return tmp;
     }
 }
