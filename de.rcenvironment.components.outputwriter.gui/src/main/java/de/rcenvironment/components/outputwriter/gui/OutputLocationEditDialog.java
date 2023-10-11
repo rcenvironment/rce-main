@@ -45,6 +45,7 @@ import de.rcenvironment.components.outputwriter.common.OutputWriterComponentCons
 import de.rcenvironment.components.outputwriter.common.OutputWriterValidatorHelper;
 import de.rcenvironment.core.gui.utils.incubator.AlphanumericalTextContraintListener;
 import de.rcenvironment.core.gui.workflow.executor.properties.WhitespaceShowListener;
+import de.rcenvironment.core.utils.common.StringUtils;
 
 /**
  * 
@@ -224,6 +225,7 @@ public class OutputLocationEditDialog extends Dialog {
         }
 
         createFormatSection(container);
+        createWarningLabel(container);
 
         return container;
     }
@@ -244,7 +246,7 @@ public class OutputLocationEditDialog extends Dialog {
         fileName.setText(chosenFilename);
         fileName.addListener(SWT.Verify, new AlphanumericalTextContraintListener(FORBIDDEN_CHARS));
         fileName.addModifyListener(ignoredEvent -> {
-            chosenFilename = fileName.getText();
+            chosenFilename = fileName.getText().trim();
             setOKButtonActivation();
             updateWarningLabel();
         });
@@ -288,7 +290,7 @@ public class OutputLocationEditDialog extends Dialog {
         additionalFolder.addModifyListener(event -> {
             if (!((Text) event.getSource()).getText().isEmpty()) {
                 chosenFolderForSaving =
-                    OutputWriterComponentConstants.ROOT_DISPLAY_NAME + File.separator + ((Text) event.getSource()).getText();
+                    OutputWriterComponentConstants.ROOT_DISPLAY_NAME + File.separator + ((Text) event.getSource()).getText().trim();
             } else {
                 chosenFolderForSaving = OutputWriterComponentConstants.ROOT_DISPLAY_NAME;
             }
@@ -464,7 +466,6 @@ public class OutputLocationEditDialog extends Dialog {
         new Label(configGroup, SWT.NONE).setText("");
         new Label(configGroup, SWT.NONE).setText(Messages.previousIterationMessage);
 
-        createWarningLabel(configGroup);
     }
 
     @Override
@@ -482,12 +483,12 @@ public class OutputLocationEditDialog extends Dialog {
         boolean isValid = true;
         // Check if input fields are empty
         if (chosenFilename.isEmpty()) {
-            validationErrors.add("Enter Target file name");
+            validationErrors.add("File name is empty");
             isValid = false;
         }
 
         if (otherOutputLocationFileNamesWithPaths.contains(chosenFolderForSaving + File.separator + chosenFilename)) {
-            validationErrors.add("Target File already exists");
+            validationErrors.add("File name already exists in another target configuration");
 
             isValid = false;
 
@@ -495,7 +496,7 @@ public class OutputLocationEditDialog extends Dialog {
 
         List<String> forbiddenFilenames = Arrays.asList(OutputWriterComponentConstants.PROBLEMATICFILENAMES_WIN);
         if (forbiddenFilenames.contains(chosenFilename.toUpperCase())) {
-            validationErrors.add("Target file name is forbidden. Enter a valid filename");
+            validationErrors.add(StringUtils.format("File name '%s' is forbidden", chosenFilename));
 
             isValid = false;
 
@@ -537,10 +538,10 @@ public class OutputLocationEditDialog extends Dialog {
         placeholderList.add(OutputWriterComponentConstants.PH_TIMESTAMP);
         placeholderList.add(OutputWriterComponentConstants.PH_EXECUTION_COUNT);
 
-        formatPlaceholderCombo.setItems((String[]) placeholderList.toArray(new String[placeholderList.size()]));
+        formatPlaceholderCombo.setItems(placeholderList.toArray(new String[placeholderList.size()]));
         formatPlaceholderCombo.select(0);
 
-        headerPlaceholderCombo.setItems((String[]) headerPlaceholderList.toArray(new String[headerPlaceholderList.size()]));
+        headerPlaceholderCombo.setItems(headerPlaceholderList.toArray(new String[headerPlaceholderList.size()]));
         headerPlaceholderCombo.select(0);
     }
 
@@ -643,15 +644,14 @@ public class OutputLocationEditDialog extends Dialog {
         }
         if (targetFileNameValidationFailed) {
             final StringBuilder errorMessageBuilder = new StringBuilder();
-            errorMessageBuilder.append("Target file section:\n");
+            errorMessageBuilder.append("Target file:\n");
             errorMessageBuilder.append(String.join(SEMICOLON + SPACE, targetFileNameValidationErrors));
             warningLabel.addError(errorMessageBuilder.toString());
         }
     }
 
-    private void createWarningLabel(Group configGroup) {
-        new Label(configGroup, SWT.NONE).setText("");
-        warningLabel = new WarningErrorLabel(configGroup, SWT.NONE);
+    private void createWarningLabel(Composite parent) {
+        warningLabel = new WarningErrorLabel(parent, SWT.FILL);
     }
 
     private KeyAdapter createHandleLinebreaksKeyAdapter(StyledText text) {
