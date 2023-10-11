@@ -12,6 +12,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -44,6 +45,7 @@ import de.rcenvironment.components.outputwriter.common.OutputWriterComponentCons
 import de.rcenvironment.components.outputwriter.common.OutputWriterValidatorHelper;
 import de.rcenvironment.core.gui.utils.incubator.AlphanumericalTextContraintListener;
 import de.rcenvironment.core.gui.workflow.executor.properties.WhitespaceShowListener;
+import de.rcenvironment.core.utils.common.StringUtils;
 
 /**
  * 
@@ -52,15 +54,29 @@ import de.rcenvironment.core.gui.workflow.executor.properties.WhitespaceShowList
  * @author Brigitte Boden
  * @author Dominik Schneider
  * @author Kathrin Schaffert (#17016, #14895, #17673)
+ * @author Devika Jalgaonkar (#17349)
  */
 
 public class OutputLocationEditDialog extends Dialog {
 
     private static final char SPACE = ' ';
 
+    private static final char[] FORBIDDEN_CHARS = new char[] { '/', '\\', ':',
+        '*', '?', '\"', '>', '<', '|' };
+
+    private static final String STRING_TARGET_FILE = "Target file:\n";
+
+    private static final String STRING_VALUE_FORMAT = "Value(s) format:\n";
+
+    private static final String STRING_FILE_HEADER = "File header:\n";
+
+    private static final String STRING_UNKNOWN_PLACEHOLDER = "Contains unknown placeholder: ";
+
+    private static final String COLON = ":";
+
     private static final String SEMICOLON = ";";
 
-    private static final String LINE_SEP = System.getProperty("line.separator");
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     private static final int GROUPS_MIN_WIDTH = 550;
 
@@ -68,12 +84,7 @@ public class OutputLocationEditDialog extends Dialog {
 
     private static final int FORMAT_HEIGHT = 50;
 
-    private static final char[] FORBIDDEN_CHARS = new char[] { '/', '\\', ':',
-        '*', '?', '\"', '>', '<', '|' };
-
     private static final int MINUS_ONE = -1;
-
-    private static final String COLON = ":";
 
     private String chosenFilename;
 
@@ -222,6 +233,7 @@ public class OutputLocationEditDialog extends Dialog {
         }
 
         createFormatSection(container);
+        createWarningLabel(container);
 
         return container;
     }
@@ -242,8 +254,9 @@ public class OutputLocationEditDialog extends Dialog {
         fileName.setText(chosenFilename);
         fileName.addListener(SWT.Verify, new AlphanumericalTextContraintListener(FORBIDDEN_CHARS));
         fileName.addModifyListener(ignoredEvent -> {
-            chosenFilename = fileName.getText();
+            chosenFilename = fileName.getText().trim();
             setOKButtonActivation();
+            updateWarningLabel();
         });
 
         new Label(configGroup, SWT.NONE).setText("");
@@ -285,11 +298,12 @@ public class OutputLocationEditDialog extends Dialog {
         additionalFolder.addModifyListener(event -> {
             if (!((Text) event.getSource()).getText().isEmpty()) {
                 chosenFolderForSaving =
-                    OutputWriterComponentConstants.ROOT_DISPLAY_NAME + File.separator + ((Text) event.getSource()).getText();
+                    OutputWriterComponentConstants.ROOT_DISPLAY_NAME + File.separator + ((Text) event.getSource()).getText().trim();
             } else {
                 chosenFolderForSaving = OutputWriterComponentConstants.ROOT_DISPLAY_NAME;
             }
             setOKButtonActivation();
+            updateWarningLabel();
         });
 
         new Label(configGroup, SWT.NONE).setText("");
@@ -322,12 +336,16 @@ public class OutputLocationEditDialog extends Dialog {
                     .equals(OutputWriterComponentConstants.ROOT_DISPLAY_NAME));
                 dirInsertButton.setEnabled(((Combo) arg0.getSource()).getText().equals(OutputWriterComponentConstants.ROOT_DISPLAY_NAME));
                 setOKButtonActivation();
+                updateWarningLabel();
+
             }
 
             @Override
             public void widgetDefaultSelected(SelectionEvent arg0) {
                 widgetSelected(arg0);
                 setOKButtonActivation();
+                updateWarningLabel();
+
             }
         });
         additionalFolder.addListener(SWT.Verify, new AlphanumericalTextContraintListener(FORBIDDEN_CHARS));
@@ -456,7 +474,6 @@ public class OutputLocationEditDialog extends Dialog {
         new Label(configGroup, SWT.NONE).setText("");
         new Label(configGroup, SWT.NONE).setText(Messages.previousIterationMessage);
 
-        createWarningLabel(configGroup);
     }
 
     @Override
@@ -469,20 +486,34 @@ public class OutputLocationEditDialog extends Dialog {
         updateWarningLabel();
     }
 
-    protected Boolean validateTargetFileName() {
-
+    protected List<String> validateTargetFileName() {
+        final List<String> validationErrors = new LinkedList<>();
+        boolean isValid = true;
         // Check if input fields are empty
-        boolean isValid = !chosenFilename.isEmpty();
+        if (chosenFilename.isEmpty()) {
+            validationErrors.add("File name is empty");
+            isValid = false;
+        }
 
-        isValid = isValid && !otherOutputLocationFileNamesWithPaths.contains(chosenFolderForSaving + File.separator + chosenFilename);
+        if (otherOutputLocationFileNamesWithPaths.contains(chosenFolderForSaving + File.separator + chosenFilename)) {
+            validationErrors.add("File name already exists in another target configuration");
+
+            isValid = false;
+
+        }
 
         List<String> forbiddenFilenames = Arrays.asList(OutputWriterComponentConstants.PROBLEMATICFILENAMES_WIN);
-        isValid = isValid && !forbiddenFilenames.contains(chosenFilename.toUpperCase());
+        if (forbiddenFilenames.contains(chosenFilename.toUpperCase())) {
+            validationErrors.add(StringUtils.format("File name '%s' is forbidden", chosenFilename));
+
+            isValid = false;
+
+        }
 
         // enable/disable "ok"
         getButton(IDialogConstants.OK_ID).setEnabled(isValid);
 
-        return isValid;
+        return validationErrors;
     }
 
     /**
@@ -515,10 +546,10 @@ public class OutputLocationEditDialog extends Dialog {
         placeholderList.add(OutputWriterComponentConstants.PH_TIMESTAMP);
         placeholderList.add(OutputWriterComponentConstants.PH_EXECUTION_COUNT);
 
-        formatPlaceholderCombo.setItems((String[]) placeholderList.toArray(new String[placeholderList.size()]));
+        formatPlaceholderCombo.setItems(placeholderList.toArray(new String[placeholderList.size()]));
         formatPlaceholderCombo.select(0);
 
-        headerPlaceholderCombo.setItems((String[]) headerPlaceholderList.toArray(new String[headerPlaceholderList.size()]));
+        headerPlaceholderCombo.setItems(headerPlaceholderList.toArray(new String[headerPlaceholderList.size()]));
         headerPlaceholderCombo.select(0);
     }
 
@@ -557,10 +588,11 @@ public class OutputLocationEditDialog extends Dialog {
     private void setOKButtonActivation() {
         final List<String> headerValidationErrors = OutputWriterValidatorHelper.getValidationErrors(chosenHeader);
         final List<String> formatValidationErrors = OutputWriterValidatorHelper.getValidationErrors(chosenFormatString);
+        final List<String> targetFileNameValidationErrors = validateTargetFileName();
 
         final boolean headerValidationFailed = !headerValidationErrors.isEmpty();
         final boolean formatValidationFailed = !formatValidationErrors.isEmpty();
-        final boolean targetFileNameValidationFailed = !validateTargetFileName();
+        final boolean targetFileNameValidationFailed = !targetFileNameValidationErrors.isEmpty();
         final boolean validationFailed = headerValidationFailed || formatValidationFailed || targetFileNameValidationFailed;
         final Button okButton = getButton(OK);
         okButton.setEnabled(!validationFailed);
@@ -572,26 +604,28 @@ public class OutputLocationEditDialog extends Dialog {
 
         final List<String> headerValidationErrors = OutputWriterValidatorHelper.getValidationErrors(chosenHeader);
         final List<String> formatValidationErrors = OutputWriterValidatorHelper.getValidationErrors(chosenFormatString);
+        final List<String> targetFileNameValidationErrors = validateTargetFileName();
 
         final boolean headerValidationFailed = !headerValidationErrors.isEmpty();
         final boolean formatValidationFailed = !formatValidationErrors.isEmpty();
+        final boolean targetFileNameValidationFailed = !targetFileNameValidationErrors.isEmpty();
 
         if (!headerValidationFailed) {
             final StringBuilder warningBuilder = new StringBuilder();
-            warningBuilder.append("Contains unknown placeholder: ");
+            warningBuilder.append(STRING_UNKNOWN_PLACEHOLDER);
             final List<String> headerValidationWarnings =
                 OutputWriterValidatorHelper.getValidationWarnings(warningBuilder, chosenHeader, generalHeaderPlaceholderList);
 
             if (!headerValidationWarnings.isEmpty()) {
                 final StringBuilder warningMessageBuilder = new StringBuilder();
-                warningMessageBuilder.append("Header section:\n");
+                warningMessageBuilder.append(STRING_FILE_HEADER);
                 warningMessageBuilder.append(String.join(SEMICOLON + SPACE, headerValidationWarnings));
 
                 warningLabel.addWarning(warningMessageBuilder.toString());
             }
         } else {
             final StringBuilder errorMessageBuilder = new StringBuilder();
-            errorMessageBuilder.append("Header section:\n");
+            errorMessageBuilder.append(STRING_FILE_HEADER);
             errorMessageBuilder.append(String.join(SEMICOLON + SPACE, headerValidationErrors));
 
             warningLabel.addError(errorMessageBuilder.toString());
@@ -599,32 +633,38 @@ public class OutputLocationEditDialog extends Dialog {
 
         if (!formatValidationFailed) {
             final StringBuilder warningBuilder = new StringBuilder();
-            warningBuilder.append("Contains unknown placeholder: ");
+            warningBuilder.append(STRING_UNKNOWN_PLACEHOLDER);
             final List<String> formatValidationWarnings =
                 OutputWriterValidatorHelper.getValidationWarnings(warningBuilder, chosenFormatString, generalFormatPlaceholderList);
 
             if (!formatValidationWarnings.isEmpty()) {
                 final StringBuilder warningMessageBuilder = new StringBuilder();
-                warningMessageBuilder.append("Format section:\n");
+                warningMessageBuilder.append(STRING_VALUE_FORMAT);
                 warningMessageBuilder.append(String.join(SEMICOLON + SPACE, formatValidationWarnings));
 
                 warningLabel.addWarning(warningMessageBuilder.toString());
             }
         } else {
             final StringBuilder errorMessageBuilder = new StringBuilder();
-            errorMessageBuilder.append("Format section:\n");
+            errorMessageBuilder.append(STRING_VALUE_FORMAT);
             errorMessageBuilder.append(String.join(SEMICOLON + SPACE, formatValidationErrors));
+            warningLabel.addError(errorMessageBuilder.toString());
+        }
+        if (targetFileNameValidationFailed) {
+            final StringBuilder errorMessageBuilder = new StringBuilder();
+            errorMessageBuilder.append(STRING_TARGET_FILE);
+            errorMessageBuilder.append(String.join(SEMICOLON + SPACE, targetFileNameValidationErrors));
             warningLabel.addError(errorMessageBuilder.toString());
         }
     }
 
-    private void createWarningLabel(Group configGroup) {
-        new Label(configGroup, SWT.NONE).setText("");
-        warningLabel = new WarningErrorLabel(configGroup, SWT.NONE);
+    private void createWarningLabel(Composite parent) {
+        warningLabel = new WarningErrorLabel(parent, SWT.FILL);
     }
 
     private KeyAdapter createHandleLinebreaksKeyAdapter(StyledText text) {
         return new KeyAdapter() {
+
             @Override
             public void keyPressed(KeyEvent e) {
                 if (text.getText().length() > 0 && (e.keyCode == SWT.CR || e.keyCode == SWT.LF)) {
@@ -640,7 +680,7 @@ public class OutputLocationEditDialog extends Dialog {
         tmp = tmp.replace("\r", "");
         tmp = tmp.replace("\n", "");
         tmp = tmp.replace(Matcher.quoteReplacement(OutputWriterComponentConstants.PH_LINEBREAK),
-            Matcher.quoteReplacement(OutputWriterComponentConstants.PH_LINEBREAK + LINE_SEP));
+            Matcher.quoteReplacement(OutputWriterComponentConstants.PH_LINEBREAK + LINE_SEPARATOR));
         return tmp;
     }
 }
