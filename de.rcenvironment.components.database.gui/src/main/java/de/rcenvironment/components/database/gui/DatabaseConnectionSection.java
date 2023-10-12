@@ -36,20 +36,13 @@ import de.rcenvironment.core.utils.incubator.ServiceRegistryAccess;
  *
  * @author Oliver Seebach
  * @author Kathrin Schaffert
+ * @author Jan Flink 
  */
 public class DatabaseConnectionSection extends ValidatingWorkflowNodePropertySection {
 
     private static JDBCDriverService jdbcDriverService;
 
     private static final Integer MINIMUM_TEXTFIELD_WIDTH = 150;
-
-    // private final static String DATABASE_FOUND = "Database found.";
-    //
-    // private final static String DATABASE_NOT_FOUND = "Cannot find database.";
-    //
-    // private final static String DATABASE_PENDING = "Pending ... ";
-    //
-    // private CLabel testDatabaseStatusLabel;
 
     private ServiceRegistryAccess serviceRegistryAccess;
 
@@ -90,7 +83,7 @@ public class DatabaseConnectionSection extends ValidatingWorkflowNodePropertySec
                 + "For information about registering database connectors, see the component's help.");
             return;
         }
-        informationLabel.setText("Please define the database for this component to use:");
+        informationLabel.setText("Please configure the database for this component to use:");
 
         // 2
         Composite databaseSelectionComposite = new Composite(mainComposite, SWT.NONE);
@@ -172,105 +165,14 @@ public class DatabaseConnectionSection extends ValidatingWorkflowNodePropertySec
         databaseSchemeText.setLayoutData(databaseSchemeTextData);
         databaseSchemeText.setData(CONTROL_PROPERTY_KEY, DatabaseComponentConstants.DATABASE_SCHEME);
 
-        // TEST DB
-        // Label testDBPlaceholderLabel = new Label(databaseSelectionGroup, SWT.NONE);
-        // testDBPlaceholderLabel.setText("");
-        // GridData testDBPlaceholderLabelData = new GridData(GridData.VERTICAL_ALIGN_BEGINNING);
-        // testDBPlaceholderLabel.setLayoutData(testDBPlaceholderLabelData);
-        //
-        // Button testDatabaseButton = new Button(databaseSelectionGroup, SWT.PUSH);
-        // testDatabaseButton.setText("Test Connection");
-        // testDatabaseButton.addSelectionListener(new TestDatabaseButtonListener());
-        // GridData testDatabaseButtonData = new GridData(GridData.HORIZONTAL_ALIGN_END);
-        // testDatabaseButton.setLayoutData(testDatabaseButtonData);
-
         // INFORMATION LABEL
         CLabel databaseSchemeInformationLabel = new CLabel(mainComposite, SWT.NONE);
         databaseSchemeInformationLabel
             .setText("Please note: 'Default Scheme' is the scheme you would define using the 'USE <scheme_name>' command.");
         databaseSchemeInformationLabel.setImage(ImageManager.getInstance().getSharedImage(StandardImages.INFORMATION_16));
         GridData databaseSchemeInformationLabelData = new GridData(GridData.VERTICAL_ALIGN_BEGINNING);
-        // databaseSchemeInformationLabelData.horizontalSpan = 2;
         databaseSchemeInformationLabel.setLayoutData(databaseSchemeInformationLabelData);
     }
-
-    // Currently not required -- seeb_ol, November 2015
-    // private final class TestDatabaseButtonListener implements SelectionListener {
-    //
-    // @Override
-    // public void widgetSelected(SelectionEvent event) {
-    //
-    // testDatabaseStatusLabel.setText(DATABASE_PENDING);
-    //
-    // DatabaseConnection databaseConnectionToBeTested = new DatabaseConnection();
-    //
-    // // do test procedure here!
-    // boolean connectionEstablished = false;
-    //
-    // if (connectionEstablished) {
-    // testDatabaseStatusLabel.setText(DATABASE_FOUND);
-    // } else {
-    // testDatabaseStatusLabel.setText(DATABASE_NOT_FOUND);
-    // }
-    //
-    // }
-    //
-    // @Override
-    // public void widgetDefaultSelected(SelectionEvent event) {
-    // widgetSelected(event);
-    // }
-    // }
-    //
-    // private final class AddDatabaseButtonListener implements SelectionListener {
-    //
-    // @Override
-    // public void widgetSelected(SelectionEvent event) {
-    //
-    // DatabaseConnectionAddEditDialog databaseEditDialog =
-    // new DatabaseConnectionAddEditDialog(Display.getCurrent().getActiveShell(), DatabaseManagementActionType.ADD);
-    // databaseEditDialog.open();
-    //
-    // }
-    //
-    // @Override
-    // public void widgetDefaultSelected(SelectionEvent event) {
-    // widgetSelected(event);
-    // }
-    // }
-    //
-    // private final class EditDatabaseButtonListener implements SelectionListener {
-    //
-    // @Override
-    // public void widgetSelected(SelectionEvent event) {
-    //
-    // DatabaseConnection dbConnection = new DatabaseConnection();
-    // DatabaseConnectionAddEditDialog databaseEditDialog =
-    // new DatabaseConnectionAddEditDialog(Display.getCurrent().getActiveShell(),
-    // dbConnection, DatabaseManagementActionType.EDIT);
-    // databaseEditDialog.open();
-    // }
-    //
-    // @Override
-    // public void widgetDefaultSelected(SelectionEvent event) {
-    // widgetSelected(event);
-    // }
-    // }
-    //
-    // private final class ManageDatabaseButtonListener implements SelectionListener {
-    //
-    // @Override
-    // public void widgetSelected(SelectionEvent event) {
-    //
-    // DatabaseManagementDialog managementDialog = new DatabaseManagementDialog(Display.getCurrent().getActiveShell());
-    // managementDialog.open();
-    //
-    // }
-    //
-    // @Override
-    // public void widgetDefaultSelected(SelectionEvent event) {
-    // widgetSelected(event);
-    // }
-    // }
 
     @Override
     public void refreshSection() {
