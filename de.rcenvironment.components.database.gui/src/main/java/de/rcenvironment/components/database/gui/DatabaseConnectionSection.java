@@ -51,8 +51,6 @@ public class DatabaseConnectionSection extends ValidatingWorkflowNodePropertySec
     //
     // private CLabel testDatabaseStatusLabel;
 
-    private CCombo databaseConnectorCombo;
-
     private ServiceRegistryAccess serviceRegistryAccess;
 
     public DatabaseConnectionSection() {
@@ -76,6 +74,7 @@ public class DatabaseConnectionSection extends ValidatingWorkflowNodePropertySec
         mainComposite.setBackground(Display.getCurrent().getSystemColor(1));
         GridData mainData = new GridData(GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL | GridData.FILL_BOTH);
         mainComposite.setLayoutData(mainData);
+        sectionDatabase.setClient(mainComposite);
 
         // 1
         Composite informationLabelComposite = new Composite(mainComposite, SWT.NONE);
@@ -85,6 +84,12 @@ public class DatabaseConnectionSection extends ValidatingWorkflowNodePropertySec
         informationLabelComposite.setLayoutData(informationLabelData);
 
         CLabel informationLabel = new CLabel(informationLabelComposite, SWT.LEFT | SWT.SHADOW_NONE);
+
+        if (jdbcDriverService.getRegisteredJDBCDrivers().isEmpty()) {
+            informationLabel.setText("WARNING: No database connectors registered!\n"
+                + "For information about registering database connectors, see the component's help.");
+            return;
+        }
         informationLabel.setText("Please define the database for this component to use:");
 
         // 2
@@ -118,19 +123,15 @@ public class DatabaseConnectionSection extends ValidatingWorkflowNodePropertySec
         GridData databaseConnectorLabelData = new GridData(GridData.VERTICAL_ALIGN_BEGINNING);
         databaseConnectorLabel.setLayoutData(databaseConnectorLabelData);
 
-        databaseConnectorCombo = new CCombo(databaseSelectionGroup, SWT.READ_ONLY | SWT.BORDER);
+        CCombo databaseConnectorCombo = new CCombo(databaseSelectionGroup, SWT.READ_ONLY | SWT.BORDER);
         GridData databaseConnectorData = new GridData(GridData.VERTICAL_ALIGN_BEGINNING);
         databaseConnectorData.minimumWidth = MINIMUM_TEXTFIELD_WIDTH;
         databaseConnectorData.widthHint = MINIMUM_TEXTFIELD_WIDTH;
         databaseConnectorCombo.setLayoutData(databaseConnectorData);
         databaseConnectorCombo.setData(CONTROL_PROPERTY_KEY, DatabaseComponentConstants.DATABASE_CONNECTOR);
-
-        for (JDBCDriverInformation jdbcDriver : jdbcDriverService.getRegisteredJDBCDrivers()) {
-            databaseConnectorCombo.add(jdbcDriver.getDisplayName());
-        }
-        if (databaseConnectorCombo.getItemCount() > 0) {
-            databaseConnectorCombo.select(0);
-        }
+        databaseConnectorCombo
+            .setItems(
+                jdbcDriverService.getRegisteredJDBCDrivers().stream().map(JDBCDriverInformation::getDisplayName).toArray(String[]::new));
 
         // DB HOST
         Label databaseHostLabel = new Label(databaseSelectionGroup, SWT.NONE);
@@ -191,8 +192,6 @@ public class DatabaseConnectionSection extends ValidatingWorkflowNodePropertySec
         GridData databaseSchemeInformationLabelData = new GridData(GridData.VERTICAL_ALIGN_BEGINNING);
         // databaseSchemeInformationLabelData.horizontalSpan = 2;
         databaseSchemeInformationLabel.setLayoutData(databaseSchemeInformationLabelData);
-
-        sectionDatabase.setClient(mainComposite);
     }
 
     // Currently not required -- seeb_ol, November 2015
