@@ -21,8 +21,7 @@
             "key": "databaseScheme"
         },
         {
-            "key": "databaseConnector",
-            "defaultValue": "MySQL"
+            "key": "databaseConnector"
         },
         {
             "key": "databaseStatements",
