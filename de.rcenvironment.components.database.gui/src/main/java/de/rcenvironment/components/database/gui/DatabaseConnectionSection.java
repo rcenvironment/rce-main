@@ -81,9 +81,10 @@ public class DatabaseConnectionSection extends ValidatingWorkflowNodePropertySec
         if (jdbcDriverService.getRegisteredJDBCDrivers().isEmpty()) {
             informationLabel.setText("WARNING: No database connectors registered!\n"
                 + "For information about registering database connectors, see the component's help.");
-            return;
+            informationLabel.setImage(ImageManager.getInstance().getSharedImage(StandardImages.WARNING_16));
+        } else {
+            informationLabel.setText("Please configure the database for this component to use:");
         }
-        informationLabel.setText("Please configure the database for this component to use:");
 
         // 2
         Composite databaseSelectionComposite = new Composite(mainComposite, SWT.NONE);
