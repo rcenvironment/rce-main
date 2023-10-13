@@ -40,14 +40,12 @@ import de.rcenvironment.core.utils.incubator.ServiceRegistryAccess;
  */
 public class DatabaseConnectionSection extends ValidatingWorkflowNodePropertySection {
 
-    private static JDBCDriverService jdbcDriverService;
-
     private static final Integer MINIMUM_TEXTFIELD_WIDTH = 150;
 
-    private ServiceRegistryAccess serviceRegistryAccess;
+    private JDBCDriverService jdbcDriverService;
 
     public DatabaseConnectionSection() {
-        serviceRegistryAccess = ServiceRegistry.createAccessFor(this);
+        ServiceRegistryAccess serviceRegistryAccess = ServiceRegistry.createAccessFor(this);
         jdbcDriverService = serviceRegistryAccess.getService(JDBCDriverService.class);
     }
 
