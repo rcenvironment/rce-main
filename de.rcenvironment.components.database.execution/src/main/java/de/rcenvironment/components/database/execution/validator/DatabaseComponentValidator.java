@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.rcenvironment.components.database.common.DatabaseComponentConstants;
 import de.rcenvironment.components.database.common.DatabaseStatement;
+import de.rcenvironment.components.database.common.jdbc.JDBCDriverService;
 import de.rcenvironment.core.component.model.api.ComponentDescription;
 import de.rcenvironment.core.component.model.endpoint.api.EndpointDescription;
 import de.rcenvironment.core.component.validation.api.ComponentValidationMessage;
@@ -26,12 +27,15 @@ import de.rcenvironment.core.component.validation.spi.AbstractComponentValidator
 import de.rcenvironment.core.datamodel.api.DataType;
 import de.rcenvironment.core.utils.common.JsonUtils;
 import de.rcenvironment.core.utils.common.StringUtils;
+import de.rcenvironment.core.utils.incubator.ServiceRegistry;
+import de.rcenvironment.core.utils.incubator.ServiceRegistryAccess;
 
 /**
  * Validator for Database component.
  *
  * @author Oliver Seebach
  * @author Jascha Riedel
+ * @author Jan Flink
  */
 public class DatabaseComponentValidator extends AbstractComponentValidator {
 
@@ -45,6 +49,13 @@ public class DatabaseComponentValidator extends AbstractComponentValidator {
 
     private static final String SEMICOLON = ";";
 
+    private JDBCDriverService jdbcDriverService;
+
+    public DatabaseComponentValidator() {
+        ServiceRegistryAccess serviceRegistryAccess = ServiceRegistry.createAccessFor(this);
+        jdbcDriverService = serviceRegistryAccess.getService(JDBCDriverService.class);
+    }
+    
     @Override
     public String getIdentifier() {
         return DatabaseComponentConstants.COMPONENT_ID;
@@ -236,45 +247,60 @@ public class DatabaseComponentValidator extends AbstractComponentValidator {
 
     private void checkIfDatabaseDefinitionIsNotEmpty(ComponentDescription componentDescription,
         final List<ComponentValidationMessage> messages) {
-        if (getProperty(componentDescription, DatabaseComponentConstants.DATABASE_HOST) == null) {
+        if (jdbcDriverService.getRegisteredJDBCDrivers().isEmpty()) {
+            messages.add(getNoConnectorsRegisteredWarning());
+        }
+        if (getProperty(componentDescription, DatabaseComponentConstants.DATABASE_CONNECTOR) == null
+            || getProperty(componentDescription, DatabaseComponentConstants.DATABASE_CONNECTOR).isEmpty()) {
+            messages.add(getEmptyConnectorWarning());
+        }
+        if (getProperty(componentDescription, DatabaseComponentConstants.DATABASE_HOST) == null
+            || getProperty(componentDescription, DatabaseComponentConstants.DATABASE_HOST).isEmpty()) {
             messages.add(getEmptyHostWarning());
-        } else if (getProperty(componentDescription, DatabaseComponentConstants.DATABASE_HOST).isEmpty()) {
-            messages.add(getEmptyHostWarning());
         }
-        if (getProperty(componentDescription, DatabaseComponentConstants.DATABASE_PORT) == null) {
-            messages.add(getEmptyPortWarning());
-        } else if (getProperty(componentDescription, DatabaseComponentConstants.DATABASE_PORT).isEmpty()) {
+        if (getProperty(componentDescription, DatabaseComponentConstants.DATABASE_PORT) == null
+            || getProperty(componentDescription, DatabaseComponentConstants.DATABASE_PORT).isEmpty()) {
             messages.add(getEmptyPortWarning());
         }
-        if (getProperty(componentDescription, DatabaseComponentConstants.DATABASE_SCHEME) == null) {
-            messages.add(getEmptySchemeWarning());
-        } else if (getProperty(componentDescription, DatabaseComponentConstants.DATABASE_SCHEME).isEmpty()) {
+        if (getProperty(componentDescription, DatabaseComponentConstants.DATABASE_SCHEME) == null
+            || getProperty(componentDescription, DatabaseComponentConstants.DATABASE_SCHEME).isEmpty()) {
             messages.add(getEmptySchemeWarning());
         }
+    }
+
+    private ComponentValidationMessage getNoConnectorsRegisteredWarning() {
+        String warningMessage = "No database connectors registered - see Database tab";
+        return new ComponentValidationMessage(
+            ComponentValidationMessage.Type.ERROR, DatabaseComponentConstants.DATABASE_CONNECTOR, warningMessage,
+            warningMessage);
     }
 
     private ComponentValidationMessage getEmptySchemeWarning() {
         String warningMessage = "Database Scheme needs to be defined - see Database tab";
-        final ComponentValidationMessage databaseSchemeNull = new ComponentValidationMessage(
+        return new ComponentValidationMessage(
             ComponentValidationMessage.Type.ERROR, DatabaseComponentConstants.DATABASE_SCHEME, warningMessage,
             warningMessage);
-        return databaseSchemeNull;
     }
 
     private ComponentValidationMessage getEmptyPortWarning() {
         String warningMessage = "Database Port needs to be defined - see Database tab";
-        final ComponentValidationMessage databasePortNull = new ComponentValidationMessage(
+        return new ComponentValidationMessage(
             ComponentValidationMessage.Type.ERROR, DatabaseComponentConstants.DATABASE_PORT, warningMessage,
             warningMessage);
-        return databasePortNull;
     }
 
     private ComponentValidationMessage getEmptyHostWarning() {
         String warningMessage = "Database Host needs to be defined - see Database tab";
-        final ComponentValidationMessage databaseHostNull = new ComponentValidationMessage(
+        return new ComponentValidationMessage(
             ComponentValidationMessage.Type.ERROR, DatabaseComponentConstants.DATABASE_HOST, warningMessage,
             warningMessage);
-        return databaseHostNull;
+    }
+
+    private ComponentValidationMessage getEmptyConnectorWarning() {
+        String warningMessage = "Database Connector needs to be configured - see Database tab";
+        return new ComponentValidationMessage(
+            ComponentValidationMessage.Type.ERROR, DatabaseComponentConstants.DATABASE_CONNECTOR, warningMessage,
+            warningMessage);
     }
 
 }

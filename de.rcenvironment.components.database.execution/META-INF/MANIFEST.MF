@@ -23,6 +23,7 @@ Import-Package: com.fasterxml.jackson.core;version="2.14.0",
  de.rcenvironment.core.datamodel.types.api,
  de.rcenvironment.core.utils.common,
  de.rcenvironment.core.utils.common.variables.legacy,
+ de.rcenvironment.core.utils.incubator,
  org.apache.commons.logging;version="1.1.1"
 Export-Package: de.rcenvironment.components.database.execution
 Service-Component: OSGI-INF/*.xml

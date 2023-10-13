@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
-                         "http://docbook.org/xml/4.4/docbookx.dtd">
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://docbook.org/xml/4.4/docbookx.dtd">
 <chapter>
     <title>Database Component Usage</title>
     <sect1>
         <title>Synopsis</title>
-    <para> With the database component, databases can be accessed. Database management however is
-            not the focus of this component.</para>
+    <para> With the database component, MySQL and PostgreSQL databases can be accessed. Database
+            management however is not the focus of this component.</para>
     </sect1>
     <sect1>
         <title>Rationale</title>
@@ -21,9 +20,18 @@
     <sect1>
         <title>Usage</title>
         <sect2>
+            <title>Registering a database connector</title>
+            <para>To register a JDBC database connector, you simply need to place the connector .jar
+                file in the subfolder ".../extras/database_connectors" in your RCE installation
+                folder. It will automatically be loaded when you restart RCE. As mentioned above:
+                Currently, only drivers for MySQL and PostgreSQL databases are supported. If you
+                require a different driver class feel free to contact us.</para><note><para>In previous releases we shipped a JDBC connector with RCE. Since we no longer deliver this for
+                    security reasons, at least one JDBC database connector must be registered before
+                    using the database component. Please inform us if there are problems with the
+                    integration of current versions of connectors.</para></note>
+        </sect2><sect2>
             <title>Defining a database connection</title>
-            <para>In the properties view of the database component there is a <emphasis
-                    role="italic">"Database"</emphasis> tab. Here you can define the database
+            <para>In the properties view of the database component there is a <emphasis role="italic">"Database"</emphasis> tab. Here you can define the database
                 connection this component works on. Note that currently drivers for MySQL and
                 PostgreSQL databases are supported. The credentials required to access the database
                 can be entered later on when you execute the workflow.</para>
@@ -34,19 +42,7 @@
                 the username and password. Note that you can store the password in an encrypted
                 storage if you check the "save" check box.</para>
         </sect2>
-        <sect2>
-            <title>Using your own connectors</title>
-            <para>As default a MySQL JDBC connector in version 5.1.17 is used and already shipped
-                with your RCE installation. You can find it in the subfolder
-                ".../extras/database_connectors" in your RCE installation folder. If you want to use
-                your own connector simply replace the connector file. It will automatically be
-                loaded when you restart RCE. As mentioned above: Only drivers for MySQL and
-                PostgreSQL database are supported currently. If you require a different driver class
-                feel free to contact us.<note>Since the supplied JDBC connector is quite outdated,
-                we strongly recommend using a current version as described in this section. In future
-                releases we will probably refrain from delivering a JDBC connector. Please inform us if
-                there are problems with the integration of newer versions of connectors.</note></para>
-        </sect2>
+        
         <sect2>
             <title>Database statements</title>
             <para>For each database component you can enter multiple statements. They are defined in
@@ -68,8 +64,7 @@
         </sect2>
         <sect2>
             <title>Output "success"</title>
-            <para>There is a static output of type boolean named <emphasis role="italic"
-                    >"success"</emphasis>. It is set to <emphasis role="italic">true</emphasis> if
+            <para>There is a static output of type boolean named <emphasis role="italic">"success"</emphasis>. It is set to <emphasis role="italic">true</emphasis> if
                 the given statement and result set distribution was successful. It is useful when a
                 database statement does not yield a result set (like an INSERT statement, for
                 instance) but should trigger the start of a succeeding component. If there are
@@ -142,8 +137,7 @@
     <sect1>
         <title>Examples</title>
         <para>The following examples refer to the "world" example which can be found at the mysql
-            website: <ulink url="https://dev.mysql.com/doc/index-other.html"
-                >https://dev.mysql.com/doc/index-other.html</ulink></para>
+            website: <ulink url="https://dev.mysql.com/doc/index-other.html">https://dev.mysql.com/doc/index-other.html</ulink></para>
         <para>The following list gives examples for the statement types without inputs configured in
             the component:</para>
         <para>
@@ -181,8 +175,6 @@
         <para>Considering inputs of type small table, the example above in the context of the world
             database would look as follows, assumed the input is properly
             defined:<programlisting>INSERT INTO City (ID, Name, CountryCode, District, Population) VALUES ${in:smallTable};</programlisting></para>
-        <para>For further information you may want to refer to the MySQL documentation: <ulink
-                url="https://dev.mysql.com/doc/refman/5.7/en/sql-syntax.html"
-                >https://dev.mysql.com/doc/refman/5.7/en/sql-syntax.html</ulink></para>
+        <para>For further information you may want to refer to the MySQL documentation: <ulink url="https://dev.mysql.com/doc/refman/5.7/en/sql-syntax.html">https://dev.mysql.com/doc/refman/5.7/en/sql-syntax.html</ulink></para>
     </sect1>
 </chapter>
