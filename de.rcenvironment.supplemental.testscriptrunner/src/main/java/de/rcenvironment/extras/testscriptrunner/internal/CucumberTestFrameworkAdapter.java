@@ -331,11 +331,11 @@ public class CucumberTestFrameworkAdapter {
             } else if (testStepResult.equals(Status.UNDEFINED)) {
                 log.error("Undefined Step [" + testStep.getStep().getKeyword() + testStep.getStep().getText() + "]");
             } else if (testStepResult.equals(Status.FAILED)) {
-                log.error("Step Execution Failed");
-            } else if (!(testStepResult.equals(Status.PASSED) || testStepResult.equals(Status.AMBIGUOUS)
-                || testStepResult.equals(Status.PENDING))) {
-
-                throw new IllegalStateException("Unexpected status: " + testStepResult);
+                log.error("Step Execution Failed [" + testStep.getStep().getKeyword() + testStep.getStep().getText() + "]");
+            } else if (testStepResult.equals(Status.AMBIGUOUS)) {
+                log.error("Ambiguous step definition [" + testStep.getStep().getKeyword() + testStep.getStep().getText() + "]");
+            } else if (testStepResult.equals(Status.PENDING)) {
+                log.error("Pending step definition [" + testStep.getStep().getKeyword() + testStep.getStep().getText() + "]");
             }
 
         }
@@ -348,6 +348,10 @@ public class CucumberTestFrameworkAdapter {
                 log.error("Undefined Scenario");
             } else if (testCaseStatus.equals(Status.FAILED)) {
                 log.error("Failed Scenario");
+            } else if (testCaseStatus.equals(Status.AMBIGUOUS)) {
+                log.error("Ambiguous Scenario");
+            } else if (testCaseStatus.equals(Status.PENDING)) {
+                log.error("Pending Scenario");
             }
 
         }

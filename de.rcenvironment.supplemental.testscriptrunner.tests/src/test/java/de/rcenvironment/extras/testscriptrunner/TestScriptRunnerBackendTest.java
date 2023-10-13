@@ -24,9 +24,6 @@ import de.rcenvironment.core.instancemanagement.InstanceManagementService;
 import de.rcenvironment.core.utils.common.TempFileServiceAccess;
 import de.rcenvironment.core.utils.common.textstream.receivers.LoggingTextOutReceiver;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ExternalServiceHolder;
-import de.rcenvironment.extras.testscriptrunner.definitions.common.RceTestLifeCycleHooks;
-import de.rcenvironment.extras.testscriptrunner.definitions.impl.InstanceInstantiationStepDefinitions;
-import de.rcenvironment.extras.testscriptrunner.definitions.impl.WorkflowStepDefinitions;
 import de.rcenvironment.extras.testscriptrunner.internal.CucumberTestFrameworkAdapter;
 import de.rcenvironment.extras.testscriptrunner.internal.CucumberTestFrameworkAdapter.ExecutionResult;
 
@@ -92,7 +89,8 @@ public class TestScriptRunnerBackendTest {
         log.info(SEPARATOR_TEXT_LINE);
         for (String line : stdOutLines) {
             log.info(line);
-            if (line.contains("Undefined scenarios")) {
+            if (line.toLowerCase().contains("undefined scenario") || line.toLowerCase().contains("ambiguous scenario")
+                || line.toLowerCase().contains("failed scenario") || line.toLowerCase().contains("pending scenario")) {
                 errorCaseDetected = true;
             }
         }
