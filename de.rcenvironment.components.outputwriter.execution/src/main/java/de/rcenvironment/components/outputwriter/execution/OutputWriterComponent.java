@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -38,6 +39,8 @@ import de.rcenvironment.core.component.datamanagement.api.ComponentDataManagemen
 import de.rcenvironment.core.component.execution.api.ComponentContext;
 import de.rcenvironment.core.component.execution.api.ComponentLog;
 import de.rcenvironment.core.component.model.spi.DefaultComponent;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionInformation;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionService;
 import de.rcenvironment.core.datamodel.api.DataType;
 import de.rcenvironment.core.datamodel.api.TypedDatum;
 import de.rcenvironment.core.datamodel.types.api.DirectoryReferenceTD;
@@ -92,8 +95,20 @@ public class OutputWriterComponent extends DefaultComponent {
     @Override
     public void start() throws ComponentException {
         dataManagementService = componentContext.getService(ComponentDataManagementService.class);
-
-        Date dt = new Date();
+        WorkflowExecutionService workflowExecutionService = componentContext.getService(WorkflowExecutionService.class);
+        Optional<Long> startTime = workflowExecutionService.getWorkflowExecutionInformations().stream()
+            .filter(info -> info.getExecutionIdentifier().equals(componentContext.getWorkflowExecutionIdentifier()))
+            .map(WorkflowExecutionInformation::getStartTime).findFirst();
+        Date dt;
+        
+        if (startTime.isPresent()) {
+            dt = new Date(startTime.get());
+        } else {
+            dt = new Date();
+            componentLog
+                .componentWarn(
+                    "The workflow start timestamp could not be received. Instead, the component initialization timestamp is used.");
+        }
         SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
         wfStartTimeStamp = df.format(dt);
 
