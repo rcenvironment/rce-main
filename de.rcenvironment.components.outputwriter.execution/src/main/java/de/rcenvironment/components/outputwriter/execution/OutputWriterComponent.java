@@ -96,11 +96,11 @@ public class OutputWriterComponent extends DefaultComponent {
     public void start() throws ComponentException {
         dataManagementService = componentContext.getService(ComponentDataManagementService.class);
         WorkflowExecutionService workflowExecutionService = componentContext.getService(WorkflowExecutionService.class);
+
         Optional<Long> startTime = workflowExecutionService.getWorkflowExecutionInformations().stream()
             .filter(info -> info.getExecutionIdentifier().equals(componentContext.getWorkflowExecutionIdentifier()))
             .map(WorkflowExecutionInformation::getStartTime).findFirst();
         Date dt;
-        
         if (startTime.isPresent()) {
             dt = new Date(startTime.get());
         } else {
@@ -171,7 +171,6 @@ public class OutputWriterComponent extends DefaultComponent {
 
     @Override
     public void processInputs() throws ComponentException {
-
         Date dt = new Date();
         SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
 
