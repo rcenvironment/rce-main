@@ -107,7 +107,7 @@ Import-Package: com.fasterxml.jackson.core;version="2.14.0",
  org.picocontainer;version="2.15.0",
  org.picocontainer.annotations;version="2.15.0",
  org.slf4j
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Service-Component: OSGI-INF/*.xml,

@@ -4,7 +4,7 @@ Bundle-SymbolicName: de.rcenvironment.core.gui.utils.common;singleton:=true
 Bundle-Vendor: DLR
 Bundle-Version: 10.4.1.qualifier
 Bundle-ManifestVersion: 2
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Import-Package: de.rcenvironment.core.component.model.spi,
  de.rcenvironment.core.component.workflow.model.spi,

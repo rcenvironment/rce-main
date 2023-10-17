@@ -4,7 +4,7 @@ Bundle-Name: RCE Core Remote Access Tests
 Bundle-SymbolicName: de.rcenvironment.core.remoteaccess.tests
 Bundle-Version: 10.4.1.qualifier
 Bundle-Vendor: DLR
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Fragment-Host: de.rcenvironment.core.remoteaccess
 Require-Bundle: de.rcenvironment.core.utils.testing
 Import-Package: de.rcenvironment.core.utils.executor.testutils

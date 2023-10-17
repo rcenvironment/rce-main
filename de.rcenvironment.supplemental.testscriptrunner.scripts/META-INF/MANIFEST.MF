@@ -7,6 +7,6 @@ Eclipse-BundleShape: dir
 RCE-Unpacked-Fileset-Id: testScripts
 RCE-Unpacked-Fileset-Path: resources/scripts
 RCE-Unpacked-Fileset-Presence-Test-File: README.txt
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: DLR
 Automatic-Module-Name: de.rcenvironment.supplemental.testscriptrunner.scripts

@@ -5,6 +5,6 @@ Bundle-SymbolicName: de.rcenvironment.core.gui.login.branding.default
 Bundle-Version: 10.4.1.qualifier
 Fragment-Host: de.rcenvironment.core.gui.login
 Bundle-Vendor: DLR & Fraunhofer SCAI
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Eclipse-BundleShape: dir
 Automatic-Module-Name: de.rcenvironment.core.gui.login.branding.default

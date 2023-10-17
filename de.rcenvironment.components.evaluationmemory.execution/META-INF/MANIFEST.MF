@@ -4,7 +4,7 @@ Bundle-Name: RCE Components Evaluation Memory Execution
 Bundle-SymbolicName: de.rcenvironment.components.evaluationmemory.execution
 Bundle-Version: 10.4.1.qualifier
 Bundle-Vendor: DLR
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Service-Component: OSGI-INF/*.xml
 RCE-Component: true
 Export-Package: de.rcenvironment.components.evaluationmemory.execution

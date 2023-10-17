@@ -5,7 +5,7 @@ Bundle-SymbolicName: de.rcenvironment.core.gui.workflow.integration;singleton:=t
 Bundle-Version: 10.4.1.qualifier
 Bundle-Vendor: DLR
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: de.rcenvironment.core.communication.api,
  de.rcenvironment.core.communication.common,
  de.rcenvironment.core.component.api,

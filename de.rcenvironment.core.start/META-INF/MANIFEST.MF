@@ -4,7 +4,7 @@ Bundle-Name: RCE Core Start
 Bundle-SymbolicName: de.rcenvironment.core.start;singleton:=true
 Bundle-Version: 10.4.1.qualifier
 Bundle-Vendor: DLR
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: de.rcenvironment.core.configuration,
  de.rcenvironment.core.start.common,
  de.rcenvironment.core.toolkitbridge.api,

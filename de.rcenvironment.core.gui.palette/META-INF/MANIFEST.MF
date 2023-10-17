@@ -10,7 +10,7 @@ Require-Bundle: org.eclipse.core.runtime,
  de.rcenvironment.core.gui.workflow,
  de.rcenvironment.core.communication,
  de.rcenvironment.core.component
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Activator: de.rcenvironment.core.gui.palette.Activator
 Import-Package: de.rcenvironment.core.authorization.api,
  de.rcenvironment.core.communication.common,

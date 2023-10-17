@@ -4,7 +4,7 @@ Bundle-Name: RCE Core Component XML
 Bundle-SymbolicName: de.rcenvironment.core.component.xml
 Bundle-Version: 10.4.1.qualifier
 Bundle-Vendor: DLR
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: de.rcenvironment.core.component.api,
  de.rcenvironment.core.component.datamanagement.api,
  de.rcenvironment.core.component.execution.api,

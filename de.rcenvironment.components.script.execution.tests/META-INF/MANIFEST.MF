@@ -4,7 +4,7 @@ Bundle-Name: RCE Script Component Execution Bundle Tests
 Bundle-SymbolicName: de.rcenvironment.components.script.execution.tests
 Bundle-Version: 10.4.1.qualifier
 Fragment-Host: de.rcenvironment.components.script.execution
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: DLR
 Import-Package: de.rcenvironment.components.script.common,
  de.rcenvironment.components.script.common.registry,

@@ -32,6 +32,6 @@ Import-Package: com.jcraft.jsch;version="0.2.0",
  org.mindrot.jbcrypt;version="0.4.0"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: DLR
 Automatic-Module-Name: de.rcenvironment.core.instancemanagement

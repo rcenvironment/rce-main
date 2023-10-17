@@ -4,7 +4,7 @@ Bundle-Name: RCE Core Log Provenance
 Bundle-SymbolicName: de.rcenvironment.core.log.provenance
 Bundle-Version: 10.4.1.qualifier
 Automatic-Module-Name: de.rcenvironment.core.log.provenance
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: DLR & Fraunhofer SCAI
 Export-Package: de.rcenvironment.provenance.api
 Import-Package: de.rcenvironment.core.datamodel.api,

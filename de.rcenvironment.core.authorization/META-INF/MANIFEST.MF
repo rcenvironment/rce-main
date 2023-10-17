@@ -8,7 +8,7 @@ Export-Package: de.rcenvironment.core.authorization,
  de.rcenvironment.core.authorization.api,
  de.rcenvironment.core.authorization.cryptography.api,
  de.rcenvironment.core.authorization.testutils
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: de.rcenvironment.core.command.common,
  de.rcenvironment.core.command.spi,
  de.rcenvironment.core.configuration,

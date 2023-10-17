@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: RCE Core Bootstrap Configuration
 Bundle-SymbolicName: de.rcenvironment.core.configuration.bootstrap;singleton:=true
 Bundle-Version: 10.4.1.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: com.fasterxml.jackson.core;version="2.9.9",
  com.fasterxml.jackson.core.type;version="2.9.9",
  com.fasterxml.jackson.databind;version="2.9.9",

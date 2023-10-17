@@ -4,7 +4,7 @@ Bundle-SymbolicName: de.rcenvironment.core.mail;singleton:=true
 Bundle-Vendor: DLR
 Bundle-Version: 10.4.1.qualifier
 Bundle-ManifestVersion: 2
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
 Import-Package: com.fasterxml.jackson.core;version="2.14.0",

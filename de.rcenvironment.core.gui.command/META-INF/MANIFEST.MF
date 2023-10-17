@@ -5,7 +5,7 @@ Bundle-SymbolicName: de.rcenvironment.core.gui.command;singleton:=true
 Bundle-Version: 10.4.1.qualifier
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: DLR
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: de.rcenvironment.core.command.api,
  de.rcenvironment.core.command.spi,
  de.rcenvironment.core.component.api,

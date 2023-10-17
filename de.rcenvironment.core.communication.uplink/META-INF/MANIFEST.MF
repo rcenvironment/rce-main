@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: RCE Core Communication Uplink Bundle
 Bundle-SymbolicName: de.rcenvironment.core.communication.uplink
 Bundle-Version: 10.4.1.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: DLR
 Import-Package: com.fasterxml.jackson.annotation;version="2.9.0",
  com.fasterxml.jackson.core;version="2.9.9",

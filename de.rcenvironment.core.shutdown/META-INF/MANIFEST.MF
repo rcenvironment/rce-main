@@ -6,7 +6,7 @@ Bundle-Version: 10.4.1.qualifier
 Bundle-Vendor: DLR
 Bundle-Activator: de.rcenvironment.core.shutdown.Activator
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: de.rcenvironment.core.configuration,
  de.rcenvironment.core.configuration.bootstrap,
  de.rcenvironment.core.configuration.bootstrap.profile,
