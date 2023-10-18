@@ -60,15 +60,23 @@ public final class ComponentIdRules {
         if (commonValidationError.isPresent()) {
             return commonValidationError;
         }
+        Optional<String> error = validateComponentIdLength(input);
+        if (error.isPresent()) {
+            return error;
+        }
+        // additionally, check whether the given id violates any platform-specific rules for filenames; for example, this rules out "LPT1"
+        if (!CrossPlatformFilenameUtils.isFilenameValid(input)) {
+            return Optional.of(ID_INVALID_AS_FILENAME_ERROR_MESSAGE);
+        }
+        return Optional.empty(); // passed
+    }
+
+    public static Optional<String> validateComponentIdLength(String input) {
         if (input.length() < MINIMUM_ID_LENGTH) {
             return Optional.of(MINIMUM_ID_LENGTH_ERROR_MESSAGE);
         }
         if (input.length() > MAXIMUM_ID_LENGTH) {
             return Optional.of(StringUtils.format(MAXIMUM_ID_LENGTH_ERROR_MESSAGE, MAXIMUM_ID_LENGTH));
-        }
-        // additionally, check whether the given id violates any platform-specific rules for filenames; for example, this rules out "LPT1"
-        if (!CrossPlatformFilenameUtils.isFilenameValid(input)) {
-            return Optional.of(ID_INVALID_AS_FILENAME_ERROR_MESSAGE);
         }
         return Optional.empty(); // passed
     }
@@ -109,7 +117,7 @@ public final class ComponentIdRules {
         Optional<String> validationError;
         validationError = validateComponentIdRules(componentInterface.getIdentifier());
         if (validationError.isPresent()) {
-            return Optional.of("Invalid component name/id: " + validationError.get());
+            return Optional.of("Invalid component identifier: " + validationError.get());
         }
         validationError = validateComponentVersionRules(componentInterface.getVersion());
         if (validationError.isPresent()) {

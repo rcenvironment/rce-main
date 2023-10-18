@@ -73,6 +73,8 @@ public class ComponentDescriptionPage extends IntegrationEditorPage {
     private static final String HELP_CONTEXT_ID =
         "de.rcenvironment.core.gui.integration.workflowintegration.integration_componentDescription";
 
+    private static final String COMPONENT_ID_PREFIX = "de.rcenvironment.integration.workflow.";
+
     private Color colorWhite = ColorManager.getInstance().getSharedColor(StandardColors.RCE_WHITE);
 
     private WorkflowIntegrationEditor integrationEditor;
@@ -172,7 +174,8 @@ public class ComponentDescriptionPage extends IntegrationEditorPage {
             if (currentName.isPresent()) {
                 usedToolnames.remove(currentName.get());
             }
-            wfNameValidationMessage = validator.validateName(wfNameText, currentName, usedToolnames);
+            String componentID = COMPONENT_ID_PREFIX + wfNameText.getText();
+            wfNameValidationMessage = validator.validateName(wfNameText, componentID, currentName, usedToolnames);
             updateValidationMessage();
             updateSaveButtonActivation();
             if (!wfNameValidationMessage.isPresent()) {
