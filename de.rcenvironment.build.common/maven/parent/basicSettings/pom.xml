@@ -14,8 +14,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- custom RCE properties -->
-		<internal.java.sourceLevel>1.8</internal.java.sourceLevel>
-		<internal.java.targetLevel>1.8</internal.java.targetLevel>
+		<internal.java.sourceLevel>11</internal.java.sourceLevel>
+		<internal.java.targetLevel>11</internal.java.targetLevel>
 		<internal.java.encoding>UTF8</internal.java.encoding>
 
 		<!-- Note: As of 3.0.4, the 3.x.x releases of Tycho have potentially unstable dependencies
