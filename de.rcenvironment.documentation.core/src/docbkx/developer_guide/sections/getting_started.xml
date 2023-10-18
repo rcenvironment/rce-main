@@ -238,9 +238,9 @@
                     </para>
                 </listitem>
                 <listitem>
-                    <para>If you previously changed the global Java compiler compliance level to 1.7
+                    <para>If you previously changed the global Java compiler compliance level e.g. to 1.8
                         for previous RCE releases, it is recommended to revert this setting to
-                        default, or explicitly set it to 1.8. This setting can be accessed by
+                        default, or explicitly set it to 11. This setting can be accessed by
                         opening "Window > Preferences" from the menu, and then navigating to the
                         "Java > Compiler" tab. If you never actively changed this setting, no action
                         is required.</para>
