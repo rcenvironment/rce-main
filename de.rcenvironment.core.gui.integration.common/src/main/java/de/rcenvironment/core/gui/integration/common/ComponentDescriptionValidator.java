@@ -74,15 +74,19 @@ public final class ComponentDescriptionValidator {
         String name = toolNameText.getText();
         if (name.isEmpty()) {
             return Optional.of("Please enter a name for the component.");
-
+        }
+        Optional<String> validationMinError = ComponentIdRules.validateMinimumLength(name);
+        if (validationMinError.isPresent()) {
+            return Optional.of(StringUtils.format(TOOLNAME_INVALID, validationMinError.get()));
         }
         Optional<String> validationResult = CommonIdRules.validateCommonIdRules(name);
         if (validationResult.isPresent()) {
             return Optional.of(StringUtils.format(TOOLNAME_INVALID, validationResult.get()));
         }
-        Optional<String> validationError = ComponentIdRules.validateComponentIdLength(componentID);
+        Optional<String> validationError = ComponentIdRules.validateComponentIdMaximumLength(componentID);
         if (validationError.isPresent()) {
-            return Optional.of(StringUtils.format(TOOLNAME_INVALID, validationError.get()));
+            return Optional.of(StringUtils.format(TOOLNAME_INVALID, "The component Id exceeds the maximum allowed length: " + componentID
+                + " " + validationError.get()));
         }
         // additionally, check whether the given id violates any platform-specific rules for filenames; for example, this rules out "LPT1"
         if (!CrossPlatformFilenameUtils.isFilenameValid(name)) {

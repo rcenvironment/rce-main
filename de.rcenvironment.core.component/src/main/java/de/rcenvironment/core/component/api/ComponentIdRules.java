@@ -60,9 +60,13 @@ public final class ComponentIdRules {
         if (commonValidationError.isPresent()) {
             return commonValidationError;
         }
-        Optional<String> error = validateComponentIdLength(input);
-        if (error.isPresent()) {
-            return error;
+        Optional<String> minimumError = validateMinimumLength(input);
+        if (minimumError.isPresent()) {
+            return minimumError;
+        }
+        Optional<String> maximumError = validateComponentIdMaximumLength(input);
+        if (maximumError.isPresent()) {
+            return maximumError;
         }
         // additionally, check whether the given id violates any platform-specific rules for filenames; for example, this rules out "LPT1"
         if (!CrossPlatformFilenameUtils.isFilenameValid(input)) {
@@ -71,14 +75,18 @@ public final class ComponentIdRules {
         return Optional.empty(); // passed
     }
 
-    public static Optional<String> validateComponentIdLength(String input) {
-        if (input.length() < MINIMUM_ID_LENGTH) {
-            return Optional.of(MINIMUM_ID_LENGTH_ERROR_MESSAGE);
-        }
+    public static Optional<String> validateComponentIdMaximumLength(String input) {
         if (input.length() > MAXIMUM_ID_LENGTH) {
             return Optional.of(StringUtils.format(MAXIMUM_ID_LENGTH_ERROR_MESSAGE, MAXIMUM_ID_LENGTH));
         }
-        return Optional.empty(); // passed
+        return Optional.empty();
+    }
+
+    public static Optional<String> validateMinimumLength(String input) {
+        if (input.length() < MINIMUM_ID_LENGTH) {
+            return Optional.of(MINIMUM_ID_LENGTH_ERROR_MESSAGE);
+        }
+        return Optional.empty();
     }
 
     /**
