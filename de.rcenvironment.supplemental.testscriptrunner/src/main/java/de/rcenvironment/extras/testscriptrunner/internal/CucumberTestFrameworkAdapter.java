@@ -78,6 +78,7 @@ import io.cucumber.plugin.event.PickleStepTestStep;
 import io.cucumber.plugin.event.Result;
 import io.cucumber.plugin.event.Status;
 import io.cucumber.plugin.event.TestCaseFinished;
+import io.cucumber.plugin.event.TestRunFinished;
 import io.cucumber.plugin.event.TestStepFinished;
 import io.cucumber.tagexpressions.TagExpressionParser;
 
@@ -148,6 +149,35 @@ public class CucumberTestFrameworkAdapter {
     }
 
     /**
+     * Container for execution result summary.
+     *
+     * @author Devika Jalgaonkar
+     */
+    public class TestStatistics {
+
+        public int passedCount = 0;
+
+        public int failedCount = 0;
+
+        public int ambiguousCount = 0;
+
+        public int skippedCount = 0;
+
+        public int pendingCount = 0;
+
+        public int undefinedCount = 0;
+
+        public int total = 0;
+
+        void printSummary() {
+            System.out.println(
+                "Total: " + total + "(passed: " + passedCount + ", failed: " + failedCount + ", skipped: " + skippedCount + ", pending: "
+                    + pendingCount + ", undefined: " + undefinedCount + ", ambiguous: " + ambiguousCount + ")");
+        }
+
+    }
+
+    /**
      * A holder for all data that is related to a specific invocation, and data-related execution methods. This class makes
      * {@link CucumberTestFrameworkAdapter} thread safe again after the Cucumber 7.x upgrade.
      * 
@@ -158,6 +188,8 @@ public class CucumberTestFrameworkAdapter {
         private final EventHandler<TestStepFinished> cucumberTestStepFinishedHandler = this::cucumberTestStepFinished;
 
         private final EventHandler<TestCaseFinished> cucumberTestCaseFinishedHandler = this::cucumberTestCaseResult;
+
+        private final EventHandler<TestRunFinished> cucumberTestRunFinishedHandler = this::cucumberTestRunFinished;
 
         private final class ClassLoaderWrapper extends ClassLoader {
 
@@ -239,6 +271,10 @@ public class CucumberTestFrameworkAdapter {
         // set by initializeCucumberRuntime()
         private ExecutorService executor;
 
+        private TestStatistics scenarioStatistics = new TestStatistics();
+
+        private TestStatistics stepStatistics = new TestStatistics();
+
         private ExecutionContext(ReportOutputFormat reportFormat, String reportDirUriString, String reportFileName, String tagNameFilter,
             File scriptLocationRoot) {
             this.reportFormat = reportFormat;
@@ -257,12 +293,14 @@ public class CucumberTestFrameworkAdapter {
 
         private void initializeCucumberRuntime() {
             EventBus eventBus = synchronize(new TimeServiceEventBus(Clock.systemUTC(), UUID::randomUUID));
+            String userHomeDir = System.getenv("USERPROFILE");
             String reportType = "html";
-            String htmlReportPath = "target/report/";
+            String htmlReportPath = userHomeDir + "/rceReports/";
             String htmlReportName = "Report";
 
             eventBus.registerHandlerFor(TestStepFinished.class, cucumberTestStepFinishedHandler);
             eventBus.registerHandlerFor(TestCaseFinished.class, cucumberTestCaseFinishedHandler);
+            eventBus.registerHandlerFor(TestRunFinished.class, cucumberTestRunFinishedHandler);
             RuntimeOptionsBuilder cucumberRuntimeOptionsBuilder =
                 new RuntimeOptionsBuilder().addGlue(GluePath.parse("de.rcenvironment.extras.testscriptrunner"))
                     .setMonochrome(true)
@@ -317,8 +355,21 @@ public class CucumberTestFrameworkAdapter {
             executor = new SingleThreadedExecutionService();
         }
 
+        private void cucumberTestRunFinished(TestRunFinished event) {
+            //TODO. Use correct alternative for sys.out.println
+            System.out.println("Scenarios:");
+            scenarioStatistics.printSummary();
+            System.out.println("Steps:");
+            stepStatistics.printSummary();
+            if (scenarioStatistics.total > 0 && (scenarioStatistics.total == scenarioStatistics.passedCount)) {
+                System.out.println("All scenarios PASSED successfully");
+            }
+
+        }
+
         private void cucumberTestStepFinished(TestStepFinished event) {
             if (event.getTestStep() instanceof PickleStepTestStep) {
+                stepStatistics.total++;
                 PickleStepTestStep testStep = (PickleStepTestStep) event.getTestStep();
                 cucumberStepResult(testStep, event.getResult());
             }
@@ -327,30 +378,47 @@ public class CucumberTestFrameworkAdapter {
         private void cucumberStepResult(PickleStepTestStep testStep, Result result) {
             Status testStepResult = result.getStatus();
             if (testStepResult.equals(Status.SKIPPED)) {
+                stepStatistics.skippedCount++;
                 log.warn("Step Execution Skipped [" + testStep.getStep().getKeyword() + testStep.getStep().getText() + "]");
             } else if (testStepResult.equals(Status.UNDEFINED)) {
+                stepStatistics.undefinedCount++;
                 log.error("Undefined Step [" + testStep.getStep().getKeyword() + testStep.getStep().getText() + "]");
             } else if (testStepResult.equals(Status.FAILED)) {
+                stepStatistics.failedCount++;
                 log.error("Step Execution Failed [" + testStep.getStep().getKeyword() + testStep.getStep().getText() + "]");
             } else if (testStepResult.equals(Status.AMBIGUOUS)) {
+                stepStatistics.ambiguousCount++;
                 log.error("Ambiguous step definition [" + testStep.getStep().getKeyword() + testStep.getStep().getText() + "]");
             } else if (testStepResult.equals(Status.PENDING)) {
+                stepStatistics.pendingCount++;
                 log.error("Pending step definition [" + testStep.getStep().getKeyword() + testStep.getStep().getText() + "]");
+            } else {
+                stepStatistics.passedCount++;
             }
 
         }
 
         private void cucumberTestCaseResult(TestCaseFinished scenario) {
+            scenarioStatistics.total++;
+
             Status testCaseStatus = scenario.getResult().getStatus();
+            if (testCaseStatus.equals(Status.PASSED)) {
+                scenarioStatistics.passedCount++;
+            }
             if (testCaseStatus.equals(Status.SKIPPED)) {
+                scenarioStatistics.skippedCount++;
                 log.info("Skipped");
             } else if (testCaseStatus.equals(Status.UNDEFINED)) {
+                scenarioStatistics.undefinedCount++;
                 log.error("Undefined Scenario");
             } else if (testCaseStatus.equals(Status.FAILED)) {
+                scenarioStatistics.failedCount++;
                 log.error("Failed Scenario");
             } else if (testCaseStatus.equals(Status.AMBIGUOUS)) {
+                scenarioStatistics.ambiguousCount++;
                 log.error("Ambiguous Scenario");
             } else if (testCaseStatus.equals(Status.PENDING)) {
+                scenarioStatistics.pendingCount++;
                 log.error("Pending Scenario");
             }
 
