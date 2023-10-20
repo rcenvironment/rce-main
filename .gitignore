@@ -13,6 +13,10 @@
 target/
 .settings/
 
+# Tycho-specific entries
+
+.tycho-consumer-pom.xml
+
 # Eclipse workspace data when using the git checkout path as workspace
 
 /.metadata/
