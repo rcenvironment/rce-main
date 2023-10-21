@@ -311,12 +311,12 @@ public class CucumberTestFrameworkAdapter {
                     .setObjectFactoryClass(PicoFactory.class).addPluginName("pretty").addDefaultSummaryPrinterIfNotDisabled()
                     .addPluginName(reportType + ":" + htmlReportPath + htmlReportName + "." + reportType)
                     .addFeature(FeatureWithLines.parse(scriptLocationRoot.getAbsolutePath()));
-            if (!StringUtils.isNullorEmpty(tagNameFilter)) {
+            if ((!StringUtils.isNullorEmpty(tagNameFilter)) && !tagNameFilter.equals("--all")) {
                 // normalize filter parts and prepend "@" character
                 final StringBuilder buffer = new StringBuilder();
                 for (String filterPart : tagNameFilter.split(",")) {
                     if (buffer.length() != 0) {
-                        buffer.append(",");
+                        buffer.append(" or ");
                     }
                     final String trimmedPart = filterPart.trim();
                     if (!trimmedPart.startsWith("@")) {
@@ -379,19 +379,14 @@ public class CucumberTestFrameworkAdapter {
             Status testStepResult = result.getStatus();
             if (testStepResult.equals(Status.SKIPPED)) {
                 stepStatistics.skippedCount++;
-                log.warn("Step Execution Skipped [" + testStep.getStep().getKeyword() + testStep.getStep().getText() + "]");
             } else if (testStepResult.equals(Status.UNDEFINED)) {
                 stepStatistics.undefinedCount++;
-                log.error("Undefined Step [" + testStep.getStep().getKeyword() + testStep.getStep().getText() + "]");
             } else if (testStepResult.equals(Status.FAILED)) {
                 stepStatistics.failedCount++;
-                log.error("Step Execution Failed [" + testStep.getStep().getKeyword() + testStep.getStep().getText() + "]");
             } else if (testStepResult.equals(Status.AMBIGUOUS)) {
                 stepStatistics.ambiguousCount++;
-                log.error("Ambiguous step definition [" + testStep.getStep().getKeyword() + testStep.getStep().getText() + "]");
             } else if (testStepResult.equals(Status.PENDING)) {
                 stepStatistics.pendingCount++;
-                log.error("Pending step definition [" + testStep.getStep().getKeyword() + testStep.getStep().getText() + "]");
             } else {
                 stepStatistics.passedCount++;
             }
@@ -400,7 +395,6 @@ public class CucumberTestFrameworkAdapter {
 
         private void cucumberTestCaseResult(TestCaseFinished scenario) {
             scenarioStatistics.total++;
-
             Status testCaseStatus = scenario.getResult().getStatus();
             if (testCaseStatus.equals(Status.PASSED)) {
                 scenarioStatistics.passedCount++;
