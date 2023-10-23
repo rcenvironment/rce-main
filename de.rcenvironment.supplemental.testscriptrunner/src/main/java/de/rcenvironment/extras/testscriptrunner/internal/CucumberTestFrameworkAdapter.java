@@ -25,7 +25,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.AbstractExecutorService;
 import java.util.concurrent.ExecutionException;
@@ -106,7 +109,8 @@ public class CucumberTestFrameworkAdapter {
         /** Report formatted by cucumber "json" plugin. */
         JSON("json", ".json"),
         /** Report formatted by cucumber "html" plugin. */
-        HTML("html",".html");
+        HTML("html", ".html");
+
         private final String formatSpecifier;
 
         private final String reportFileSuffix;
@@ -174,8 +178,9 @@ public class CucumberTestFrameworkAdapter {
 
         void printSummary(TextOutputReceiver outputReceiver) {
             outputReceiver.addOutput(
-                "Total: " + total + "(passed: " + passedCount + ", failed: " + failedCount + ", skipped: " + skippedCount + ", pending: "
-                    + pendingCount + ", undefined: " + undefinedCount + ", ambiguous: " + ambiguousCount + ")");
+                "Total : " + total + "(passed : " + passedCount + ", failed : " + failedCount + ", skipped : " + skippedCount
+                    + ", pending : "
+                    + pendingCount + ", undefined  " + undefinedCount + ", ambiguous : " + ambiguousCount + ")");
         }
 
     }
@@ -193,6 +198,8 @@ public class CucumberTestFrameworkAdapter {
         private final EventHandler<TestCaseFinished> cucumberTestCaseFinishedHandler = this::cucumberTestCaseResult;
 
         private final EventHandler<TestRunFinished> cucumberTestRunFinishedHandler = this::cucumberTestRunFinished;
+
+        private Map<String, String> unsuccessfulScenarios = new HashMap();
 
         private final class ClassLoaderWrapper extends ClassLoader {
 
@@ -313,7 +320,6 @@ public class CucumberTestFrameworkAdapter {
             String cucumberReportType = "";
             String cucumberReportFormatter = "";
 
-
             if (reportFormat.equals(ReportOutputFormat.PRETTY)) {
                 cucumberReportFormatter = ReportOutputFormat.PRETTY.getFormatSpecifier();
                 cucumberReportType = ReportOutputFormat.PRETTY.getReportFileSuffix();
@@ -396,6 +402,15 @@ public class CucumberTestFrameworkAdapter {
             if (scenarioStatistics.total > 0 && (scenarioStatistics.total == scenarioStatistics.passedCount)) {
                 outputReceiver.addOutput("All scenarios PASSED successfully");
             }
+            else {
+                outputReceiver.addOutput("Unsuccessful scenarios are listed below : ");
+
+                for (Entry unsuccessfulScenario : unsuccessfulScenarios.entrySet()) {
+                    outputReceiver.addOutput(unsuccessfulScenario.getKey() + " - " + unsuccessfulScenario.getValue());
+                }
+                outputReceiver.addOutput("----------------------------------------------------------------------------");
+
+            }
 
         }
 
@@ -430,24 +445,25 @@ public class CucumberTestFrameworkAdapter {
             Status testCaseStatus = scenario.getResult().getStatus();
             if (testCaseStatus.equals(Status.PASSED)) {
                 scenarioStatistics.passedCount++;
+            } else {
+                unsuccessfulScenarios.put(scenario.getTestCase().getName(), scenario.getResult().getStatus().toString());
+                if (testCaseStatus.equals(Status.SKIPPED)) {
+                    scenarioStatistics.skippedCount++;
+                    log.info("Skipped");
+                } else if (testCaseStatus.equals(Status.UNDEFINED)) {
+                    scenarioStatistics.undefinedCount++;
+                    log.error("Undefined Scenario");
+                } else if (testCaseStatus.equals(Status.FAILED)) {
+                    scenarioStatistics.failedCount++;
+                    log.error("Failed Scenario");
+                } else if (testCaseStatus.equals(Status.AMBIGUOUS)) {
+                    scenarioStatistics.ambiguousCount++;
+                    log.error("Ambiguous Scenario");
+                } else if (testCaseStatus.equals(Status.PENDING)) {
+                    scenarioStatistics.pendingCount++;
+                    log.error("Pending Scenario");
+                }
             }
-            if (testCaseStatus.equals(Status.SKIPPED)) {
-                scenarioStatistics.skippedCount++;
-                log.info("Skipped");
-            } else if (testCaseStatus.equals(Status.UNDEFINED)) {
-                scenarioStatistics.undefinedCount++;
-                log.error("Undefined Scenario");
-            } else if (testCaseStatus.equals(Status.FAILED)) {
-                scenarioStatistics.failedCount++;
-                log.error("Failed Scenario");
-            } else if (testCaseStatus.equals(Status.AMBIGUOUS)) {
-                scenarioStatistics.ambiguousCount++;
-                log.error("Ambiguous Scenario");
-            } else if (testCaseStatus.equals(Status.PENDING)) {
-                scenarioStatistics.pendingCount++;
-                log.error("Pending Scenario");
-            }
-
         }
 
         private void runFeatureFiles() {
