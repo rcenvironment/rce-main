@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -44,6 +45,7 @@ import org.osgi.framework.FrameworkUtil;
 
 import de.rcenvironment.core.configuration.ConfigurationService;
 import de.rcenvironment.core.configuration.ConfigurationService.ConfigurablePathId;
+import de.rcenvironment.core.utils.common.OSFamily;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 import de.rcenvironment.core.utils.incubator.ServiceRegistry;
@@ -101,9 +103,10 @@ public class CucumberTestFrameworkAdapter {
 
         /** Report formatted by cucumber "pretty" plugin. */
         PRETTY("pretty", ".txt"),
-        /** Report formatted by cucumber "json" plugin. Deprecated in Cucumber. */
-        JSON("json", ".json");
-
+        /** Report formatted by cucumber "json" plugin. */
+        JSON("json", ".json"),
+        /** Report formatted by cucumber "html" plugin. */
+        HTML("html",".html");
         private final String formatSpecifier;
 
         private final String reportFileSuffix;
@@ -169,8 +172,8 @@ public class CucumberTestFrameworkAdapter {
 
         public int total = 0;
 
-        void printSummary() {
-            System.out.println(
+        void printSummary(TextOutputReceiver outputReceiver) {
+            outputReceiver.addOutput(
                 "Total: " + total + "(passed: " + passedCount + ", failed: " + failedCount + ", skipped: " + skippedCount + ", pending: "
                     + pendingCount + ", undefined: " + undefinedCount + ", ambiguous: " + ambiguousCount + ")");
         }
@@ -271,17 +274,20 @@ public class CucumberTestFrameworkAdapter {
         // set by initializeCucumberRuntime()
         private ExecutorService executor;
 
+        private TextOutputReceiver outputReceiver;
+
         private TestStatistics scenarioStatistics = new TestStatistics();
 
         private TestStatistics stepStatistics = new TestStatistics();
 
         private ExecutionContext(ReportOutputFormat reportFormat, String reportDirUriString, String reportFileName, String tagNameFilter,
-            File scriptLocationRoot) {
+            File scriptLocationRoot, TextOutputReceiver outputReceiver) {
             this.reportFormat = reportFormat;
             this.reportDirUriString = reportDirUriString;
             this.reportFileName = reportFileName;
             this.tagNameFilter = tagNameFilter;
             this.scriptLocationRoot = scriptLocationRoot;
+            this.outputReceiver = outputReceiver;
 
             // patch the OSGi classloader by wrapping it
             ClassLoader upstreamClassLoader = getClass().getClassLoader();
@@ -292,11 +298,31 @@ public class CucumberTestFrameworkAdapter {
         }
 
         private void initializeCucumberRuntime() {
+
             EventBus eventBus = synchronize(new TimeServiceEventBus(Clock.systemUTC(), UUID::randomUUID));
-            String userHomeDir = System.getenv("USERPROFILE");
-            String reportType = "html";
-            String htmlReportPath = userHomeDir + "/rceReports/";
-            String htmlReportName = "Report";
+            String subdirForBDDReportFiles = "rce-bdd-reports";
+            if (OSFamily.isLinux()) {
+                subdirForBDDReportFiles += "-" + System.getProperty("user.name");
+            }
+//            File reportFolder = new File(System.getProperty("java.io.tmpdir"), subdirForBDDReportFiles);
+            File reportFolder = new File(System.getenv("USERPROFILE"), subdirForBDDReportFiles);
+
+            // set report format - pretty by default
+
+            // CURRENT BEHAVIOUR - generates both HTML and PRETTY/JSON(depending on command)
+            String cucumberReportType = "";
+            String cucumberReportFormatter = "";
+
+
+            if (reportFormat.equals(ReportOutputFormat.PRETTY)) {
+                cucumberReportFormatter = ReportOutputFormat.PRETTY.getFormatSpecifier();
+                cucumberReportType = ReportOutputFormat.PRETTY.getReportFileSuffix();
+            } else if (reportFormat.equals(ReportOutputFormat.JSON)) {
+                cucumberReportFormatter = ReportOutputFormat.JSON.getFormatSpecifier();
+                cucumberReportType = ReportOutputFormat.JSON.getReportFileSuffix();
+            }
+            long unixTime = Instant.now().getEpochSecond();
+            String cucumberReportName = "Report_" + unixTime;
 
             eventBus.registerHandlerFor(TestStepFinished.class, cucumberTestStepFinishedHandler);
             eventBus.registerHandlerFor(TestCaseFinished.class, cucumberTestCaseFinishedHandler);
@@ -309,7 +335,9 @@ public class CucumberTestFrameworkAdapter {
                     .addPluginName(StringUtils.format("%s:%s/%s", reportFormat.getFormatSpecifier(),
                         reportDirUriString, reportFileName))
                     .setObjectFactoryClass(PicoFactory.class).addPluginName("pretty").addDefaultSummaryPrinterIfNotDisabled()
-                    .addPluginName(reportType + ":" + htmlReportPath + htmlReportName + "." + reportType)
+                    .addPluginName(ReportOutputFormat.HTML.getFormatSpecifier() + ":" + reportFolder.toString() + "\\" + cucumberReportName
+                        + ReportOutputFormat.HTML.getReportFileSuffix())
+                    .addPluginName(cucumberReportFormatter + ":" + reportFolder.toString() + "\\" + cucumberReportName + cucumberReportType)
                     .addFeature(FeatureWithLines.parse(scriptLocationRoot.getAbsolutePath()));
             if ((!StringUtils.isNullorEmpty(tagNameFilter)) && !tagNameFilter.equals("--all")) {
                 // normalize filter parts and prepend "@" character
@@ -356,13 +384,17 @@ public class CucumberTestFrameworkAdapter {
         }
 
         private void cucumberTestRunFinished(TestRunFinished event) {
-            //TODO. Use correct alternative for sys.out.println
-            System.out.println("Scenarios:");
-            scenarioStatistics.printSummary();
-            System.out.println("Steps:");
-            stepStatistics.printSummary();
+            // TODO. Use correct alternative for sys.out.println
+            outputReceiver.addOutput("----------------------------------------------------------------------------");
+            outputReceiver.addOutput("Execution Summary :");
+            outputReceiver.addOutput("----------------------------------------------------------------------------");
+            outputReceiver.addOutput("Scenarios :");
+            scenarioStatistics.printSummary(outputReceiver);
+            outputReceiver.addOutput("Steps :");
+            stepStatistics.printSummary(outputReceiver);
+            outputReceiver.addOutput("----------------------------------------------------------------------------");
             if (scenarioStatistics.total > 0 && (scenarioStatistics.total == scenarioStatistics.passedCount)) {
-                System.out.println("All scenarios PASSED successfully");
+                outputReceiver.addOutput("All scenarios PASSED successfully");
             }
 
         }
@@ -536,7 +568,7 @@ public class CucumberTestFrameworkAdapter {
             throw new IOException("Failed to delete pre-existing report file " + reportFile.getAbsolutePath());
         }
         ExecutionContext executionContext =
-            new ExecutionContext(reportFormat, reportDirUriString, reportFileName, tagNameFilter, scriptLocationRoot);
+            new ExecutionContext(reportFormat, reportDirUriString, reportFileName, tagNameFilter, scriptLocationRoot, outputReceiver);
 
         // TODO check: it looks like this is never attached to any data source, only consumed
         PrintStream oldStdOut = System.out;
