@@ -307,7 +307,9 @@ public class CucumberTestFrameworkAdapter {
         private void initializeCucumberRuntime() {
 
             EventBus eventBus = synchronize(new TimeServiceEventBus(Clock.systemUTC(), UUID::randomUUID));
-            String subdirForBDDReportFiles = "rce-bdd-reports";
+            String subdirForBDDReportFiles = ".rce\\default\\output\\rce-bdd-reports";
+//            String dirForBDDReportFiles = "rce-bdd-reports";
+
             if (OSFamily.isLinux()) {
                 subdirForBDDReportFiles += "-" + System.getProperty("user.name");
             }
