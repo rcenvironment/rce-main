@@ -44,6 +44,8 @@ public final class ComponentDescriptionValidator {
     protected static final String ID_INVALID_AS_FILENAME_ERROR_MESSAGE =
         "It violates the rules for valid filenames of at least one operating system.";
 
+    protected static final int MAXIMUM_ID_LENGTH = 100;
+
     private static final String TOOLNAME_INVALID = "The chosen component name is not valid. \n %s";
 
     private static final String TOOL_NAME_EXISTS =
@@ -53,7 +55,7 @@ public final class ComponentDescriptionValidator {
     private static final String ICON_INVALID_SPACES =
         "Icon path is invalid. Spaces are allowed, but cannot be the first or last character.";
 
-    private static final String GROUPNAME_INVALID = "The chosen group name is not valid.\n %s";
+    private static final String GROUPNAME_INVALID = "The chosen group name is not valid.\n%s";
 
     private static final String DOC_EXTENSION_NOT_VALID = "Documentation extension not valid. Valid extensions: ";
 
@@ -69,7 +71,7 @@ public final class ComponentDescriptionValidator {
         super();
     }
 
-    public Optional<String> validateName(Text toolNameText, String componentID, Optional<String> nameOrigin,
+    public Optional<String> validateName(Text toolNameText, String prefix, Optional<String> nameOrigin,
         Collection<String> usedToolnames) {
         String name = toolNameText.getText();
         if (name.isEmpty()) {
@@ -83,10 +85,13 @@ public final class ComponentDescriptionValidator {
         if (validationResult.isPresent()) {
             return Optional.of(StringUtils.format(TOOLNAME_INVALID, validationResult.get()));
         }
+        String componentID = prefix + name;
         Optional<String> validationError = ComponentIdRules.validateComponentIdMaximumLength(componentID);
         if (validationError.isPresent()) {
-            return Optional.of(StringUtils.format(TOOLNAME_INVALID, "The component Id exceeds the maximum allowed length: " + componentID
-                + " " + validationError.get()));
+            return Optional
+                .of(StringUtils.format(TOOLNAME_INVALID,
+                    "The combination of prefix \"" + prefix + "\" and name exceeds " + MAXIMUM_ID_LENGTH
+                        + " characters."));
         }
         // additionally, check whether the given id violates any platform-specific rules for filenames; for example, this rules out "LPT1"
         if (!CrossPlatformFilenameUtils.isFilenameValid(name)) {

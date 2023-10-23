@@ -121,9 +121,8 @@ public class ToolCharacteristicsPage extends ToolIntegrationWizardPage {
         ((GridData) toolNameText.getLayoutData()).horizontalSpan = 2;
         toolNameText.addModifyListener(e -> {
             ComponentDescriptionValidator validator = new ComponentDescriptionValidator();
-            String componentID =
-                ((ToolIntegrationWizard) getWizard()).getCurrentContext().getPrefixForComponentId() + toolNameText.getText();
-            nameValidationMessage = validator.validateName(toolNameText, componentID, nameOrigin, usedToolnames);
+            nameValidationMessage = validator.validateName(toolNameText,
+                ((ToolIntegrationWizard) getWizard()).getCurrentContext().getPrefixForComponentId(), nameOrigin, usedToolnames);
             validate(true);
         });
         iconText =

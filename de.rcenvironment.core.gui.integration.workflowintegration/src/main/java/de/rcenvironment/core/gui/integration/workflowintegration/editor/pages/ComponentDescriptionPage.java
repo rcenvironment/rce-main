@@ -174,8 +174,7 @@ public class ComponentDescriptionPage extends IntegrationEditorPage {
             if (currentName.isPresent()) {
                 usedToolnames.remove(currentName.get());
             }
-            String componentID = COMPONENT_ID_PREFIX + wfNameText.getText();
-            wfNameValidationMessage = validator.validateName(wfNameText, componentID, currentName, usedToolnames);
+            wfNameValidationMessage = validator.validateName(wfNameText, COMPONENT_ID_PREFIX, currentName, usedToolnames);
             updateValidationMessage();
             updateSaveButtonActivation();
             if (!wfNameValidationMessage.isPresent()) {
