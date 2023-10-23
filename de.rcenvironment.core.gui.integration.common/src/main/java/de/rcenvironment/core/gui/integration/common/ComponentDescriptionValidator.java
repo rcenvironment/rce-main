@@ -27,6 +27,8 @@ import de.rcenvironment.core.component.api.ComponentGroupPathRules;
 import de.rcenvironment.core.component.api.ComponentIdRules;
 import de.rcenvironment.core.component.integration.IntegrationConstants;
 import de.rcenvironment.core.component.integration.IntegrationContext;
+import de.rcenvironment.core.utils.common.CommonIdRules;
+import de.rcenvironment.core.utils.common.CrossPlatformFilenameUtils;
 import de.rcenvironment.core.utils.common.StringUtils;
 
 /**
@@ -39,6 +41,11 @@ public final class ComponentDescriptionValidator {
     /** Warning Message for invalid icon path. */
     public static final String ICON_INVALID = "Icon path or file format is invalid. The default icon will be used.";
 
+    protected static final String ID_INVALID_AS_FILENAME_ERROR_MESSAGE =
+        "It violates the rules for valid filenames of at least one operating system.";
+
+    protected static final int MAXIMUM_ID_LENGTH = 100;
+
     private static final String TOOLNAME_INVALID = "The chosen component name is not valid. \n %s";
 
     private static final String TOOL_NAME_EXISTS =
@@ -48,7 +55,7 @@ public final class ComponentDescriptionValidator {
     private static final String ICON_INVALID_SPACES =
         "Icon path is invalid. Spaces are allowed, but cannot be the first or last character.";
 
-    private static final String GROUPNAME_INVALID = "The chosen group name is not valid.\n %s";
+    private static final String GROUPNAME_INVALID = "The chosen group name is not valid.\n%s";
 
     private static final String DOC_EXTENSION_NOT_VALID = "Documentation extension not valid. Valid extensions: ";
 
@@ -64,13 +71,33 @@ public final class ComponentDescriptionValidator {
         super();
     }
 
-    public Optional<String> validateName(Text toolNameText, Optional<String> nameOrigin, Collection<? extends String> usedToolnames) {
-        Optional<String> validationResult = ComponentIdRules.validateComponentIdRules(toolNameText.getText());
+    public Optional<String> validateName(Text toolNameText, String prefix, Optional<String> nameOrigin,
+        Collection<String> usedToolnames) {
+        String name = toolNameText.getText();
+        if (name.isEmpty()) {
+            return Optional.of("Please enter a name for the component.");
+        }
+        Optional<String> validationMinError = ComponentIdRules.validateMinimumLength(name);
+        if (validationMinError.isPresent()) {
+            return Optional.of(StringUtils.format(TOOLNAME_INVALID, validationMinError.get()));
+        }
+        Optional<String> validationResult = CommonIdRules.validateCommonIdRules(name);
         if (validationResult.isPresent()) {
             return Optional.of(StringUtils.format(TOOLNAME_INVALID, validationResult.get()));
         }
-        String name = toolNameText.getText().trim();
-        if (nameOrigin.isPresent() && name.equalsIgnoreCase(nameOrigin.get())) {
+        String componentID = prefix + name;
+        Optional<String> validationError = ComponentIdRules.validateComponentIdMaximumLength(componentID);
+        if (validationError.isPresent()) {
+            return Optional
+                .of(StringUtils.format(TOOLNAME_INVALID,
+                    "The combination of prefix \"" + prefix + "\" and name exceeds " + MAXIMUM_ID_LENGTH
+                        + " characters."));
+        }
+        // additionally, check whether the given id violates any platform-specific rules for filenames; for example, this rules out "LPT1"
+        if (!CrossPlatformFilenameUtils.isFilenameValid(name)) {
+            return Optional.of(StringUtils.format(TOOLNAME_INVALID, ID_INVALID_AS_FILENAME_ERROR_MESSAGE));
+        }
+        if (nameOrigin.isPresent() && name.trim().equalsIgnoreCase(nameOrigin.get())) {
             return Optional.empty();
         }
         Set<String> set = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
