@@ -1,9 +1,9 @@
 Feature: ExampleWorkflows
 
 # executing this scenario should be possible after the next major update (RCE 11.0), since the base version then has the necessary commands to export wf runs
-#@ExampleWorkflow01 
 #@NoGUITestSuite
 #@BasicIntegrationTestSuite
+#@ExampleWorkflow01 
 #Scenario: Workflow Data maintained different versions
 #
 #	Given instance "NodeA" using the default build
