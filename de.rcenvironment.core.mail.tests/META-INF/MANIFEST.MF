@@ -4,7 +4,7 @@ Bundle-Name: RCE Core Mail Tests
 Bundle-SymbolicName: de.rcenvironment.core.mail.tests
 Bundle-Version: 10.4.1.qualifier
 Fragment-Host: de.rcenvironment.core.mail
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: de.rcenvironment.core.utils.testing
 Bundle-Vendor: DLR
 Import-Package: com.icegreen.greenmail;version="1.5.1",

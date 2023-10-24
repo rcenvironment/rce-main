@@ -7,7 +7,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
  org.eclipse.equinox.security,
  org.eclipse.equinox.security.ui
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Activator: de.rcenvironment.core.gui.communication.views.Activator
 Import-Package: com.jcraft.jsch;version="0.2.0",
  de.rcenvironment.core.authorization.api,

@@ -7,7 +7,7 @@
         build and run a development version of RCE from your local development environment.</para>
     <para>The development environment is built on top of<itemizedlist>
             <listitem>
-                <para>AdoptOpenJDK 8 and</para>
+                <para>OpenJDK 11 and</para>
             </listitem>
             <listitem>
                 <para>Eclipse for RCP and RAP Developers, Version 2022-03</para>
@@ -23,10 +23,10 @@
                 <listitem>
                     <para>Make sure you have a <ulink
                             url="https://www.oracle.com/java/technologies/downloads/">Java
-                            Development Kit</ulink> installed on your system in version 8u161 or
+                            Development Kit</ulink> installed on your system in version 11 or
                         higher. The canonical choice of JDK is <ulink
-                            url="https://adoptopenjdk.net/?variant=openjdk8">AdoptOpenJDK Version
-                            8</ulink>. <note>
+                            url="https://adoptium.net/de/temurin/releases/?version=11">Eclipse Temurin Version
+                            11</ulink>. <note>
                             <para>If you are installing a JDK on a centrally administrated computer
                                 that already has Java installed, it is usually a good idea to
                                     <emphasis>uncheck</emphasis> the "Install public JRE" option
@@ -40,7 +40,7 @@
                             >Eclipse Foundation</ulink>. In the following sections, this version is
                         assumed.</para>
                     <note>
-                        <para>AdoptOpenJDK 8 and Eclipse 2022-03 are most widespread among
+                        <para>OpenJDK 11 and Eclipse 2022-03 are most widespread among
                             developers and provides a relatively stable basis for development.
                             However, newer versions of both have been reported to work anecdotally.
                         </para>
@@ -55,7 +55,7 @@
                             <listitem>
                                 <para>Set the proper path to your JDK installation by adapting the
                                         <code>-vm</code> parameter: <code>&lt;your
-                                        path>/jdk8/bin</code> immediately below the <code>-vm</code>
+                                        path>/jdk11/bin</code> immediately below the <code>-vm</code>
                                     line.</para>
                             </listitem>
                             <listitem>
@@ -238,9 +238,9 @@
                     </para>
                 </listitem>
                 <listitem>
-                    <para>If you previously changed the global Java compiler compliance level to 1.7
+                    <para>If you previously changed the global Java compiler compliance level e.g. to 1.8
                         for previous RCE releases, it is recommended to revert this setting to
-                        default, or explicitly set it to 1.8. This setting can be accessed by
+                        default, or explicitly set it to 11. This setting can be accessed by
                         opening "Window > Preferences" from the menu, and then navigating to the
                         "Java > Compiler" tab. If you never actively changed this setting, no action
                         is required.</para>

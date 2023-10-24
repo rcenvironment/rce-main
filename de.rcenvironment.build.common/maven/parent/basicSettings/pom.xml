@@ -1,6 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>de.rcenvironment</groupId>
@@ -14,8 +12,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<!-- custom RCE properties -->
-		<internal.java.sourceLevel>1.8</internal.java.sourceLevel>
-		<internal.java.targetLevel>1.8</internal.java.targetLevel>
+		<internal.java.sourceLevel>11</internal.java.sourceLevel>
+		<internal.java.targetLevel>11</internal.java.targetLevel>
 		<internal.java.encoding>UTF8</internal.java.encoding>
 
 		<!-- Note: As of 3.0.4, the 3.x.x releases of Tycho have potentially unstable dependencies
@@ -352,14 +350,19 @@
 				<version>3.1.0</version>
 				<executions>
 					<execution>
-						<id>enforce-maven</id>
+						<id>enforce-minimium-jdk-and-maven-versions</id>
 						<goals>
 							<goal>enforce</goal>
 						</goals>
 						<configuration>
 							<rules>
+								<requireJavaVersion>
+									<!-- require JDK 11.x, and also do not permit 12.x or higher -->
+									<version>[11.0.0,12.0.0)</version>
+								</requireJavaVersion>
 								<requireMavenVersion>
-									<version>3.2.5</version>
+									<!-- set a lower bound against building with ancient versions -->
+									<version>3.6.3</version>
 								</requireMavenVersion>
 							</rules>
 						</configuration>

@@ -12,7 +12,7 @@ Export-Package:
  de.rcenvironment.core.datamanagement.testutils
 Bundle-ClassPath: .
 Bundle-ManifestVersion: 2
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Import-Package: com.fasterxml.jackson.annotation;version="2.10.0",
  com.fasterxml.jackson.core;version="2.10.0",

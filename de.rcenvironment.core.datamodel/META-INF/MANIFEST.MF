@@ -4,7 +4,7 @@ Bundle-Name: RCE Core Data Model
 Bundle-SymbolicName: de.rcenvironment.core.datamodel;singleton:=true
 Bundle-Version: 10.4.1.qualifier
 Bundle-Vendor: DLR
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Import-Package: de.rcenvironment.core.utils.common,
  org.apache.commons.lang3;version="3.1.0",

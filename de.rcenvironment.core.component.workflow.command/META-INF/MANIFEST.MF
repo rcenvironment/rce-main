@@ -4,7 +4,7 @@ Bundle-Name: RCE Workflow Commands
 Bundle-SymbolicName: de.rcenvironment.core.component.workflow.command
 Bundle-Version: 10.4.1.qualifier
 Automatic-Module-Name: de.rcenvironment.core.component.workflow.command
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: de.rcenvironment.core.component.workflow.command.api
 Import-Package: de.rcenvironment.core.command.common,
  de.rcenvironment.core.command.spi,

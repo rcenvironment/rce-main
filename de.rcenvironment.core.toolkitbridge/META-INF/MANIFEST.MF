@@ -4,7 +4,7 @@ Bundle-Name: RCE Core Toolkit-OSGi Bridge
 Bundle-SymbolicName: de.rcenvironment.core.toolkitbridge;singleton:=true
 Bundle-Version: 10.4.1.qualifier
 Bundle-Activator: de.rcenvironment.core.toolkitbridge.internal.Activator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: 
  de.rcenvironment.core.utils.common,
  de.rcenvironment.core.utils.common.textstream,

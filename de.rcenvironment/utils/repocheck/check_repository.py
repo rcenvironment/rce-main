@@ -331,7 +331,7 @@ class ProjectRulesValidator:
             self.add_project_error('Missing Bundle-RequiredExecutionEnvironment in manifest')
         else:
             exec_env_value = entries['Bundle-RequiredExecutionEnvironment']
-            if exec_env_value != 'JavaSE-1.8':
+            if exec_env_value != 'JavaSE-11':
                 self.add_project_error('Wrong Bundle-RequiredExecutionEnvironment: %r' % exec_env_value)
 
     def __check_extra_clean_repo_rules(self):
