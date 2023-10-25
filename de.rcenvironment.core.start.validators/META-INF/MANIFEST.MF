@@ -9,7 +9,6 @@ Bundle-ClassPath: .
 Service-Component: OSGI-INF/*.xml,
  OSGI-INF/generated/de.rcenvironment.core.start.validators.internal.ProfileDirectoriesAccessibleValidator.xml,
  OSGI-INF/generated/de.rcenvironment.core.start.validators.internal.ProfileDirectoryVersionValidator.xml,
- OSGI-INF/generated/de.rcenvironment.core.start.validators.internal.JavaVersionValidator.xml,
  OSGI-INF/generated/de.rcenvironment.core.start.validators.internal.ProfileDirectoryNotInUseValidator.xml,
  OSGI-INF/generated/de.rcenvironment.core.start.validators.internal.PythonInstallationValidator.xml,
  OSGI-INF/generated/de.rcenvironment.core.start.validators.internal.LoggingConfiguredProperlyValidator.xml
