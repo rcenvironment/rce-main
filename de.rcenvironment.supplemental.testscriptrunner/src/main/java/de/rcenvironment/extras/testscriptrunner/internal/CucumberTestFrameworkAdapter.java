@@ -130,6 +130,19 @@ public class CucumberTestFrameworkAdapter {
     }
 
     /**
+     * Test Execution result status.
+     * 
+     * @author Devika Jalgaonkar
+     */
+    public enum ExecutionResultStatus {
+
+        /** SUCCESSFUL only if all scenarios (test) have Cucumber status PASSED. */
+        SUCCESSFUL,
+        /** UNSUCCESSFUL if any scenario has cucumber status UNDEFINED, FAILED, SKIPPED, AMBIGUOUS, PENDING. */
+        UNSUCCESSFUL;
+    }
+
+    /**
      * Simple container for execution result data.
      *
      * @author Robert Mischke
@@ -140,9 +153,13 @@ public class CucumberTestFrameworkAdapter {
 
         private List<String> capturedStdOutLines;
 
-        public ExecutionResult(List<String> reportLines, List<String> capturedStdOutLines) {
+        private ExecutionResultStatus status;
+
+        public ExecutionResult(List<String> reportLines, List<String> capturedStdOutLines, ExecutionResultStatus status) {
             this.reportFileLines = reportLines;
             this.capturedStdOutLines = capturedStdOutLines;
+            this.status = status;
+
         }
 
         public List<String> getReportFileLines() {
@@ -151,6 +168,10 @@ public class CucumberTestFrameworkAdapter {
 
         public List<String> getCapturedStdOutLines() {
             return capturedStdOutLines;
+        }
+
+        public ExecutionResultStatus getExecutionResultStatus() {
+            return status;
         }
 
     }
@@ -287,6 +308,9 @@ public class CucumberTestFrameworkAdapter {
 
         private TestStatistics stepStatistics = new TestStatistics();
 
+        // set by cucumberFinishTestRun
+        private ExecutionResultStatus executionResultStatus;
+
         private ExecutionContext(ReportOutputFormat reportFormat, String reportDirUriString, String reportFileName, String tagNameFilter,
             File scriptLocationRoot, TextOutputReceiver outputReceiver) {
             this.reportFormat = reportFormat;
@@ -402,12 +426,13 @@ public class CucumberTestFrameworkAdapter {
             stepStatistics.printSummary(outputReceiver);
             outputReceiver.addOutput("----------------------------------------------------------------------------");
             if (scenarioStatistics.total > 0 && (scenarioStatistics.total == scenarioStatistics.passedCount)) {
+                executionResultStatus = ExecutionResultStatus.SUCCESSFUL;
                 outputReceiver.addOutput("All scenarios PASSED successfully");
-            }
-            else {
+            } else {
+                executionResultStatus = ExecutionResultStatus.UNSUCCESSFUL;
                 outputReceiver.addOutput("Unsuccessful scenarios are listed below : ");
 
-                for (Entry unsuccessfulScenario : unsuccessfulScenarios.entrySet()) {
+                for (Entry<String, String> unsuccessfulScenario : unsuccessfulScenarios.entrySet()) {
                     outputReceiver.addOutput(unsuccessfulScenario.getKey() + " - " + unsuccessfulScenario.getValue());
                 }
                 outputReceiver.addOutput("----------------------------------------------------------------------------");
@@ -466,6 +491,10 @@ public class CucumberTestFrameworkAdapter {
                     log.error("Pending Scenario");
                 }
             }
+        }
+
+        private ExecutionResultStatus getExecutionResultStatus() {
+            return executionResultStatus;
         }
 
         private void runFeatureFiles() {
@@ -607,7 +636,8 @@ public class CucumberTestFrameworkAdapter {
             final List<String> reportLines = FileUtils.readLines(reportFile, Charsets.UTF_8); // TODO charset correct?
             final List<String> capturedStdOutLines =
                 IOUtils.readLines(new ByteArrayInputStream(outputBuffer.toByteArray()), Charsets.UTF_8);
-            return new ExecutionResult(reportLines, capturedStdOutLines);
+            final ExecutionResultStatus executionResultStatus = executionContext.getExecutionResultStatus();
+            return new ExecutionResult(reportLines, capturedStdOutLines, executionResultStatus);
         } else {
             return null;
         }
