@@ -174,7 +174,7 @@ Scenario: Connection with other major version - regular connection
     Then  the visible network of "NodeA" should consist of "NodeA"
     And   the visible network of "NodeB" should consist of "NodeB"
     
-@NetworkingTestsFeature
+#@NetworkingTestsFeature
 @Network09
 @NoGUITestSuite
 @BasicIntegrationTestSuite

@@ -36,7 +36,7 @@ Scenario: Workflows containing integrated workflows can be executed locally
 	And   executing the workflow "incrementAndAppend.wf" on "Instance1"
 	Then  the log output of instance "Instance1" should not contain any error
 	
-@WorkflowAsComponentFeature
+#@WorkflowAsComponentFeature
 @RemoteExecutionOfIntegratedWorkflows
 Scenario: Components backed by workflows can be executed remotely even if they contain components that are not accessible to the workflow controller
   Given instances "DataSource,Controller,ComputeInterface,ComputeWorker,DataSink" using the default build

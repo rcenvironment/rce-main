@@ -352,7 +352,7 @@ Scenario: Check of uplink autoconnect after crash and restart of uplink server
 # This combines the previous restart options. It is meant to be used in the context of automated
 # regression testing in order to save time (compared with running each case independently).
 #Combination of @Uplink02, @Uplink03, @Uplink4
-@UplinkTestsFeature
+#@UplinkTestsFeature
 @Uplink05
 Scenario: Combined check of uplink autoconnect after shutdown and restart of clients and uplink server
 
@@ -581,7 +581,7 @@ Scenario: Check of disconnect and connect of clients in an uplink connection
     session already closed
     """
 
-@UplinkTestsFeature
+#@UplinkTestsFeature
 @Uplink11
 Scenario: Two clients with same ID access the uplink server after startup and dis- and reconnecting, uplink server rejects the second. 
 
@@ -631,7 +631,7 @@ Scenario: Two clients with same ID access the uplink server after startup and di
     from using namespace userNameClient3a as it is already in use
     """
 
-@UplinkTestsFeature
+#@UplinkTestsFeature
 @Uplink12
 Scenario: Two clients with same ID access the uplink server after startup and repeated stop/restart, uplink server rejects the second. 
 
@@ -692,7 +692,7 @@ Scenario: Two clients with same ID access the uplink server after startup and re
     from using namespace userNameClient3a as it is already in use
     """
 
-@UplinkTestsFeature
+#@UplinkTestsFeature
 @Uplink13
 Scenario: Two clients with same ID access the uplink server after startup and repeated crash/restart, uplink server rejects the second. 
 

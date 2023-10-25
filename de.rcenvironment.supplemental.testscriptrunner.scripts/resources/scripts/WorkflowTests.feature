@@ -86,7 +86,7 @@ Scenario: Network disruptions during distributed workflow with local controller
   And   the workflow should have reached the FINISHED state
 
 
-@WorkflowTestsFeature
+#@WorkflowTestsFeature
 @Workflow04
 @WfRobustness02
 @NoGUITestSuite
@@ -265,7 +265,7 @@ Scenario Outline: Workflow Info via Network
     |default|base|
     |base|default|
     
-@WorkflowTestsFeature
+#@WorkflowTestsFeature
 @Workflow10
 @NoGUITestSuite
 @BasicIntegrationTestSuite
