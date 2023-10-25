@@ -183,25 +183,32 @@ public class CucumberTestFrameworkAdapter {
      */
     public class TestStatistics {
 
+        /** Total test-cases with Cucumber PASSED status. */
         public int passedCount = 0;
 
+        /** Total test-cases with Cucumber FAILED status. */
         public int failedCount = 0;
 
+        /** Total test-cases with Cucumber AMBIGUOUS status. */
         public int ambiguousCount = 0;
 
+        /** Total test-cases with Cucumber SKIPPED status. */
         public int skippedCount = 0;
 
+        /** Total test-cases with Cucumber PENDING status. */
         public int pendingCount = 0;
 
+        /** Total test-cases with Cucumber UNDEFINED status. */
         public int undefinedCount = 0;
 
-        public int total = 0;
+        /** Total no. of test-cases. */
+        public int totalCount = 0;
 
         void printSummary(TextOutputReceiver outputReceiver) {
             outputReceiver.addOutput(
-                "Total : " + total + "(passed : " + passedCount + ", failed : " + failedCount + ", skipped : " + skippedCount
+                "Total : " + totalCount + " ( passed : " + passedCount + ", failed : " + failedCount + ", skipped : " + skippedCount
                     + ", pending : "
-                    + pendingCount + ", undefined  " + undefinedCount + ", ambiguous : " + ambiguousCount + ")");
+                    + pendingCount + ", undefined  " + undefinedCount + ", ambiguous : " + ambiguousCount + " )");
         }
 
     }
@@ -220,7 +227,7 @@ public class CucumberTestFrameworkAdapter {
 
         private final EventHandler<TestRunFinished> cucumberTestRunFinishedHandler = this::cucumberTestRunFinished;
 
-        private Map<String, String> unsuccessfulScenarios = new HashMap();
+        private Map<String, String> unsuccessfulScenarios = new HashMap<String, String>();
 
         private final class ClassLoaderWrapper extends ClassLoader {
 
@@ -414,16 +421,18 @@ public class CucumberTestFrameworkAdapter {
         }
 
         private void cucumberTestRunFinished(TestRunFinished event) {
-            // TODO. Use correct alternative for sys.out.println
-            outputReceiver.addOutput("----------------------------------------------------------------------------");
+
+            final String textSeparatorLine =
+                "-----------------------------------------------------------------------------------------------";
+            outputReceiver.addOutput(textSeparatorLine);
             outputReceiver.addOutput("Execution Summary :");
-            outputReceiver.addOutput("----------------------------------------------------------------------------");
+            outputReceiver.addOutput(textSeparatorLine);
             outputReceiver.addOutput("Scenarios :");
             scenarioStatistics.printSummary(outputReceiver);
             outputReceiver.addOutput("Steps :");
             stepStatistics.printSummary(outputReceiver);
-            outputReceiver.addOutput("----------------------------------------------------------------------------");
-            if (scenarioStatistics.total > 0 && (scenarioStatistics.total == scenarioStatistics.passedCount)) {
+            outputReceiver.addOutput(textSeparatorLine);
+            if (scenarioStatistics.totalCount > 0 && (scenarioStatistics.totalCount == scenarioStatistics.passedCount)) {
                 executionResultStatus = ExecutionResultStatus.SUCCESSFUL;
                 outputReceiver.addOutput("All scenarios PASSED successfully");
             } else {
@@ -433,7 +442,7 @@ public class CucumberTestFrameworkAdapter {
                 for (Entry<String, String> unsuccessfulScenario : unsuccessfulScenarios.entrySet()) {
                     outputReceiver.addOutput(unsuccessfulScenario.getKey() + " - " + unsuccessfulScenario.getValue());
                 }
-                outputReceiver.addOutput("----------------------------------------------------------------------------");
+                outputReceiver.addOutput(textSeparatorLine);
 
             }
 
@@ -441,7 +450,7 @@ public class CucumberTestFrameworkAdapter {
 
         private void cucumberTestStepFinished(TestStepFinished event) {
             if (event.getTestStep() instanceof PickleStepTestStep) {
-                stepStatistics.total++;
+                stepStatistics.totalCount++;
                 PickleStepTestStep testStep = (PickleStepTestStep) event.getTestStep();
                 cucumberStepResult(testStep, event.getResult());
             }
@@ -466,7 +475,7 @@ public class CucumberTestFrameworkAdapter {
         }
 
         private void cucumberTestCaseResult(TestCaseFinished scenario) {
-            scenarioStatistics.total++;
+            scenarioStatistics.totalCount++;
             Status testCaseStatus = scenario.getResult().getStatus();
             if (testCaseStatus.equals(Status.PASSED)) {
                 scenarioStatistics.passedCount++;
