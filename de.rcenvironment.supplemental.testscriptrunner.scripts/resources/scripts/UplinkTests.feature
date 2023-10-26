@@ -352,7 +352,7 @@ Scenario: Check of uplink autoconnect after crash and restart of uplink server
 # This combines the previous restart options. It is meant to be used in the context of automated
 # regression testing in order to save time (compared with running each case independently).
 #Combination of @Uplink02, @Uplink03, @Uplink4
-#@UplinkTestsFeature
+@UplinkTestsFeature
 @Uplink05
 Scenario: Combined check of uplink autoconnect after shutdown and restart of clients and uplink server
 
@@ -405,14 +405,14 @@ Scenario: Combined check of uplink autoconnect after shutdown and restart of cli
     And waiting for 15 seconds
 
     When stopping instance "Uplink1"
-    #And waiting for 15 seconds
     And  instances "Uplink1" should be stopped
     And the visible uplink network of "Client1" should contain "Uplink1"
     And the visible uplink network of "Client1" should not be connected to "Uplink1"
     And the visible uplink network of "Client2" should contain "Uplink1"
     And the visible uplink network of "Client2" should not be connected to "Uplink1"
     And starting instance "Uplink1"
-
+    And waiting for 15 seconds
+    
     Then the visible uplink network of "Client1" should be connected to "Uplink1"
     And the visible uplink network of "Client2" should be connected to "Uplink1"
     And instance "Client2" should see these components:
@@ -581,6 +581,7 @@ Scenario: Check of disconnect and connect of clients in an uplink connection
     session already closed
     """
 
+# TODO fix test failure @Matthias Wagner
 #@UplinkTestsFeature
 @Uplink11
 Scenario: Two clients with same ID access the uplink server after startup and dis- and reconnecting, uplink server rejects the second. 
@@ -631,6 +632,7 @@ Scenario: Two clients with same ID access the uplink server after startup and di
     from using namespace userNameClient3a as it is already in use
     """
 
+# TODO fix test failure @Matthias Wagner
 #@UplinkTestsFeature
 @Uplink12
 Scenario: Two clients with same ID access the uplink server after startup and repeated stop/restart, uplink server rejects the second. 
@@ -692,6 +694,7 @@ Scenario: Two clients with same ID access the uplink server after startup and re
     from using namespace userNameClient3a as it is already in use
     """
 
+# TODO fix test failure @Matthias Wagner
 #@UplinkTestsFeature
 @Uplink13
 Scenario: Two clients with same ID access the uplink server after startup and repeated crash/restart, uplink server rejects the second. 

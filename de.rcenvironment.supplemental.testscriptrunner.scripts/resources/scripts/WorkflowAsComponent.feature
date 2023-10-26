@@ -36,7 +36,7 @@ Scenario: Workflows containing integrated workflows can be executed locally
 	And   executing the workflow "incrementAndAppend.wf" on "Instance1"
 	Then  the log output of instance "Instance1" should not contain any error
 	
-#@WorkflowAsComponentFeature
+@WorkflowAsComponentFeature
 @RemoteExecutionOfIntegratedWorkflows
 Scenario: Components backed by workflows can be executed remotely even if they contain components that are not accessible to the workflow controller
   Given instances "DataSource,Controller,ComputeInterface,ComputeWorker,DataSink" using the default build
@@ -44,6 +44,8 @@ Scenario: Components backed by workflows can be executed remotely even if they c
   And   configured network connections "ComputeInterface->Controller [autoStart relay],ComputeWorker->ComputeInterface [autoStart]"
   And   configured network connections "DataSink->Controller [autoStart relay]"
   And   starting all instances
+  # TODO find better solution than just waiting
+  And   waiting for 5 second
   And   integrating workflow "DataSource.wf" as component "DataSource" on instance "DataSource" with the following endpoint definitions:
   			| InputProvider:output:inputData |
   And   executing command "components set-auth workflow/DataSource public" on "DataSource"
@@ -59,6 +61,7 @@ Scenario: Components backed by workflows can be executed remotely even if they c
   And   integrating workflow "DataSink.wf" as component "DataSink" on instance "DataSink" with the following endpoint definitions:
   			| OutputWriter:input:resultData |
   And   executing command "components set-auth workflow/DataSink public" on "DataSink"
+ 
   And   waiting for 1 second
   When  executing the workflow "DataProcessing.wf" on "Controller"
   Then  the log output of all instances should not contain any errors
