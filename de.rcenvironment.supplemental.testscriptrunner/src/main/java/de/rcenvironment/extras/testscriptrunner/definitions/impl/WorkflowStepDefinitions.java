@@ -25,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -65,6 +67,8 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
     private static final String QUOTATION_MARK = "\"";
 
     private static final String BACKSLASH = "\\";
+
+    private static final String FORWARD_SLASH = "/";
 
     private static final String ESCAPED_BACKSLASH = "\\\\";
 
@@ -307,7 +311,6 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
     public void whenCopyingIntoWorkspace(String fileOrDir, String instanceId) throws Exception {
         ManagedInstance instance = resolveInstance(instanceId);
         printToCommandConsole(StringUtils.format("Copying %s to instance %s", fileOrDir, instance));
-        TestContext.setWorkflowProjectDirectory(fileOrDir);
         File workspace = instance.getAbsolutePathFromRelative("workspace");
         if (!workspace.exists()) {
             workspace.mkdir();
@@ -325,37 +328,6 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
     }
 
     /**
-     * Copies configuration files to the installation site of the software under test in preparation of running a workflow.
-     * Note: It uses (via "TestContext") the given build of test step "using the ... build".
-     * Note: It uses (via "TestContext") the origin project directory  of test step "copying ... into workspace( of ...").
-     * Both of the above are set during their steps; so without these steps this step is likely to fail (there are no default values or so in TestContext)!
-     * This step is required as a special copy action for input files, for now (2021-10-26) especially of workflow 0203.
-     * 
-     * @param fileNamesToCopy list of (configuration) files which have to be copied
-     * @param workflowGroupDir target directory of the workflow for the copying (e. g. "02_Component Groups")
-     *///(?: workflow[s]?)? \"([^\"]+)\"
-    @When("^copying configuration file[s]? \"([^\"]+)\" of workflow group \"([^\"]*)\" into installation workspace")
-    public void whenPreparingInstallationWorkspace(String fileNamesToCopy, String workflowGroupDir) throws Exception {
-        String originDir = TestContext.getWorkflowProjectDirectory() + File.separator + workflowGroupDir;
-        //String[] filesToCopy = {"CPACS.xml", "MappingRules.xsl", "XMLMerger_Integrate.xml"};
-        String projectName = "Workflow Examples Project";
-        String sutDir = TestContext.getTestedInstanceInstallationRoot() + File.separator + "workspace" + File.separator + projectName + File.separator + workflowGroupDir;
-        printToCommandConsole("   +++   SUT DIR: " + sutDir);
-        
-        String[] filesToCopy = fileNamesToCopy.split(",[ ]");
-        for (String fileToCopy : filesToCopy) {
-            File originFile = Paths.get(executionContext.getTestScriptLocation().toString(), new File(originDir + File.separator + fileToCopy).getPath()).toFile();
-            File destFile = new File(sutDir + File.separator + fileToCopy);
-            // Delete previous versions on the destination location
-            if (destFile.exists()) {
-                FileUtils.forceDelete(destFile);
-            }
-            printToCommandConsole("   +++   copy files: " + originFile + destFile);
-            FileUtils.copyFile(originFile, destFile);
-        }
-    }
-
-    /**
      * Starts a workflow via IM SSH access on the given instance.
      * 
      * TODO decide: clean up workflow log files on test success? TODO synchronize alteration of runningWorkflowMap
@@ -365,7 +337,7 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
      *        optional
      * @param instanceId the instance to execute the command on
      */
-    @When("^starting (?:the )?workflow \"([^\"]*)\" (?:using \"([^\"]*)\" as placeholder file)?on (?:instance )?\"([^\"]*)\"$")
+    @When("^starting (?:the )?workflow \"([^\"]*)\" (?:using \"([^\"]*)\" as placeholder file )?on (?:instance )?\"([^\"]*)\"$")
     public void whenStartingWorkflowOnInstance(String workflowNameInput, String placeholderFile, String instanceId) throws Exception {
         final ManagedInstance instance = resolveInstance(instanceId);
         String workflowPath = addExtension(workflowNameInput, WORKFLOW_EXTENSION);
@@ -385,7 +357,7 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
             log.warn("Another workflow of the same file is still running. Cannot store the new workflow id.");
         } else {
             runningWorkflows.put(workflowKey, workflowId);
-            startJobCheckingTermiantion(instanceId, instance, workflowName, workflowId, workflowKey);
+            startJobCheckingTermination(instanceId, instance, workflowName, workflowId, workflowKey);
         }
 
         Path logFilesDirectory = Paths.get(workflowLogDir);
@@ -398,7 +370,7 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
         this.lastWorkflowInitiatingInstance = instance;
     }
 
-    private void startJobCheckingTermiantion(String instanceId, final ManagedInstance instance, final String workflowName,
+    private void startJobCheckingTermination(String instanceId, final ManagedInstance instance, final String workflowName,
         String workflowId, String workflowKey) {
         new Job(StringUtils.format("check for termination workflow %s", workflowId)) {
 
@@ -796,66 +768,129 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
         return (new File(workflowPath)).getName();
     }
 
+    private void correctPathToInputFiles(Path orgWorkflowFileLocation) throws IOException {
+        // During workflow execution the workflow file and all placeholder files will be copied to a temp dir.
+        // In the workflow file, there are only relative project paths to the placeholder files given.
+        // Headless instances don't know about this projects.
+        // That's why we have to replace the placholder file paths by absolute paths in the temp dir.
+        Path testLocation = executionContext.getTestScriptLocation().toPath();
+        String correctedWorkflowRoot = testLocation.resolve("workflows").toString().replace(BACKSLASH, FORWARD_SLASH);
+        try (Stream<String> lines = Files.lines(orgWorkflowFileLocation)) {
+            Stream<String> updatedLines = lines.map(line -> replacePathToInputFile(line, correctedWorkflowRoot));
+            Files.write(orgWorkflowFileLocation, updatedLines.collect(Collectors.toList()));
+        }
+    }
+
+    private String replacePathToInputFile(String line, String correctedWorkflowRoot) {
+        if (line.contains("startValue") && line.contains("Workflow Examples Project")) {
+            return line.replace("Workflow Examples Project", correctedWorkflowRoot + "/Workflow Examples Project");
+        }
+        return line;
+    }
+
     private String[] startWorkflowOnInstance(final ManagedInstance instance, String workflowName, String placeholderFile)
         throws IOException {
-        boolean hasPlaceholder = placeholderFile != null;
-        final String instanceId = instance.getId();
 
-        Path originalWfFileLocation = executionContext.getTestScriptLocation().toPath().resolve(WORKFLOWS).resolve(workflowName);
-        if (!Files.isRegularFile(originalWfFileLocation)) {
-            throw new AssertionError("No workflow file found at expected location " + originalWfFileLocation);
-        }
+        Path originalWfFileLocation = getOriginalFileLocation(workflowName);
         final File tempDir = TempFileServiceAccess.getInstance().createManagedTempDir("bdd-wf");
         Path wfFileLocation = tempDir.toPath().resolve(originalWfFileLocation.getFileName());
         Files.copy(originalWfFileLocation, wfFileLocation);
-        String startInfoText = StringUtils.format("Starting workflow %s on instance %s", workflowName, instanceId);
 
-        Path placeholderFileLocation = null;
-
-        if (hasPlaceholder) {
-            if (!(new File(placeholderFile).isAbsolute())) {
-                Path testLocation = executionContext.getTestScriptLocation().toPath();
-                Path subdir = testLocation.resolve(WORKFLOWS).resolve("placeholder_values");
-                Path originalPlaceholderFileLocation = subdir.resolve(placeholderFile);
-                if (!Files.isRegularFile(originalPlaceholderFileLocation)) {
-                    throw new AssertionError("No placeholder file found at expected location " + originalWfFileLocation);
-                }
-                placeholderFileLocation = tempDir.toPath().resolve(originalPlaceholderFileLocation.getFileName());
-                Files.copy(originalPlaceholderFileLocation, placeholderFileLocation);
-            } else {
-                placeholderFileLocation = Paths.get(placeholderFile);
-            }
-            startInfoText = StringUtils.format("%s using placeholders from %s", startInfoText, placeholderFile);
+        // The Example Workflow 02_03_XML_Components.wf contains file inputs located in the project.
+        // These files are copied into the temp dir when running the test.
+        // The path to these input files have to be updated in the workflow file.
+        if (workflowName.equals("Workflow Examples Project" + File.separator + "02_Component Groups" + File.separator + "02_03_XML_Components.wf")) {
+            correctPathToInputFiles(wfFileLocation);
         }
+
+        String[] workflowInfo = null;
+        if (placeholderFile != null) {
+            Path placeholderFileLocation = getPlaceholderFileLocation(workflowName, placeholderFile, tempDir);
+            workflowInfo =
+                startWorkflowWithPlaceholderFile(instance, workflowName, placeholderFile, wfFileLocation, placeholderFileLocation);
+        } else {
+            workflowInfo = startWorkflow(instance, workflowName, wfFileLocation);
+        }
+
+        if (workflowInfo == null || workflowInfo.length != StepDefinitionConstants.EXPECTED_WORKFLOW_INFO_LENGTH) {
+            fail("Info about started workflow did not contain the expected amount of information.");
+        }
+
+        return workflowInfo;
+
+    }
+
+    private void setLastCommandOutput(final ManagedInstance instance, String workflowName, CapturingTextOutReceiver commandOutputReceiver) {
+        instance.setLastCommandOutput(commandOutputReceiver.getBufferedOutput());
+        executionContext.setLastInstanceWithSingleCommandExecution(instance);
+        log.debug(StringUtils.format("Started workflow %s on instance %s", workflowName, instance.getId()));
+    }
+
+    private String[] startWorkflowWithPlaceholderFile(final ManagedInstance instance, String workflowName, String placeholderFile,
+        Path wfFileLocation, Path placeholderFileLocation) throws AssertionError, IOException {
+
+        final String instanceId = instance.getId();
+        String startInfoText = StringUtils.format("Starting workflow %s on instance %s", workflowName, instanceId);
+        CapturingTextOutReceiver commandOutputReceiver = new CapturingTextOutReceiver();
+
+        startInfoText = StringUtils.format("%s using placeholders from %s", startInfoText, placeholderFileLocation);
+        printToCommandConsole(startInfoText);
+        log.debug(startInfoText);
+
+        String[] workflowInfo = null;
+        try {
+            workflowInfo = INSTANCE_MANAGEMENT_SERVICE.startWorkflowOnInstance(instanceId, wfFileLocation, placeholderFileLocation,
+                commandOutputReceiver);
+        } catch (JSchException | SshParameterException | IOException | InterruptedException e) {
+            fail(StringUtils.format("Failed to start workflow %s on instance %s: %s", workflowName, instanceId, e.toString()));
+        }
+        setLastCommandOutput(instance, workflowName, commandOutputReceiver);
+        return workflowInfo;
+    }
+
+    private Path getPlaceholderFileLocation(String workflowName, String placeholderFile, final File tempDir)
+        throws AssertionError, IOException {
+        Path placeholderFileLocation = null;
+        if (!(new File(placeholderFile).isAbsolute())) {
+            Path testLocation = executionContext.getTestScriptLocation().toPath();
+            Path subdir = testLocation.resolve(WORKFLOWS).resolve("placeholder_values");
+            Path originalPlaceholderFileLocation = subdir.resolve(placeholderFile);
+            if (!Files.isRegularFile(originalPlaceholderFileLocation)) {
+                throw new AssertionError("No placeholder file found at expected location " + getOriginalFileLocation(workflowName));
+            }
+            placeholderFileLocation = tempDir.toPath().resolve(originalPlaceholderFileLocation.getFileName());
+            Files.copy(originalPlaceholderFileLocation, placeholderFileLocation);
+        } else {
+            placeholderFileLocation = Paths.get(placeholderFile);
+        }
+        return placeholderFileLocation;
+    }
+
+    private String[] startWorkflow(final ManagedInstance instance, String workflowName, Path wfFileLocation) {
+
+        final String instanceId = instance.getId();
+        String startInfoText = StringUtils.format("Starting workflow %s on instance %s", workflowName, instanceId);
+        CapturingTextOutReceiver commandOutputReceiver = new CapturingTextOutReceiver();
 
         printToCommandConsole(startInfoText);
         log.debug(startInfoText);
 
-        CapturingTextOutReceiver commandOutputReceiver = new CapturingTextOutReceiver();
+        String[] workflowInfo = null;
         try {
-            String[] workflowInfo;
-
-            if (hasPlaceholder) {
-                // placeholderFileLocation should have a value, as this block is only reached if the initialization block is also reached
-                workflowInfo = INSTANCE_MANAGEMENT_SERVICE.startWorkflowOnInstance(instanceId, wfFileLocation, placeholderFileLocation,
-                    commandOutputReceiver);
-            } else {
-                workflowInfo = INSTANCE_MANAGEMENT_SERVICE.startWorkflowOnInstance(instanceId, wfFileLocation, commandOutputReceiver);
-            }
-
-            if (workflowInfo == null || workflowInfo.length != StepDefinitionConstants.EXPECTED_WORKFLOW_INFO_LENGTH) {
-                fail("Info about started workflow did not contain the expected amount of information.");
-            }
-
-            instance.setLastCommandOutput(commandOutputReceiver.getBufferedOutput());
-            executionContext.setLastInstanceWithSingleCommandExecution(instance);
-            log.debug(StringUtils.format("Started workflow %s on instance %s", workflowName, instanceId));
-            return workflowInfo;
+            workflowInfo = INSTANCE_MANAGEMENT_SERVICE.startWorkflowOnInstance(instanceId, wfFileLocation, commandOutputReceiver);
         } catch (JSchException | SshParameterException | IOException | InterruptedException e) {
             fail(StringUtils.format("Failed to start workflow %s on instance %s: %s", workflowName, instanceId, e.toString()));
-            return null; // dummy command; never reached
         }
+        setLastCommandOutput(instance, workflowName, commandOutputReceiver);
+        return workflowInfo;
+    }
 
+    private Path getOriginalFileLocation(String workflowName) throws AssertionError {
+        Path originalWfFileLocation = executionContext.getTestScriptLocation().toPath().resolve(WORKFLOWS).resolve(workflowName);
+        if (!Files.isRegularFile(originalWfFileLocation)) {
+            throw new AssertionError("No workflow file found at expected location " + originalWfFileLocation);
+        }
+        return originalWfFileLocation;
     }
 
     private void thenWorkflowLogContainsCaller(boolean negate, boolean useRegex, String contents) throws Exception {

@@ -1,6 +1,7 @@
 {
   "identifier" : "228631bf-f032-4eca-9d80-ef39cc1869a0",
   "workflowVersion" : "5",
+  "name" : "stringAppender",
   "nodes" : [ {
     "identifier" : "c4fd02e9-4925-4b5d-853a-4bee3da34179",
     "name" : "Script",
@@ -9,7 +10,7 @@
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.script",
-      "version" : "3.4",
+      "version" : "3.5",
       "name" : "Script"
     },
     "configuration" : {

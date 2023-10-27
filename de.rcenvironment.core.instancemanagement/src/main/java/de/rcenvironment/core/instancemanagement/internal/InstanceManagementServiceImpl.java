@@ -214,7 +214,7 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
             // do not activate this service if is was spawned as part of a default test environment
             return;
         }
-        
+
         tfs = TempFileServiceAccess.getInstance();
         hasValidLocalConfiguration = false;
         hasValidDownloadConfiguration = false;
@@ -1708,7 +1708,7 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
                 JSchRCECommandLineExecutor rceExecutor = new JSchRCECommandLineExecutor(session);
                 rceExecutor.start(command);
                 Object returnValue = afterInstancePerformance.after(rceExecutor, userOutputReceiver);
-                //session.disconnect();
+                // session.disconnect();
                 userOutputReceiver.addOutput("Finished executing command " + command + ON_INSTANCE + instanceId);
                 return returnValue;
             } else {

@@ -1,6 +1,7 @@
 {
   "identifier" : "801533f3-d40b-42f6-af68-54c4625e52bb",
   "workflowVersion" : "5",
+  "name" : "IntegerIncrement",
   "nodes" : [ {
     "identifier" : "28187779-fce4-410e-87a5-c47a433b47ff",
     "name" : "Script",
@@ -9,7 +10,7 @@
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.script",
-      "version" : "3.4",
+      "version" : "3.5",
       "name" : "Script"
     },
     "configuration" : {

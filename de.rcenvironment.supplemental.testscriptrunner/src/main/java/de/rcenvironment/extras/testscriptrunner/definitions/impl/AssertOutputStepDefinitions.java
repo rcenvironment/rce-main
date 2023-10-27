@@ -11,10 +11,10 @@ package de.rcenvironment.extras.testscriptrunner.definitions.impl;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 
 import cucumber.api.DataTable;
 import cucumber.api.java.en.Then;
@@ -100,7 +100,9 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
     private class AssertFileMayContainOnly implements InstanceIterator {
 
         private String relativeFilePath;
+
         private String allowedWarnings;
+
         private String[] allowedWarningList;
 
         AssertFileMayContainOnly(String relativeFilePath, String allowedWarnings) {
@@ -224,7 +226,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
     }
 
     /**
-     * Convenience shortcut to test all relevant log files for a clean shutdown.
+     * Convenience shortcut to test all relevant log files for a clean shutdown, including the absence of any warnings.
      * 
      * @param allFlag a phrase whose presence (non-null) influences which instances are effected. How it does that depends on the value of
      *        {@code instanceIds} and is defined in {@link #resolveInstanceList()}
@@ -232,7 +234,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
      *        does that depends on the value of {@code allFlag} and is defined in {@link #resolveInstanceList()}
      */
     @Then("^the log output of( all)?(?: instance[s]?)?(?: \"([^\"]*)\")? should indicate a clean shutdown with no warnings or errors$")
-    public void thenLogOutputCleanShutdown(String allFlag, String instanceIds) throws Exception {
+    public void thenLogOutputCleanShutdownWithoutWarnings(String allFlag, String instanceIds) throws Exception {
         AssertFileEmpty warningLogEmpty = new AssertFileEmpty(StepDefinitionConstants.WARNINGS_LOG_FILE_NAME);
         AssertFileContains debugLogContainsNoneUnfinished =
             new AssertFileContains(true, false, "Known unfinished operations on shutdown: <none>",
@@ -252,13 +254,13 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
      *        {@code instanceIds} and is defined in {@link #resolveInstanceList()}
      * @param instanceIds a comma-separated list of instances, which when present (non-null) influences which instances are effected. How it
      *        does that depends on the value of {@code allFlag} and is defined in {@link #resolveInstanceList()}
-     * @param allowedWarnings indicates which warnings may be tolerated. They are to be listed in the feature between 
-     * two lines with just """, and each tolerated warning in one line. 
-     * The warning text given in the feature file  may be substring of a warning message.
+     * @param allowedWarnings indicates which warnings may be tolerated. They are to be listed in the feature between two lines with just
+     *        """, and each tolerated warning in one line. The warning text given in the feature file may be substring of a warning message.
      */
     @Then("^the log output of( all)?(?: instance[s]?)?(?: \"([^\"]*)\")? should indicate a clean shutdown with these allowed warnings or errors:$")
     public void thenLogOutputCleanShutdownWithAllowedWarnings(String allFlag, String instanceIds, String allowedWarnings) throws Exception {
-        AssertFileMayContainOnly warningLogContainOnly = new AssertFileMayContainOnly(StepDefinitionConstants.WARNINGS_LOG_FILE_NAME, allowedWarnings);
+        AssertFileMayContainOnly warningLogContainOnly =
+            new AssertFileMayContainOnly(StepDefinitionConstants.WARNINGS_LOG_FILE_NAME, allowedWarnings);
         AssertFileContains debugLogContainsNoneUnfinished =
             new AssertFileContains(true, false, "Known unfinished operations on shutdown: <none>",
                 StepDefinitionConstants.DEBUG_LOG_FILE_NAME);
@@ -266,6 +268,28 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
             new AssertFileContains(true, false, "Main application shutdown complete, exit code: 0",
                 StepDefinitionConstants.DEBUG_LOG_FILE_NAME);
         iterateInstances(warningLogContainOnly, allFlag, instanceIds);
+        iterateInstances(debugLogContainsNoneUnfinished, allFlag, instanceIds);
+        iterateInstances(debugLogContainsExitCode0, allFlag, instanceIds);
+    }
+
+    /**
+     * Convenience shortcut to test all relevant log files for a clean shutdown, i. e. for the absence
+     * of unfinished operations and the exit code has to be 0.
+     * 
+     * @param allFlag a phrase whose presence (non-null) influences which instances are effected. How it does that depends on the value of
+     *        {@code instanceIds} and is defined in {@link #resolveInstanceList()}
+     * @param instanceIds a comma-separated list of instances, which when present (non-null) influences which instances are effected. How it
+     *        does that depends on the value of {@code allFlag} and is defined in {@link #resolveInstanceList()}
+     */
+    @Then("^the log output of( all)?(?: instance[s]?)?(?: \"([^\"]*)\")? should indicate a clean shutdown without checking for further warnings or errors")
+
+    public void thenLogOutputCleanShutdown(String allFlag, String instanceIds) throws Exception {
+        AssertFileContains debugLogContainsNoneUnfinished =
+            new AssertFileContains(true, false, "Known unfinished operations on shutdown: <none>",
+                StepDefinitionConstants.DEBUG_LOG_FILE_NAME);
+        AssertFileContains debugLogContainsExitCode0 =
+            new AssertFileContains(true, false, "Main application shutdown complete, exit code: 0",
+                StepDefinitionConstants.DEBUG_LOG_FILE_NAME);
         iterateInstances(debugLogContainsNoneUnfinished, allFlag, instanceIds);
         iterateInstances(debugLogContainsExitCode0, allFlag, instanceIds);
     }
@@ -282,7 +306,8 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
      * @param subString the subString or pattern expected to be present or absent in the command's output
      */
     @Then("^the log output of( all)?(?: instance[s]?)?(?: \"([^\"]*)\")? should (not )?contain (the pattern )?\"((?:[^\"]|\\\")*)\"$")
-    public void thenLogOutputContainsAtShutdown(String allFlag, String instanceIds, String negationFlag, String useRegexpMarker, String subString)
+    public void thenLogOutputContainsAtShutdown(String allFlag, String instanceIds, String negationFlag, String useRegexpMarker,
+        String subString)
         throws Exception {
         subString = subString.replace("\\\"", "\"");
 
@@ -317,8 +342,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
      */
     @Then("^the log output of( all)?(?: instance[s]?)?(?: \"([^\"]*)\")? should contain (\\d+)(?: to (\\d+))? (error|warning)[s]?$")
     public void thenLogOutputNumberErrors(final String allFlag, final String instanceIds, final Integer lowerBoundInput,
-        final Integer upperBoundInput, final String type)
-        {
+        final Integer upperBoundInput, final String type) {
 
         final int[] assertReturn = assertBounds(lowerBoundInput, upperBoundInput);
         final int lowerBound = assertReturn[0];
@@ -365,18 +389,33 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
     }
 
     private int countErrorsOrWarnings(final ManagedInstance instance, final Pattern typePattern) {
-        int numberErrorsOrWarnings = 0;
-        String warningLog = null;
+        String warningLog = getWarningsLog(instance);
+
+        Scanner logScanner = new Scanner(warningLog);
+
+        int logCount = 0;
+        String nextLine;
+        
+
+        while (logScanner.hasNextLine()){
+            nextLine = logScanner.nextLine();
+            if (nextLine.contains(" ERROR ") || nextLine.contains(" WARN ")) {
+                logCount++;
+            }
+        }
+        logScanner.close();
+
+        return logCount;
+
+    }
+
+    private String getWarningsLog(final ManagedInstance instance) {
         try {
-            warningLog = instance.getProfileRelativeFileContent(StepDefinitionConstants.WARNINGS_LOG_FILE_NAME, false);
+            return instance.getProfileRelativeFileContent(StepDefinitionConstants.WARNINGS_LOG_FILE_NAME, false);
         } catch (IOException e) {
             fail(StringUtils.format("Trying to acces warnings log of instance %s produced an error: %s", instance, e));
+            return "";
         }
-        Matcher m = typePattern.matcher(warningLog);
-        while (m.find()) {
-            numberErrorsOrWarnings++;
-        }
-        return numberErrorsOrWarnings;
     }
 
     private int[] assertBounds(final Integer lowerBound, final Integer upperBound) {
@@ -517,10 +556,11 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
                 int allowedWarningsCount = 0;
                 ArrayList<String> detectedAllowedWarnings = new ArrayList<String>();
                 int warnCount = 0;
-                String[] linesOfFile = instance.getProfileRelativeFileContent(StepDefinitionConstants.WARNINGS_LOG_FILE_NAME, false).split("\\r?\\n");
+                String[] linesOfFile =
+                    instance.getProfileRelativeFileContent(StepDefinitionConstants.WARNINGS_LOG_FILE_NAME, false).split("\\r?\\n");
                 for (String line : linesOfFile) {
                     Boolean warningWasAllowed = false;
-                    for (String warning: allowedWarnings) {
+                    for (String warning : allowedWarnings) {
                         if (line.contains(warning)) {
                             warningWasAllowed = true;
                             detectedAllowedWarnings.add(line);
@@ -536,8 +576,8 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
                 if (warnCount > 0) {
                     fail(StringUtils.format(
                         "The file \"%s\" in profile \"%s\" should not show these warnings: "
-                            + "(error count: %d warnings); full file content:\n%s", 
-                            relativeFilePath, instance, warnCount, failedLines));
+                            + "(error count: %d warnings); full file content:\n%s",
+                        relativeFilePath, instance, warnCount, failedLines));
                 } else {
                     printToCommandConsole("Detected " + allowedWarningsCount + " allowed warnings  for instance \"" + instance + "\":");
                     for (String warning : detectedAllowedWarnings) {
