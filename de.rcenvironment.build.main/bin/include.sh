@@ -83,12 +83,12 @@ build_intermediate_repo() {
     mkdir -p target/intermediate
 
     echo "Building RCE Bundles and Features (Intermediate Repository)"
-    echo "  Build type:              $RCE_BUILD_TYPE"
-    echo "  Third-party repository:  $RCE_THIRD_PARTY_REPOSITORY_URL"
-    # echo "  Collect JQA data:        $RCE_COLLECT_JQASSISTANT_DATA"
+    echo "  Build type:                    $RCE_BUILD_TYPE"
+    echo "  Third-party repository:        $RCE_THIRD_PARTY_REPOSITORY_URL"
+    # echo "  Collect JQA data:              $RCE_COLLECT_JQASSISTANT_DATA"
 
     BUILD_LOG_FILE="target/intermediate/build.log"
-    echo "Capturing log output in $(pwd)/$BUILD_LOG_FILE"
+    echo "  Build Log File:                $(pwd)/$BUILD_LOG_FILE"
 
     set +e
     # TODO make help content generation optional?
@@ -110,6 +110,8 @@ build_intermediate_repo() {
 
     # 6 lines for clean output in the BUILD SUCCESS case
     tail -n 6 "$BUILD_LOG_FILE"
+    echo "Generated artifacts:"
+    echo "  Intermediate p2 repository:    $(pwd)/target/intermediate/repository"
 }
 
 
@@ -124,11 +126,11 @@ build_products_from_repo() {
     mkdir -p target/products
 
     echo "Assembling RCE (Executable Product)"
-    echo "  Build type:                $RCE_BUILD_TYPE"
+    echo "  Build type:                    $RCE_BUILD_TYPE"
     # echo "  Documentation build mode:  $RCE_DOCUMENTATION_BUILD_MODE"
 
     BUILD_LOG_FILE="target/products/build.log"
-    echo "Capturing log output in $(pwd)/$BUILD_LOG_FILE"
+    echo "  Build Log File:                $(pwd)/$BUILD_LOG_FILE"
 
     # TODO apply RCE_DOCUMENTATION_BUILD_MODE; for now, it is always built
 
@@ -157,6 +159,9 @@ build_products_from_repo() {
 
     # 6 lines for clean output in the BUILD SUCCESS case
     tail -n 6 "$BUILD_LOG_FILE"
+    echo "Generated artifacts:"
+    echo "  Product zip files:             $(pwd)/target/products/zip"
+    echo "  Product update p2 repository:  $(pwd)/target/products/repository"
 }
 
 run_unit_tests() {
@@ -173,7 +178,7 @@ run_unit_tests() {
     echo "Running Unit Tests (Build Scope '$RCE_UNIT_TESTS_BUILD_SCOPE')"
 
     BUILD_LOG_FILE="target/unit-tests/build.log"
-    echo "Capturing log output in $(pwd)/$BUILD_LOG_FILE"
+    echo "  Build Log File:                $(pwd)/$BUILD_LOG_FILE"
 
     # TODO consider compiling and running tests against the intermediate repository
     # TODO consider making the test scope more configurable, e.g. per bundle
@@ -205,4 +210,6 @@ run_unit_tests() {
 
     # 6 lines for clean output in the BUILD SUCCESS case
     tail -n 6 "$BUILD_LOG_FILE"
+    echo "Generated artifacts:"
+    echo "  JUnit test result XML files:   $(pwd)/target/unit-tests/reports/xml"
 }
