@@ -246,6 +246,22 @@
 					<version>2.5.2</version> <!-- last updated: 2014-10-15, misc_ro -->
 				</plugin>
 				<plugin>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>3.2.1</version> <!-- last updated: 2023-10-26, misc_ro -->
+				</plugin>
+				<plugin>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>3.2.1</version> <!-- last updated: 2023-10-26, misc_ro -->
+				</plugin>
+				<plugin>
+				    <artifactId>maven-site-plugin</artifactId>
+				    <version>3.12.1</version> <!-- last 3.x as of 2023-10-26, misc_ro -->
+				</plugin>
+				<plugin>
+				    <artifactId>maven-antrun-plugin</artifactId>
+				    <version>1.8</version> <!-- ancient, but we don't want to upgrade to 3.x right now -->
+				</plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
 					<version>2.7</version> <!-- last updated: 2014-10-15, misc_ro -->
@@ -305,7 +321,22 @@
 				</plugin>
 				<plugin>
 					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-ds-plugin</artifactId>
+					<version>${internal.tycho.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-p2-plugin</artifactId>
+					<version>${internal.tycho.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>tycho-p2-director-plugin</artifactId>
+					<version>${internal.tycho.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-p2-publisher-plugin</artifactId>
 					<version>${internal.tycho.version}</version>
 				</plugin>
 				<plugin>
@@ -364,6 +395,9 @@
 									<!-- set a lower bound against building with ancient versions -->
 									<version>3.6.3</version>
 								</requireMavenVersion>
+								<requirePluginVersions>
+									<!-- default settings only -->
+								</requirePluginVersions>
 							</rules>
 						</configuration>
 					</execution>
