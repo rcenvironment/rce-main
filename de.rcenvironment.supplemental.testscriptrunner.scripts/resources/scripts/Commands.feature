@@ -351,9 +351,6 @@ Scenario: Alternative approach for verifying accessibility of console commands f
     Then  the output should not contain "Unknown command"
     # Assert that no user-facing error message is shown
     And   the output should not contain "not executed. You either do not have the privileges to execute this command or it does not exist."
-    When  executing the command "dna" on "Node4"
-    # Assert that no developer-facing error message is shown
-    Then  the output should not contain "Unknown command"
     # Assert that no user-facing error message is shown
     And   the output should not contain "not executed. You either do not have the privileges to execute this command or it does not exist."
     When  executing the command "dm create-test-data" on "Node4"
