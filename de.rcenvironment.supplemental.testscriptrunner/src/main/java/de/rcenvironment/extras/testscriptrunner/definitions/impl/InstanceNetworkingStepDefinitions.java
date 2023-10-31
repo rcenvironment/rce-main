@@ -24,18 +24,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
 import de.rcenvironment.core.command.spi.AbstractParsedCommandParameter;
 import de.rcenvironment.core.command.spi.ParsedBooleanParameter;
-import de.rcenvironment.core.command.spi.ParsedCommandModifiers;
 import de.rcenvironment.core.command.spi.ParsedIntegerParameter;
 import de.rcenvironment.core.command.spi.ParsedMultiParameter;
 import de.rcenvironment.core.command.spi.ParsedStringParameter;
 import de.rcenvironment.core.instancemanagement.internal.InstanceConfigurationException;
 import de.rcenvironment.core.instancemanagement.internal.SSHAccountParameters;
-import de.rcenvironment.core.instancemanagement.internal.UplinkConnectionParameters;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.InstanceManagementStepDefinitionBase;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ManagedInstance;
@@ -46,6 +41,9 @@ import de.rcenvironment.extras.testscriptrunner.definitions.helper.RegularConnec
 import de.rcenvironment.extras.testscriptrunner.definitions.helper.SSHConnectionOptions;
 import de.rcenvironment.extras.testscriptrunner.definitions.helper.StepDefinitionConstants;
 import de.rcenvironment.extras.testscriptrunner.definitions.helper.UplinkConnectionOptions;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 
 /**
  * Steps for setting up, changing or asserting the network connection(s) between instances.

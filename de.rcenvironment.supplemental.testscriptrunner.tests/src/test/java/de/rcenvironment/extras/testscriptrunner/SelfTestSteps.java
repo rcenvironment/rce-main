@@ -10,10 +10,10 @@ package de.rcenvironment.extras.testscriptrunner;
 
 import static org.junit.Assert.assertEquals;
 
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.AbstractStepDefinitionBase;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
 
 /**
  * Step definitions for self-testing the TestScriptRunner plugin backend.

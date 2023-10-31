@@ -16,13 +16,13 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import cucumber.api.DataTable;
-import cucumber.api.java.en.Then;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.InstanceManagementStepDefinitionBase;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ManagedInstance;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
 import de.rcenvironment.extras.testscriptrunner.definitions.helper.StepDefinitionConstants;
+import io.cucumber.datatable.DataTable;
+import io.cucumber.java.en.Then;
 
 /**
  * Steps for asserting output conditions.

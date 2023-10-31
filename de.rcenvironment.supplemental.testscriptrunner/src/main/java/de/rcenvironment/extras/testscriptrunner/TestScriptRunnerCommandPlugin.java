@@ -19,7 +19,6 @@ import org.apache.commons.logging.LogFactory;
 import de.rcenvironment.core.command.common.CommandException;
 import de.rcenvironment.core.command.spi.AbstractCommandParameter;
 import de.rcenvironment.core.command.spi.CommandContext;
-import de.rcenvironment.core.command.spi.CommandFlag;
 import de.rcenvironment.core.command.spi.CommandModifierInfo;
 import de.rcenvironment.core.command.spi.CommandPlugin;
 import de.rcenvironment.core.command.spi.ListCommandParameter;
@@ -37,17 +36,9 @@ import de.rcenvironment.core.configuration.ConfigurationService;
 import de.rcenvironment.core.configuration.bootstrap.RuntimeDetection;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.common.TempFileServiceAccess;
-import de.rcenvironment.extras.testscriptrunner.definitions.common.RceTestLifeCycleHooks;
-import de.rcenvironment.extras.testscriptrunner.definitions.impl.AssertOutputStepDefinitions;
-import de.rcenvironment.extras.testscriptrunner.definitions.impl.CommonStepDefinitions;
-import de.rcenvironment.extras.testscriptrunner.definitions.impl.ComponentStepDefinitions;
-import de.rcenvironment.extras.testscriptrunner.definitions.impl.InstanceCommandStepDefinitions;
-import de.rcenvironment.extras.testscriptrunner.definitions.impl.InstanceInstantiationStepDefinitions;
-import de.rcenvironment.extras.testscriptrunner.definitions.impl.InstanceNetworkingStepDefinitions;
-import de.rcenvironment.extras.testscriptrunner.definitions.impl.InstanceStateStepDefinitions;
-import de.rcenvironment.extras.testscriptrunner.definitions.impl.WorkflowStepDefinitions;
 import de.rcenvironment.extras.testscriptrunner.internal.CucumberTestFrameworkAdapter;
 import de.rcenvironment.extras.testscriptrunner.internal.CucumberTestFrameworkAdapter.ExecutionResult;
+import de.rcenvironment.extras.testscriptrunner.internal.CucumberTestFrameworkAdapter.ExecutionResultStatus;
 import de.rcenvironment.extras.testscriptrunner.internal.CucumberTestFrameworkAdapter.ReportOutputFormat;
 
 /**
@@ -94,10 +85,7 @@ public class TestScriptRunnerCommandPlugin implements CommandPlugin {
     private final File reportsRootDir;
 
     public TestScriptRunnerCommandPlugin() throws IOException {
-        testFrameworkAdapter = new CucumberTestFrameworkAdapter(AssertOutputStepDefinitions.class,
-                CommonStepDefinitions.class, ComponentStepDefinitions.class, InstanceCommandStepDefinitions.class,
-                InstanceInstantiationStepDefinitions.class, InstanceNetworkingStepDefinitions.class,
-                InstanceStateStepDefinitions.class, RceTestLifeCycleHooks.class, WorkflowStepDefinitions.class);
+        testFrameworkAdapter = new CucumberTestFrameworkAdapter();
         if (RuntimeDetection.isImplicitServiceActivationDenied()) {
             // avoid breaking when activated in a default test environment
             TempFileServiceAccess.setupUnitTestEnvironment();
@@ -144,30 +132,31 @@ public class TestScriptRunnerCommandPlugin implements CommandPlugin {
         final ExecutionResult result = testFrameworkAdapter.executeTestScripts(scriptLocationRoot, tagNameFilter,
                 context.getOutputReceiver(), buildUnderTestId, reportsRootDir, reportFormat);
 
-        List<String> reportLines = result.getReportFileLines();
-        if (reportLines != null) {
-            // dump generated text report to text console
-            context.println("");
-            context.println("Test run complete, content of report file:");
-            context.println(SEPARATOR_TEXT_LINE);
-            for (String line : reportLines) {
-                context.println(line);
+        if (result.getExecutionResultStatus().equals(ExecutionResultStatus.UNSUCCESSFUL)) {
+            List<String> reportLines = result.getReportFileLines();
+            if (reportLines != null) {
+                // dump generated text report to text console
+                context.println("");
+                context.println("Test run complete, content of report file:");
+                context.println(SEPARATOR_TEXT_LINE);
+                for (String line : reportLines) {
+                    context.println(line);
+                }
+                context.println(SEPARATOR_TEXT_LINE);
+            } else {
+                context.println("Test run complete (no report file found)");
             }
-            context.println(SEPARATOR_TEXT_LINE);
-        } else {
-            context.println("Test run complete (no report file found)");
-        }
-
-        List<String> stdOutLines = result.getCapturedStdOutLines();
-        if (!stdOutLines.isEmpty()) {
-            // dump generated text report to text console
-            context.println("");
-            context.println("Captured Output:");
-            context.println(SEPARATOR_TEXT_LINE);
-            for (String line : stdOutLines) {
-                context.println(line);
+            List<String> stdOutLines = result.getCapturedStdOutLines();
+            if (!stdOutLines.isEmpty()) {
+                // dump generated text report to text console
+                context.println("");
+                context.println("Captured Output:");
+                context.println(SEPARATOR_TEXT_LINE);
+                for (String line : stdOutLines) {
+                    context.println(line);
+                }
+                context.println(SEPARATOR_TEXT_LINE);
             }
-            context.println(SEPARATOR_TEXT_LINE);
         }
     }
 
