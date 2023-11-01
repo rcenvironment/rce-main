@@ -154,12 +154,18 @@ Scenario: Connection of client instance to uplink instance established after mul
     And waiting for 5 seconds
 
     And   stopping instance "Upl, Cli1, Cli2"
-    #And waiting for 10 seconds
-    #And   stopping instance "Upl"
-    # the following would lead to something "alreadyshut down"
-    #Then  the log output of "Upl" should indicate a clean shutdown with no warnings or errors
-    #And waiting for 10 seconds
-    And  the log output of "Cli1" should indicate a clean shutdown with no warnings or errors
+
+    #And the log output of "Upl" should indicate a clean shutdown with no warnings or errors
+    And the log output of instance "Upl" should indicate a clean shutdown with these allowed warnings or errors:
+    """
+	session already closed
+	UNCLEAN_SHUTDOWN_INITIATED
+    """
+    And the log output of instances "Cli1, Cli2" should indicate a clean shutdown with these allowed warnings or errors:
+    """
+    Error in asynchronous callback; shutting down queue
+    """
+    
         
 #@NetworkingTestsFeature
 # TODO fix test failure @Matthias Wagner
