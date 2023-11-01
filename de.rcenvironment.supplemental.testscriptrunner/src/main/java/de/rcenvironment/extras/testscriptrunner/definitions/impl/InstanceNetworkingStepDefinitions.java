@@ -681,6 +681,14 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
             .isEnabled(true)
             .build();
         addSSHAccount(serverInstance, accountParametersUpl);
+
+        // if there is a *common* client ID, we have to replace the usual client ID. 
+        final String clientId;
+        if (commonClientId.equals("")) {
+            clientId = clientInstance.getId();
+        } else {
+            clientId = commonClientId;
+        }
         
         final ParsedMultiParameter uplinkParameters = new ParsedMultiParameter(
             new AbstractParsedCommandParameter[] {
@@ -689,7 +697,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
                 new ParsedStringParameter(ConnectionOptionConstants.HOST_DEFAULT),
                 new ParsedIntegerParameter(serverPort),
                 new ParsedStringParameter(
-                    StringUtils.format(StepDefinitionConstants.CONNECTION_ID_FORMAT, clientInstance.getId(), serverInstance.getId())),
+                    StringUtils.format(StepDefinitionConstants.CONNECTION_ID_FORMAT, clientId, serverInstance.getId())),
                 new ParsedBooleanParameter(connectionOptions.getGateway()),
                 new ParsedBooleanParameter(connectionOptions.getAutoStart()),
                 new ParsedBooleanParameter(connectionOptions.getAutoRetry()),
