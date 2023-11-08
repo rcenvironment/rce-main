@@ -6,7 +6,7 @@ Bundle-Version: 10.4.1.qualifier
 Main-Class: org.eclipse.equinox.launcher.Main
 Bundle-ClassPath: .,
  target/mavenSources.jar
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: org.eclipse.core.launcher,
  org.eclipse.equinox.internal.launcher,
  org.eclipse.equinox.launcher,
