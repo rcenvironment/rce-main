@@ -16,7 +16,6 @@
 	<artifactId>de.rcenvironment.core.launcher</artifactId>
 	<version>10.4.1-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -39,6 +38,10 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
 				<executions>
 					<execution>
 						<phase>generate-sources</phase>
