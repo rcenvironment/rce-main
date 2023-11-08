@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCE Core Utils Cluster
 Bundle-SymbolicName: de.rcenvironment.core.utils.cluster
-Bundle-Version: 10.4.1.qualifier
+Bundle-Version: 10.5.0.qualifier
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: DLR

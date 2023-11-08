@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCE Core GUI Resources Bundle
 Bundle-SymbolicName: de.rcenvironment.core.gui.resources;singleton:=true
-Bundle-Version: 10.4.1.qualifier
+Bundle-Version: 10.5.0.qualifier
 Bundle-Activator: de.rcenvironment.core.gui.resources.internal.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: 

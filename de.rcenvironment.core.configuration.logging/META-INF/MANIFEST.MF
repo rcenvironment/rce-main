@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCE Core Configuration Logging
 Bundle-SymbolicName: de.rcenvironment.core.configuration.logging
-Bundle-Version: 10.4.1.qualifier
+Bundle-Version: 10.5.0.qualifier
 Fragment-Host: org.ops4j.pax.logging.pax-logging-log4j2
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: de.rcenvironment.core.configuration.logging
