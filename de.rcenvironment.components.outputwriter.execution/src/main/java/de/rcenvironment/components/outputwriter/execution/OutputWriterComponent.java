@@ -97,7 +97,7 @@ public class OutputWriterComponent extends DefaultComponent {
         dataManagementService = componentContext.getService(ComponentDataManagementService.class);
         WorkflowExecutionService workflowExecutionService = componentContext.getService(WorkflowExecutionService.class);
 
-        Optional<Long> startTime = workflowExecutionService.getWorkflowExecutionInformations().stream()
+        Optional<Long> startTime = workflowExecutionService.getWorkflowExecutionInformations(true).stream()
             .filter(info -> info.getExecutionIdentifier().equals(componentContext.getWorkflowExecutionIdentifier()))
             .map(WorkflowExecutionInformation::getStartTime).findFirst();
         Date dt;
