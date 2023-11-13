@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -188,7 +189,7 @@ public class OptimizerEndpointSelectionPane extends EndpointSelectionPane {
          * Extended super class method to validate Optimizer specific inputs. (check if the lower bound of the optimizer is less than the
          * upper bound)
          *
-         * @author Devika Jalgaonkar
+         * @author Devika Jalgaonkar (#17983, #18127)
          */
         @Override
         protected boolean validateMetaDataInputs() {
@@ -200,21 +201,30 @@ public class OptimizerEndpointSelectionPane extends EndpointSelectionPane {
                 && widgetToKeyMap.containsValue(OptimizerComponentConstants.META_UPPERBOUND) && validMetaDataInputs) {
                 String upperBoundText = null;
                 String lowerBoundText = null;
+                boolean hasBounds = false;
+                boolean checkedHasBoundsValue = false;
                 for (Entry<Widget, String> entry : widgetToKeyMap.entrySet()) {
-                    if (upperBoundText != null && lowerBoundText != null) {
+                    if (upperBoundText != null && lowerBoundText != null && checkedHasBoundsValue) {
                         break;
                     }
                     if (entry.getValue().equals(OptimizerComponentConstants.META_UPPERBOUND)) {
                         upperBoundText = ((Text) entry.getKey()).getText();
                     } else if (entry.getValue().equals(OptimizerComponentConstants.META_LOWERBOUND)) {
                         lowerBoundText = ((Text) entry.getKey()).getText();
+                    } else if (entry.getValue().equals(OptimizerComponentConstants.META_KEY_HAS_BOUNDS)) {
+                        hasBounds = ((Button) entry.getKey()).getSelection();
+                        checkedHasBoundsValue = true;
                     }
                 }
-                float upperBound = Float.parseFloat(upperBoundText);
-                float lowerBound = Float.parseFloat(lowerBoundText);
-                if (upperBound <= lowerBound) {
-                    validUpperLowerBounds = false;
-                    updateMessage(StringUtils.format(Messages.boundCheckMessage, lowerBound, upperBound), true);
+
+                if (hasBounds) {
+                    float upperBound = Float.parseFloat(upperBoundText);
+                    float lowerBound = Float.parseFloat(lowerBoundText);
+
+                    if (upperBound <= lowerBound) {
+                        validUpperLowerBounds = false;
+                        updateMessage(StringUtils.format(Messages.boundCheckMessage, lowerBound, upperBound), true);
+                    }
                 }
             }
             return validMetaDataInputs && validUpperLowerBounds;
