@@ -90,7 +90,7 @@ public final class ComponentDescriptionValidator {
         if (validationError.isPresent()) {
             return Optional
                 .of(StringUtils.format(TOOLNAME_INVALID,
-                    "The combination of prefix \"" + prefix + "\" and name exceeds " + MAXIMUM_ID_LENGTH
+                    "The component ID (prefix \"" + prefix + "\" + name) exceeds " + MAXIMUM_ID_LENGTH
                         + " characters."));
         }
         // additionally, check whether the given id violates any platform-specific rules for filenames; for example, this rules out "LPT1"
