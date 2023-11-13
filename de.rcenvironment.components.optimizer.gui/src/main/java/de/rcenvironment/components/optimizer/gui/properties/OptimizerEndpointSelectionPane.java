@@ -11,7 +11,6 @@ package de.rcenvironment.components.optimizer.gui.properties;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -190,44 +189,29 @@ public class OptimizerEndpointSelectionPane extends EndpointSelectionPane {
          * upper bound)
          *
          * @author Devika Jalgaonkar (#17983, #18127)
+         * @author Jan Flink (#18127)
          */
         @Override
         protected boolean validateMetaDataInputs() {
-            boolean validUpperLowerBounds = true;
+            if (!super.validateMetaDataInputs()) {
+                return false;
+            }
 
-            boolean validMetaDataInputs = super.validateMetaDataInputs();
+            Widget boundsCheckBox = getWidget(OptimizerComponentConstants.META_KEY_HAS_BOUNDS);
+            Widget upperBoundText = getWidget(OptimizerComponentConstants.META_UPPERBOUND);
+            Widget lowerBoundText = getWidget(OptimizerComponentConstants.META_LOWERBOUND);
 
-            if (widgetToKeyMap.containsValue(OptimizerComponentConstants.META_LOWERBOUND)
-                && widgetToKeyMap.containsValue(OptimizerComponentConstants.META_UPPERBOUND) && validMetaDataInputs) {
-                String upperBoundText = null;
-                String lowerBoundText = null;
-                boolean hasBounds = false;
-                boolean checkedHasBoundsValue = false;
-                for (Entry<Widget, String> entry : widgetToKeyMap.entrySet()) {
-                    if (upperBoundText != null && lowerBoundText != null && checkedHasBoundsValue) {
-                        break;
-                    }
-                    if (entry.getValue().equals(OptimizerComponentConstants.META_UPPERBOUND)) {
-                        upperBoundText = ((Text) entry.getKey()).getText();
-                    } else if (entry.getValue().equals(OptimizerComponentConstants.META_LOWERBOUND)) {
-                        lowerBoundText = ((Text) entry.getKey()).getText();
-                    } else if (entry.getValue().equals(OptimizerComponentConstants.META_KEY_HAS_BOUNDS)) {
-                        hasBounds = ((Button) entry.getKey()).getSelection();
-                        checkedHasBoundsValue = true;
-                    }
-                }
+            if (boundsCheckBox != null && ((Button) boundsCheckBox).getSelection() && upperBoundText != null && lowerBoundText != null) {
 
-                if (hasBounds) {
-                    float upperBound = Float.parseFloat(upperBoundText);
-                    float lowerBound = Float.parseFloat(lowerBoundText);
+                float upperBound = Float.parseFloat(((Text) upperBoundText).getText());
+                float lowerBound = Float.parseFloat(((Text) lowerBoundText).getText());
 
-                    if (upperBound <= lowerBound) {
-                        validUpperLowerBounds = false;
-                        updateMessage(StringUtils.format(Messages.boundCheckMessage, lowerBound, upperBound), true);
-                    }
+                if (upperBound <= lowerBound) {
+                    updateMessage(StringUtils.format(Messages.boundCheckMessage, lowerBound, upperBound), true);
+                    return false;
                 }
             }
-            return validMetaDataInputs && validUpperLowerBounds;
+            return true;
         }
     }
 
