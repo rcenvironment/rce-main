@@ -69,6 +69,9 @@ public class EmbeddedSshServerImpl implements EmbeddedSshServerControl {
 
     private static final int DYNAMIC_ACCOUNT_FILE_MODIFICATION_CHECK_INTERVAL_MSEC = 10 * 1000;
 
+    // TODO (p3) make SSH auth timeout configurable?
+    private static final int AUTH_TIMEOUT_SECONDS = 30; // changed from 10 to 30 seconds in 10.5.0
+
     private static final String HOST_KEY_STORAGE_FILE_NAME = "ssh_host_key.dat";
 
     private static final String EVENT_LOG_KEY_CONNECTION_TYPE = "type";
@@ -319,9 +322,8 @@ public class EmbeddedSshServerImpl implements EmbeddedSshServerControl {
         PropertyResolverUtils.updateProperty(serverInstance, CoreModuleProperties.IDLE_TIMEOUT.getName(),
             TimeUnit.SECONDS.toMillis(sshConfiguration.getIdleTimeoutSeconds()));
         // set the allowed time before the first authentication attempt; default is 120 seconds
-        // TODO make this configurable?
         PropertyResolverUtils.updateProperty(serverInstance, CoreModuleProperties.AUTH_TIMEOUT.getName(),
-            TimeUnit.SECONDS.toMillis(10));
+            TimeUnit.SECONDS.toMillis(AUTH_TIMEOUT_SECONDS));
         return serverInstance;
     }
 
