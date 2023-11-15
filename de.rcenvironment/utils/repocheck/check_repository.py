@@ -283,9 +283,9 @@ class ProjectRulesValidator:
     def __check_manifest_require_bundle_clauses(self, bundle_imports):
         for import_clause in bundle_imports:
             if ';bundle-version' in import_clause:
-                # allow the JUnit reexport to be versioned (at least for now)
+                # allow test utility library reexports to be versioned (at least for now)
                 if self.project_name == 'de.rcenvironment.core.utils.testing' \
-                        and import_clause.startswith('org.junit'):
+                        and import_clause.startswith('org.'):
                     continue
                 self.add_project_error(
                     "Require-Bundle clause '%s' should not specify a version constraint" % import_clause)

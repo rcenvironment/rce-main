@@ -58,5 +58,5 @@ Service-Component: OSGI-INF/*.xml,
  OSGI-INF/generated/*.xml
 Bundle-Vendor: DLR
 Require-Bundle: org.eclipse.ui.workbench,
- de.rcenvironment.thirdparty.wrappers.cucumber;bundle-version="7.12.1"
+ de.rcenvironment.thirdparty.wrappers.cucumber
 Automatic-Module-Name: de.rcenvironment.supplemental.testscriptrunner
