@@ -130,6 +130,8 @@ public class EndpointEditDialog extends TitleAreaDialog {
 
     private int readOnlyType;
 
+    private Composite configHeader;
+
     /**
      * Dialog for creating or editing an endpoint.
      * 
@@ -233,7 +235,7 @@ public class EndpointEditDialog extends TitleAreaDialog {
         g.horizontalAlignment = GridData.CENTER;
         g.grabExcessVerticalSpace = false;
 
-        Composite configHeader = new Composite(container, SWT.FILL);
+        configHeader = new Composite(container, SWT.FILL);
         configHeader.setLayout(new GridLayout(3, false));
         Label sep = new Label(configHeader, SWT.SEPARATOR | SWT.HORIZONTAL | SWT.FILL);
         sep.setLayoutData(g);
@@ -735,6 +737,7 @@ public class EndpointEditDialog extends TitleAreaDialog {
             ((Button) widget).getParent().setVisible(visible);
             ((Button) widget).setEnabled(enabled);
         }
+        configHeader.setVisible(visible);
     }
 
     protected boolean checkValidation(double value, String validation) {
