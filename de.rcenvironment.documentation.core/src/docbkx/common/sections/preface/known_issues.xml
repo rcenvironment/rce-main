@@ -48,13 +48,4 @@
                 nothing will happen at all. Therefore, always make sure a 64-bit Java Runtime
                 Environment is used to run RCE.</para>
         </section>
-        <section>
-        <title>MySQL JDBC connector</title>
-        <para>In order to provide database access via RCE's "Database" workflow component to MySQL
-        		databases, the MySQL JDBC Connector version 5.1.17 is supplied with RCE. Since
-        		this version is quite outdated, we strongly recommend using a current version as
-        		described in the context help of the component. In future releases we will probably
-        		refrain from delivering a JDBC connector. Please inform us if there are problems
-        		with the integration of newer versions of connectors.</para>
-        </section>
     </section>
