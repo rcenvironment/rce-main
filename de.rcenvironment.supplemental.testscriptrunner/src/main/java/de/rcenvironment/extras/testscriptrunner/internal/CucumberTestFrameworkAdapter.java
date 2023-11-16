@@ -20,6 +20,8 @@ import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -338,28 +340,43 @@ public class CucumberTestFrameworkAdapter {
         private void initializeCucumberRuntime() {
 
             EventBus eventBus = synchronize(new TimeServiceEventBus(Clock.systemUTC(), UUID::randomUUID));
-            String subdirForBDDReportFiles = "rce-bdd-reports";
 
+            String subdirForBDDReportFiles = "rce-bdd-reports";
             if (OSFamily.isLinux()) {
                 subdirForBDDReportFiles += "-" + System.getProperty("user.name");
             }
-            File reportFolder = new File(System.getProperty("java.io.tmpdir"), subdirForBDDReportFiles);
+            final File reportFolder = new File(System.getProperty("java.io.tmpdir"), subdirForBDDReportFiles);
 
             // set report format - pretty by default
 
             // CURRENT BEHAVIOUR - generates both HTML and PRETTY/JSON(depending on command)
-            String cucumberReportType = "";
             String cucumberReportFormatter = "";
+            String cucumberReportFileSuffix = "";
 
             if (reportFormat.equals(ReportOutputFormat.PRETTY)) {
                 cucumberReportFormatter = ReportOutputFormat.PRETTY.getFormatSpecifier();
-                cucumberReportType = ReportOutputFormat.PRETTY.getReportFileSuffix();
+                cucumberReportFileSuffix = ReportOutputFormat.PRETTY.getReportFileSuffix();
             } else if (reportFormat.equals(ReportOutputFormat.JSON)) {
                 cucumberReportFormatter = ReportOutputFormat.JSON.getFormatSpecifier();
-                cucumberReportType = ReportOutputFormat.JSON.getReportFileSuffix();
+                cucumberReportFileSuffix = ReportOutputFormat.JSON.getReportFileSuffix();
             }
             long unixTime = Instant.now().getEpochSecond();
-            String cucumberReportName = "Report_" + unixTime;
+            final String cucumberReportBaseName = "bdd-report-" + unixTime;
+
+            final File cucumberHtmlReportFile = new File(reportFolder, cucumberReportBaseName + ".html").getAbsoluteFile();
+            final File cucumberRequestedFormatReportFile =
+                new File(reportFolder, cucumberReportBaseName + cucumberReportFileSuffix).getAbsoluteFile();
+
+            // store the path of the most recent BDD report file in a hardcoded file to allow automated, non-parallel processes
+            // (especially CI) to access it easily; not using symlinks to avoid permission issues on Windows
+            try {
+                FileUtils.writeStringToFile(new File(reportFolder, "bdd-report-latest-path-html"), cucumberHtmlReportFile.toString(),
+                    StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                log.error("Failed to store report file location", e);
+            }
+            outputReceiver.addOutput("Location of HTML report file: " + cucumberHtmlReportFile.toString());
+            outputReceiver.addOutput("Location of " + reportFormat + " report file: " + cucumberRequestedFormatReportFile.toString());
 
             eventBus.registerHandlerFor(TestStepFinished.class, cucumberTestStepFinishedHandler);
             eventBus.registerHandlerFor(TestCaseFinished.class, cucumberTestCaseFinishedHandler);
@@ -372,9 +389,8 @@ public class CucumberTestFrameworkAdapter {
                     .addPluginName(StringUtils.format("%s:%s/%s", reportFormat.getFormatSpecifier(),
                         reportDirUriString, reportFileName))
                     .setObjectFactoryClass(PicoFactory.class).addPluginName("pretty").addDefaultSummaryPrinterIfNotDisabled()
-                    .addPluginName(ReportOutputFormat.HTML.getFormatSpecifier() + ":" + reportFolder.toString() + "\\" + cucumberReportName
-                        + ReportOutputFormat.HTML.getReportFileSuffix())
-                    .addPluginName(cucumberReportFormatter + ":" + reportFolder.toString() + "\\" + cucumberReportName + cucumberReportType)
+                    .addPluginName(ReportOutputFormat.HTML.getFormatSpecifier() + ":" + cucumberHtmlReportFile.toString())
+                    .addPluginName(cucumberReportFormatter + ":" + cucumberRequestedFormatReportFile.toString())
                     .addFeature(FeatureWithLines.parse(scriptLocationRoot.getAbsolutePath()));
             if ((!StringUtils.isNullorEmpty(tagNameFilter)) && !tagNameFilter.equals("--all")) {
                 // normalize filter parts and prepend "@" character
