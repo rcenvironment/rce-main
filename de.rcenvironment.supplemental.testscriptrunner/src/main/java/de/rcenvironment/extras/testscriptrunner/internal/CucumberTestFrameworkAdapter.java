@@ -20,7 +20,6 @@ import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
@@ -206,11 +205,18 @@ public class CucumberTestFrameworkAdapter {
         /** Total no. of test-cases. */
         public int totalCount = 0;
 
-        void printSummary(TextOutputReceiver outputReceiver) {
-            outputReceiver.addOutput(
-                "Total : " + totalCount + " ( passed : " + passedCount + ", failed : " + failedCount + ", skipped : " + skippedCount
-                    + ", pending : "
-                    + pendingCount + ", undefined  " + undefinedCount + ", ambiguous : " + ambiguousCount + " )");
+        void printSummary(TextOutputReceiver outputReceiver, String prefix) {
+            final int unsuccessfulCount = totalCount - passedCount;
+            if (unsuccessfulCount == 0) {
+                outputReceiver.addOutput(
+                    StringUtils.format("%s%d passed, 0 unsuccessful or skipped", prefix, passedCount));
+            } else {
+                outputReceiver.addOutput(
+                    StringUtils.format(
+                        "%s%d passed, %d unsuccessful or skipped (%d failed, %d skipped, %d pending, %d undefined, %d ambiguous)",
+                        prefix, passedCount, unsuccessfulCount,
+                        passedCount, failedCount, skippedCount, pendingCount, undefinedCount, ambiguousCount));
+            }
         }
 
     }
@@ -441,27 +447,22 @@ public class CucumberTestFrameworkAdapter {
             final String textSeparatorLine =
                 "-----------------------------------------------------------------------------------------------";
             outputReceiver.addOutput(textSeparatorLine);
-            outputReceiver.addOutput("Execution Summary :");
+            outputReceiver.addOutput("Test Run Summary:");
             outputReceiver.addOutput(textSeparatorLine);
-            outputReceiver.addOutput("Scenarios :");
-            scenarioStatistics.printSummary(outputReceiver);
-            outputReceiver.addOutput("Steps :");
-            stepStatistics.printSummary(outputReceiver);
-            outputReceiver.addOutput(textSeparatorLine);
+            scenarioStatistics.printSummary(outputReceiver, "Scenario counts: ");
+            stepStatistics.printSummary(outputReceiver, "Step counts: ");
             if (scenarioStatistics.totalCount > 0 && (scenarioStatistics.totalCount == scenarioStatistics.passedCount)) {
                 executionResultStatus = ExecutionResultStatus.SUCCESSFUL;
-                outputReceiver.addOutput("All scenarios PASSED successfully");
+                outputReceiver.addOutput("All scenarios passed successfully");
             } else {
                 executionResultStatus = ExecutionResultStatus.UNSUCCESSFUL;
-                outputReceiver.addOutput("Unsuccessful scenarios are listed below : ");
+                outputReceiver.addOutput("Unsuccessful scenarios:");
 
                 for (Entry<String, String> unsuccessfulScenario : unsuccessfulScenarios.entrySet()) {
-                    outputReceiver.addOutput(unsuccessfulScenario.getKey() + " - " + unsuccessfulScenario.getValue());
+                    outputReceiver.addOutput("- " + unsuccessfulScenario.getKey() + ": " + unsuccessfulScenario.getValue());
                 }
-                outputReceiver.addOutput(textSeparatorLine);
-
             }
-
+            outputReceiver.addOutput(textSeparatorLine);
         }
 
         private void cucumberTestStepFinished(TestStepFinished event) {
@@ -484,8 +485,10 @@ public class CucumberTestFrameworkAdapter {
                 stepStatistics.ambiguousCount++;
             } else if (testStepResult.equals(Status.PENDING)) {
                 stepStatistics.pendingCount++;
-            } else {
+            } else if (testStepResult.equals(Status.PASSED)) {
                 stepStatistics.passedCount++;
+            } else {
+                log.warn("Ignoring unhandled test step outcome " + testStepResult);
             }
 
         }
