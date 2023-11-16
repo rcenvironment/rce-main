@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.IBasicPropertyConstants;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Tree;
 
 import de.rcenvironment.core.communication.api.PlatformService;
 import de.rcenvironment.core.communication.common.LogicalNodeId;
@@ -365,13 +366,17 @@ public class PaletteViewContentProvider implements ITreeContentProvider {
                 }
             }
 
-            paletteView.getPaletteTreeViewer().getTree().setVisible(false);
+            Tree tree = paletteView.getPaletteTreeViewer().getTree();
+            if (tree.isDisposed()) {
+                return;
+            }
+            tree.setVisible(false);
             Object[] expandedElements = paletteView.getPaletteTreeViewer().getExpandedElements();
             updateTree(installationsToAdd, installationsToRemove);
             paletteView.getPaletteTreeViewer().refresh();
             paletteView.getPaletteTreeViewer().setExpandedElements(expandedElements);
             paletteView.getPaletteTreeViewer().refresh();
-            paletteView.getPaletteTreeViewer().getTree().setVisible(true);
+            tree.setVisible(true);
 
             // If organizeGroupsDialog is open, we need to update the TableViewer.
             if (paletteView.getOrganizeGroupsDialog() != null) {
