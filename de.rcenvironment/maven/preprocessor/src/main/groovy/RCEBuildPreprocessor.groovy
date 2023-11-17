@@ -22,12 +22,12 @@ class RCEBuildPreprocessor {
 
     final defaultRepositoryUrlSuffixes = [
         'snapshot': [
-            'platform': 'snapshots/integration-10',
-            'intermediate': 'snapshots/integration-10'
+            'platform': 'releases/10.5.0',
+            'intermediate': 'releases/10.5.0'
         ],
         'rc_or_release': [
-            'platform': 'releases/10.5.0', // not used yet
-            'intermediate': 'releases/10.5.0' // not used yet
+            'platform': 'releases/10.5.0',
+            'intermediate': 'releases/10.5.0'
         ]
     ]
 
