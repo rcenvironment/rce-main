@@ -6,7 +6,7 @@
  * https://rcenvironment.de/
  */
 
-package de.rcenvironment.extras.testscriptrunner;
+package de.rcenvironment.extras.testscriptrunner.definitions.impl;
 
 import static org.junit.Assert.assertEquals;
 
@@ -20,11 +20,11 @@ import io.cucumber.java.en.Then;
  *
  * @author Robert Mischke
  */
-public class SelfTestSteps extends AbstractStepDefinitionBase {
+public class SelfTestStepDefinitions extends AbstractStepDefinitionBase {
 
     private boolean testFlag;
 
-    public SelfTestSteps(TestScenarioExecutionContext executionContext) {
+    public SelfTestStepDefinitions(TestScenarioExecutionContext executionContext) {
         super(executionContext);
     }
 

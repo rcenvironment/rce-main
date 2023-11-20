@@ -47,12 +47,10 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
-import de.rcenvironment.core.configuration.ConfigurationService;
-import de.rcenvironment.core.configuration.ConfigurationService.ConfigurablePathId;
+import de.rcenvironment.core.configuration.bootstrap.BootstrapConfiguration;
 import de.rcenvironment.core.utils.common.OSFamily;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
-import de.rcenvironment.core.utils.incubator.ServiceRegistry;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
 import io.cucumber.core.eventbus.EventBus;
 import io.cucumber.core.feature.FeatureParser;
@@ -561,6 +559,10 @@ public class CucumberTestFrameworkAdapter {
         if (containingBundle != null) {
             String locationInfo = containingBundle.getLocation();
             log.debug("Original OSGi bundle location value: " + locationInfo);
+            // strip the "initial@" part of "initial@reference:file:" locations that occur during Tycho Surefire tests
+            if (locationInfo.startsWith("initial@")) {
+                locationInfo = locationInfo.substring("initial@".length());
+            }
             if (!locationInfo.startsWith("reference:file:")) {
                 throw new RuntimeException("Unexpected bundle location format (expected a 'reference:file:' prefix): " + locationInfo);
             }
@@ -583,8 +585,7 @@ public class CucumberTestFrameworkAdapter {
                 // "reference:file:plugins/de.rcenvironment.supplemental.testscriptrunner_<...>.jar";
                 // unfortunately, the path is relative, so for robustness, we need to resolve it against the installation dir
                 String relativePathPart = locationInfo.replace("reference:file:", "");
-                File installationDir = ServiceRegistry.createAccessFor(this).getService(ConfigurationService.class)
-                    .getConfigurablePath(ConfigurablePathId.INSTALLATION_DATA_ROOT);
+                File installationDir = BootstrapConfiguration.getInstallationDir();
                 File absolutePath = new File(installationDir, relativePathPart);
                 if (!absolutePath.isFile()) {
                     throw new RuntimeException(
