@@ -5,7 +5,7 @@
  * 
  * https://rcenvironment.de/
  */
- 
+
 package de.rcenvironment.core.utils.cluster.torque.internal;
 
 import java.io.IOException;
@@ -32,31 +32,36 @@ import de.rcenvironment.core.utils.ssh.jsch.SshSessionConfiguration;
  * Note: ClusterService implementations should be an OSGi service --seid_do
  * 
  * @author Doreen Seider
+ * @author Robert Mischke (minor fix)
  */
 public class TorqueClusterService extends AbstractClusterService {
 
+    // for now, also accept Windows line endings when parsing output, as git rewrites the
+    // example content; alternatively, this git rewrite behavior could also be suppressed
+    private static final String LINE_ENDING_REGEXP = "\\r?\\n";
+
     private static final int INDEX_JOBID = 0;
-    
+
     private static final int INDEX_USER = 1;
-    
+
     private static final int INDEX_QUEUE = 2;
 
     private static final int INDEX_JOBNAME = 3;
 
     private static final int INDEX_JOBSTATE = 9;
-    
+
     private static final int INDEX_REMAININGTIME = 4;
 
     private static final int INDEX_STARTTIME = 5;
-    
+
     private static final int INDEX_QUEUETIME = 5;
-    
+
     private static final int SECTION_ACTIVE_JOBS = 0;
-    
+
     private static final int SECTION_IDLE_JOBS = 1;
-    
+
     private static final int SECTION_BLOCKED_JOBS = 2;
-    
+
     public TorqueClusterService(SshSessionConfiguration sshConfiguration, Map<String, String> pathToQueuingSystemCommands) {
         super(sshConfiguration, pathToQueuingSystemCommands);
     }
@@ -76,7 +81,7 @@ public class TorqueClusterService extends AbstractClusterService {
         Map<String, ClusterJobTimesInformation> jobTimesInformation = parseStdoutForClusterJobTimesInformation(stdout);
         return enhanceClusterJobInformation(jobInformation, jobTimesInformation);
     }
-    
+
     @Override
     public String cancelClusterJobs(List<String> jobIds) throws IOException {
         StringBuilder commandBuilder = new StringBuilder(buildMainCommand(ClusterQueuingSystemConstants.COMMAND_QDEL) + " ");
@@ -92,18 +97,17 @@ public class TorqueClusterService extends AbstractClusterService {
         }
         return "";
     }
-    
+
     // visibility is protected for test purposes
     protected Map<String, ClusterJobInformation> parseStdoutForClusterJobInformation(String stdout) {
         Map<String, ClusterJobInformation> jobInformation = new HashMap<String, ClusterJobInformation>();
-        
+
         final String regex = "(-+)";
 
         boolean headerCompleted = false;
         boolean isHeader = false;
-        
-        
-        String[] lines = stdout.split("\n");
+
+        String[] lines = stdout.split(LINE_ENDING_REGEXP);
         for (String line : lines) {
             headerCompleted = isHeader;
             String[] lineTokens = line.split("(\\s+)");
@@ -122,22 +126,22 @@ public class TorqueClusterService extends AbstractClusterService {
         }
         return jobInformation;
     }
-    
+
     // visibility is protected for test purposes
     protected Map<String, ClusterJobTimesInformation> parseStdoutForClusterJobTimesInformation(String stdout) {
         Map<String, ClusterJobTimesInformation> information = new HashMap<String, ClusterJobTimesInformation>();
-        
+
         int section = SECTION_ACTIVE_JOBS;
         boolean inSection = false;
         boolean emptyRowPassed = false;
-        
-        String[] lines = stdout.split("\n");
+
+        String[] lines = stdout.split(LINE_ENDING_REGEXP);
         for (String line : lines) {
             String[] lineTokens = line.split("(\\s+)");
             if (inSection) {
                 if (lineTokens.length <= 1) {
                     if (!emptyRowPassed) {
-                        emptyRowPassed = true;                        
+                        emptyRowPassed = true;
                     } else {
                         emptyRowPassed = false;
                         inSection = false;
@@ -163,15 +167,15 @@ public class TorqueClusterService extends AbstractClusterService {
     // visibility is protected for test purposes
     protected Set<ClusterJobInformation> enhanceClusterJobInformation(Map<String, ClusterJobInformation> jobInformation,
         Map<String, ClusterJobTimesInformation> jobTimesInformation) {
-        
+
         jobInformation = enhanceClusterJobInformationWithTimesInformation(jobInformation, jobTimesInformation);
 
         return new HashSet<ClusterJobInformation>(jobInformation.values());
     }
-    
+
     private Map<String, ClusterJobInformation> enhanceClusterJobInformationWithTimesInformation(
         Map<String, ClusterJobInformation> jobInformation, Map<String, ClusterJobTimesInformation> jobTimesInformation) {
-        
+
         for (ClusterJobInformation information : jobInformation.values()) {
             String jobName = information.getJobId().split("\\.")[0];
             if (jobTimesInformation.containsKey(jobName)) {
@@ -182,10 +186,10 @@ public class TorqueClusterService extends AbstractClusterService {
         }
         return jobInformation;
     }
-    
+
     private ClusterJobTimesInformation extractClusterJobTimesInformation(String[] lineTokens, int section) {
         ClusterJobTimesInformation information = new ClusterJobTimesInformation();
-        
+
         information.setJobId(lineTokens[INDEX_JOBID]);
 
         switch (section) {
@@ -199,10 +203,10 @@ public class TorqueClusterService extends AbstractClusterService {
             information.setQueueTime(getTime(lineTokens, INDEX_QUEUETIME));
             break;
         }
-        
+
         return information;
     }
-    
+
     private String getTime(String[] lineTokens, int startIndex) {
         StringBuilder strBuilder = new StringBuilder();
         for (int i = startIndex; i < lineTokens.length; i++) {
@@ -211,36 +215,36 @@ public class TorqueClusterService extends AbstractClusterService {
         }
         return strBuilder.delete(strBuilder.length() - 1, strBuilder.length()).toString();
     }
-    
+
     private ClusterJobInformation extractClusterJobInformation(String[] lineTokens) {
         ClusterJobInformationImpl information = new ClusterJobInformationImpl();
-        
+
         information.setJobId(lineTokens[INDEX_JOBID]);
         information.setUser(lineTokens[INDEX_USER]);
         information.setQueue(lineTokens[INDEX_QUEUE]);
         information.setJobName(lineTokens[INDEX_JOBNAME]);
         information.setJobState(getClusterJobState(lineTokens[INDEX_JOBSTATE]));
-        
+
         return information;
     }
-    
+
     private ClusterJobState getClusterJobState(String stateToken) {
         ClusterJobState state = ClusterJobState.Unknown;
-        if (stateToken.equals("C"))  {
+        if (stateToken.equals("C")) {
             state = ClusterJobState.Completed;
-        } else if (stateToken.equals("E"))  {
+        } else if (stateToken.equals("E")) {
             state = ClusterJobState.Exiting;
-        } else if (stateToken.equals("H"))  {
+        } else if (stateToken.equals("H")) {
             state = ClusterJobState.Held;
-        } else if (stateToken.equals("Q"))  {
+        } else if (stateToken.equals("Q")) {
             state = ClusterJobState.Queued;
-        } else if (stateToken.equals("R"))  {
+        } else if (stateToken.equals("R")) {
             state = ClusterJobState.Running;
-        } else if (stateToken.equals("T"))  {
+        } else if (stateToken.equals("T")) {
             state = ClusterJobState.Moved;
-        } else if (stateToken.equals("W"))  {
+        } else if (stateToken.equals("W")) {
             state = ClusterJobState.Waiting;
-        } else if (stateToken.equals("S"))  {
+        } else if (stateToken.equals("S")) {
             state = ClusterJobState.Suspended;
         }
         return state;
