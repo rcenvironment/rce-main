@@ -18,7 +18,9 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +48,8 @@ import de.rcenvironment.core.component.execution.api.Component;
 import de.rcenvironment.core.component.execution.api.ComponentContext;
 import de.rcenvironment.core.component.testutils.ComponentContextMock;
 import de.rcenvironment.core.component.testutils.ComponentTestWrapper;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionInformation;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionService;
 import de.rcenvironment.core.datamodel.api.DataType;
 import de.rcenvironment.core.datamodel.api.TypedDatumFactory;
 import de.rcenvironment.core.datamodel.api.TypedDatumService;
@@ -144,6 +148,11 @@ public class OutputWriterComponentTest {
             return "TestComponentName";
         }
 
+        @Override
+        public String getExecutionIdentifier() {
+            return "TestExecutionIdentifier";
+        }
+
     }
 
     private ComponentTestWrapper component;
@@ -153,6 +162,8 @@ public class OutputWriterComponentTest {
     private TypedDatumFactory typedDatumFactory;
 
     private ComponentDataManagementService componentDataManagementServiceMock;
+
+    private WorkflowExecutionService workflowExecutionServiceMock;
 
     /*
      * These two IAnswers are called by the mocked ComponentDataManagementService and imitate the behavior of the methods
@@ -212,8 +223,18 @@ public class OutputWriterComponentTest {
         assertEquals(2, inputDirectory.listFiles().length);
 
         componentDataManagementServiceMock = EasyMock.createMock(ComponentDataManagementService.class);
-
         context.addService(ComponentDataManagementService.class, componentDataManagementServiceMock);
+        
+        WorkflowExecutionInformation workflowExecutionInformation = EasyMock.createNiceMock(WorkflowExecutionInformation.class);
+        EasyMock.expect(workflowExecutionInformation.getExecutionIdentifier()).andReturn(context.getExecutionIdentifier());
+        EasyMock.replay(workflowExecutionInformation);
+
+        workflowExecutionServiceMock = EasyMock.createNiceMock(WorkflowExecutionService.class);
+        EasyMock.expect(workflowExecutionServiceMock.getWorkflowExecutionInformations(true))
+            .andReturn(new HashSet<>(Arrays.asList(workflowExecutionInformation)));
+        EasyMock.replay(workflowExecutionServiceMock);
+        context.addService(WorkflowExecutionService.class, workflowExecutionServiceMock);
+
         context.setConfigurationValue(OutputWriterComponentConstants.CONFIG_KEY_ROOT, testRootDir.getAbsolutePath());
 
         mapper = JsonUtils.getDefaultObjectMapper();
