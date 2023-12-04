@@ -68,6 +68,9 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
     public static final String FINAL_STATE_UNKNOWN_EXCEPTION_MESSAGE =
         "Most likely because the connection to the workflow host node was interupted. See logs for more details.";
 
+    /** Exception Message. */
+    public static final String WF_EXECUTION_FAILURE_EXCEPTION_MESSAGE = "Failed to execute workflow";
+
     /**
      * The interval (in msec) between the "heartbeat" notifications sent for active workflows. Workflows are considered active when they are
      * running or paused, or in the transitional states in-between.
@@ -149,7 +152,7 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
         try {
             performStartOnExecutionController(workflowExecutionInformation.getWorkflowExecutionHandle());
         } catch (ExecutionControllerException | RemoteOperationException e) {
-            throw new WorkflowExecutionException("Failed to execute workflow", e);
+            throw new WorkflowExecutionException(WF_EXECUTION_FAILURE_EXCEPTION_MESSAGE, e);
         }
         return workflowExecutionInformation;
     }

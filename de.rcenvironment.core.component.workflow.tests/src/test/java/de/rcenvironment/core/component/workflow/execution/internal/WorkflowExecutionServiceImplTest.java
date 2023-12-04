@@ -93,38 +93,63 @@ public class WorkflowExecutionServiceImplTest {
 
         builder.verifyAllDependencies();
     }
-    // TODO dicuss with Alex, if needed
-//    @Test
-//    public void whenControllingWorkflow_thenWorkflowControllerIsCalled()
-//        throws WorkflowExecutionException, ExecutionControllerException, RemoteOperationException {
-//        final LogicalNodeId localNodeId = localNodeId();
-//
-//        final Map<String, String> authTokens = new HashMap<>();
-//
-//        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
-//        description.setControllerNode(localNodeId);
-//
-//        final WorkflowExecutionContext context = new WorkflowExecutionContextImpl(executionIdentifier(), description);
-//        context.setNodeIdentifierStartedExecution(localNodeId);
-//
-//        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
-//        final WorkflowExecutionServiceImpl service = builder
-//            .withLocalNodeId(localNodeId)
-//            .expectAuthorizationTokenAcquisition(isEmpty(), authTokens)
-//            .expectControllerServiceCreation(localNodeId)
-//            .expectLocalControllerCreation(localNodeId, context, authTokens)
-////            .expectStartOnController(localNodeId, executionIdentifier())
-//            .build();
-//
-//        final WorkflowExecutionInformation info = service.start(context);
-//
-////        service.pause(info.getWorkflowExecutionHandle());
-////        service.resume(info.getWorkflowExecutionHandle());
-////        service.cancel(info.getWorkflowExecutionHandle());
-////        service.dispose(info.getWorkflowExecutionHandle());
-//
-////        builder.verifyAllDependencies();
-//    }
+
+    @Test
+    public void whenStartWorkflowExecutionThrowsExecutionControllerException()
+        throws WorkflowExecutionException, ExecutionControllerException, RemoteOperationException {
+        final LogicalNodeId localNodeId = localNodeId();
+
+        final Map<String, String> authTokens = new HashMap<>();
+
+        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+        description.setControllerNode(localNodeId);
+
+        final WorkflowExecutionContext context = new WorkflowExecutionContextImpl(executionIdentifier(), description);
+        context.setNodeIdentifierStartedExecution(localNodeId);
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .withLocalNodeId(localNodeId)
+            .expectAuthorizationTokenAcquisition(isEmpty(), authTokens)
+            .expectControllerServiceCreation(localNodeId)
+            .expectLocalControllerCreation(localNodeId, context, authTokens)
+            .expectThrowingExecutionControllerExceptionWhenStartOnController(localNodeId, executionIdentifier())
+            .build();
+
+        exceptionRule.expect(WorkflowExecutionException.class);
+        exceptionRule.expectMessage(WorkflowExecutionServiceImpl.WF_EXECUTION_FAILURE_EXCEPTION_MESSAGE);
+        service.start(context);
+
+
+    }
+
+    @Test
+    public void whenStartWorkflowExecutionThrowsRemoteOperationException()
+        throws WorkflowExecutionException, ExecutionControllerException, RemoteOperationException {
+        final LogicalNodeId localNodeId = localNodeId();
+
+        final Map<String, String> authTokens = new HashMap<>();
+
+        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+        description.setControllerNode(localNodeId);
+
+        final WorkflowExecutionContext context = new WorkflowExecutionContextImpl(executionIdentifier(), description);
+        context.setNodeIdentifierStartedExecution(localNodeId);
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .withLocalNodeId(localNodeId)
+            .expectAuthorizationTokenAcquisition(isEmpty(), authTokens)
+            .expectControllerServiceCreation(localNodeId)
+            .expectLocalControllerCreation(localNodeId, context, authTokens)
+            .expectThrowingRemoteOperationExceptionWhenStartOnController(localNodeId, executionIdentifier())
+            .build();
+
+        exceptionRule.expect(WorkflowExecutionException.class);
+        exceptionRule.expectMessage(WorkflowExecutionServiceImpl.WF_EXECUTION_FAILURE_EXCEPTION_MESSAGE);
+        service.start(context);
+
+    }
 
     @Test
     public void whenWorkflowHostIsRemote_thenWorkflowControllerIsRemote()
@@ -299,6 +324,32 @@ public class WorkflowExecutionServiceImplTest {
             .expectControllerServiceCreationAndComponentVisibilityVerification(localNodeId, componentRefs)
             .build();
 
+        service.validateRemoteWorkflowControllerVisibilityOfComponents(description);
+    }
+
+    @Test
+    public void whenVailidatingRemoteWorkflowControllerVisibilityExceptionIsThrown() throws WorkflowExecutionException {
+
+        final LogicalNodeId localNodeId = localNodeId();
+        final WorkflowNode node = workflowNode();
+
+        final WorkflowDescriptionMock description = new WorkflowDescriptionMock(workflowIdentifier());
+        description.setControllerNode(localNodeId);
+        description.addNode(node);
+
+        List<String> componentRefs = new ArrayList<>();
+        componentRefs.add(StringUtils.escapeAndConcat("workflowNodeIdentifier", "identifierWithVersion", "localNodeId"));
+
+        List<WorkflowNode> nodes = new ArrayList<WorkflowNode>();
+        nodes.add(node);
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .expectControllerServiceVisibilityVerificationThrowsException(localNodeId, componentRefs, description, nodes)
+            .build();
+
+//        exceptionRule.expect(RemoteOperationException.class);
+//        exceptionRule.expectMessage("any message");
         service.validateRemoteWorkflowControllerVisibilityOfComponents(description);
     }
 

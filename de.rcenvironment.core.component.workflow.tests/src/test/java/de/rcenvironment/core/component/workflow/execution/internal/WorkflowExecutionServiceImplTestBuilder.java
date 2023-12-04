@@ -8,6 +8,7 @@
 
 package de.rcenvironment.core.component.workflow.execution.internal;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -151,6 +152,21 @@ class WorkflowExecutionServiceImplTestBuilder {
         return this;
     }
 
+    public WorkflowExecutionServiceImplTestBuilder expectThrowingExecutionControllerExceptionWhenStartOnController(
+        LogicalNodeId localNodeId,
+        String executionId) throws ExecutionControllerException, RemoteOperationException {
+        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerServiceMock(localNodeId);
+        expectThrowsExecutionControllerExceptionWhenCallOnController(controllerService::performStart, executionId);
+        return this;
+    }
+
+    public WorkflowExecutionServiceImplTestBuilder expectThrowingRemoteOperationExceptionWhenStartOnController(LogicalNodeId localNodeId,
+        String executionId) throws ExecutionControllerException, RemoteOperationException {
+        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerServiceMock(localNodeId);
+        expectThrowsRemoteOperationExceptionWhenCallOnController(controllerService::performStart, executionId);
+        return this;
+    }
+
     // TODO dicuss with Alex, if needed
 //    public WorkflowExecutionServiceImplTestBuilder expectStartOnController(LogicalNodeId localNodeId, String executionId) {
 //        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerService(localNodeId);
@@ -201,6 +217,18 @@ class WorkflowExecutionServiceImplTestBuilder {
 
     }
 
+    private void expectThrowsExecutionControllerExceptionWhenCallOnController(ControllerMethod method, String executionId)
+        throws ExecutionControllerException, RemoteOperationException {
+        method.accept(executionId);
+        EasyMock.expectLastCall().andThrow(new ExecutionControllerException("any message"));
+    }
+
+    private void expectThrowsRemoteOperationExceptionWhenCallOnController(ControllerMethod method, String executionId)
+        throws ExecutionControllerException, RemoteOperationException {
+        method.accept(executionId);
+        EasyMock.expectLastCall().andThrow(new RemoteOperationException("any message"));
+    }
+
     public WorkflowExecutionServiceImplTestBuilder expectControllerServiceCreationAndComponentVisibilityVerification(
         LogicalNodeId targetNode, List<String> componentRefs) {
         EasyMock
@@ -209,6 +237,24 @@ class WorkflowExecutionServiceImplTestBuilder {
                 final RemotableWorkflowExecutionControllerService controllerService =
                     EasyMock.createNiceMock(RemotableWorkflowExecutionControllerService.class);
                 EasyMock.expect(controllerService.verifyComponentVisibility(componentRefs)).andStubReturn(new HashMap<>());
+                EasyMock.replay(controllerService);
+                return controllerService;
+            });
+
+        return this;
+    }
+
+    public WorkflowExecutionServiceImplTestBuilder expectControllerServiceVisibilityVerificationThrowsException(
+        LogicalNodeId targetNode, List<String> componentRefs, WorkflowDescriptionMock description, List<WorkflowNode> nodes) {
+        EasyMock
+            .expect(communicationService.getRemotableService(RemotableWorkflowExecutionControllerService.class, targetNode))
+            .andStubAnswer(() -> {
+                final RemotableWorkflowExecutionControllerService controllerService =
+                    EasyMock.createNiceMock(RemotableWorkflowExecutionControllerService.class);
+                EasyMock.expect(controllerService.verifyComponentVisibility(componentRefs))
+                    .andThrow(new RemoteOperationException("any message"));
+                EasyMock.expect(description.getWorkflowNodes()).andStubReturn(new ArrayList<>(nodes));
+//                EasyMock.expect
                 EasyMock.replay(controllerService);
                 return controllerService;
             });
