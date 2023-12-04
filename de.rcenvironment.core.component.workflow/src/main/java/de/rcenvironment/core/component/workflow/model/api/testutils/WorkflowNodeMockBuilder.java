@@ -134,9 +134,7 @@ public class WorkflowNodeMockBuilder {
             return description;
         });
 
-        EasyMock.expect(node.getComponentIdentifierWithVersion()).andStubAnswer(() -> {
-            return "identifierWithVersion";
-        });
+        EasyMock.expect(node.getComponentIdentifierWithVersion()).andStubAnswer(() -> "identifierWithVersion");
 
         EasyMock.replay(node);
         return node;
