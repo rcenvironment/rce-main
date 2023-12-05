@@ -124,6 +124,11 @@ class WorkflowExecutionServiceImplTestBuilder {
         return expectControllerCreation(targetNodeId, context, authTokens, false);
     }
 
+    public WorkflowExecutionServiceImplTestBuilder expectLocalControllerCreationThrowsRemoteOperationException(LogicalNodeId targetNodeId,
+        WorkflowExecutionContext context, Map<String, String> authTokens) throws WorkflowExecutionException, RemoteOperationException {
+        return expectControllerCreationThrowsRemoteOperationException(targetNodeId, context, authTokens, false);
+    }
+
     public WorkflowExecutionServiceImplTestBuilder expectRemoteControllerCreation(LogicalNodeId targetNodeId,
         WorkflowExecutionContext context, Map<String, String> authTokens) {
         return expectControllerCreation(targetNodeId, context, authTokens, true);
@@ -142,6 +147,18 @@ class WorkflowExecutionServiceImplTestBuilder {
         } catch (WorkflowExecutionException | RemoteOperationException e) {
             // Will not be thrown, as we only call this method on a mock
         }
+
+        return this;
+    }
+
+    private WorkflowExecutionServiceImplTestBuilder expectControllerCreationThrowsRemoteOperationException(LogicalNodeId targetNodeId,
+        WorkflowExecutionContext context,
+        Map<String, String> authTokens, boolean isRemote) throws WorkflowExecutionException, RemoteOperationException {
+        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerServiceMock(targetNodeId);
+
+        EasyMock
+            .expect(controllerService.createExecutionController(context, authTokens, isRemote))
+            .andThrow(new RemoteOperationException("any message"));
 
         return this;
     }

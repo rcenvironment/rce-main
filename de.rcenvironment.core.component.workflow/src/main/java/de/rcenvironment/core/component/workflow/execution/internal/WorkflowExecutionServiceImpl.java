@@ -322,7 +322,7 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
         try {
             returnValue = startWorkflowExecutionInternal(wfExeCtx);
         } catch (RemoteOperationException e) {
-            throw new WorkflowExecutionException("Failed to execute workflow", e);
+            throw new WorkflowExecutionException(WF_EXECUTION_FAILURE_EXCEPTION_MESSAGE, e);
         }
         log.workflowStarted(wfExeCtx.getWorkflowOriginDisplayName(), returnValue);
 
