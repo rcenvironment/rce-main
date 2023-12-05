@@ -3,15 +3,19 @@ RCE 10.5.0 (November 21, 2023)
 # Tool/Workflow Integration
 
 - Added name length validation for component names of integrated tools and workflows
-- The context menu entry 'Edit selected Workflow Integration' in the Workflow Editor is now disabled if the workflow integration was renamed
+- The context menu entry 'Edit selected Workflow Integration' in the Workflow Editor is now 
+  disabled if the workflow integration was renamed
 
 # Components
 
 - Evaluation Memory Component: Added a validator for the tolerance value configuration
 - Optimizer Component: Added a validator for boundary values
-- Output Writer Component: The 'Timestamp at workflow start' placeholder is now consistent for all Output Writers within a workflow
-- Output Writer Component: Validation results of the 'Add target for simple data types' dialog are now displayed within the dialog
-- Database Component: There is no MySQL JDBC (database) connector shipped with RCE anymore; The User Guide now explains how to install it if necessary
+- Output Writer Component: The 'Timestamp at workflow start' placeholder is now consistent for 
+  all Output Writers within a workflow
+- Output Writer Component: Validation results of the 'Add target for simple data types' dialog 
+  are now displayed within the dialog
+- Database Component: There is no MySQL JDBC (database) connector shipped with RCE anymore; 
+  the User Guide now explains how to install it if necessary
 
 # GUI
 
@@ -20,7 +24,9 @@ RCE 10.5.0 (November 21, 2023)
 
 # Security
 
-- Adressed a potentially significant security vulnerability in ActiveMQ (CVE-2023-46604) that affects RCE server ports for default ("local network") connections; Upgrading all servers that accept network connections (e.g. "relays") is strongly recommended
+- Adressed a potentially significant security vulnerability in ActiveMQ (CVE-2023-46604) 
+  that affects default ("local network") connections; upgrading all installations is strongly 
+  recommended, in particular servers that accept network connections (e.g. "relays")
 
 # Third-party Library Upgrades
 
@@ -50,10 +56,13 @@ RCE 10.5.0 (November 21, 2023)
 
 # Bugfixes
 
-- Fixed a bug where configurations of specific and response settings of the Optimizer component were not persisted
+- Fixed a bug where configurations of specific and response settings of the Optimizer component 
+  were not persisted
 - Fixed a bug where registering a "Workflow as Component" with a long component name would fail
-- Fixed a bug in the Workflow Data Browser where references to already deleted files in the data management were not disabled
-- Fixed a NPE that occured when trying to open a tool integration configuration from the context menu of a remote component in the component palette
+- Fixed a bug in the Workflow Data Browser where references to already deleted files in the data 
+  management were not disabled
+- Fixed a NPE that occured when trying to open a tool integration configuration from the context 
+  menu of a remote component in the component palette
 - Fixed a NPE that could occur when editing a selected tool integration configuration
 
 
@@ -61,11 +70,13 @@ RCE 10.4.1 (April 13, 2023)
 
 # Script Component
 
-- Fixed a bug that caused an error when running the Script component with longer scripts using the Python Agent function.
+- Fixed a bug that caused an error when running the Script component with longer scripts using 
+  the Python Agent function.
 
 # Workflow as Component
 
-- Fixed a bug that prevented 'Workflow as Component' components from running when the component was integrated from the command line.
+- Fixed a bug that prevented 'Workflow as Component' components from running when the component 
+  was integrated from the command line.
 
 # Optimizer Component
 

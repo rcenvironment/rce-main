@@ -2,19 +2,27 @@ RCE is a distributed, workflow-driven integration environment.
 It is used by engineers and scientists to analyze, optimize, and design complex systems (e.g., aircraft, ships, or satellites).
 Using RCE, they can combine their specialized design and simulation tools into distributed workflows.
 
-Software website: [https://rcenvironment.de](https://rcenvironment.de)
+The main project website is [https://rcenvironment.de/](https://rcenvironment.de/).
 
 ##### Issue Tracker
 
-See the [main issue tracker](https://mantis.sc.dlr.de/roadmap_page.php) for the complete set of issues and an up-to-date roadmap.
-It is currently read-only.
-Please use the [GitHub issue tracker](https://github.com/rcenvironment/rce/issues) to report new issues.
+The primary issue tracking and roadmap planning for RCE's development is currently done internally at the 
+[DLR Institute for Software Technology](https://www.dlr.de/sc), where the majority of development work takes place.
+Please use this [GitHub issue tracker](https://github.com/rcenvironment/rce-main/issues) to report new issues and suggestions.
+We will review them and integrate them into our internal roadmap.
+
+Please note that there is also a [previous issue tracker](https://github.com/rcenvironment/rce/issues), which is maintained 
+for historical completeness, but should not be used for new issues anymore.
+
+##### Contributing
+
+Code contributions in this repository are welcome; a contributor's license agreement (CLA) is being prepared.
 
 ##### Changelog
 
-The most relevant changes and new features in each release are listed on [this page](https://github.com/rcenvironment/rce/releases).
-Similar information for older releases is available [here](https://github.com/rcenvironment/rce/wiki/Changelog-Overview).
-For a more detailed, but also more technical list of changes, see the [main issue tracker](https://mantis.sc.dlr.de/changelog_page.php).
+The changes and new features in recent releases (10.4.0+) are listed on [this page](https://github.com/rcenvironment/rce-main/releases).
+Changelogs for older releases (up to 10.4.0) are listed in [this repository](https://github.com/rcenvironment/rce/releases).
+Similar information for very old releases (up to 8.3.0) is available [here](https://github.com/rcenvironment/rce/wiki/Changelog-Overview).
 
 ##### Get RCE (as a ready-to-run software)
 
@@ -22,7 +30,8 @@ For Windows, a simple .zip file is provided to set up both client and server ins
 
 On Linux, .deb/.rpm packages as well as a simple .zip file are provided to set up both client and server installations.
 
-[Download latest release](https://software.dlr.de/updates/rce/10.x/products/standard/releases/latest/) | [Update site of latest release](https://software.dlr.de/updates/rce/10.x/repositories/standard/releases/latest/)
+[Installation packages for the latest release](https://software.dlr.de/updates/rce/10.x/products/standard/releases/latest/) | 
+[Update site for the latest release](https://software.dlr.de/updates/rce/10.x/repositories/standard/releases/latest/)
 
 ##### License
 
