@@ -24,11 +24,13 @@ import de.rcenvironment.core.communication.api.PlatformService;
 import de.rcenvironment.core.communication.common.LogicalNodeId;
 import de.rcenvironment.core.communication.common.ResolvableNodeId;
 import de.rcenvironment.core.component.execution.api.ExecutionControllerException;
+import de.rcenvironment.core.component.workflow.api.WorkflowConstants;
 import de.rcenvironment.core.component.workflow.execution.api.ExecutionAuthorizationTokenService;
 import de.rcenvironment.core.component.workflow.execution.api.RemotableWorkflowExecutionControllerService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContext;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionException;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionInformation;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowState;
 import de.rcenvironment.core.component.workflow.execution.impl.WorkflowExecutionInformationImpl;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowNode;
 import de.rcenvironment.core.notification.DistributedNotificationService;
@@ -36,6 +38,8 @@ import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
 import junit.framework.AssertionFailedError;
 
 class WorkflowExecutionServiceImplTestBuilder {
+
+    private static final String ERROR_MESSAGE = "any message";
 
     private final WorkflowExecutionServiceImpl service = new WorkflowExecutionServiceImpl();
 
@@ -158,7 +162,7 @@ class WorkflowExecutionServiceImplTestBuilder {
 
         EasyMock
             .expect(controllerService.createExecutionController(context, authTokens, isRemote))
-            .andThrow(new RemoteOperationException("any message"));
+            .andThrow(new RemoteOperationException(ERROR_MESSAGE));
 
         return this;
     }
@@ -237,13 +241,13 @@ class WorkflowExecutionServiceImplTestBuilder {
     private void expectThrowsExecutionControllerExceptionWhenCallOnController(ControllerMethod method, String executionId)
         throws ExecutionControllerException, RemoteOperationException {
         method.accept(executionId);
-        EasyMock.expectLastCall().andThrow(new ExecutionControllerException("any message"));
+        EasyMock.expectLastCall().andThrow(new ExecutionControllerException(ERROR_MESSAGE));
     }
 
     private void expectThrowsRemoteOperationExceptionWhenCallOnController(ControllerMethod method, String executionId)
         throws ExecutionControllerException, RemoteOperationException {
         method.accept(executionId);
-        EasyMock.expectLastCall().andThrow(new RemoteOperationException("any message"));
+        EasyMock.expectLastCall().andThrow(new RemoteOperationException(ERROR_MESSAGE));
     }
 
     public WorkflowExecutionServiceImplTestBuilder expectControllerServiceCreationAndComponentVisibilityVerification(
@@ -269,13 +273,18 @@ class WorkflowExecutionServiceImplTestBuilder {
                 final RemotableWorkflowExecutionControllerService controllerService =
                     EasyMock.createNiceMock(RemotableWorkflowExecutionControllerService.class);
                 EasyMock.expect(controllerService.verifyComponentVisibility(componentRefs))
-                    .andThrow(new RemoteOperationException("any message"));
-                EasyMock.expect(description.getWorkflowNodes()).andStubReturn(new ArrayList<>(nodes));
-//                EasyMock.expect
+                    .andThrow(new RemoteOperationException(ERROR_MESSAGE));
+                EasyMock.expect(description.getWorkflowNodes()).andStubReturn(new ArrayList<WorkflowNode>());
                 EasyMock.replay(controllerService);
                 return controllerService;
             });
 
+        return this;
+    }
+
+    public WorkflowExecutionServiceImplTestBuilder expectNotificationServiceSendNotification() {
+        notificationService.send(WorkflowConstants.STATE_NOTIFICATION_ID + "identifier", WorkflowState.IS_ALIVE.name());
+        EasyMock.expectLastCall();
         return this;
     }
 

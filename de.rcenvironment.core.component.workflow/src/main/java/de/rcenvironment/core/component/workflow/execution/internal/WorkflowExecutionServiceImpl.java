@@ -266,7 +266,7 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
         return communicationService.getRemotableService(RemotableWorkflowExecutionControllerService.class, node);
     }
 
-    private void sendHeartbeatForActiveWorkflows() {
+    void sendHeartbeatForActiveWorkflows() {
         Set<WorkflowExecutionInformation> wfExeInfoSnapshot = getWorkflowExecutionInformation();
         for (WorkflowExecutionInformation wfExeInfo : wfExeInfoSnapshot) {
             String wfExeId = wfExeInfo.getExecutionIdentifier();

@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import org.easymock.EasyMock;
 import org.hamcrest.CoreMatchers;
@@ -40,6 +42,7 @@ import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionI
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowState;
 import de.rcenvironment.core.component.workflow.execution.headless.internal.HeadlessWorkflowExecutionContextMock;
 import de.rcenvironment.core.component.workflow.execution.impl.WorkflowExecutionContextImpl;
+import de.rcenvironment.core.component.workflow.execution.impl.WorkflowExecutionInformationImpl;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowDescription;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowNode;
 import de.rcenvironment.core.component.workflow.model.api.testutils.WorkflowNodeMockBuilder;
@@ -390,14 +393,15 @@ public class WorkflowExecutionServiceImplTest {
     @Test
     public void whenGetLocalWorkflowExecutionInformations() throws ExecutionControllerException, RemoteOperationException {
 
-        final RemotableWorkflowExecutionControllerService controllerService = controllerService();
+        final RemotableWorkflowExecutionControllerService controllerService = controllerService(Optional.empty());
 
         final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
             .bindWorkflowExecutionControllerService(controllerService)
             .build();
 
-        service.getLocalWorkflowExecutionInformations();
+        Set<WorkflowExecutionInformation> actualSet = service.getLocalWorkflowExecutionInformations();
+        assertEquals(1, actualSet.size());
     }
 
     @Test
@@ -411,9 +415,58 @@ public class WorkflowExecutionServiceImplTest {
             .build();
 
         exceptionRule.expect(IllegalStateException.class);
-        exceptionRule.expectMessage("Failed to get local workflow execution information");
-
+        exceptionRule.expectMessage("Failed to get local workflow execution information;");
         service.getLocalWorkflowExecutionInformations();
+    }
+
+    @Test
+    public void whenSendHeartBeatForActiveWorkflowsAndWorkflowStateIsCancelingAfterFailed()
+        throws ExecutionControllerException, RemoteOperationException {
+
+        final RemotableWorkflowExecutionControllerService controllerService =
+            controllerService(Optional.of(WorkflowState.CANCELING_AFTER_FAILED));
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .bindWorkflowExecutionControllerService(controllerService)
+            .expectNotificationServiceSendNotification()
+            .build();
+
+        service.sendHeartbeatForActiveWorkflows();
+        builder.verifyAllDependencies();
+    }
+
+    @Test
+    public void whenSendHeartBeatForActiveWorkflowsAndWorkflowStateIsAny() throws ExecutionControllerException, RemoteOperationException {
+
+        final RemotableWorkflowExecutionControllerService controllerService =
+            controllerService(Optional.of(WorkflowState.PAUSING));
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .bindWorkflowExecutionControllerService(controllerService)
+            .expectNotificationServiceSendNotification()
+            .build();
+
+        service.sendHeartbeatForActiveWorkflows();
+        builder.verifyAllDependencies();
+    }
+
+    // TODO log mocken und aufruf prüfen
+    @Test
+    public void whenSendHeartBeatForActiveWorkflowsAndControllerServiceThrowsException()
+        throws ExecutionControllerException, RemoteOperationException {
+
+        final RemotableWorkflowExecutionControllerService controllerService =
+            controllerServiceThrowsException();
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .bindWorkflowExecutionControllerService(controllerService)
+            .build();
+
+        service.sendHeartbeatForActiveWorkflows();
+
     }
 
     private static String workflowIdentifier() {
@@ -438,13 +491,26 @@ public class WorkflowExecutionServiceImplTest {
         return localNodeId;
     }
 
-
-    private static RemotableWorkflowExecutionControllerService controllerService()
+    private static RemotableWorkflowExecutionControllerService controllerService(Optional<WorkflowState> state)
         throws ExecutionControllerException, RemoteOperationException {
+
+        final LogicalNodeId localNodeId = localNodeId();
+        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+        description.setControllerNode(localNodeId);
+        final HeadlessWorkflowExecutionContextMock context = new HeadlessWorkflowExecutionContextMock(executionIdentifier(), description);
+
         final RemotableWorkflowExecutionControllerService controllerService =
             EasyMock.createMock(RemotableWorkflowExecutionControllerService.class);
 
-        EasyMock.expect(controllerService.getWorkflowExecutionInformations()).andStubReturn(new HashSet<>());
+        Collection<WorkflowExecutionInformation> set = new HashSet<WorkflowExecutionInformation>();
+        WorkflowExecutionInformationImpl info = new WorkflowExecutionInformationImpl(context);
+        if (state.isPresent()) {
+            info.setWorkflowState(state.get());
+        }
+        info.setIdentifier("identifier");
+        set.add(info);
+
+        EasyMock.expect(controllerService.getWorkflowExecutionInformations()).andStubReturn(set);
         EasyMock.replay(controllerService);
         return controllerService;
     }
