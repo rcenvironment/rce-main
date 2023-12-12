@@ -77,7 +77,12 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
      */
     private static final int ACTIVE_WORKFLOW_HEARTBEAT_NOTIFICATION_INTERVAL_MSEC = 6 * 1000;
 
-    private final WorkflowExecutionServiceLog log = new WorkflowExecutionServiceLog();
+    // !Removed final modifier for testing purposes only!
+    // The modifier of this variable was changed to add the setLog() method to ensure good test coverage for a major overhaul of the
+    // Workflow Engine. After this work is completed, the variable should be changed back to private final and the setLog method must be
+    // removed.
+    // Dec. 2023, Kathrin Schaffert
+    private WorkflowExecutionServiceLog log = new WorkflowExecutionServiceLog();
 
     private PlatformService platformService;
 
@@ -90,7 +95,7 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
     private RemotableWorkflowExecutionControllerService wfExeCtrlService;
 
     private MetaDataService metaDataService;
-    
+
     private ExecutionAuthorizationTokenService authorizationTokenService;
 
     private WorkflowExecutionInformationCache workflowExecutionInformationCache = new WorkflowExecutionInformationCache(
@@ -266,6 +271,10 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
         return communicationService.getRemotableService(RemotableWorkflowExecutionControllerService.class, node);
     }
 
+    // !Visibility "package" for testing purposes only!
+    // The visibility of this method has been changed to package to ensure a good test coverage for a major overhaul of the Workflow Engine.
+    // After this work is completed, the method should be changed back to private.
+    // Dec. 2023, Kathrin Schaffert
     void sendHeartbeatForActiveWorkflows() {
         Set<WorkflowExecutionInformation> wfExeInfoSnapshot = getWorkflowExecutionInformation();
         for (WorkflowExecutionInformation wfExeInfo : wfExeInfoSnapshot) {
@@ -388,9 +397,18 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
     protected void bindMetaDataService(MetaDataService newService) {
         metaDataService = newService;
     }
-    
+
     @Reference
     protected void bindExecutionAuthorizationTokenService(ExecutionAuthorizationTokenService newService) {
         authorizationTokenService = newService;
     }
+
+    // !Method was added for testing purposes only!
+    // Method was added to ensure good test coverage for a major overhaul of the Workflow Engine.
+    // After this work is completed, the method should again be removed.
+    // Dec. 2023, Kathrin Schaffert
+    public void setLog(WorkflowExecutionServiceLog log) {
+        this.log = log;
+    }
+
 }

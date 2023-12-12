@@ -8,7 +8,6 @@
 
 package de.rcenvironment.core.component.workflow.execution.internal;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -251,12 +250,12 @@ class WorkflowExecutionServiceImplTestBuilder {
     }
 
     public WorkflowExecutionServiceImplTestBuilder expectControllerServiceCreationAndComponentVisibilityVerification(
-        LogicalNodeId targetNode, List<String> componentRefs) {
+        LogicalNodeId localNodeId, List<String> componentRefs) {
         EasyMock
-            .expect(communicationService.getRemotableService(RemotableWorkflowExecutionControllerService.class, targetNode))
+            .expect(communicationService.getRemotableService(RemotableWorkflowExecutionControllerService.class, localNodeId))
             .andStubAnswer(() -> {
                 final RemotableWorkflowExecutionControllerService controllerService =
-                    EasyMock.createNiceMock(RemotableWorkflowExecutionControllerService.class);
+                    getOrComputeControllerServiceMock(localNodeId);
                 EasyMock.expect(controllerService.verifyComponentVisibility(componentRefs)).andStubReturn(new HashMap<>());
                 EasyMock.replay(controllerService);
                 return controllerService;
@@ -266,15 +265,14 @@ class WorkflowExecutionServiceImplTestBuilder {
     }
 
     public WorkflowExecutionServiceImplTestBuilder expectControllerServiceVisibilityVerificationThrowsException(
-        LogicalNodeId targetNode, List<String> componentRefs, WorkflowDescriptionMock description, List<WorkflowNode> nodes) {
+        LogicalNodeId localNodeId, List<String> componentRefs) {
         EasyMock
-            .expect(communicationService.getRemotableService(RemotableWorkflowExecutionControllerService.class, targetNode))
+            .expect(communicationService.getRemotableService(RemotableWorkflowExecutionControllerService.class, localNodeId))
             .andStubAnswer(() -> {
                 final RemotableWorkflowExecutionControllerService controllerService =
-                    EasyMock.createNiceMock(RemotableWorkflowExecutionControllerService.class);
+                    getOrComputeControllerServiceMock(localNodeId);
                 EasyMock.expect(controllerService.verifyComponentVisibility(componentRefs))
                     .andThrow(new RemoteOperationException(ERROR_MESSAGE));
-                EasyMock.expect(description.getWorkflowNodes()).andStubReturn(new ArrayList<WorkflowNode>());
                 EasyMock.replay(controllerService);
                 return controllerService;
             });
@@ -294,13 +292,19 @@ class WorkflowExecutionServiceImplTestBuilder {
         return this;
     }
 
+    public WorkflowExecutionServiceImplTestBuilder setMockedLog(WorkflowExecutionServiceLog log) {
+        service.setLog(log);
+        return this;
+    }
+
     // TODO: ggf wieder umbenennen ohne Mock
     private RemotableWorkflowExecutionControllerService getOrComputeControllerServiceMock(LogicalNodeId localNodeId) {
         return this.controllerServices.computeIfAbsent(localNodeId,
             ignored -> EasyMock.createMock(RemotableWorkflowExecutionControllerService.class));
     }
 
-    // TODO dicuss with Alex, if needed
+
+    // TODO dicuss with Alex, if needed >> should be moved to a seperate file for Integration Tests
 //    private RemotableWorkflowExecutionControllerService getOrComputeControllerService(LogicalNodeId localNodeId) {
 //
 //        WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
@@ -308,4 +312,5 @@ class WorkflowExecutionServiceImplTestBuilder {
 //        return this.controllerServices.computeIfAbsent(localNodeId,
 //            ignored -> builder.build());
 //    }
+
 }

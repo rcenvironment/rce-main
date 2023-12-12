@@ -57,7 +57,7 @@ import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
  */
 public class WorkflowExecutionServiceImplTest {
 
-    private static final String LOCAL_NODE_ID = "localNodeId";
+    private static final String LOGICAL_NODE_ID = "logicalNodeId";
 
     private static final String WORKFLOW_NODE_IDENTIFIER = "workflowNodeIdentifier";
 
@@ -65,7 +65,6 @@ public class WorkflowExecutionServiceImplTest {
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
 
-    // TODO ggf wieder umbenennen ohne Mock
     @Test
     public void whenControllingWorkflow_thenWorkflowControllerMockIsCalled()
         throws WorkflowExecutionException, ExecutionControllerException, RemoteOperationException {
@@ -338,7 +337,6 @@ public class WorkflowExecutionServiceImplTest {
         service.waitForWorkflowTermination(context);
     }
 
-    // TODO add test that passes through catch clause
     @Test
     public void whenVailidatingRemoteWorkflowControllerVisibility() throws WorkflowExecutionException {
 
@@ -352,7 +350,7 @@ public class WorkflowExecutionServiceImplTest {
         description.addNode(node);
 
         List<String> componentRefs = new ArrayList<>();
-        componentRefs.add(StringUtils.escapeAndConcat(WORKFLOW_NODE_IDENTIFIER, "identifierWithVersion", LOCAL_NODE_ID));
+        componentRefs.add(StringUtils.escapeAndConcat(WORKFLOW_NODE_IDENTIFIER, "identifierWithVersion", LOGICAL_NODE_ID));
 
         final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
@@ -360,6 +358,8 @@ public class WorkflowExecutionServiceImplTest {
             .build();
 
         service.validateRemoteWorkflowControllerVisibilityOfComponents(description);
+
+        builder.verifyAllDependencies();
     }
 
     @Test
@@ -375,19 +375,17 @@ public class WorkflowExecutionServiceImplTest {
         description.addNode(node);
 
         List<String> componentRefs = new ArrayList<>();
-        componentRefs.add(StringUtils.escapeAndConcat(WORKFLOW_NODE_IDENTIFIER, "identifierWithVersion", LOCAL_NODE_ID));
-
-        List<WorkflowNode> nodes = new ArrayList<WorkflowNode>();
-        nodes.add(node);
+        componentRefs.add(StringUtils.escapeAndConcat(WORKFLOW_NODE_IDENTIFIER, "identifierWithVersion", LOGICAL_NODE_ID));
 
         final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
-            .expectControllerServiceVisibilityVerificationThrowsException(localNodeId, componentRefs, description, nodes)
+            .expectControllerServiceVisibilityVerificationThrowsException(localNodeId, componentRefs)
             .build();
 
-//        exceptionRule.expect(RemoteOperationException.class);
-//        exceptionRule.expectMessage("any message");
-        service.validateRemoteWorkflowControllerVisibilityOfComponents(description);
+        Map<String, String> result = service.validateRemoteWorkflowControllerVisibilityOfComponents(description);
+        builder.verifyAllDependencies();
+        assertEquals("Failed to query the selected workflow controller about component visibility: " + "any message",
+            result.get(WORKFLOW_NODE_IDENTIFIER));
     }
 
     @Test
@@ -407,7 +405,8 @@ public class WorkflowExecutionServiceImplTest {
     @Test
     public void whenGetLocalWorkflowExecutionInformationsThrowsException() throws ExecutionControllerException, RemoteOperationException {
 
-        final RemotableWorkflowExecutionControllerService controllerService = controllerServiceThrowsException();
+        final RemotableWorkflowExecutionControllerService controllerService =
+            controllerServiceThrowsException(new ExecutionControllerException("Test Exception"));
 
         final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
@@ -420,7 +419,7 @@ public class WorkflowExecutionServiceImplTest {
     }
 
     @Test
-    public void whenSendHeartBeatForActiveWorkflowsAndWorkflowStateIsCancelingAfterFailed()
+    public void whenSendHeartBeatForActiveWorkflowsForStateIsCancelingAfterFailed()
         throws ExecutionControllerException, RemoteOperationException {
 
         final RemotableWorkflowExecutionControllerService controllerService =
@@ -437,7 +436,7 @@ public class WorkflowExecutionServiceImplTest {
     }
 
     @Test
-    public void whenSendHeartBeatForActiveWorkflowsAndWorkflowStateIsAny() throws ExecutionControllerException, RemoteOperationException {
+    public void whenSendHeartBeatForActiveWorkflowsForStatePausing() throws ExecutionControllerException, RemoteOperationException {
 
         final RemotableWorkflowExecutionControllerService controllerService =
             controllerService(Optional.of(WorkflowState.PAUSING));
@@ -452,21 +451,25 @@ public class WorkflowExecutionServiceImplTest {
         builder.verifyAllDependencies();
     }
 
-    // TODO log mocken und aufruf prüfen
     @Test
     public void whenSendHeartBeatForActiveWorkflowsAndControllerServiceThrowsException()
         throws ExecutionControllerException, RemoteOperationException {
 
+        ExecutionControllerException e = new ExecutionControllerException("Test Exception");
+
         final RemotableWorkflowExecutionControllerService controllerService =
-            controllerServiceThrowsException();
+            controllerServiceThrowsException(e);
+
+        final WorkflowExecutionServiceLog log = log(e);
 
         final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
             .bindWorkflowExecutionControllerService(controllerService)
+            .setMockedLog(log)
             .build();
 
         service.sendHeartbeatForActiveWorkflows();
-
+        EasyMock.verify(log);
     }
 
     private static String workflowIdentifier() {
@@ -479,7 +482,7 @@ public class WorkflowExecutionServiceImplTest {
 
     private static LogicalNodeId localNodeId() {
         final LogicalNodeId localNodeId = EasyMock.createStrictMock(LogicalNodeId.class);
-        EasyMock.expect(localNodeId.getLogicalNodeIdString()).andStubReturn(LOCAL_NODE_ID);
+        EasyMock.expect(localNodeId.getLogicalNodeIdString()).andStubReturn(LOGICAL_NODE_ID);
         EasyMock.replay(localNodeId);
         return localNodeId;
     }
@@ -515,14 +518,23 @@ public class WorkflowExecutionServiceImplTest {
         return controllerService;
     }
 
-    private static RemotableWorkflowExecutionControllerService controllerServiceThrowsException()
+    private static RemotableWorkflowExecutionControllerService controllerServiceThrowsException(ExecutionControllerException e)
         throws ExecutionControllerException, RemoteOperationException {
         final RemotableWorkflowExecutionControllerService controllerService =
             EasyMock.createMock(RemotableWorkflowExecutionControllerService.class);
 
-        EasyMock.expect(controllerService.getWorkflowExecutionInformations()).andThrow(new ExecutionControllerException("Test Exception"));
+        EasyMock.expect(controllerService.getWorkflowExecutionInformations()).andThrow(e);
         EasyMock.replay(controllerService);
         return controllerService;
+    }
+
+    private static WorkflowExecutionServiceLog log(ExecutionControllerException e) {
+        WorkflowExecutionServiceLog log = EasyMock.createMock(WorkflowExecutionServiceLog.class);
+
+        log.fetchingLocalWorkflowExecutionInformationFailed(e);
+        EasyMock.expectLastCall();
+        EasyMock.replay(log);
+        return log;
     }
 
 }
