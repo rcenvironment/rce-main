@@ -29,6 +29,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import de.rcenvironment.core.communication.common.CommunicationException;
 import de.rcenvironment.core.communication.common.LogicalNodeId;
 import de.rcenvironment.core.component.api.ComponentUtils;
 import de.rcenvironment.core.component.execution.api.ExecutionControllerException;
@@ -38,6 +39,7 @@ import de.rcenvironment.core.component.workflow.execution.api.FinalWorkflowState
 import de.rcenvironment.core.component.workflow.execution.api.RemotableWorkflowExecutionControllerService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContext;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionException;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionHandle;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionInformation;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowState;
 import de.rcenvironment.core.component.workflow.execution.headless.internal.HeadlessWorkflowExecutionContextMock;
@@ -472,6 +474,65 @@ public class WorkflowExecutionServiceImplTest {
         EasyMock.verify(log);
     }
 
+    @Test
+    public void whenDeleteFromDataManagement() throws ExecutionControllerException, RemoteOperationException, CommunicationException {
+
+        final LogicalNodeId localNodeId = localNodeId();
+
+        WorkflowExecutionHandle handle = handle(localNodeId);
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .expectControllerServiceCreation(localNodeId)
+            .expectControllerServiceReturnsWorkflowDataManagementId(localNodeId)
+            .expectMetaDataServiceDeletesWorkflowRun(localNodeId)
+            .build();
+
+        service.deleteFromDataManagement(handle);
+        builder.verifyAllDependencies();
+    }
+
+    @Test
+    public void whenDeleteFromDataManagementThrowsFailedToDetermineStorageException()
+        throws ExecutionControllerException, RemoteOperationException, CommunicationException {
+
+        final LogicalNodeId localNodeId = localNodeId();
+
+        WorkflowExecutionHandle handle = handle(localNodeId);
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .expectControllerServiceCreation(localNodeId)
+            .expectControllerServiceThrowsException(localNodeId)
+            .build();
+
+        exceptionRule.expect(ExecutionControllerException.class);
+        exceptionRule.expectMessage("Failed to determine the storage id of workflow run " + "identifier");
+        service.deleteFromDataManagement(handle);
+        builder.verifyAllDependencies();
+    }
+
+    @Test
+    public void whenDeleteFromDataManagementThrowsCouldNotDeleteWorkflowException()
+        throws ExecutionControllerException, RemoteOperationException, CommunicationException {
+
+        final LogicalNodeId localNodeId = localNodeId();
+
+        WorkflowExecutionHandle handle = handle(localNodeId);
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .expectControllerServiceCreation(localNodeId)
+            .expectControllerServiceReturnsWorkflowDataManagementId(localNodeId)
+            .expectMetaDataServiceThrowsException(localNodeId)
+            .build();
+
+        exceptionRule.expect(ExecutionControllerException.class);
+        exceptionRule.expectMessage("Could not delete workflow run " + (long) 1234);
+        service.deleteFromDataManagement(handle);
+        builder.verifyAllDependencies();
+    }
+
     private static String workflowIdentifier() {
         return "workflowIdentifier";
     }
@@ -535,6 +596,15 @@ public class WorkflowExecutionServiceImplTest {
         EasyMock.expectLastCall();
         EasyMock.replay(log);
         return log;
+    }
+
+    private WorkflowExecutionHandle handle(LogicalNodeId localNodeId) {
+        WorkflowExecutionHandle handle = EasyMock.createMock(WorkflowExecutionHandle.class);
+
+        EasyMock.expect(handle.getLocation()).andStubReturn(localNodeId);
+        EasyMock.expect(handle.getIdentifier()).andStubReturn("identifier");
+        EasyMock.replay(handle);
+        return handle;
     }
 
 }
