@@ -59,6 +59,14 @@ import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
  */
 public class WorkflowExecutionServiceImplTest {
 
+    private static final String WF_EXEC_INFO_IDENTIFIER = "wfExecInfoIdentifier";
+
+    private static final String TEST_EXCEPTION = "Test Exception";
+
+    private static final long WORKFLOW_DATA_MANAGEMENT_ID = (long) 1234;
+
+    private static final String WORKFLOW_EXECUTION_HANDLE_IDENTIFIER = "handleIdentifier";
+
     private static final String LOGICAL_NODE_ID = "logicalNodeId";
 
     private static final String WORKFLOW_NODE_IDENTIFIER = "workflowNodeIdentifier";
@@ -352,7 +360,8 @@ public class WorkflowExecutionServiceImplTest {
         description.addNode(node);
 
         List<String> componentRefs = new ArrayList<>();
-        componentRefs.add(StringUtils.escapeAndConcat(WORKFLOW_NODE_IDENTIFIER, "identifierWithVersion", LOGICAL_NODE_ID));
+        componentRefs
+            .add(StringUtils.escapeAndConcat(WORKFLOW_NODE_IDENTIFIER, WorkflowNodeMockBuilder.IDENTIFIER_WITH_VERSION, LOGICAL_NODE_ID));
 
         final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
@@ -377,7 +386,8 @@ public class WorkflowExecutionServiceImplTest {
         description.addNode(node);
 
         List<String> componentRefs = new ArrayList<>();
-        componentRefs.add(StringUtils.escapeAndConcat(WORKFLOW_NODE_IDENTIFIER, "identifierWithVersion", LOGICAL_NODE_ID));
+        componentRefs
+            .add(StringUtils.escapeAndConcat(WORKFLOW_NODE_IDENTIFIER, WorkflowNodeMockBuilder.IDENTIFIER_WITH_VERSION, LOGICAL_NODE_ID));
 
         final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
@@ -386,7 +396,8 @@ public class WorkflowExecutionServiceImplTest {
 
         Map<String, String> result = service.validateRemoteWorkflowControllerVisibilityOfComponents(description);
         builder.verifyAllDependencies();
-        assertEquals("Failed to query the selected workflow controller about component visibility: " + "any message",
+        assertEquals(
+            WorkflowExecutionServiceImpl.ERROR_MESSAGE_COMPONENT_VISIBILITY_FAILURE + WorkflowExecutionServiceImplTestBuilder.ERROR_MESSAGE,
             result.get(WORKFLOW_NODE_IDENTIFIER));
     }
 
@@ -408,7 +419,7 @@ public class WorkflowExecutionServiceImplTest {
     public void whenGetLocalWorkflowExecutionInformationsThrowsException() throws ExecutionControllerException, RemoteOperationException {
 
         final RemotableWorkflowExecutionControllerService controllerService =
-            controllerServiceThrowsException(new ExecutionControllerException("Test Exception"));
+            controllerServiceThrowsException(new ExecutionControllerException(TEST_EXCEPTION));
 
         final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
@@ -416,7 +427,7 @@ public class WorkflowExecutionServiceImplTest {
             .build();
 
         exceptionRule.expect(IllegalStateException.class);
-        exceptionRule.expectMessage("Failed to get local workflow execution information;");
+        exceptionRule.expectMessage(WorkflowExecutionServiceImpl.ERROR_MESSAGE_FAILED_TO_GET_WF_EXEC_INFO + TEST_EXCEPTION);
         service.getLocalWorkflowExecutionInformations();
     }
 
@@ -430,7 +441,7 @@ public class WorkflowExecutionServiceImplTest {
         final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
             .bindWorkflowExecutionControllerService(controllerService)
-            .expectNotificationServiceSendNotification()
+            .expectNotificationServiceSendNotification(WF_EXEC_INFO_IDENTIFIER)
             .build();
 
         service.sendHeartbeatForActiveWorkflows();
@@ -446,7 +457,7 @@ public class WorkflowExecutionServiceImplTest {
         final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
             .bindWorkflowExecutionControllerService(controllerService)
-            .expectNotificationServiceSendNotification()
+            .expectNotificationServiceSendNotification(WF_EXEC_INFO_IDENTIFIER)
             .build();
 
         service.sendHeartbeatForActiveWorkflows();
@@ -457,7 +468,7 @@ public class WorkflowExecutionServiceImplTest {
     public void whenSendHeartBeatForActiveWorkflowsAndControllerServiceThrowsException()
         throws ExecutionControllerException, RemoteOperationException {
 
-        ExecutionControllerException e = new ExecutionControllerException("Test Exception");
+        ExecutionControllerException e = new ExecutionControllerException(TEST_EXCEPTION);
 
         final RemotableWorkflowExecutionControllerService controllerService =
             controllerServiceThrowsException(e);
@@ -484,7 +495,8 @@ public class WorkflowExecutionServiceImplTest {
         final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
             .expectControllerServiceCreation(localNodeId)
-            .expectControllerServiceReturnsWorkflowDataManagementId(localNodeId)
+            .expectControllerServiceReturnsWorkflowDataManagementId(localNodeId, WORKFLOW_EXECUTION_HANDLE_IDENTIFIER,
+                WORKFLOW_DATA_MANAGEMENT_ID)
             .expectMetaDataServiceDeletesWorkflowRun(localNodeId)
             .build();
 
@@ -503,11 +515,12 @@ public class WorkflowExecutionServiceImplTest {
         final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
             .expectControllerServiceCreation(localNodeId)
-            .expectControllerServiceThrowsException(localNodeId)
+            .expectControllerServiceThrowsException(localNodeId, WORKFLOW_EXECUTION_HANDLE_IDENTIFIER)
             .build();
 
         exceptionRule.expect(ExecutionControllerException.class);
-        exceptionRule.expectMessage("Failed to determine the storage id of workflow run " + "identifier");
+        exceptionRule.expectMessage(
+            WorkflowExecutionServiceImpl.ERROR_MESSAGE_FAILED_TO_DETERMINE_STORAGE_ID + WORKFLOW_EXECUTION_HANDLE_IDENTIFIER);
         service.deleteFromDataManagement(handle);
         builder.verifyAllDependencies();
     }
@@ -523,12 +536,13 @@ public class WorkflowExecutionServiceImplTest {
         final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
             .expectControllerServiceCreation(localNodeId)
-            .expectControllerServiceReturnsWorkflowDataManagementId(localNodeId)
+            .expectControllerServiceReturnsWorkflowDataManagementId(localNodeId, WORKFLOW_EXECUTION_HANDLE_IDENTIFIER,
+                WORKFLOW_DATA_MANAGEMENT_ID)
             .expectMetaDataServiceThrowsException(localNodeId)
             .build();
 
         exceptionRule.expect(ExecutionControllerException.class);
-        exceptionRule.expectMessage("Could not delete workflow run " + (long) 1234);
+        exceptionRule.expectMessage(WorkflowExecutionServiceImpl.ERROR_MESSAGE_COULD_NOT_DELETE_WORKFLOW_RUN + WORKFLOW_DATA_MANAGEMENT_ID);
         service.deleteFromDataManagement(handle);
         builder.verifyAllDependencies();
     }
@@ -571,7 +585,7 @@ public class WorkflowExecutionServiceImplTest {
         if (state.isPresent()) {
             info.setWorkflowState(state.get());
         }
-        info.setIdentifier("identifier");
+        info.setIdentifier(WF_EXEC_INFO_IDENTIFIER);
         set.add(info);
 
         EasyMock.expect(controllerService.getWorkflowExecutionInformations()).andStubReturn(set);
@@ -602,7 +616,7 @@ public class WorkflowExecutionServiceImplTest {
         WorkflowExecutionHandle handle = EasyMock.createMock(WorkflowExecutionHandle.class);
 
         EasyMock.expect(handle.getLocation()).andStubReturn(localNodeId);
-        EasyMock.expect(handle.getIdentifier()).andStubReturn("identifier");
+        EasyMock.expect(handle.getIdentifier()).andStubReturn(WORKFLOW_EXECUTION_HANDLE_IDENTIFIER);
         EasyMock.replay(handle);
         return handle;
     }

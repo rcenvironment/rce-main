@@ -40,7 +40,7 @@ import junit.framework.AssertionFailedError;
 
 class WorkflowExecutionServiceImplTestBuilder {
 
-    private static final String ERROR_MESSAGE = "any message";
+    static final String ERROR_MESSAGE = "any message";
 
     private final WorkflowExecutionServiceImpl service = new WorkflowExecutionServiceImpl();
 
@@ -269,23 +269,24 @@ class WorkflowExecutionServiceImplTestBuilder {
         return this;
     }
 
-    public WorkflowExecutionServiceImplTestBuilder expectNotificationServiceSendNotification() {
-        notificationService.send(WorkflowConstants.STATE_NOTIFICATION_ID + "identifier", WorkflowState.IS_ALIVE.name());
+    public WorkflowExecutionServiceImplTestBuilder expectNotificationServiceSendNotification(String identifier) {
+        notificationService.send(WorkflowConstants.STATE_NOTIFICATION_ID + identifier, WorkflowState.IS_ALIVE.name());
         EasyMock.expectLastCall();
         return this;
     }
 
-    public WorkflowExecutionServiceImplTestBuilder expectControllerServiceReturnsWorkflowDataManagementId(LogicalNodeId targetNode)
+    public WorkflowExecutionServiceImplTestBuilder expectControllerServiceReturnsWorkflowDataManagementId(LogicalNodeId targetNode,
+        String identifier, long id)
         throws ExecutionControllerException, RemoteOperationException {
         final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerServiceMock(targetNode);
-        EasyMock.expect(controllerService.getWorkflowDataManagementId("identifier")).andStubReturn((long) 1234);
+        EasyMock.expect(controllerService.getWorkflowDataManagementId(identifier)).andStubReturn(id);
         return this;
     }
 
-    public WorkflowExecutionServiceImplTestBuilder expectControllerServiceThrowsException(LogicalNodeId targetNode)
+    public WorkflowExecutionServiceImplTestBuilder expectControllerServiceThrowsException(LogicalNodeId targetNode, String identifier)
         throws ExecutionControllerException, RemoteOperationException {
         final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerServiceMock(targetNode);
-        EasyMock.expect(controllerService.getWorkflowDataManagementId("identifier"))
+        EasyMock.expect(controllerService.getWorkflowDataManagementId(identifier))
             .andThrow(new ExecutionControllerException(ERROR_MESSAGE));
         return this;
     }

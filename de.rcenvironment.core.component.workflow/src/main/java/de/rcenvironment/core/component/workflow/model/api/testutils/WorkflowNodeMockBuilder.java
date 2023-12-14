@@ -34,6 +34,9 @@ import de.rcenvironment.core.component.workflow.model.api.WorkflowNodeIdentifier
  */
 public class WorkflowNodeMockBuilder {
 
+    /** Constant. */
+    public static final String IDENTIFIER_WITH_VERSION = "identifierWithVersion";
+
     private final WorkflowNode node = EasyMock.createMock(WorkflowNode.class);
     
     private final Map<String, EndpointDefinition> inputDefinitions = new HashMap<>();
@@ -134,7 +137,7 @@ public class WorkflowNodeMockBuilder {
             return description;
         });
 
-        EasyMock.expect(node.getComponentIdentifierWithVersion()).andStubAnswer(() -> "identifierWithVersion");
+        EasyMock.expect(node.getComponentIdentifierWithVersion()).andStubAnswer(() -> IDENTIFIER_WITH_VERSION);
 
         EasyMock.replay(node);
         return node;

@@ -56,20 +56,33 @@ import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
  * 
  * @author Doreen Seider
  * @author Robert Mischke
+ * @author Kathrin Schaffert (little refactoring)
  */
 @Component
 public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
 
+    static final String ERROR_MESSAGE_COMPONENT_VISIBILITY_FAILURE =
+        "Failed to query the selected workflow controller about component visibility: ";
+
     /** Exception Message. */
-    public static final String WORKFLOW_INTERRUPTED_EXCEPTION_MESSAGE =
+    static final String ERROR_MESSAGE_FAILED_TO_DETERMINE_STORAGE_ID = "Failed to determine the storage id of workflow run ";
+
+    /** Exception Message. */
+    static final String ERROR_MESSAGE_FAILED_TO_GET_WF_EXEC_INFO = "Failed to get local workflow execution information; cause: ";
+
+    /** Exception Message. */
+    static final String ERROR_MESSAGE_COULD_NOT_DELETE_WORKFLOW_RUN = "Could not delete workflow run ";
+
+    /** Exception Message. */
+    static final String WORKFLOW_INTERRUPTED_EXCEPTION_MESSAGE =
         "Received interruption signal while waiting for workflow to terminate";
 
     /** Exception Message. */
-    public static final String FINAL_STATE_UNKNOWN_EXCEPTION_MESSAGE =
+    static final String FINAL_STATE_UNKNOWN_EXCEPTION_MESSAGE =
         "Most likely because the connection to the workflow host node was interupted. See logs for more details.";
 
     /** Exception Message. */
-    public static final String WF_EXECUTION_FAILURE_EXCEPTION_MESSAGE = "Failed to execute workflow";
+    static final String WF_EXECUTION_FAILURE_EXCEPTION_MESSAGE = "Failed to execute workflow";
 
     /**
      * The interval (in msec) between the "heartbeat" notifications sent for active workflows. Workflows are considered active when they are
@@ -145,7 +158,7 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
             Map<String, String> result = new HashMap<>();
             for (WorkflowNode wfDescNode : wfDescription.getWorkflowNodes()) {
                 result.put(wfDescNode.getIdentifierAsObject().toString(),
-                    "Failed to query the selected workflow controller about component visibility: " + e.getMessage());
+                    ERROR_MESSAGE_COMPONENT_VISIBILITY_FAILURE + e.getMessage());
             }
             return result;
         }
@@ -225,13 +238,13 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
         try {
             wfDataManagementId = getWorkflowDataManagementId(handle);
         } catch (ExecutionControllerException | RemoteOperationException e) {
-            throw new ExecutionControllerException("Failed to determine the storage id of workflow run " + handle.getIdentifier(), e);
+            throw new ExecutionControllerException(ERROR_MESSAGE_FAILED_TO_DETERMINE_STORAGE_ID + handle.getIdentifier(), e);
         }
         try {
             // note: this relies on the current convention that the storage location is always the wf controller's location
             metaDataService.deleteWorkflowRun(wfDataManagementId, handle.getLocation());
         } catch (CommunicationException e) {
-            throw new ExecutionControllerException("Could not delete workflow run " + wfDataManagementId, e);
+            throw new ExecutionControllerException(ERROR_MESSAGE_COULD_NOT_DELETE_WORKFLOW_RUN + wfDataManagementId, e);
         }
     }
 
@@ -253,7 +266,7 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
             return new HashSet<>(wfExeCtrlService.getWorkflowExecutionInformations());
         } catch (ExecutionControllerException | RemoteOperationException e) {
             // should not happen as it is finally a local call and the ExecutionController are directly fetched before
-            throw new IllegalStateException("Failed to get local workflow execution information; cause: " + e.toString());
+            throw new IllegalStateException(ERROR_MESSAGE_FAILED_TO_GET_WF_EXEC_INFO + e.getMessage());
         }
     }
 
