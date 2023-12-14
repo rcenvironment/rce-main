@@ -501,6 +501,7 @@ public class WorkflowExecutionServiceImplTest {
             .build();
 
         service.deleteFromDataManagement(handle);
+        EasyMock.verify(handle);
         builder.verifyAllDependencies();
     }
 
@@ -522,7 +523,6 @@ public class WorkflowExecutionServiceImplTest {
         exceptionRule.expectMessage(
             WorkflowExecutionServiceImpl.ERROR_MESSAGE_FAILED_TO_DETERMINE_STORAGE_ID + WORKFLOW_EXECUTION_HANDLE_IDENTIFIER);
         service.deleteFromDataManagement(handle);
-        builder.verifyAllDependencies();
     }
 
     @Test
@@ -530,7 +530,6 @@ public class WorkflowExecutionServiceImplTest {
         throws ExecutionControllerException, RemoteOperationException, CommunicationException {
 
         final LogicalNodeId localNodeId = localNodeId();
-
         WorkflowExecutionHandle handle = handle(localNodeId);
 
         final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
@@ -544,6 +543,50 @@ public class WorkflowExecutionServiceImplTest {
         exceptionRule.expect(ExecutionControllerException.class);
         exceptionRule.expectMessage(WorkflowExecutionServiceImpl.ERROR_MESSAGE_COULD_NOT_DELETE_WORKFLOW_RUN + WORKFLOW_DATA_MANAGEMENT_ID);
         service.deleteFromDataManagement(handle);
+    }
+
+    @Test
+    public void whenGetWorkflowExecutionInformations() {
+
+        WorkflowExecutionInformationCache cache = cache();
+        
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .setMockedCache(cache)
+            .build();
+
+        service.getWorkflowExecutionInformations(false);
+        EasyMock.verify(cache);
+    }
+
+    @Test
+    public void whenGetWorkflowExecutionInformationsForceRefresh() {
+
+        WorkflowExecutionInformationCache cache = forceRefreshCache();
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .setMockedCache(cache)
+            .build();
+
+        service.getWorkflowExecutionInformations(true);
+        EasyMock.verify(cache);
+    }
+
+    @Test
+    public void whenGetWorkflowState() throws ExecutionControllerException, RemoteOperationException {
+
+        final LogicalNodeId localNodeId = localNodeId();
+        WorkflowExecutionHandle handle = handle(localNodeId);
+
+        final WorkflowExecutionServiceImplTestBuilder builder = new WorkflowExecutionServiceImplTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .expectControllerServiceCreation(localNodeId)
+            .expectControllerServiceReturnsWorkflowState(localNodeId, WORKFLOW_EXECUTION_HANDLE_IDENTIFIER)
+            .build();
+
+        service.getWorkflowState(handle);
+        EasyMock.verify(handle);
         builder.verifyAllDependencies();
     }
 
@@ -604,7 +647,7 @@ public class WorkflowExecutionServiceImplTest {
     }
 
     private static WorkflowExecutionServiceLog log(ExecutionControllerException e) {
-        WorkflowExecutionServiceLog log = EasyMock.createMock(WorkflowExecutionServiceLog.class);
+        WorkflowExecutionServiceLog log = EasyMock.createStrictMock(WorkflowExecutionServiceLog.class);
 
         log.fetchingLocalWorkflowExecutionInformationFailed(e);
         EasyMock.expectLastCall();
@@ -613,12 +656,30 @@ public class WorkflowExecutionServiceImplTest {
     }
 
     private WorkflowExecutionHandle handle(LogicalNodeId localNodeId) {
-        WorkflowExecutionHandle handle = EasyMock.createMock(WorkflowExecutionHandle.class);
+        WorkflowExecutionHandle handle = EasyMock.createStrictMock(WorkflowExecutionHandle.class);
 
         EasyMock.expect(handle.getLocation()).andStubReturn(localNodeId);
         EasyMock.expect(handle.getIdentifier()).andStubReturn(WORKFLOW_EXECUTION_HANDLE_IDENTIFIER);
         EasyMock.replay(handle);
         return handle;
+    }
+
+    private WorkflowExecutionInformationCache forceRefreshCache() {
+        WorkflowExecutionInformationCache cache = EasyMock.createStrictMock(WorkflowExecutionInformationCache.class);
+
+        cache.refreshCache();
+        EasyMock.expectLastCall();
+        EasyMock.expect(cache.getCachedWorkflowExecutionInformations()).andStubReturn(new HashSet<>());
+        EasyMock.replay(cache);
+        return cache;
+    }
+
+    private WorkflowExecutionInformationCache cache() {
+        WorkflowExecutionInformationCache cache = EasyMock.createStrictMock(WorkflowExecutionInformationCache.class);
+
+        EasyMock.expect(cache.getCachedWorkflowExecutionInformations()).andStubReturn(new HashSet<>());
+        EasyMock.replay(cache);
+        return cache;
     }
 
 }

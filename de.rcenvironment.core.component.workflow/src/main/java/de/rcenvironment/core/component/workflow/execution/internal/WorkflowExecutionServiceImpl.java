@@ -420,8 +420,16 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
     // Method was added to ensure good test coverage for a major overhaul of the Workflow Engine.
     // After this work is completed, the method should again be removed.
     // Dec. 2023, Kathrin Schaffert
-    public void setLog(WorkflowExecutionServiceLog log) {
+    void setLog(WorkflowExecutionServiceLog log) {
         this.log = log;
+    }
+
+    // !Method was added for testing purposes only!
+    // Method was added to ensure good test coverage for a major overhaul of the Workflow Engine.
+    // After this work is completed, the method should again be removed.
+    // Dec. 2023, Kathrin Schaffert
+    void setCache(WorkflowExecutionInformationCache cache) {
+        this.workflowExecutionInformationCache = cache;
     }
 
 }

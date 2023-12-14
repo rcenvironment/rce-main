@@ -304,6 +304,14 @@ class WorkflowExecutionServiceImplTestBuilder {
         return this;
     }
 
+    public WorkflowExecutionServiceImplTestBuilder expectControllerServiceReturnsWorkflowState(LogicalNodeId targetNode,
+        String identifier)
+        throws ExecutionControllerException, RemoteOperationException {
+        final RemotableWorkflowExecutionControllerService controllerService = getOrComputeControllerServiceMock(targetNode);
+        EasyMock.expect(controllerService.getWorkflowState(identifier)).andStubReturn(WorkflowState.CANCELLED);
+        return this;
+    }
+
     public WorkflowExecutionServiceImplTestBuilder bindWorkflowExecutionControllerService(
         RemotableWorkflowExecutionControllerService controllerService) {
         service.bindWorkflowExecutionControllerService(controllerService);
@@ -312,6 +320,11 @@ class WorkflowExecutionServiceImplTestBuilder {
 
     public WorkflowExecutionServiceImplTestBuilder setMockedLog(WorkflowExecutionServiceLog log) {
         service.setLog(log);
+        return this;
+    }
+
+    public WorkflowExecutionServiceImplTestBuilder setMockedCache(WorkflowExecutionInformationCache cache) {
+        service.setCache(cache);
         return this;
     }
 
