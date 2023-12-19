@@ -35,7 +35,6 @@
   "postScript" : "${out:present} = \"${dir:workingDir}/result\"",
   "preScript" : "",
   "toolDescription" : "",
-  "toolIconPath" : "../doalot/SirDoALot.png",
   "toolIntegrationVersion" : 1,
   "toolIntegratorE-Mail" : "",
   "toolIntegratorName" : "",

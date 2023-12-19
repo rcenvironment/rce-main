@@ -104,7 +104,7 @@
     <!-- Runtime View -->
    	<extension
          point="org.eclipse.ui.views">
-      <view icon="resources/optimizer16.png"
+      <view icon="platform:/plugin/de.rcenvironment.components.optimizer.common/resources/optimizer16.png"
             allowMultiple="true"
             class="de.rcenvironment.components.optimizer.gui.view.OptimizerView"
             id="de.rcenvironment.components.optimizer.gui.view.OptimizerView"

@@ -35,7 +35,7 @@ This file describes the directory structure of /src/test/resources and explains 
 	      ../configuration/integration/common/doalot
 	    - Copy the configuration.json from /src/test/resources/workflows_manual/files/ToolIntegration/configuration.json into the
 	      new doalot folder
-	    - Create a folder "doalot" in your .../<RCE workspace>/<launch config name> folder and copy SirDoALot.png and SirDoALot.py there
+	    - Create a folder "doalot" in your .../<RCE workspace>/<launch config name> folder and copy SirDoALot.py there
 	    - Start RCE, copy the Toolintegration.wf into a project and run it
 	    - Check if workflow becomes FINISHED
 		- Check if there are no error log messages in Workflow Console View
