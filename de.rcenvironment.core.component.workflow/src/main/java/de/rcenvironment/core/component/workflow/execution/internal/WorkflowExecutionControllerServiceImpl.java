@@ -65,6 +65,7 @@ import de.rcenvironment.core.utils.incubator.ServiceRegistry;
  * 
  * @author Doreen Seider
  * @author Robert Mischke
+ * @author Kathrin Schaffert (little refactoring)
  */
 @Component
 public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflowExecutionControllerService {
@@ -117,8 +118,7 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
                 + "not declared as workflow host: %s", wfExeCtx.getNodeId()));
         }
         // TODO use global ServiceRegistryAcccess instance once available
-        WorkflowExecutionController workflowController =
-            new WorkflowExecutionControllerImpl(wfExeCtx, ServiceRegistry.createAccessFor(this));
+        WorkflowExecutionController workflowController = createWorkflowExecutionController(wfExeCtx);
         workflowController.setComponentExecutionAuthTokens(executionAuthTokens);
 
         final String executionId = wfExeCtx.getExecutionIdentifier();
@@ -135,6 +135,10 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
         EventLog.append(eventLogEntry);
 
         return workflowExecutionInformation;
+    }
+
+    WorkflowExecutionControllerImpl createWorkflowExecutionController(WorkflowExecutionContext wfExeCtx) {
+        return new WorkflowExecutionControllerImpl(wfExeCtx, ServiceRegistry.createAccessFor(this));
     }
 
     @Override
@@ -335,7 +339,7 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
     }
 
     // TODO there is no real point of registering the controllers at the OSGi service registry - simply use a map instead? -- misc_ro
-    private void registerExecutionController(WorkflowExecutionController workflowController, final String executionId) {
+    void registerExecutionController(WorkflowExecutionController workflowController, final String executionId) {
         Dictionary<String, String> properties = new Hashtable<String, String>();
         properties.put(ExecutionConstants.EXECUTION_ID_OSGI_PROP_KEY, executionId);
         ServiceRegistration<?> serviceRegistration = bundleContext.registerService(
