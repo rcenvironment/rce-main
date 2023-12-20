@@ -1,7 +1,7 @@
 /*
  * Copyright 2006-2023 DLR, Germany
  * 
- * All rights reserved
+ * SPDX-License-Identifier: EPL-1.0
  * 
  * https://rcenvironment.de/
  */
