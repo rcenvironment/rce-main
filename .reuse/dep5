@@ -7,7 +7,7 @@ Copyright: None
 License: CC0-1.0
 Comment: Exclusion of version control files; note that some of these patterns are for files that may only exist in a checkout
 
-Files: de.rcenvironment.*/*/MANIFEST.MF
+Files: de.rcenvironment*/*/MANIFEST.MF
 Copyright: DLR
 License: EPL-1.0
 Comment: preliminary
@@ -27,22 +27,22 @@ Copyright: DLR
 License: EPL-1.0
 Comment: preliminary
 
-Files: de.rcenvironment.*/pom.xml de.rcenvironment/maven/*/pom.xml
+Files: de.rcenvironment*/pom.xml
 Copyright: DLR
 License: EPL-1.0
 Comment: preliminary
 
-Files: de.rcenvironment.*/.classpath
+Files: de.rcenvironment*/.classpath
 Copyright: DLR
 License: EPL-1.0
 Comment: preliminary
 
-Files: de.rcenvironment/.project de.rcenvironment.*/.project
+Files: de.rcenvironment*/.project
 Copyright: DLR
 License: EPL-1.0
 Comment: preliminary
 
-Files: de.rcenvironment.*/build.properties
+Files: de.rcenvironment*/build.properties
 Copyright: DLR
 License: EPL-1.0
 Comment: preliminary
@@ -77,17 +77,26 @@ Copyright: DLR
 License: CC0-1.0
 Comment: preliminary
 
+Files: de.rcenvironment.documentation.core/*.adoc
+Copyright: DLR
+License: CC0-1.0
+Comment: preliminary
+
 Files: de.rcenvironment.documentation.core/src/docbkx/*.xml
 Copyright: DLR
 License: CC-BY-4.0
+
+Files: de.rcenvironment.documentation.core/src/docbkx/*.xpr de.rcenvironment.documentation.core/src/docbkx/stylesheets/*.xsl 
+Copyright: DLR
+License: CC0-1.0
 
 Files: de.rcenvironment.documentation.core/src/asciidoc/*.ad
 Copyright: DLR
 License: CC-BY-4.0
 
-Files: de.rcenvironment.*.gui/help/*.xml
+Files: de.rcenvironment.*.gui/help/*.xml de.rcenvironment.*.gui.*/help/*.xml
 Copyright: DLR
-License: CC-BY-4.0
+License: CC0-1.0
 Comment: preliminary
 
 Files: de.rcenvironment.*.gui.*/help/src/docbkx/*.xml
@@ -95,23 +104,12 @@ Copyright: DLR
 License: CC-BY-4.0
 Comment: preliminary
 
-Files: de.rcenvironment.*.gui.help/help/*.xml
+Files: de.rcenvironment.*.gui.help/help/*.xml de.rcenvironment.*.gui.help/help/*.xsl de.rcenvironment.*.gui.help/help/*.html de.rcenvironment.*.gui.help/help/*.css 
 Copyright: DLR
 License: CC0-1.0
 Comment: preliminary
 
-Files: de.rcenvironment.*.gui.help/help/*.xsl
-Copyright: DLR
-License: CC0-1.0
-Comment: preliminary
-
-Files: de.rcenvironment.*.gui.help/help/*.html
-Copyright: DLR
-License: CC0-1.0
-Comment: preliminary
-
-Files: de.rcenvironment.*.gui.help/help/*.css
-Copyright: DLR
+Files: de.rcenvironment.core.gui.help/resources/docbkx/*.xsl de.rcenvironment.core.gui.help/resources/docbkx/*.xml
 License: CC0-1.0
 Comment: preliminary
 
@@ -140,5 +138,17 @@ Copyright: DLR
 License: EPL-1.0
 
 Files: de.rcenvironment.filesets.configuration.samples.feature/root_files/examples/configuration/*.sample
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.scripting/src/main/resources/resources/*.py
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.filesets.extras.win32.feature/root_files/extras/*.bat de.rcenvironment.filesets.extras.linux.feature/root_files/extras/*.sh
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.filesets.integration.tools.templates.cpacs.feature/root_files/integration/tools/templates/*.json
 Copyright: DLR
 License: CC0-1.0
