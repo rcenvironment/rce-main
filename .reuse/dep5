@@ -81,7 +81,52 @@ Files: de.rcenvironment.documentation.core/src/docbkx/*.xml
 Copyright: DLR
 License: CC-BY-4.0
 
+de.rcenvironment.documentation.core/src/asciidoc/*.ad
+Copyright: DLR
+License: CC-BY-4.0
+
 Files: de.rcenvironment.*.gui/help/*.xml
 Copyright: DLR
 License: CC-BY-4.0
 Comment: preliminary
+
+Files: de.rcenvironment.*.gui.*/help/src/docbkx/*.xml
+Copyright: DLR
+License: CC-BY-4.0
+Comment: preliminary
+
+Files: de.rcenvironment.*.gui.help/help/*.xml
+Copyright: DLR
+License: CC0-1.0
+Comment: preliminary
+
+Files: de.rcenvironment.*.gui.help/help/*.xsl
+Copyright: DLR
+License: CC0-1.0
+Comment: preliminary
+
+Files: de.rcenvironment.*.gui.help/help/*.html
+Copyright: DLR
+License: CC0-1.0
+Comment: preliminary
+
+Files: de.rcenvironment.*.gui.help/help/*.css
+Copyright: DLR
+License: CC0-1.0
+Comment: preliminary
+
+Files: de.rcenvironment/doc/meta/release_changelogs/*.md
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.components.*.execution/src/main/resources/resources/*.json
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.*/messages.properties
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.*/plugin.*
+Copyright: DLR
+License: EPL-1.0
