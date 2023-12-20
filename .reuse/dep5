@@ -153,3 +153,18 @@ License: EPL-1.0
 Files: de.rcenvironment.filesets.integration.tools.templates.cpacs.feature/root_files/integration/tools/templates/*.json
 Copyright: DLR
 License: CC0-1.0
+
+Files: de.rcenvironment.core.component.integration.cpacs/resources/*.xslt
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.core.component.integration/src/main/resources/*.txt
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.datamanagement/src/main/resources/*.xml de.rcenvironment.core.datamanagement/src/main/resources/*.txt
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.gui.introduction/content/*.html de.rcenvironment.core.gui.introduction/content/*.css de.rcenvironment.core.gui.introduction/content/*.jsonCopyright: DLR
+License: CC0-1.0
