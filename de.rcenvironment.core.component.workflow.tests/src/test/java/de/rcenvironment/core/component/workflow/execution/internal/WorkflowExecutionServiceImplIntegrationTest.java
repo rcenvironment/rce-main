@@ -10,9 +10,11 @@ package de.rcenvironment.core.component.workflow.execution.internal;
 
 import static de.rcenvironment.core.utils.testing.CollectionMatchers.isEmpty;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import de.rcenvironment.core.communication.common.LogicalNodeId;
@@ -32,7 +34,7 @@ import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
 public class WorkflowExecutionServiceImplIntegrationTest extends WorkflowExecutionServiceImplTestHelper {
 
     @Test
-    public void whenStartPauseResumeCancelDisposeIsCalledOnWorkflowExecutionService()
+    public void whenControllingWorkflowThenLocalWorkflowControllerIsCalled()
         throws WorkflowExecutionException, ExecutionControllerException, RemoteOperationException {
         final LogicalNodeId localNodeId = localNodeId();
 
@@ -47,7 +49,9 @@ public class WorkflowExecutionServiceImplIntegrationTest extends WorkflowExecuti
         final WorkflowExecutionServiceImplIntegrationTestBuilder builder =
             new WorkflowExecutionServiceImplIntegrationTestBuilder();
         final WorkflowExecutionServiceImpl service = ((WorkflowExecutionServiceImplIntegrationTestBuilder) builder
+            .withLocalNodeId(localNodeId)
             .expectAuthorizationTokenAcquisition(isEmpty(), authTokens))
+                .bindWorkflowExecutionControllerService(localNodeId)
                 .expectControllerServiceCreation(localNodeId, executionIdentifier())
                 .build();
 
@@ -56,6 +60,34 @@ public class WorkflowExecutionServiceImplIntegrationTest extends WorkflowExecuti
         service.resume(info.getWorkflowExecutionHandle());
         service.cancel(info.getWorkflowExecutionHandle());
         service.dispose(info.getWorkflowExecutionHandle());
+
+        builder.verifyAllDependencies();
+    }
+
+    @Test
+    public void whenWorkflowHostIsRemoteThenWorkflowControllerIsRemote()
+        throws ExecutionControllerException, RemoteOperationException, WorkflowExecutionException {
+        final LogicalNodeId localNodeId = localNodeId();
+        final LogicalNodeId remoteNodeId = remoteNodeId();
+
+        final Map<String, String> authTokens = new HashMap<>();
+
+        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+        description.setControllerNode(remoteNodeId);
+
+        final WorkflowExecutionContext context = new WorkflowExecutionContextImpl(executionIdentifier(), description);
+        context.setNodeIdentifierStartedExecution(localNodeId);
+
+        final WorkflowExecutionServiceImplIntegrationTestBuilder builder = new WorkflowExecutionServiceImplIntegrationTestBuilder();
+        final WorkflowExecutionServiceImpl service =
+            ((WorkflowExecutionServiceImplIntegrationTestBuilder) builder
+                .withLocalNodeId(localNodeId)
+                .expectAuthorizationTokenAcquisition(CoreMatchers.any(Collection.class), authTokens))
+                    .bindWorkflowExecutionControllerService(remoteNodeId)
+                    .expectControllerServiceCreation(remoteNodeId, executionIdentifier())
+                    .build();
+
+        service.start(context);
 
         builder.verifyAllDependencies();
     }

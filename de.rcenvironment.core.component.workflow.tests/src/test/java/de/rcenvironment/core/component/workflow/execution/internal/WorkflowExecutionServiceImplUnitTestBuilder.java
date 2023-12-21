@@ -12,13 +12,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.easymock.Capture;
-import org.easymock.CaptureType;
 import org.easymock.EasyMock;
 
 import de.rcenvironment.core.communication.common.CommunicationException;
 import de.rcenvironment.core.communication.common.LogicalNodeId;
-import de.rcenvironment.core.communication.common.ResolvableNodeId;
 import de.rcenvironment.core.component.execution.api.ExecutionControllerException;
 import de.rcenvironment.core.component.workflow.api.WorkflowConstants;
 import de.rcenvironment.core.component.workflow.execution.api.RemotableWorkflowExecutionControllerService;
@@ -68,17 +65,6 @@ class WorkflowExecutionServiceImplUnitTestBuilder extends WorkflowExecutionServi
         }
     }
 
-    WorkflowExecutionServiceImplUnitTestBuilder withLocalNodeId(LogicalNodeId localNodeId) {
-        EasyMock.expect(platformService.getLocalDefaultLogicalNodeId()).andStubReturn(localNodeId);
-
-        final Capture<ResolvableNodeId> matchesLocalInstanceArgument = Capture.newInstance(CaptureType.LAST);
-        EasyMock
-            .expect(platformService.matchesLocalInstance(EasyMock.capture(matchesLocalInstanceArgument)))
-            .andStubAnswer(() -> matchesLocalInstanceArgument.getValue().equals(localNodeId));
-
-        return this;
-    }
-
     public WorkflowExecutionServiceImplUnitTestBuilder expectControllerServiceCreation(LogicalNodeId targetNode) {
         final RemotableWorkflowExecutionControllerService controllerService = getControllerService(targetNode);
 
@@ -107,8 +93,12 @@ class WorkflowExecutionServiceImplUnitTestBuilder extends WorkflowExecutionServi
         return this;
     }
 
+    public WorkflowExecutionServiceImplUnitTestBuilder expectRemoteControllerCreation(LogicalNodeId targetNodeId,
+        WorkflowExecutionContext context, Map<String, String> authTokens) {
+        return expectControllerCreation(targetNodeId, context, authTokens, true);
+    }
 
-    private WorkflowExecutionServiceImplUnitTestBuilder expectControllerCreation(LogicalNodeId targetNodeId,
+    protected WorkflowExecutionServiceImplUnitTestBuilder expectControllerCreation(LogicalNodeId targetNodeId,
         WorkflowExecutionContext context,
         Map<String, String> authTokens, boolean isRemote) {
         final RemotableWorkflowExecutionControllerService controllerService = getControllerService(targetNodeId);
@@ -161,11 +151,6 @@ class WorkflowExecutionServiceImplUnitTestBuilder extends WorkflowExecutionServi
         return expectControllerCreation(targetNodeId, context, authTokens, false);
     }
 
-    public WorkflowExecutionServiceImplUnitTestBuilder expectRemoteControllerCreation(LogicalNodeId targetNodeId,
-        WorkflowExecutionContext context, Map<String, String> authTokens) {
-        return expectControllerCreation(targetNodeId, context, authTokens, true);
-    }
-
     private void expectCallOnController(ControllerMethod method, String executionId) {
         try {
             method.accept(executionId);
@@ -191,8 +176,6 @@ class WorkflowExecutionServiceImplUnitTestBuilder extends WorkflowExecutionServi
         expectThrowsRemoteOperationExceptionWhenCallOnController(controllerService::performStart, executionId);
         return this;
     }
-
-
 
     private void expectThrowsExecutionControllerExceptionWhenCallOnController(ControllerMethod method, String executionId)
         throws ExecutionControllerException, RemoteOperationException {

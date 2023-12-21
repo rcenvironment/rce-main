@@ -19,6 +19,7 @@ import org.hamcrest.Matcher;
 
 import de.rcenvironment.core.communication.api.CommunicationService;
 import de.rcenvironment.core.communication.api.PlatformService;
+import de.rcenvironment.core.communication.common.LogicalNodeId;
 import de.rcenvironment.core.communication.common.ResolvableNodeId;
 import de.rcenvironment.core.component.workflow.execution.api.ExecutionAuthorizationTokenService;
 import de.rcenvironment.core.component.workflow.execution.api.RemotableWorkflowExecutionControllerService;
@@ -60,6 +61,17 @@ abstract class WorkflowExecutionServiceImplTestBuilder {
     }
 
     protected abstract void replayAllServices();
+
+    WorkflowExecutionServiceImplTestBuilder withLocalNodeId(LogicalNodeId localNodeId) {
+        EasyMock.expect(platformService.getLocalDefaultLogicalNodeId()).andStubReturn(localNodeId);
+
+        final Capture<ResolvableNodeId> matchesLocalInstanceArgument = Capture.newInstance(CaptureType.LAST);
+        EasyMock
+            .expect(platformService.matchesLocalInstance(EasyMock.capture(matchesLocalInstanceArgument)))
+            .andStubAnswer(() -> matchesLocalInstanceArgument.getValue().equals(localNodeId));
+
+        return this;
+    }
 
     public WorkflowExecutionServiceImplTestBuilder expectAuthorizationTokenAcquisition(Matcher<?> expectedNodes,
         Map<String, String> authTokens) {

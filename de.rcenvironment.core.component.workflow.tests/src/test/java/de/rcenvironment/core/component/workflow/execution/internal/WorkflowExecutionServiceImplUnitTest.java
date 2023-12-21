@@ -89,8 +89,8 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
         final WorkflowExecutionServiceImplUnitTestBuilder builder = new WorkflowExecutionServiceImplUnitTestBuilder();
         final WorkflowExecutionServiceImpl service =
             ((WorkflowExecutionServiceImplUnitTestBuilder) builder
-            .expectAuthorizationTokenAcquisition(isEmpty(), authTokens))
-                    .withLocalNodeId(localNodeId)
+                .withLocalNodeId(localNodeId)
+                .expectAuthorizationTokenAcquisition(isEmpty(), authTokens))
                     .expectControllerServiceCreation(localNodeId)
                     .expectLocalControllerCreation(localNodeId, context, authTokens)
                     .expectStartOnController(localNodeId, executionIdentifier())
@@ -125,8 +125,8 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
         final WorkflowExecutionServiceImplUnitTestBuilder builder = new WorkflowExecutionServiceImplUnitTestBuilder();
         final WorkflowExecutionServiceImpl service =
             ((WorkflowExecutionServiceImplUnitTestBuilder) builder
+                .withLocalNodeId(localNodeId)
                 .expectAuthorizationTokenAcquisition(isEmpty(), authTokens))
-                    .withLocalNodeId(localNodeId)
                     .expectControllerServiceCreation(localNodeId)
                     .expectLocalControllerCreation(localNodeId, context, authTokens)
                     .expectThrowingExecutionControllerExceptionWhenStartOnController(localNodeId, executionIdentifier())
@@ -154,8 +154,8 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
         final WorkflowExecutionServiceImplUnitTestBuilder builder = new WorkflowExecutionServiceImplUnitTestBuilder();
         final WorkflowExecutionServiceImpl service =
             ((WorkflowExecutionServiceImplUnitTestBuilder) builder
+                .withLocalNodeId(localNodeId)
                 .expectAuthorizationTokenAcquisition(isEmpty(), authTokens))
-                    .withLocalNodeId(localNodeId)
                     .expectControllerServiceCreation(localNodeId)
                     .expectLocalControllerCreation(localNodeId, context, authTokens)
                     .expectThrowingRemoteOperationExceptionWhenStartOnController(localNodeId, executionIdentifier())
@@ -183,8 +183,8 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
         final WorkflowExecutionServiceImplUnitTestBuilder builder = new WorkflowExecutionServiceImplUnitTestBuilder();
         final WorkflowExecutionServiceImpl service =
             ((WorkflowExecutionServiceImplUnitTestBuilder) builder
+                .withLocalNodeId(localNodeId)
                 .expectAuthorizationTokenAcquisition(isEmpty(), authTokens))
-                    .withLocalNodeId(localNodeId)
                     .expectControllerServiceCreation(localNodeId)
                     .expectLocalControllerCreationThrowsRemoteOperationException(localNodeId, context, authTokens)
                     .build();
@@ -212,8 +212,8 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
         final WorkflowExecutionServiceImplUnitTestBuilder builder = new WorkflowExecutionServiceImplUnitTestBuilder();
         final WorkflowExecutionServiceImpl service =
             ((WorkflowExecutionServiceImplUnitTestBuilder) builder
+                .withLocalNodeId(localNodeId)
                 .expectAuthorizationTokenAcquisition(CoreMatchers.any(Collection.class), authTokens))
-                    .withLocalNodeId(localNodeId)
                     .expectControllerServiceCreation(remoteNodeId)
                     .expectRemoteControllerCreation(remoteNodeId, context, authTokens)
                     .expectStartOnController(remoteNodeId, executionIdentifier())
@@ -254,8 +254,8 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
         final WorkflowExecutionServiceImplUnitTestBuilder builder = new WorkflowExecutionServiceImplUnitTestBuilder();
         final WorkflowExecutionServiceImpl service =
             ((WorkflowExecutionServiceImplUnitTestBuilder) builder
+                .withLocalNodeId(localNodeId)
                 .expectAuthorizationTokenAcquisition(allOf(size(2), contains(localNode), contains(remoteNode)), authTokens))
-                    .withLocalNodeId(localNodeId)
                     .expectControllerServiceCreation(remoteNodeId)
                     .expectRemoteControllerCreation(remoteNodeId, context, authTokens)
                     .expectStartOnController(remoteNodeId, executionIdentifier())
@@ -593,13 +593,6 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
         service.getWorkflowState(handle);
         EasyMock.verify(handle);
         builder.verifyAllDependencies();
-    }
-
-    private static LogicalNodeId remoteNodeId() {
-        final LogicalNodeId localNodeId = EasyMock.createStrictMock(LogicalNodeId.class);
-        EasyMock.expect(localNodeId.getLogicalNodeIdString()).andStubReturn("remoteNodeId");
-        EasyMock.replay(localNodeId);
-        return localNodeId;
     }
 
     private static RemotableWorkflowExecutionControllerService controllerService(Optional<WorkflowState> state)
