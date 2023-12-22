@@ -109,7 +109,7 @@ Copyright: DLR
 License: CC0-1.0
 Comment: preliminary
 
-Files: de.rcenvironment.core.gui.help/resources/docbkx/*.xsl de.rcenvironment.core.gui.help/resources/docbkx/*.xml
+Files: de.rcenvironment.core.gui.help/resources/docbkx/*.xsl de.rcenvironment.core.gui.help/resources/docbkx/*.xml de.rcenvironment.core.gui.help/resources/docbkx/*.scenarios
 Copyright: DLR
 License: CC0-1.0
 Comment: preliminary
@@ -158,6 +158,10 @@ Files: de.rcenvironment.core.component.integration.cpacs/resources/*.xslt
 Copyright: DLR
 License: EPL-1.0
 
+Files: de.rcenvironment.core.gui.integration.toolintegration.cpacs/resources/*.json
+Copyright: DLR
+License: CC0-1.0
+
 Files: de.rcenvironment.core.component.integration/src/main/resources/*.txt
 Copyright: DLR
 License: CC0-1.0
@@ -166,5 +170,10 @@ Files: de.rcenvironment.core.datamanagement/src/main/resources/*.xml de.rcenviro
 Copyright: DLR
 License: CC0-1.0
 
-Files: de.rcenvironment.core.gui.introduction/content/*.html de.rcenvironment.core.gui.introduction/content/*.css de.rcenvironment.core.gui.introduction/content/*.jsonCopyright: DLR
+Files: de.rcenvironment.core.gui.introduction/content/*.html de.rcenvironment.core.gui.introduction/content/*.css de.rcenvironment.core.gui.introduction/content/*.json de.rcenvironment.core.gui.introduction/*.xml
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.monitoring/resources/*.json
+Copyright: DLR
 License: CC0-1.0
