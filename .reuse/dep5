@@ -17,6 +17,11 @@ Copyright: DLR
 License: EPL-1.0
 Comment: preliminary
 
+Files: de.rcenvironment*/fragment.xml
+Copyright: DLR
+License: EPL-1.0
+Comment: preliminary
+
 Files: de.rcenvironment.*/OSGI-INF/*
 Copyright: DLR
 License: EPL-1.0
@@ -259,5 +264,33 @@ Copyright: DLR
 License: CC0-1.0
 
 Files: de.rcenvironment.core.component.workflow.testworkflows/src/main/resources/cases/* de.rcenvironment.core.component.workflow.testworkflows/src/main/resources/*.json de.rcenvironment.core.component.workflow.testworkflows/src/main/resources/workflows/*.expected
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/*.json de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/*.json de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/workflows/Workflow Examples Project/*.xml de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/workflows/Workflow Examples Project/*.xsl
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.supplemental.testscriptrunner/README.txt
+Copyright: DLR
+License: CC-BY-4.0
+
+Files: de.rcenvironment.supplemental.testscriptrunner/src/main/resources/*.properties de.rcenvironment.supplemental.testscriptrunner/src/main/resources/*.json
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.mail.tests/src/test/resources/*.json
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.login.tests/src/test/resources/*.pem
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.gui.workflow/resources/*.exsd
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.core.gui.palette.tests/src/test/resources/*
 Copyright: DLR
 License: CC0-1.0
