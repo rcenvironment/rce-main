@@ -178,7 +178,7 @@ Files: de.rcenvironment.core.monitoring/resources/*.json
 Copyright: DLR
 License: CC0-1.0
 
-de.rcenvironment.components.optimizer.dakota.common/resources/doe/dakota/*.json de.rcenvironment.components.optimizer.dakota.common/resources/optimizer/dakota/*.json de.rcenvironment.components.optimizer.dakota.execution/resources/*.json de.rcenvironment.components.optimizer.dakota.execution/resources/*.sample
+Files: de.rcenvironment.components.optimizer.dakota.common/resources/doe/dakota/*.json de.rcenvironment.components.optimizer.dakota.common/resources/optimizer/dakota/*.json de.rcenvironment.components.optimizer.dakota.execution/resources/*.json de.rcenvironment.components.optimizer.dakota.execution/resources/*.sample
 Copyright: DLR
 License: EPL-1.0
 
@@ -190,7 +190,7 @@ Files: de.rcenvironment.components.excel.common.tests/externalFiles/*.xls de.rce
 Copyright: DLR
 License: CC0-1.0
 
-Files: de.rcenvironment.components.xml.merger.execution.tests/src/test/resources/*.xml de.rcenvironment.components.xml.merger.execution.tests/src/test/resources/*.xsl
+Files: de.rcenvironment.components.xml.merger.execution.tests/src/test/resources/*.xml de.rcenvironment.components.xml.merger.execution.tests/src/test/resources/*.xsl de.rcenvironment.core.component.xml.tests/src/test/resources/.xml
 Copyright: DLR
 License: CC0-1.0
 
@@ -203,5 +203,13 @@ Copyright: DLR
 License: CC0-1.0
 
 Files: de.rcenvironment.core.utils.incubator.tests/src/test/resources/*.xml de.rcenvironment.core.utils.incubator.tests/src/test/resources/*.xsd de.rcenvironment.core.utils.incubator.tests/src/test/resources/*.xsl
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.component.integration.tests/src/test/resources/TestTools.zip
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.filesets.extras.feature/root_files/examples/optimization_algorithm_api/*
 Copyright: DLR
 License: CC0-1.0
