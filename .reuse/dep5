@@ -106,12 +106,12 @@ Comment: preliminary
 
 Files: de.rcenvironment.*.gui.help/help/*.xml de.rcenvironment.*.gui.help/help/*.xsl de.rcenvironment.*.gui.help/help/*.html de.rcenvironment.*.gui.help/help/*.css 
 Copyright: DLR
-License: CC0-1.0
+License: CC-BY-4.0
 Comment: preliminary
 
 Files: de.rcenvironment.core.gui.help/resources/docbkx/*.xsl de.rcenvironment.core.gui.help/resources/docbkx/*.xml de.rcenvironment.core.gui.help/resources/docbkx/*.scenarios
 Copyright: DLR
-License: CC0-1.0
+License: CC-BY-4.0
 Comment: preliminary
 
 Files: de.rcenvironment/doc/meta/release_changelogs/*.md
@@ -122,7 +122,7 @@ Files: de.rcenvironment.components.*.execution/src/main/resources/resources/*.js
 Copyright: DLR
 License: EPL-1.0
 
-Files: de.rcenvironment.*/messages.properties
+Files: de.rcenvironment.*/messages.properties de.rcenvironment.*/images.properties
 Copyright: DLR
 License: EPL-1.0
 
@@ -166,6 +166,10 @@ Files: de.rcenvironment.core.component.integration/src/main/resources/*.txt
 Copyright: DLR
 License: CC0-1.0
 
+Files: de.rcenvironment.components.script.common/src/main/resources/resources/defaultScript.py
+Copyright: DLR
+License: CC0-1.0
+
 Files: de.rcenvironment.core.datamanagement/src/main/resources/*.xml de.rcenvironment.core.datamanagement/src/main/resources/*.txt
 Copyright: DLR
 License: CC0-1.0
@@ -178,7 +182,11 @@ Files: de.rcenvironment.core.monitoring/resources/*.json
 Copyright: DLR
 License: CC0-1.0
 
-Files: de.rcenvironment.components.optimizer.dakota.common/resources/doe/dakota/*.json de.rcenvironment.components.optimizer.dakota.common/resources/optimizer/dakota/*.json de.rcenvironment.components.optimizer.dakota.execution/resources/*.json de.rcenvironment.components.optimizer.dakota.execution/resources/*.sample
+Files: de.rcenvironment.components.optimizer.dakota.common/resources/doe/dakota/*.json de.rcenvironment.components.optimizer.dakota.common/resources/optimizer/dakota/*.json de.rcenvironment.components.optimizer.dakota.execution/resources/*.json de.rcenvironment.components.optimizer.dakota.execution/resources/*.sample de.rcenvironment.components.optimizer.common/resources/de.rcenvironment.components.optimizer.simulator.jar 
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.components.optimizer.generic.execution/resources/RCE_Optimizer_API.zip
 Copyright: DLR
 License: EPL-1.0
 
@@ -211,5 +219,45 @@ Copyright: DLR
 License: CC0-1.0
 
 Files: de.rcenvironment.filesets.extras.feature/root_files/examples/optimization_algorithm_api/*
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.components.cluster.execution/src/main/resources/resources/job.pbs
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.components.evaluationmemory.execution.tests/src/test/resources/*
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.components.script.execution.python.fragment/src/main/java/empty_dir.txt de.rcenvironment.components.optimizer.generic.execution/resources/example_profile/optimizer/example/source/generic_optimizer.py
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.communication.file.service.tests/src/test/resources/*.txt
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.communication.tests/src/test/resources/config-tests/*.json
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.component.integration.workflow/src/main/resources/configuration.json
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.core.component.tests/src/test/resources/*.json
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.component.workflow.tests/src/test/resources/*readme
+Copyright: DLR
+License: CC-BY-4.0
+
+Files: de.rcenvironment.core.component.workflow.tests/src/test/resources/*.json
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.component.workflow.testworkflows/src/main/resources/cases/* de.rcenvironment.core.component.workflow.testworkflows/src/main/resources/*.json de.rcenvironment.core.component.workflow.testworkflows/src/main/resources/workflows/*.expected
 Copyright: DLR
 License: CC0-1.0
