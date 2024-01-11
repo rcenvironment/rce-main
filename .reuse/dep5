@@ -118,7 +118,7 @@ Files: de.rcenvironment/doc/meta/release_changelogs/*.md
 Copyright: DLR
 License: CC0-1.0
 
-Files: de.rcenvironment.components.*.execution/src/main/resources/resources/*.json
+Files: de.rcenvironment.components.*.execution/src/main/resources/resources/*.json de.rcenvironment.components.*.execution/resources/*.json
 Copyright: DLR
 License: EPL-1.0
 
@@ -177,3 +177,29 @@ License: CC0-1.0
 Files: de.rcenvironment.core.monitoring/resources/*.json
 Copyright: DLR
 License: CC0-1.0
+
+de.rcenvironment.components.optimizer.dakota.common/resources/doe/dakota/*.json de.rcenvironment.components.optimizer.dakota.common/resources/optimizer/dakota/*.json de.rcenvironment.components.optimizer.dakota.execution/resources/*.json de.rcenvironment.components.optimizer.dakota.execution/resources/*.sample
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.core.component.workflow.tests/src/test/resources/workflows_manual/files/CPACSToolIntegration/*.xml de.rcenvironment.core.component.workflow.tests/src/test/resources/workflows_manual/files/ToolIntegration/*.py  de.rcenvironment.core.component.workflow.tests/src/test/resources/workflows_manual/files/*/configuration.json
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.components.excel.common.tests/externalFiles/*.xls de.rcenvironment.components.excel.common.tests/externalFiles/*.txt
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.components.xml.merger.execution.tests/src/test/resources/*.xml de.rcenvironment.components.xml.merger.execution.tests/src/test/resources/*.xsl
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.gui.wizards.exampleproject/templates/*.json de.rcenvironment.core.gui.wizards.exampleproject/templates/*.txt de.rcenvironment.core.gui.wizards.exampleproject/templates/*.xml de.rcenvironment.core.gui.wizards.exampleproject/templates/*.xsl
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.utils.common.tests/src/test/resources/*.xml de.rcenvironment.core.utils.common.tests/src/test/resources/*.xsl de.rcenvironment.core.utils.common.tests/src/test/resources/*.zip 
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.utils.incubator.tests/src/test/resources/*.xml de.rcenvironment.core.utils.incubator.tests/src/test/resources/*.xsd de.rcenvironment.core.utils.incubator.tests/src/test/resources/*.xsl
