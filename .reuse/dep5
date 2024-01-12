@@ -37,6 +37,11 @@ Copyright: DLR
 License: EPL-1.0
 Comment: preliminary
 
+Files: de.rcenvironment.core/maven/coreParent.pom
+Copyright: DLR
+License: EPL-1.0
+Comment: preliminary
+
 Files: de.rcenvironment*/.classpath
 Copyright: DLR
 License: EPL-1.0
@@ -48,6 +53,11 @@ License: EPL-1.0
 Comment: preliminary
 
 Files: de.rcenvironment*/build.properties
+Copyright: DLR
+License: EPL-1.0
+Comment: preliminary
+
+Files: de.rcenvironment.core/maven/utils/*.bat
 Copyright: DLR
 License: EPL-1.0
 Comment: preliminary
@@ -239,6 +249,10 @@ Files: de.rcenvironment.components.script.execution.python.fragment/src/main/jav
 Copyright: DLR
 License: CC0-1.0
 
+Files: de.rcenvironment.core.utils.incubator/src/main/resources/empty_dir.txt
+Copyright: DLR
+License: CC0-1.0
+
 Files: de.rcenvironment.core.communication.file.service.tests/src/test/resources/*.txt
 Copyright: DLR
 License: CC0-1.0
@@ -257,7 +271,7 @@ License: CC0-1.0
 
 Files: de.rcenvironment.core.component.workflow.tests/src/test/resources/*readme
 Copyright: DLR
-License: CC-BY-4.0
+License: CC0-1.0
 
 Files: de.rcenvironment.core.component.workflow.tests/src/test/resources/*.json
 Copyright: DLR
@@ -267,13 +281,13 @@ Files: de.rcenvironment.core.component.workflow.testworkflows/src/main/resources
 Copyright: DLR
 License: CC0-1.0
 
-Files: de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/*.json de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/*.json de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/workflows/Workflow Examples Project/*.xml de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/workflows/Workflow Examples Project/*.xsl
+Files: de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/*.json de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/*.json de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/workflows/Workflow Examples Project/*.xml de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/workflows/Workflow Examples Project/*.xsl de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/tools/*/docs/*.txt
 Copyright: DLR
 License: CC0-1.0
 
-Files: de.rcenvironment.supplemental.testscriptrunner/README.txt
+Files: de.rcenvironment.supplemental.testscriptrunner/README.txt de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/README.txt
 Copyright: DLR
-License: CC-BY-4.0
+License: CC0-1.0
 
 Files: de.rcenvironment.supplemental.testscriptrunner/src/main/resources/*.properties de.rcenvironment.supplemental.testscriptrunner/src/main/resources/*.json
 Copyright: DLR
@@ -283,14 +297,58 @@ Files: de.rcenvironment.core.mail.tests/src/test/resources/*.json
 Copyright: DLR
 License: CC0-1.0
 
-Files: de.rcenvironment.core.login.tests/src/test/resources/*.pem
+Files: de.rcenvironment.core.login.tests/src/test/resources/*.pem de.rcenvironment.core.datamanagement/src/test/resources/*.pem Files: de.rcenvironment.core.authentication.tests/src/test/resources/*.pem
 Copyright: DLR
 License: CC0-1.0
 
-Files: de.rcenvironment.core.gui.workflow/resources/*.exsd
+Files: de.rcenvironment.core.gui.workflow/resources/*.exsd de.rcenvironment.core.gui.datamanagement/schema/*.exsd
 Copyright: DLR
 License: EPL-1.0
 
 Files: de.rcenvironment.core.gui.palette.tests/src/test/resources/*
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.filesets.sql.connectors.mysql.feature/root_files/extras/database_connectors/README.txt
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.filesets.logging.default.feature/root_files/configuration/logging.xml
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.filesets.extras.feature/root_files/extras/mail/filter.json
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.utils.cluster.tests/src/test/resources/*
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.utils.common/src/main/resources/*.xslt
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.core.utils.ssh.tests/src/test-manual/java/*.properties.template
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.utils.executor.tests/src/test/resources/*.test.properties
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.components.script.execution.python.fragment/src/main/resources/resources/configuration_python.json
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.components.inputprovider.gui.tests/src/main/resources/sampleFile
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.components.optimizer.common/resources/optimizer/algorithms.json
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.configuration.tests/src/test/resources/configurationStore/minimal.json
 Copyright: DLR
 License: CC0-1.0
