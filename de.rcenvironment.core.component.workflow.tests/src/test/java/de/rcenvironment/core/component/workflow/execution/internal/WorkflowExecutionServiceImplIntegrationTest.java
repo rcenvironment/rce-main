@@ -15,7 +15,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hamcrest.CoreMatchers;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import de.rcenvironment.core.communication.common.LogicalNodeId;
 import de.rcenvironment.core.component.execution.api.ExecutionControllerException;
@@ -32,6 +34,10 @@ import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
  * @author Kathrin Schaffert
  */
 public class WorkflowExecutionServiceImplIntegrationTest extends WorkflowExecutionServiceImplTestHelper {
+
+    /** Rule for expecting an Exception during test run. */
+    @Rule
+    public ExpectedException exceptionRule = ExpectedException.none();
 
     @Test
     public void whenControllingWorkflowThenLocalWorkflowControllerIsCalled()
@@ -91,5 +97,62 @@ public class WorkflowExecutionServiceImplIntegrationTest extends WorkflowExecuti
 
         builder.verifyAllDependencies();
     }
+
+    @Test
+    public void whenStartWorkflowExecutionThrowsExecutionControllerException()
+        throws WorkflowExecutionException, ExecutionControllerException, RemoteOperationException {
+        final LogicalNodeId localNodeId = localNodeId();
+
+        final Map<String, String> authTokens = new HashMap<>();
+
+        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+        description.setControllerNode(localNodeId);
+
+        final WorkflowExecutionContext context = new WorkflowExecutionContextImpl(executionIdentifier(), description);
+        context.setNodeIdentifierStartedExecution(localNodeId);
+
+        final WorkflowExecutionServiceImplIntegrationTestBuilder builder = new WorkflowExecutionServiceImplIntegrationTestBuilder();
+        final WorkflowExecutionServiceImpl service =
+            ((WorkflowExecutionServiceImplIntegrationTestBuilder) builder
+                .withLocalNodeId(localNodeId)
+                .expectAuthorizationTokenAcquisition(isEmpty(), authTokens))
+                    .bindWorkflowExecutionControllerServiceThrowingExceptionWhenStartOnController(localNodeId, executionIdentifier())
+                    .expectControllerServiceCreation(localNodeId, executionIdentifier())
+                    .build();
+
+        exceptionRule.expect(WorkflowExecutionException.class);
+        exceptionRule.expectMessage(WorkflowExecutionServiceImpl.WF_EXECUTION_FAILURE_EXCEPTION_MESSAGE);
+        service.start(context);
+
+    }
+
+    @Test
+    public void whenWorkflowExecutionRequestIsRefused()
+        throws WorkflowExecutionException, ExecutionControllerException, RemoteOperationException {
+        final LogicalNodeId localNodeId = localNodeId();
+        final LogicalNodeId remoteNodeId = remoteNodeId();
+
+        final Map<String, String> authTokens = new HashMap<>();
+
+        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+        description.setControllerNode(remoteNodeId);
+
+        final WorkflowExecutionContext context = new WorkflowExecutionContextImpl(executionIdentifier(), description);
+        context.setNodeIdentifierStartedExecution(remoteNodeId);
+
+        final WorkflowExecutionServiceImplIntegrationTestBuilder builder = new WorkflowExecutionServiceImplIntegrationTestBuilder();
+        final WorkflowExecutionServiceImpl service =
+            ((WorkflowExecutionServiceImplIntegrationTestBuilder) builder
+                .withLocalNodeId(localNodeId)
+                .expectAuthorizationTokenAcquisition(isEmpty(), authTokens))
+                    .bindWorkflowExecutionControllerServiceRefusingRequest(remoteNodeId)
+                    .expectControllerServiceCreation(remoteNodeId, executionIdentifier())
+                    .build();
+
+        exceptionRule.expect(WorkflowExecutionException.class);
+        exceptionRule.expectMessage(WorkflowExecutionControllerServiceImpl.ERROR_MESSAGE_WF_EXECUTION_REFUSED + " " + context.getNodeId());
+        service.start(context);
+    }
+
 
 }

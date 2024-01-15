@@ -90,6 +90,11 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
         return this;
     }
 
+    public WorkflowExecutionControllerServiceImplTestBuilder expectWorkflowHostUnknown() {
+        EasyMock.expect(workflowHostService.getLogicalWorkflowHostNodes()).andStubReturn(new HashSet<>());
+        return this;
+    }
+
     public WorkflowExecutionControllerServiceImplTestBuilder expectExecCtrlUtilsServiceGetExecutionControllerIsCalled(String identifier) {
 
         try {
@@ -141,6 +146,20 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
     public WorkflowExecutionControllerServiceImplTestBuilder expectDisposeOnController() {
         executionController.dispose();
         EasyMock.expectLastCall();
+        return this;
+    }
+
+    public WorkflowExecutionControllerServiceImplTestBuilder expectExecCtrlUtilsServiceGetExecutionControllerThrowsException(
+        String identifier) {
+
+        try {
+            EasyMock
+                .expect(exeCtrlUtilsService.getExecutionController(WorkflowExecutionController.class, identifier,
+                    null))
+                .andThrow(new ExecutionControllerException("Test Error"));
+        } catch (ExecutionControllerException e) {
+            // Will never happen, since we call this method only on a mock
+        }
         return this;
     }
 

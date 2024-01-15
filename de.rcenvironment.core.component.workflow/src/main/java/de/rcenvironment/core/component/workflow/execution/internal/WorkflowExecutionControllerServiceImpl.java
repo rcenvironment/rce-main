@@ -70,6 +70,10 @@ import de.rcenvironment.core.utils.incubator.ServiceRegistry;
 @Component
 public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflowExecutionControllerService {
 
+    /** Exception Message. */
+    static final String ERROR_MESSAGE_WF_EXECUTION_REFUSED =
+        "Workflow execution request refused, as the requested instance is not declared as workflow host:";
+
     private BundleContext bundleContext;
 
     private WorkflowHostService workflowHostService;
@@ -114,8 +118,7 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
         if (calledFromRemote && !workflowHostService.getLogicalWorkflowHostNodes().contains(wfExeCtx.getNodeId())) {
             eventLogEntry.set(EventType.Attributes.SUCCESS, EventLogConstants.FALSE_VALUE);
             EventLog.append(eventLogEntry);
-            throw new WorkflowExecutionException(StringUtils.format("Workflow execution request refused, as the requested instance is "
-                + "not declared as workflow host: %s", wfExeCtx.getNodeId()));
+            throw new WorkflowExecutionException(StringUtils.format(ERROR_MESSAGE_WF_EXECUTION_REFUSED + " %s", wfExeCtx.getNodeId()));
         }
         // TODO use global ServiceRegistryAcccess instance once available
         WorkflowExecutionController workflowController = createWorkflowExecutionController(wfExeCtx);
