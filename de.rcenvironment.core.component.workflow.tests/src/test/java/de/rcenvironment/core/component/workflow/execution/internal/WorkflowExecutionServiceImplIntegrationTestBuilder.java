@@ -41,6 +41,13 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
         return this;
     }
 
+    public WorkflowExecutionServiceImplIntegrationTestBuilder bindWorkflowExecutionControllerServiceMockExpectingAllWorklfowStates(
+        LogicalNodeId targetNodeId) {
+        this.controllerService = getControllerServiceExpectingAllWorklfowStates(targetNodeId);
+        service.bindWorkflowExecutionControllerService(this.controllerService);
+        return this;
+    }
+
     public WorkflowExecutionServiceImplIntegrationTestBuilder expectControllerServiceCreation(LogicalNodeId targetNode, String identifier) {
         EasyMock
             .expect(communicationService.getRemotableService(RemotableWorkflowExecutionControllerService.class, targetNode))
@@ -57,6 +64,24 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
                 .expectWorkflowHostServiceGetLogicalWorkflowHostNodesIsCalled(targetNodeId)
                 .expectExecCtrlUtilsServiceGetExecutionControllerIsCalled(WorkflowExecutionServiceImplTestHelper.executionIdentifier())
                 .expectNotificationServiceSubscription()
+                .expectStartOnController()
+                .build();
+        return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
+    }
+
+    protected RemotableWorkflowExecutionControllerService getControllerServiceExpectingAllWorklfowStates(LogicalNodeId targetNodeId) {
+
+        WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
+        WorkflowExecutionControllerServiceImpl workflowExecutionControllerService =
+            builder
+                .expectWorkflowHostServiceGetLogicalWorkflowHostNodesIsCalled(targetNodeId)
+                .expectExecCtrlUtilsServiceGetExecutionControllerIsCalled(WorkflowExecutionServiceImplTestHelper.executionIdentifier())
+                .expectNotificationServiceSubscription()
+                .expectStartOnController()
+                .expectPauseOnController()
+                .expectResumeOnController()
+                .expectCancelOnController()
+                .expectDisposeOnController()
                 .build();
         return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
     }

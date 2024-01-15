@@ -46,7 +46,7 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
 
         public void verifyAllDependencies() {
             EasyMock.verify(workflowHostService, exeCtrlUtilsService, notificationService, communicationService,
-                distributedComponentKnowledgeService);
+                distributedComponentKnowledgeService, executionController);
         }
 
     }
@@ -65,6 +65,8 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
     private final DistributedComponentKnowledgeService distributedComponentKnowledgeService =
         EasyMock.createMock(DistributedComponentKnowledgeService.class);
 
+    private WorkflowExecutionControllerImpl executionController = EasyMock.createMock(WorkflowExecutionControllerImpl.class);
+
     public WorkflowExecutionControllerServiceImpl build() {
         service.bindWorkflowHostService(workflowHostService);
         service.bindLocalExecutionControllerUtilsService(exeCtrlUtilsService);
@@ -79,12 +81,7 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
 
     private void replayAllServices() {
         EasyMock.replay(workflowHostService, exeCtrlUtilsService, notificationService, communicationService,
-            distributedComponentKnowledgeService);
-    }
-
-    void verifyAllDependencies() {
-        EasyMock.replay(workflowHostService, exeCtrlUtilsService, notificationService, communicationService,
-            distributedComponentKnowledgeService);
+            distributedComponentKnowledgeService, executionController);
     }
 
     public WorkflowExecutionControllerServiceImplTestBuilder expectWorkflowHostServiceGetLogicalWorkflowHostNodesIsCalled(
@@ -95,13 +92,11 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
 
     public WorkflowExecutionControllerServiceImplTestBuilder expectExecCtrlUtilsServiceGetExecutionControllerIsCalled(String identifier) {
 
-        final WorkflowExecutionControllerImpl controller = EasyMock.createMock(WorkflowExecutionControllerImpl.class);
-
         try {
             EasyMock
                 .expect(exeCtrlUtilsService.getExecutionController(WorkflowExecutionController.class, identifier,
                     null))
-                .andStubReturn(controller);
+                .andStubReturn(executionController);
         } catch (ExecutionControllerException e) {
             // Will never happen, since we call this method only on a mock
         }
@@ -116,6 +111,36 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
         } catch (RemoteOperationException e) {
             // Will never happen, since we call this method only on a mock
         }
+        return this;
+    }
+
+    public WorkflowExecutionControllerServiceImplTestBuilder expectStartOnController() {
+        executionController.start();
+        EasyMock.expectLastCall();
+        return this;
+    }
+
+    public WorkflowExecutionControllerServiceImplTestBuilder expectPauseOnController() {
+        executionController.pause();
+        EasyMock.expectLastCall();
+        return this;
+    }
+
+    public WorkflowExecutionControllerServiceImplTestBuilder expectResumeOnController() {
+        executionController.resume();
+        EasyMock.expectLastCall();
+        return this;
+    }
+
+    public WorkflowExecutionControllerServiceImplTestBuilder expectCancelOnController() {
+        executionController.cancel();
+        EasyMock.expectLastCall();
+        return this;
+    }
+
+    public WorkflowExecutionControllerServiceImplTestBuilder expectDisposeOnController() {
+        executionController.dispose();
+        EasyMock.expectLastCall();
         return this;
     }
 

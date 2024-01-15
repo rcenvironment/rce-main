@@ -51,7 +51,7 @@ public class WorkflowExecutionServiceImplIntegrationTest extends WorkflowExecuti
         final WorkflowExecutionServiceImpl service = ((WorkflowExecutionServiceImplIntegrationTestBuilder) builder
             .withLocalNodeId(localNodeId)
             .expectAuthorizationTokenAcquisition(isEmpty(), authTokens))
-                .bindWorkflowExecutionControllerService(localNodeId)
+                .bindWorkflowExecutionControllerServiceMockExpectingAllWorklfowStates(localNodeId)
                 .expectControllerServiceCreation(localNodeId, executionIdentifier())
                 .build();
 
