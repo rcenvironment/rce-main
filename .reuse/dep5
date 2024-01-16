@@ -145,11 +145,11 @@ Files: de.rcenvironment.*/plugin.*
 Copyright: DLR
 License: EPL-1.0
 
-Files: de.rcenvironment.supplemental.testscriptrunner/src/main/assembly/*
+Files: de.rcenvironment.supplemental.testscriptrunner/src/main/assembly/* de.rcenvironment.supplemental.testscriptrunner/META-INF/services/*
 Copyright: DLR
 License: EPL-1.0
 
-Files: de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/*.feature
+Files: de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/*.feature de.rcenvironment.supplemental.testscriptrunner.tests/src/test/resources/scripts/*.feature
 Copyright: DLR
 License: EPL-1.0
 
