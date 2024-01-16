@@ -297,7 +297,7 @@ Files: de.rcenvironment.core.mail.tests/src/test/resources/*.json
 Copyright: DLR
 License: CC0-1.0
 
-Files: de.rcenvironment.core.login.tests/src/test/resources/*.pem de.rcenvironment.core.datamanagement/src/test/resources/*.pem Files: de.rcenvironment.core.authentication.tests/src/test/resources/*.pem
+Files: de.rcenvironment.core.login.tests/src/test/resources/*.pem de.rcenvironment.core.datamanagement/src/test/resources/*.pem de.rcenvironment.core.authentication.tests/src/test/resources/*.pem
 Copyright: DLR
 License: CC0-1.0
 
@@ -352,3 +352,12 @@ License: CC0-1.0
 Files: de.rcenvironment.core.configuration.tests/src/test/resources/configurationStore/minimal.json
 Copyright: DLR
 License: CC0-1.0
+
+Files: org.eclipse.equinox.launcher/.classpath org.eclipse.equinox.launcher/.project org.eclipse.equinox.launcher/pom.xml org.eclipse.equinox.launcher/META-INF/MANIFEST.MF org.eclipse.equinox.launcher/README-RCE.ad
+Copyright: DLR
+License: EPL-1.0
+
+Files: org.eclipse.equinox.launcher/build.properties org.eclipse.equinox.launcher/src/main/java/*/package.html org.eclipse.equinox.launcher/about.html
+Copyright: IBM Corporation and others
+License: EPL-1.0
+Comment: Non-code files imported as part of the Eclipse native launcher
