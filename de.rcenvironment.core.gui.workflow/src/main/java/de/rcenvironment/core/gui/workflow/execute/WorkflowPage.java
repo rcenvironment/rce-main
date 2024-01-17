@@ -184,7 +184,10 @@ final class WorkflowPage extends WizardPage {
         workflowComposite.componentsTableViewer.setContentProvider(
             new WorkflowDescriptionContentProvider(SWT.UP, TableSortSelectionListener.COLUMN_NAME));
         workflowComposite.componentsTableViewer.setInput(workflowDescription);
-
+        String additionalInformation = WorkflowPage.this.workflowDescription.getAdditionalInformation();
+        if (additionalInformation != null) {
+            workflowComposite.additionalInformationText.setText(additionalInformation);
+        }
         workflowComposite.additionalInformationText.addModifyListener(new ModifyListener() {
 
             @Override
