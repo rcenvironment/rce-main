@@ -54,10 +54,17 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
         service.bindWorkflowExecutionControllerService(this.controllerService);
         return this;
     }
-    
+
     public WorkflowExecutionServiceImplIntegrationTestBuilder bindWorkflowExecutionControllerServiceRefusingRequest(
         LogicalNodeId targetNodeId) {
         this.controllerService = getControllerServiceRefusingRequest(targetNodeId);
+        service.bindWorkflowExecutionControllerService(this.controllerService);
+        return this;
+    }
+
+    public WorkflowExecutionServiceImplIntegrationTestBuilder bindWorkflowExecutionControllerServiceToVailidateControllerVisibility(
+        LogicalNodeId targetNodeId) {
+        this.controllerService = getControllerServiceToVailidateRemoteWorkflowControllerVisibility(targetNodeId);
         service.bindWorkflowExecutionControllerService(this.controllerService);
         return this;
     }
@@ -117,6 +124,17 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
             builder
                 .expectWorkflowHostUnknown()
                 .build();
+        return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
+    }
+
+    protected RemotableWorkflowExecutionControllerService getControllerServiceToVailidateRemoteWorkflowControllerVisibility(
+        LogicalNodeId targetNodeId) {
+        WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
+        WorkflowExecutionControllerServiceImpl workflowExecutionControllerService =
+            builder
+                .expectComponentKnowledgeServiceGetCurrentSnapshotIsCalled()
+                .expectCommunicationServiceGetReachableLogicalNodesIsCalled(targetNodeId)
+                .build(targetNodeId);
         return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
     }
 

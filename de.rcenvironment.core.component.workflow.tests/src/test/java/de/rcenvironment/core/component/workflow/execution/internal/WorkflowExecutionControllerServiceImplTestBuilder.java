@@ -11,12 +11,15 @@ package de.rcenvironment.core.component.workflow.execution.internal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.easymock.EasyMock;
 
 import de.rcenvironment.core.communication.api.CommunicationService;
+import de.rcenvironment.core.communication.common.IdentifierException;
 import de.rcenvironment.core.communication.common.LogicalNodeId;
 import de.rcenvironment.core.communication.management.WorkflowHostService;
+import de.rcenvironment.core.component.api.DistributedComponentKnowledge;
 import de.rcenvironment.core.component.api.DistributedComponentKnowledgeService;
 import de.rcenvironment.core.component.execution.api.ExecutionControllerException;
 import de.rcenvironment.core.component.execution.api.LocalExecutionControllerUtilsService;
@@ -34,6 +37,8 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
 
     class WorkflowExecutionControllerServiceImplMock extends WorkflowExecutionControllerServiceImpl {
 
+        private LogicalNodeId targetNodeId;
+
         @Override
         WorkflowExecutionControllerImpl createWorkflowExecutionController(WorkflowExecutionContext wfExeCtx) {
             return EasyMock.createMock(WorkflowExecutionControllerImpl.class);
@@ -44,14 +49,29 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
             // no implementation for testing purposes
         }
 
+        @Override
+        LogicalNodeId parseLogicalNodeIdString(String[] refParts) throws IdentifierException {
+            return targetNodeId;
+        }
+
+        @Override
+        boolean isComponentVisible(DistributedComponentKnowledge compKnowledge, String componentIdAndVersion,
+            LogicalNodeId logicalNodeId) {
+            return true;
+        }
+
         public void verifyAllDependencies() {
             EasyMock.verify(workflowHostService, exeCtrlUtilsService, notificationService, communicationService,
                 distributedComponentKnowledgeService, executionController);
         }
 
+        public void setTargetNodeId(LogicalNodeId targetNodeId) {
+            this.targetNodeId = targetNodeId;
+        }
+
     }
 
-    private WorkflowExecutionControllerServiceImpl service = new WorkflowExecutionControllerServiceImplMock();
+    private WorkflowExecutionControllerServiceImplMock service = new WorkflowExecutionControllerServiceImplMock();
 
     private final WorkflowHostService workflowHostService = EasyMock.createMock(WorkflowHostService.class);
 
@@ -77,6 +97,11 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
         replayAllServices();
 
         return service;
+    }
+
+    public WorkflowExecutionControllerServiceImpl build(LogicalNodeId targetNodeId) {
+        service.setTargetNodeId(targetNodeId);
+        return build();
     }
 
     private void replayAllServices() {
@@ -162,5 +187,23 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
         }
         return this;
     }
+
+    public WorkflowExecutionControllerServiceImplTestBuilder expectComponentKnowledgeServiceGetCurrentSnapshotIsCalled() {
+        EasyMock.expect(distributedComponentKnowledgeService.getCurrentSnapshot())
+            .andStubReturn(null);
+        return this;
+    }
+
+    public WorkflowExecutionControllerServiceImplTestBuilder expectCommunicationServiceGetReachableLogicalNodesIsCalled(
+        LogicalNodeId targetNodeId) {
+
+        Set<LogicalNodeId> nodesSet = new HashSet<LogicalNodeId>();
+        nodesSet.add(targetNodeId);
+
+        EasyMock.expect(communicationService.getReachableLogicalNodes())
+            .andStubReturn(nodesSet);
+        return this;
+    }
+
 
 }

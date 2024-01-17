@@ -9,9 +9,12 @@
 package de.rcenvironment.core.component.workflow.execution.internal;
 
 import static de.rcenvironment.core.utils.testing.CollectionMatchers.isEmpty;
+import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.hamcrest.CoreMatchers;
@@ -26,6 +29,9 @@ import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionE
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionInformation;
 import de.rcenvironment.core.component.workflow.execution.impl.WorkflowExecutionContextImpl;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowDescription;
+import de.rcenvironment.core.component.workflow.model.api.WorkflowNode;
+import de.rcenvironment.core.component.workflow.model.api.testutils.WorkflowNodeMockBuilder;
+import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
 
 /**
@@ -34,6 +40,8 @@ import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
  * @author Kathrin Schaffert
  */
 public class WorkflowExecutionServiceImplIntegrationTest extends WorkflowExecutionServiceImplTestHelper {
+
+    private static final String WORKFLOW_NODE_IDENTIFIER = "workflowNodeIdentifier";
 
     /** Rule for expecting an Exception during test run. */
     @Rule
@@ -154,5 +162,101 @@ public class WorkflowExecutionServiceImplIntegrationTest extends WorkflowExecuti
         service.start(context);
     }
 
+//    @Test
+//    public void whenWorkflowContainsNodes_thenAuthorizationTokensAreAcquiredForEachNode() throws WorkflowExecutionException {
+//        final LogicalNodeId localNodeId = localNodeId();
+//        final LogicalNodeId remoteNodeId = remoteNodeId();
+//
+//        final Map<String, String> authTokens = new HashMap<>();
+//        authTokens.put(localNodeId().toString(), "localAuthToken");
+//        authTokens.put(remoteNodeId().toString(), "remoteAuthToken");
+//
+//        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+//        description.setControllerNode(remoteNodeId);
+//
+//        final ComponentInstallation localInstallation =
+//            ComponentUtils.createPlaceholderComponentInstallation("localComponent", "v1", "localComponent", localNodeId);
+//        final ComponentDescription localDescription = new ComponentDescription(localInstallation);
+//        final WorkflowNode localNode = new WorkflowNode(localDescription);
+//        description.addWorkflowNode(localNode);
+//
+//        final ComponentInstallation remoteInstallation =
+//            ComponentUtils.createPlaceholderComponentInstallation("remoteComponent", "v1", "remoteComponent", remoteNodeId);
+//        final ComponentDescription remoteDescription = new ComponentDescription(remoteInstallation);
+//        final WorkflowNode remoteNode = new WorkflowNode(remoteDescription);
+//        description.addWorkflowNode(remoteNode);
+//
+//        final WorkflowExecutionContext context = new WorkflowExecutionContextImpl(executionIdentifier(), description);
+//        context.setNodeIdentifierStartedExecution(localNodeId);
+//
+//        final WorkflowExecutionServiceImplIntegrationTestBuilder builder = new WorkflowExecutionServiceImplIntegrationTestBuilder();
+//        final WorkflowExecutionServiceImpl service =
+//            ((WorkflowExecutionServiceImplIntegrationTestBuilder) builder
+//                .withLocalNodeId(localNodeId)
+//                .expectAuthorizationTokenAcquisition(allOf(size(2), contains(localNode), contains(remoteNode)), authTokens))
+//                    .bindWorkflowExecutionControllerService(remoteNodeId)
+//                    .expectControllerServiceCreation(remoteNodeId, executionIdentifier())
+//                    .build();
+//
+//        service.start(context);
+//
+//        builder.verifyAllDependencies();
+//    }
+
+//    @Test
+//    public void whenWaitingForWorkflowExecutionTermination() throws WorkflowExecutionException {
+//        final LogicalNodeId localNodeId = localNodeId();
+//
+//        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+//        description.setControllerNode(localNodeId);
+//
+//        final HeadlessWorkflowExecutionContextMock context = new HeadlessWorkflowExecutionContextMock(executionIdentifier(), description);
+//        context.setNodeIdentifierStartedExecution(localNodeId);
+//
+//        final WorkflowExecutionServiceImplIntegrationTestBuilder builder = new WorkflowExecutionServiceImplIntegrationTestBuilder();
+//        final WorkflowExecutionServiceImpl service = builder.build();
+//
+//        context.setFinalState(WorkflowState.FINISHED);
+//        FinalWorkflowState finished = service.waitForWorkflowTermination(context);
+//        assertEquals(FinalWorkflowState.FINISHED, finished);
+//        context.setFinalState(WorkflowState.CANCELLED);
+//        FinalWorkflowState cancelled = service.waitForWorkflowTermination(context);
+//        assertEquals(FinalWorkflowState.CANCELLED, cancelled);
+//        context.setFinalState(WorkflowState.FAILED);
+//        FinalWorkflowState failed = service.waitForWorkflowTermination(context);
+//        assertEquals(FinalWorkflowState.FAILED, failed);
+//        context.setFinalState(WorkflowState.RESULTS_REJECTED);
+//        FinalWorkflowState rejected = service.waitForWorkflowTermination(context);
+//        assertEquals(FinalWorkflowState.RESULTS_REJECTED, rejected);
+//    }
+
+    @Test
+    public void whenVailidatingRemoteWorkflowControllerVisibility() throws WorkflowExecutionException {
+
+        final LogicalNodeId localNodeId = localNodeId();
+        final WorkflowNode node = new WorkflowNodeMockBuilder()
+            .identifier(WORKFLOW_NODE_IDENTIFIER)
+            .build();
+
+        final WorkflowDescriptionMock description = new WorkflowDescriptionMock(workflowIdentifier());
+        description.setControllerNode(localNodeId);
+        description.addNode(node);
+
+        List<String> componentRefs = new ArrayList<>();
+        componentRefs
+            .add(StringUtils.escapeAndConcat(WORKFLOW_NODE_IDENTIFIER, WorkflowNodeMockBuilder.IDENTIFIER_WITH_VERSION, LOGICAL_NODE_ID));
+
+        final WorkflowExecutionServiceImplIntegrationTestBuilder builder = new WorkflowExecutionServiceImplIntegrationTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .bindWorkflowExecutionControllerServiceToVailidateControllerVisibility(localNodeId)
+            .expectControllerServiceCreation(localNodeId, executionIdentifier())
+            .build();
+
+
+        Map<String, String> result = service.validateRemoteWorkflowControllerVisibilityOfComponents(description);
+        assertEquals(0, result.size());
+
+        builder.verifyAllDependencies();
+    }
 
 }

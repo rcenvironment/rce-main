@@ -35,6 +35,7 @@ class WorkflowExecutionServiceImplTestHelper {
     static LogicalNodeId localNodeId() {
         final LogicalNodeId localNodeId = EasyMock.createStrictMock(LogicalNodeId.class);
         EasyMock.expect(localNodeId.getLogicalNodeIdString()).andStubReturn(LOGICAL_NODE_ID);
+        EasyMock.expect(localNodeId.convertToDefaultLogicalNodeId()).andStubReturn(localNodeId);
         EasyMock.replay(localNodeId);
         return localNodeId;
     }

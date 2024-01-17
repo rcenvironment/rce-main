@@ -65,7 +65,7 @@ import de.rcenvironment.core.utils.incubator.ServiceRegistry;
  * 
  * @author Doreen Seider
  * @author Robert Mischke
- * @author Kathrin Schaffert (little refactoring)
+ * @author Kathrin Schaffert (little refactorings)
  */
 @Component
 public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflowExecutionControllerService {
@@ -281,7 +281,7 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
             final String componentIdAndVersion = refParts[1];
             final LogicalNodeId logicalNodeId;
             try {
-                logicalNodeId = NodeIdentifierUtils.parseLogicalNodeIdString(refParts[2]);
+                logicalNodeId = parseLogicalNodeIdString(refParts);
             } catch (IdentifierException e) {
                 result.put(resultKey, "Invalid node id: " + refParts[2]); // should never happen
                 continue;
@@ -297,6 +297,10 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
             }
         }
         return result;
+    }
+
+    LogicalNodeId parseLogicalNodeIdString(String[] refParts) throws IdentifierException {
+        return NodeIdentifierUtils.parseLogicalNodeIdString(refParts[2]);
     }
 
     @Reference
@@ -328,7 +332,7 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
         return reachableLogicalNodes.contains(logicalNodeId);
     }
 
-    private boolean isComponentVisible(DistributedComponentKnowledge compKnowledge, String componentIdAndVersion,
+    boolean isComponentVisible(DistributedComponentKnowledge compKnowledge, String componentIdAndVersion,
         LogicalNodeId logicalNodeId) {
 
         for (DistributedComponentEntry comp : compKnowledge.getKnownSharedInstallationsOnNode(logicalNodeId, false)) {
