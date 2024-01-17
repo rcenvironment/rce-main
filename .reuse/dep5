@@ -2,7 +2,7 @@ Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: Remote Component Environment (RCE)
 Source: https://rcenvironment.de/
 
-Files: .gitignore .git/* .svn/* */.svn/*
+Files: *.gitignore .git/* .svn/* */.svn/*
 Copyright: None
 License: CC0-1.0
 Comment: Exclusion of version control files; note that some of these patterns are for files that may only exist in a checkout
@@ -165,7 +165,7 @@ Files: de.rcenvironment.filesets.extras.win32.feature/root_files/extras/*.bat de
 Copyright: DLR
 License: EPL-1.0
 
-Files: de.rcenvironment.filesets.integration.tools.templates.cpacs.feature/root_files/integration/tools/templates/*.json
+Files: de.rcenvironment.filesets.integration.tools.templates.cpacs.feature/root_files/integration/tools/templates/*.json de.rcenvironment/eclipse/launch/installation_data/integration/tools/templates/*.json
 Copyright: DLR
 License: CC0-1.0
 
@@ -309,7 +309,7 @@ Files: de.rcenvironment.core.gui.palette.tests/src/test/resources/*
 Copyright: DLR
 License: CC0-1.0
 
-Files: de.rcenvironment.filesets.sql.connectors.mysql.feature/root_files/extras/database_connectors/README.txt
+Files: de.rcenvironment.filesets.sql.connectors.mysql.feature/root_files/extras/database_connectors/README.txt de.rcenvironment/eclipse/launch/installation_data/extras/database_connectors/README.txt
 Copyright: DLR
 License: CC0-1.0
 
@@ -317,7 +317,7 @@ Files: de.rcenvironment.filesets.logging.default.feature/root_files/configuratio
 Copyright: DLR
 License: EPL-1.0
 
-Files: de.rcenvironment.filesets.extras.feature/root_files/extras/mail/filter.json
+Files: de.rcenvironment.filesets.extras.feature/root_files/extras/mail/filter.json de.rcenvironment/eclipse/launch/installation_data/extras/mail/filter.json
 Copyright: DLR
 License: CC0-1.0
 
@@ -361,3 +361,98 @@ Files: org.eclipse.equinox.launcher/build.properties org.eclipse.equinox.launche
 Copyright: IBM Corporation and others
 License: EPL-1.0
 Comment: Non-code files imported as part of the Eclipse native launcher
+
+Files: de.rcenvironment.filesets.extras.win32.feature/root_files/extras/windows_service/prunsrv.exe
+Copyright: The Apache Software Foundation
+License: Apache-2.0
+Comment: Non-code file
+
+Files: de.rcenvironment/checkstyle/checks.xml de.rcenvironment/checkstyle/suppressions.xml
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment/eclipse/eclipse-cleanup.xml de.rcenvironment/eclipse/eclipse-formatter.xml
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment/maven/modules/jqassistant.report/jqassistant/rce-rules.xml
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment/maven/modules/repository.mainProduct/category.xml de.rcenvironment/maven/modules/repository.mainProduct/rce_default.p2.inf de.rcenvironment/maven/modules/repository.mainProduct/rce_default.product de.rcenvironment/maven/modules/repository.intermediate/category.xml
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.core.embedded.ssh.tests/src/test/resources/*.json
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.eventlog/scripts/requirements.txt
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.extensions.testscriptrunner/maven/repository/category.xml
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.documentation.core/maven/genGraphvizSVG.pom
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.documentation.core/src/legacy/release.txt
+Copyright: DLR
+License: CC-BY-4.0
+Comment: preliminary
+
+Files: de.rcenvironment.core.start.gui/src/main/java/de/rcenvironment/core/start/gui/internal/unwanted.properties de.rcenvironment.core.gui.utils.incubator/src/main/java/de/rcenvironment/core/gui/utils/incubator/unwanted.properties
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment/utils/repocheck/test_check_repository.py de.rcenvironment/utils/repocheck/validation_examples/bundle_with_assorted_issues/expected_result.txt
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment/utils/release/additions-filter.conf
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment/utils/release/readme.txt
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment/eclipse/tp/README - using local platform builds.txt
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment/doc/meta/release_shasums.txt
+Copyright: DLR
+License: CC-BY-4.0
+Comment: preliminary
+
+Files: de.rcenvironment/eclipse/launch/installation_data/dev_config.ini de.rcenvironment/eclipse/launch/installation_data/logging.xml
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.core.gui.xpathchooser/resources/XPathChooserPropertyView.properties
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.core.instancemanagement.tests/src/test/resources/instanceManagementTest/configuration.json
+Copyright: DLR
+License: CC0-1.0
+
+Files: de.rcenvironment.core.instancemanagement.tests/src/test-manual/java/de/rcenvironment/core/instancemanagement/internal/InstanceOperationsImplManualTests.properties.template
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.core.remoteaccess.tests/src/test-manual/resources/RemoteAccessStandaloneClientParametrizedTests.properties.template
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.core.gui.introduction/content/script/intro.js
+Copyright: DLR
+License: EPL-1.0
+
+Files: de.rcenvironment.core.gui.tiglviewer/contexts.xml
+Copyright: DLR
+License: EPL-1.0
