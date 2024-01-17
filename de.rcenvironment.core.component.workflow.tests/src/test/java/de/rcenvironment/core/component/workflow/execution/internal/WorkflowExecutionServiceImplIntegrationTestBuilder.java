@@ -8,10 +8,16 @@
 
 package de.rcenvironment.core.component.workflow.execution.internal;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.easymock.EasyMock;
 
 import de.rcenvironment.core.communication.common.LogicalNodeId;
 import de.rcenvironment.core.component.workflow.execution.api.RemotableWorkflowExecutionControllerService;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContext;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionInformation;
+import de.rcenvironment.core.component.workflow.execution.impl.WorkflowExecutionInformationImpl;
 import de.rcenvironment.core.component.workflow.execution.internal.WorkflowExecutionControllerServiceImplTestBuilder.WorkflowExecutionControllerServiceImplMock;
 
 /**
@@ -63,8 +69,15 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
     }
 
     public WorkflowExecutionServiceImplIntegrationTestBuilder bindWorkflowExecutionControllerServiceToVailidateControllerVisibility(
-        LogicalNodeId targetNodeId) {
-        this.controllerService = getControllerServiceToVailidateRemoteWorkflowControllerVisibility(targetNodeId);
+        LogicalNodeId targetNodeId, boolean isComponentVisible) {
+        this.controllerService = getControllerServiceWithComponentVisibility(targetNodeId, isComponentVisible);
+        service.bindWorkflowExecutionControllerService(this.controllerService);
+        return this;
+    }
+
+    public WorkflowExecutionServiceImplIntegrationTestBuilder bindWorkflowExecutionControllerServiceWithWfExecutionInformations(
+        LogicalNodeId targetNodeId, WorkflowExecutionContext context) {
+        this.controllerService = getControllerServiceWithWfExecutionInformations(targetNodeId, context);
         service.bindWorkflowExecutionControllerService(this.controllerService);
         return this;
     }
@@ -127,15 +140,31 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
         return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
     }
 
-    protected RemotableWorkflowExecutionControllerService getControllerServiceToVailidateRemoteWorkflowControllerVisibility(
-        LogicalNodeId targetNodeId) {
+    protected RemotableWorkflowExecutionControllerService getControllerServiceWithComponentVisibility(
+        LogicalNodeId targetNodeId, boolean isComponentVisible) {
         WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
         WorkflowExecutionControllerServiceImpl workflowExecutionControllerService =
             builder
                 .expectComponentKnowledgeServiceGetCurrentSnapshotIsCalled()
                 .expectCommunicationServiceGetReachableLogicalNodesIsCalled(targetNodeId)
-                .build(targetNodeId);
+                .build(targetNodeId, isComponentVisible);
         return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
     }
 
+    private RemotableWorkflowExecutionControllerService getControllerServiceWithWfExecutionInformations(LogicalNodeId targetNodeId,
+        WorkflowExecutionContext context) {
+        WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
+        WorkflowExecutionControllerServiceImpl workflowExecutionControllerService = builder
+            .expectExecCtrlUtilsServiceGetExecutionControllerIsCalled(WorkflowExecutionServiceImplTestHelper.executionIdentifier())
+            .expectExecutionControllerGetStateIsCalled()
+            .expectExecutionControllerGetDataManagmentIdIsCalled()
+            .build();
+
+        Map<String, WorkflowExecutionInformation> map = new HashMap<String, WorkflowExecutionInformation>();
+        WorkflowExecutionInformationImpl info = new WorkflowExecutionInformationImpl(context);
+        map.put(WorkflowExecutionServiceImplTestHelper.executionIdentifier(), info);
+        workflowExecutionControllerService.setWorkflowExecutionInformations(map);
+
+        return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
+    }
 }

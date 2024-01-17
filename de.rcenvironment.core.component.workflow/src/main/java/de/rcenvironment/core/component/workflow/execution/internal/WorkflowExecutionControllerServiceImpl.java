@@ -71,6 +71,10 @@ import de.rcenvironment.core.utils.incubator.ServiceRegistry;
 public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflowExecutionControllerService {
 
     /** Exception Message. */
+    static final String ERROR_MESSAGE_CANNOT_ACCESS_COMPONENT = "The workflow controller cannot access this component. "
+        + "Check if the controller needs to be in additional authorization groups.";
+
+    /** Exception Message. */
     static final String ERROR_MESSAGE_WF_EXECUTION_REFUSED =
         "Workflow execution request refused, as the requested instance is not declared as workflow host:";
 
@@ -292,8 +296,7 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
                 result.put(resultKey, "The instance to run this component on is not visible from the workflow controller's instance. "
                     + "Check if they are located in disconnected networks.");
             } else if (!isComponentVisible(compKnowledge, componentIdAndVersion, logicalNodeId)) {
-                result.put(resultKey, "The workflow controller cannot access this component. "
-                    + "Check if the controller needs to be in additional authorization groups.");
+                result.put(resultKey, ERROR_MESSAGE_CANNOT_ACCESS_COMPONENT);
             }
         }
         return result;
@@ -368,5 +371,13 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
                 workflowServiceRegistrations.remove(executionId);
             }
         }
+    }
+
+    // !Method was added for the integration tests!
+    // Method was added to ensure good test coverage for a major overhaul of the Workflow Engine.
+    // After completing this work, it should be checked whether the integration tests are still relevant.
+    // Jan. 2024, Kathrin Schaffert
+    public void setWorkflowExecutionInformations(Map<String, WorkflowExecutionInformation> workflowExecutionInformations) {
+        this.workflowExecutionInformations = workflowExecutionInformations;
     }
 }

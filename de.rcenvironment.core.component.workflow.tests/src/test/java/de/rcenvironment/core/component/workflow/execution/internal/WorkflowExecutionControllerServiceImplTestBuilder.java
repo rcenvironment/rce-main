@@ -25,6 +25,7 @@ import de.rcenvironment.core.component.execution.api.ExecutionControllerExceptio
 import de.rcenvironment.core.component.execution.api.LocalExecutionControllerUtilsService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContext;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionController;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowState;
 import de.rcenvironment.core.notification.NotificationService;
 import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
 
@@ -38,6 +39,8 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
     class WorkflowExecutionControllerServiceImplMock extends WorkflowExecutionControllerServiceImpl {
 
         private LogicalNodeId targetNodeId;
+
+        private boolean isComponentVisible;
 
         @Override
         WorkflowExecutionControllerImpl createWorkflowExecutionController(WorkflowExecutionContext wfExeCtx) {
@@ -57,7 +60,7 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
         @Override
         boolean isComponentVisible(DistributedComponentKnowledge compKnowledge, String componentIdAndVersion,
             LogicalNodeId logicalNodeId) {
-            return true;
+            return isComponentVisible;
         }
 
         public void verifyAllDependencies() {
@@ -67,6 +70,10 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
 
         public void setTargetNodeId(LogicalNodeId targetNodeId) {
             this.targetNodeId = targetNodeId;
+        }
+
+        public void setComponentVisible(boolean isComponentVisible) {
+            this.isComponentVisible = isComponentVisible;
         }
 
     }
@@ -99,8 +106,9 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
         return service;
     }
 
-    public WorkflowExecutionControllerServiceImpl build(LogicalNodeId targetNodeId) {
+    public WorkflowExecutionControllerServiceImpl build(LogicalNodeId targetNodeId, boolean isComponentVisible) {
         service.setTargetNodeId(targetNodeId);
+        service.setComponentVisible(isComponentVisible);
         return build();
     }
 
@@ -174,6 +182,17 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
         return this;
     }
 
+    public WorkflowExecutionControllerServiceImplTestBuilder expectExecutionControllerGetStateIsCalled() {
+        EasyMock.expect(executionController.getState()).andStubReturn(WorkflowState.RUNNING);
+        return this;
+    }
+
+    public WorkflowExecutionControllerServiceImplTestBuilder expectExecutionControllerGetDataManagmentIdIsCalled() {
+        final long id = 2345;
+        EasyMock.expect(executionController.getDataManagementId()).andStubReturn(id);
+        return this;
+    }
+
     public WorkflowExecutionControllerServiceImplTestBuilder expectExecCtrlUtilsServiceGetExecutionControllerThrowsException(
         String identifier) {
 
@@ -204,6 +223,5 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
             .andStubReturn(nodesSet);
         return this;
     }
-
 
 }
