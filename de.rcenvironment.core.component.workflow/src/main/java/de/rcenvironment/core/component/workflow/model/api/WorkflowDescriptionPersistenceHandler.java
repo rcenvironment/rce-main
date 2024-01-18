@@ -286,11 +286,11 @@ public class WorkflowDescriptionPersistenceHandler {
     /**
      * Writes the given {@link WorkflowDescription} into an {@link OutputStream}.
      * 
-     * @param wd
-     *            The {@link WorkflowDescription} to write.
+     * @param wd The {@link WorkflowDescription} to write.
      * @return An byte array with the {@link WorkflowDescription}.
-     * @throws IOException
-     *             if writing to {@link java.io.File} failed for some reason.
+     * @throws IOException if writing to {@link java.io.File} failed for some reason.
+     * 
+     * 
      */
     public ByteArrayOutputStream writeWorkflowDescriptionToStream(WorkflowDescription wd) throws IOException {
 
