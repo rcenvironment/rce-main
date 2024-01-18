@@ -78,6 +78,8 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
 
     }
 
+    static final long DATA_MANAGEMENT_ID = 2345;
+
     private WorkflowExecutionControllerServiceImplMock service = new WorkflowExecutionControllerServiceImplMock();
 
     private final WorkflowHostService workflowHostService = EasyMock.createMock(WorkflowHostService.class);
@@ -188,8 +190,7 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
     }
 
     public WorkflowExecutionControllerServiceImplTestBuilder expectExecutionControllerGetDataManagmentIdIsCalled() {
-        final long id = 2345;
-        EasyMock.expect(executionController.getDataManagementId()).andStubReturn(id);
+        EasyMock.expect(executionController.getDataManagementId()).andStubReturn(DATA_MANAGEMENT_ID);
         return this;
     }
 
@@ -223,5 +224,6 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
             .andStubReturn(nodesSet);
         return this;
     }
+
 
 }

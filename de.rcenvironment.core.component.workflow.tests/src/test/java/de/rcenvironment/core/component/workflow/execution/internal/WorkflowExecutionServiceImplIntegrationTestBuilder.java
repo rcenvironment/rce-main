@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.easymock.EasyMock;
 
+import de.rcenvironment.core.communication.common.CommunicationException;
 import de.rcenvironment.core.communication.common.LogicalNodeId;
 import de.rcenvironment.core.component.workflow.api.WorkflowConstants;
 import de.rcenvironment.core.component.workflow.execution.api.RemotableWorkflowExecutionControllerService;
@@ -33,7 +34,7 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
 
     @Override
     protected void replayAllServices() {
-        EasyMock.replay(notificationService, authorizationTokenService, platformService, communicationService);
+        EasyMock.replay(notificationService, authorizationTokenService, platformService, communicationService, metaDataService);
     }
 
     public void verifyAllDependencies() {
@@ -93,6 +94,13 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
         return this;
     }
 
+    public WorkflowExecutionServiceImplIntegrationTestBuilder bindWorkflowExecutionControllerServiceGetWorkflowDataManagementIdIsCalled(
+        LogicalNodeId targetNodeId) {
+        this.controllerService = getControllerServiceGetWorkflowDataManagementIdIsCalled(targetNodeId);
+        service.bindWorkflowExecutionControllerService(this.controllerService);
+        return this;
+    }
+
     public WorkflowExecutionServiceImplIntegrationTestBuilder expectControllerServiceCreation(LogicalNodeId targetNode, String identifier) {
         EasyMock
             .expect(communicationService.getRemotableService(RemotableWorkflowExecutionControllerService.class, targetNode))
@@ -104,6 +112,15 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
     public WorkflowExecutionServiceImplIntegrationTestBuilder expectNotificationServiceSendNotification(String wfExecInfoIdentifier) {
         notificationService.send(WorkflowConstants.STATE_NOTIFICATION_ID + wfExecInfoIdentifier, WorkflowState.IS_ALIVE.name());
         EasyMock.expectLastCall();
+        return this;
+    }
+
+    public WorkflowExecutionServiceImplIntegrationTestBuilder expectMetaDataServiceDeleteWorkflowRun(Long id, LogicalNodeId nodeId) {
+        try {
+            EasyMock.expect(metaDataService.deleteWorkflowRun(id, nodeId)).andStubReturn(true);
+        } catch (CommunicationException e) {
+            // should never happen since this is called in a mock
+        }
         return this;
     }
 
@@ -168,9 +185,8 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
         return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
     }
 
-    private RemotableWorkflowExecutionControllerService getControllerServiceGetWorkflowExecutionInformationsIsCalled(
-        LogicalNodeId targetNodeId,
-        WorkflowExecutionContext context) {
+    protected RemotableWorkflowExecutionControllerService getControllerServiceGetWorkflowExecutionInformationsIsCalled(
+        LogicalNodeId targetNodeId, WorkflowExecutionContext context) {
         WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
         WorkflowExecutionControllerServiceImpl workflowExecutionControllerService = builder
             .expectExecCtrlUtilsServiceGetExecutionControllerIsCalled(WorkflowExecutionServiceImplTestHelper.executionIdentifier())
@@ -184,6 +200,17 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
         info.setIdentifier(WorkflowExecutionServiceImplTestHelper.executionIdentifier());
         map.put(WorkflowExecutionServiceImplTestHelper.executionIdentifier(), info);
         workflowExecutionControllerService.setWorkflowExecutionInformations(map);
+
+        return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
+    }
+
+    protected RemotableWorkflowExecutionControllerService getControllerServiceGetWorkflowDataManagementIdIsCalled(
+        LogicalNodeId targetNodeId) {
+        WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
+        WorkflowExecutionControllerServiceImpl workflowExecutionControllerService = builder
+            .expectExecCtrlUtilsServiceGetExecutionControllerIsCalled(WorkflowExecutionServiceImplTestHelper.executionIdentifier())
+            .expectExecutionControllerGetDataManagmentIdIsCalled()
+            .build();
 
         return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
     }

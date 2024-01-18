@@ -24,7 +24,6 @@ import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionE
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionInformation;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowState;
 import de.rcenvironment.core.component.workflow.execution.impl.WorkflowExecutionInformationImpl;
-import de.rcenvironment.core.datamanagement.MetaDataService;
 import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
 
 /**
@@ -37,18 +36,8 @@ class WorkflowExecutionServiceImplUnitTestBuilder extends WorkflowExecutionServi
 
     static final String ERROR_MESSAGE = "any message";
 
-    private final MetaDataService metaDataService = EasyMock.createMock(MetaDataService.class);
-
     private interface ControllerMethod {
         void accept(String executionId) throws ExecutionControllerException, RemoteOperationException;
-    }
-
-    public WorkflowExecutionServiceImpl build() {
-
-        service.bindMetaDataService(metaDataService);
-        super.build();
-
-        return service;
     }
 
     protected void replayAllServices() {

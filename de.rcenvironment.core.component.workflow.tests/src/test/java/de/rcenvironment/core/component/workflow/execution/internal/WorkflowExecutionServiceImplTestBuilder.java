@@ -25,6 +25,7 @@ import de.rcenvironment.core.component.workflow.execution.api.ExecutionAuthoriza
 import de.rcenvironment.core.component.workflow.execution.api.RemotableWorkflowExecutionControllerService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionException;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowNode;
+import de.rcenvironment.core.datamanagement.MetaDataService;
 import de.rcenvironment.core.notification.DistributedNotificationService;
 import junit.framework.AssertionFailedError;
 
@@ -46,6 +47,8 @@ abstract class WorkflowExecutionServiceImplTestBuilder {
     protected final ExecutionAuthorizationTokenService authorizationTokenService =
         EasyMock.createMock(ExecutionAuthorizationTokenService.class);
 
+    protected final MetaDataService metaDataService = EasyMock.createMock(MetaDataService.class);
+
     protected final Map<ResolvableNodeId, RemotableWorkflowExecutionControllerService> controllerServices = new HashMap<>();
 
     public WorkflowExecutionServiceImpl build() {
@@ -53,7 +56,7 @@ abstract class WorkflowExecutionServiceImplTestBuilder {
         service.bindExecutionAuthorizationTokenService(authorizationTokenService);
         service.bindPlatformService(platformService);
         service.bindCommunicationService(communicationService);
-//        service.bindMetaDataService(metaDataService);
+        service.bindMetaDataService(metaDataService);
 
         replayAllServices();
 
