@@ -64,8 +64,7 @@ public interface RemotableWorkflowExecutionControllerService extends RemotableEx
      * @throws RemoteOperationException if called from remote and remote method call failed
      * @throws ExecutionControllerException if {@link ExecutionController} is not available (anymore)
      */
-    Collection<WorkflowExecutionInformation> getWorkflowExecutionInformations() throws ExecutionControllerException,
-        RemoteOperationException;
+    Collection<WorkflowExecutionInformation> getWorkflowExecutionInformations() throws RemoteOperationException;
 
     /**
      * The remote call performing the actual check behind

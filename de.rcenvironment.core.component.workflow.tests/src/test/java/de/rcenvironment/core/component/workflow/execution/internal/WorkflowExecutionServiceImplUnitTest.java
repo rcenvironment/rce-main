@@ -388,10 +388,10 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
     }
 
     @Test
-    public void whenGetLocalWorkflowExecutionInformationsThrowsException() throws ExecutionControllerException, RemoteOperationException {
+    public void whenGetLocalWorkflowExecutionInformationsThrowsException() throws RemoteOperationException {
 
         final RemotableWorkflowExecutionControllerService controllerService =
-            controllerServiceThrowsException(new ExecutionControllerException(TEST_EXCEPTION));
+            controllerServiceThrowsException(new RemoteOperationException(TEST_EXCEPTION));
 
         final WorkflowExecutionServiceImplUnitTestBuilder builder = new WorkflowExecutionServiceImplUnitTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
@@ -437,10 +437,9 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
     }
 
     @Test
-    public void whenSendHeartBeatForActiveWorkflowsAndControllerServiceThrowsException()
-        throws ExecutionControllerException, RemoteOperationException {
+    public void whenSendHeartBeatForActiveWorkflowsAndControllerServiceThrowsException() throws RemoteOperationException {
 
-        ExecutionControllerException e = new ExecutionControllerException(TEST_EXCEPTION);
+        RemoteOperationException e = new RemoteOperationException(TEST_EXCEPTION);
 
         final RemotableWorkflowExecutionControllerService controllerService =
             controllerServiceThrowsException(e);
@@ -586,8 +585,8 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
         return controllerService;
     }
 
-    private static RemotableWorkflowExecutionControllerService controllerServiceThrowsException(ExecutionControllerException e)
-        throws ExecutionControllerException, RemoteOperationException {
+    private static RemotableWorkflowExecutionControllerService controllerServiceThrowsException(RemoteOperationException e)
+        throws RemoteOperationException {
         final RemotableWorkflowExecutionControllerService controllerService =
             EasyMock.createMock(RemotableWorkflowExecutionControllerService.class);
 
@@ -596,7 +595,7 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
         return controllerService;
     }
 
-    private static WorkflowExecutionServiceLog log(ExecutionControllerException e) {
+    private static WorkflowExecutionServiceLog log(RemoteOperationException e) {
         WorkflowExecutionServiceLog log = EasyMock.createStrictMock(WorkflowExecutionServiceLog.class);
 
         log.fetchingLocalWorkflowExecutionInformationFailed(e);
