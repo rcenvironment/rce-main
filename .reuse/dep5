@@ -456,3 +456,16 @@ License: EPL-1.0
 Files: de.rcenvironment.core.gui.tiglviewer/contexts.xml
 Copyright: DLR
 License: EPL-1.0
+
+Files: de.rcenvironment.core.scripting/src/main/resources/resources/simplejson.zip
+Copyright: Bob Ippolito
+License: MIT
+
+Files: de.rcenvironment.filesets.licensing.thirdparty.default.feature/root_files/THIRD_PARTY
+Copyright: DLR
+License: CC0-1.0
+
+Files: README.md
+Copyright: DLR
+License: CC-BY-4.0
+Comment: preliminary
