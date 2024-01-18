@@ -212,7 +212,7 @@ public class WorkflowExecutionServiceImplIntegrationTest extends WorkflowExecuti
     }
 
     @Test
-    public void whenGetLocalWorkflowExecutionInformations() throws ExecutionControllerException, RemoteOperationException {
+    public void whenGetLocalWorkflowExecutionInformationsIsCalled() throws ExecutionControllerException, RemoteOperationException {
 
         final LogicalNodeId localNodeId = localNodeId();
         final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
@@ -234,7 +234,7 @@ public class WorkflowExecutionServiceImplIntegrationTest extends WorkflowExecuti
     }
 
     @Test
-    public void whenSendHeartBeatForActiveWorkflowsForStateRunning()
+    public void whenSendHeartBeatForActiveWorkflowsForStateRunningIsCalled()
         throws ExecutionControllerException, RemoteOperationException {
 
         final LogicalNodeId localNodeId = localNodeId();
@@ -252,10 +252,10 @@ public class WorkflowExecutionServiceImplIntegrationTest extends WorkflowExecuti
     }
 
     @Test
-    public void whenDeleteFromDataManagement() throws ExecutionControllerException, RemoteOperationException, CommunicationException {
+    public void whenDeleteFromDataManagementIsCalled()
+        throws ExecutionControllerException, RemoteOperationException, CommunicationException {
 
         final LogicalNodeId localNodeId = localNodeId();
-
         WorkflowExecutionHandle handle = handle(localNodeId);
 
         final WorkflowExecutionServiceImplIntegrationTestBuilder builder = new WorkflowExecutionServiceImplIntegrationTestBuilder();
@@ -266,6 +266,62 @@ public class WorkflowExecutionServiceImplIntegrationTest extends WorkflowExecuti
             .build();
 
         service.deleteFromDataManagement(handle);
+        EasyMock.verify(handle);
+        builder.verifyAllDependencies();
+    }
+
+    @Test
+    public void whenDeleteFromDataManagementThrowsFailedToDetermineStorageException()
+        throws ExecutionControllerException, RemoteOperationException, CommunicationException {
+
+        final LogicalNodeId localNodeId = localNodeId();
+        WorkflowExecutionHandle handle = handle(localNodeId);
+
+        final WorkflowExecutionServiceImplIntegrationTestBuilder builder = new WorkflowExecutionServiceImplIntegrationTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .bindWorkflowExecutionControllerServiceGetExecutionControllerThrowsException(localNodeId)
+            .expectControllerServiceCreation(localNodeId, executionIdentifier())
+            .build();
+
+        exceptionRule.expect(ExecutionControllerException.class);
+        exceptionRule.expectMessage(
+            WorkflowExecutionServiceImpl.ERROR_MESSAGE_FAILED_TO_DETERMINE_STORAGE_ID + executionIdentifier());
+        service.deleteFromDataManagement(handle);
+    }
+
+    @Test
+    public void whenDeleteFromDataManagementThrowsCouldNotDeleteWorkflowException()
+        throws ExecutionControllerException, RemoteOperationException, CommunicationException {
+
+        final LogicalNodeId localNodeId = localNodeId();
+        WorkflowExecutionHandle handle = handle(localNodeId);
+
+        final WorkflowExecutionServiceImplIntegrationTestBuilder builder = new WorkflowExecutionServiceImplIntegrationTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .bindWorkflowExecutionControllerServiceGetWorkflowDataManagementIdIsCalled(localNodeId)
+            .expectControllerServiceCreation(localNodeId, executionIdentifier())
+            .expectMetaDataServiceThrowsException(DATA_MANAGEMENT_ID, localNodeId)
+            .build();
+
+        exceptionRule.expect(ExecutionControllerException.class);
+        exceptionRule.expectMessage(WorkflowExecutionServiceImpl.ERROR_MESSAGE_COULD_NOT_DELETE_WORKFLOW_RUN + DATA_MANAGEMENT_ID);
+        service.deleteFromDataManagement(handle);
+    }
+
+    @Test
+    public void whenWorkflowStateIsRunningThenRunningIsReturned() throws ExecutionControllerException, RemoteOperationException {
+
+        final LogicalNodeId localNodeId = localNodeId();
+        WorkflowExecutionHandle handle = handle(localNodeId);
+
+        final WorkflowExecutionServiceImplIntegrationTestBuilder builder = new WorkflowExecutionServiceImplIntegrationTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .bindWorkflowExecutionControllerServiceGetStateIsCalled(localNodeId)
+            .expectControllerServiceCreation(localNodeId, executionIdentifier())
+            .build();
+
+        WorkflowState currentState = service.getWorkflowState(handle);
+        assertEquals(WorkflowState.RUNNING, currentState);
         EasyMock.verify(handle);
         builder.verifyAllDependencies();
     }

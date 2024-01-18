@@ -87,9 +87,7 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
 
     public WorkflowExecutionServiceImplIntegrationTestBuilder bindWorkflowExecutionControllerServiceSendHeartbeat(
         LogicalNodeId localNodeId, WorkflowExecutionContext context) {
-
         this.controllerService = getControllerServiceGetWorkflowExecutionInformationsIsCalled(localNodeId, context);
-
         service.bindWorkflowExecutionControllerService(this.controllerService);
         return this;
     }
@@ -100,6 +98,21 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
         service.bindWorkflowExecutionControllerService(this.controllerService);
         return this;
     }
+
+    public WorkflowExecutionServiceImplIntegrationTestBuilder bindWorkflowExecutionControllerServiceGetExecutionControllerThrowsException(
+        LogicalNodeId targetNodeId) {
+        this.controllerService = getControllerServiceGetExecutionControllerThrowsException(targetNodeId);
+        service.bindWorkflowExecutionControllerService(this.controllerService);
+        return this;
+    }
+
+    public WorkflowExecutionServiceImplIntegrationTestBuilder bindWorkflowExecutionControllerServiceGetStateIsCalled(
+        LogicalNodeId targetNodeId) {
+        this.controllerService = getControllerServiceGetStateIsCalled(targetNodeId);
+        service.bindWorkflowExecutionControllerService(this.controllerService);
+        return this;
+    }
+
 
     public WorkflowExecutionServiceImplIntegrationTestBuilder expectControllerServiceCreation(LogicalNodeId targetNode, String identifier) {
         EasyMock
@@ -124,7 +137,16 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
         return this;
     }
 
-    protected RemotableWorkflowExecutionControllerService getControllerService(LogicalNodeId targetNodeId) {
+    public WorkflowExecutionServiceImplIntegrationTestBuilder expectMetaDataServiceThrowsException(Long id, LogicalNodeId nodeId) {
+        try {
+            EasyMock.expect(metaDataService.deleteWorkflowRun(id, nodeId)).andThrow(new CommunicationException("Test Error"));
+        } catch (CommunicationException e) {
+            // should never happen since this is called in a mock
+        }
+        return this;
+    }
+
+    private RemotableWorkflowExecutionControllerService getControllerService(LogicalNodeId targetNodeId) {
 
         WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
         WorkflowExecutionControllerServiceImpl workflowExecutionControllerService =
@@ -137,7 +159,7 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
         return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
     }
 
-    protected RemotableWorkflowExecutionControllerService getControllerServiceExpectingAllWorklfowStates(LogicalNodeId targetNodeId) {
+    private RemotableWorkflowExecutionControllerService getControllerServiceExpectingAllWorklfowStates(LogicalNodeId targetNodeId) {
 
         WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
         WorkflowExecutionControllerServiceImpl workflowExecutionControllerService =
@@ -154,7 +176,7 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
         return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
     }
 
-    protected RemotableWorkflowExecutionControllerService getControllerServiceThrowsException(LogicalNodeId targetNodeId) {
+    private RemotableWorkflowExecutionControllerService getControllerServiceThrowsException(LogicalNodeId targetNodeId) {
         WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
         WorkflowExecutionControllerServiceImpl workflowExecutionControllerService =
             builder
@@ -165,7 +187,7 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
         return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
     }
 
-    protected RemotableWorkflowExecutionControllerService getControllerServiceRefusingRequest(LogicalNodeId targetNodeId) {
+    private RemotableWorkflowExecutionControllerService getControllerServiceRefusingRequest(LogicalNodeId targetNodeId) {
         WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
         WorkflowExecutionControllerServiceImpl workflowExecutionControllerService =
             builder
@@ -174,7 +196,7 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
         return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
     }
 
-    protected RemotableWorkflowExecutionControllerService getControllerServiceWithComponentVisibility(
+    private RemotableWorkflowExecutionControllerService getControllerServiceWithComponentVisibility(
         LogicalNodeId targetNodeId, boolean isComponentVisible) {
         WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
         WorkflowExecutionControllerServiceImpl workflowExecutionControllerService =
@@ -185,7 +207,7 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
         return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
     }
 
-    protected RemotableWorkflowExecutionControllerService getControllerServiceGetWorkflowExecutionInformationsIsCalled(
+    private RemotableWorkflowExecutionControllerService getControllerServiceGetWorkflowExecutionInformationsIsCalled(
         LogicalNodeId targetNodeId, WorkflowExecutionContext context) {
         WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
         WorkflowExecutionControllerServiceImpl workflowExecutionControllerService = builder
@@ -204,12 +226,33 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
         return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
     }
 
-    protected RemotableWorkflowExecutionControllerService getControllerServiceGetWorkflowDataManagementIdIsCalled(
+    private RemotableWorkflowExecutionControllerService getControllerServiceGetWorkflowDataManagementIdIsCalled(
         LogicalNodeId targetNodeId) {
         WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
         WorkflowExecutionControllerServiceImpl workflowExecutionControllerService = builder
             .expectExecCtrlUtilsServiceGetExecutionControllerIsCalled(WorkflowExecutionServiceImplTestHelper.executionIdentifier())
             .expectExecutionControllerGetDataManagmentIdIsCalled()
+            .build();
+
+        return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
+    }
+
+    private RemotableWorkflowExecutionControllerService getControllerServiceGetExecutionControllerThrowsException(
+        LogicalNodeId targetNodeId) {
+        WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
+        WorkflowExecutionControllerServiceImpl workflowExecutionControllerService = builder
+            .expectExecCtrlUtilsServiceGetExecutionControllerThrowsException(WorkflowExecutionServiceImplTestHelper.executionIdentifier())
+            .build();
+
+        return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
+    }
+
+
+    private RemotableWorkflowExecutionControllerService getControllerServiceGetStateIsCalled(LogicalNodeId targetNodeId) {
+        WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
+        WorkflowExecutionControllerServiceImpl workflowExecutionControllerService = builder
+            .expectExecCtrlUtilsServiceGetExecutionControllerIsCalled(WorkflowExecutionServiceImplTestHelper.executionIdentifier())
+            .expectExecutionControllerGetStateIsCalled()
             .build();
 
         return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
