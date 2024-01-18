@@ -217,7 +217,7 @@ Files: de.rcenvironment.components.xml.merger.execution.tests/src/test/resources
 Copyright: DLR
 License: CC0-1.0
 
-Files: de.rcenvironment.core.gui.wizards.exampleproject/templates/*.json de.rcenvironment.core.gui.wizards.exampleproject/templates/*.txt de.rcenvironment.core.gui.wizards.exampleproject/templates/*.xml de.rcenvironment.core.gui.wizards.exampleproject/templates/*.xsl
+Files: de.rcenvironment.core.gui.wizards.exampleproject/templates/*.json de.rcenvironment.core.gui.wizards.exampleproject/templates/*.txt de.rcenvironment.core.gui.wizards.exampleproject/templates/*.xsl de.rcenvironment.core.gui.wizards.exampleproject/templates/workflows_examples/02_Component?Groups/XMLMerger_Integrate.xml
 Copyright: DLR
 License: CC0-1.0
 
