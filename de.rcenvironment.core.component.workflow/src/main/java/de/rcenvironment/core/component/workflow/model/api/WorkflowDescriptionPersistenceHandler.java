@@ -290,7 +290,7 @@ public class WorkflowDescriptionPersistenceHandler {
      * @return An byte array with the {@link WorkflowDescription}.
      * @throws IOException if writing to {@link java.io.File} failed for some reason.
      * 
-     * @author Devika Jalgaonkar (#18135)
+     * 
      */
     public ByteArrayOutputStream writeWorkflowDescriptionToStream(WorkflowDescription wd) throws IOException {
 
@@ -310,7 +310,7 @@ public class WorkflowDescriptionPersistenceHandler {
                 && !wd.getIsControllerNodeIdTransient()) {
             writeOptionalValue(g, PLATFORM, wd.getControllerNode().getLogicalNodeIdString());
         }
-//        writeOptionalValue(g, ADDITIONAL_INFORMATION, wd.getAdditionalInformation());
+        writeOptionalValue(g, ADDITIONAL_INFORMATION, wd.getAdditionalInformation());
 
         if (wd.getWorkflowNodes().size() > 0) {
             g.writeArrayFieldStart(NODES);
