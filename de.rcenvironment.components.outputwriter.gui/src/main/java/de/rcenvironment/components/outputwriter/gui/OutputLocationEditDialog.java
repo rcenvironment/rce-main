@@ -54,7 +54,7 @@ import de.rcenvironment.core.utils.common.StringUtils;
  * @author Brigitte Boden
  * @author Dominik Schneider
  * @author Kathrin Schaffert (#17016, #14895, #17673)
- * @author Devika Jalgaonkar (#17349)
+ * @author Devika Jalgaonkar (#17349, #18132)
  */
 
 public class OutputLocationEditDialog extends Dialog {
@@ -492,6 +492,10 @@ public class OutputLocationEditDialog extends Dialog {
         // Check if input fields are empty
         if (chosenFilename.isEmpty()) {
             validationErrors.add("File name is empty");
+            isValid = false;
+        }
+        if (chosenFilename.isBlank()) {
+            validationErrors.add("File name consists of just blank spaces");
             isValid = false;
         }
 

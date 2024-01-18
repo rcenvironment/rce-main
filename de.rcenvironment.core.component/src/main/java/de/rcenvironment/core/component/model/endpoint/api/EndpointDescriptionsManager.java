@@ -592,9 +592,11 @@ public class EndpointDescriptionsManager extends PropertiesChangeSupport impleme
      * @param name name to validate
      * @return <code>true</code> if no other endpoint with given name exists, else
      *         <code>false</code>
+     * 
+     * @author Devika Jalgaonkar (#18132)
      */
     public boolean isValidEndpointName(String name) {
-        return name != null && !name.isEmpty() && !staticEndpointDescriptions.containsKey(name)
+        return name != null && !name.isEmpty() && !name.isBlank() && !staticEndpointDescriptions.containsKey(name)
             && !dynamicEndpointDescriptions.containsKey(name);
     }
 
