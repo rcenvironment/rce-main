@@ -374,35 +374,6 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
     }
 
     @Test
-    public void whenVailidatingRemoteWorkflowControllerVisibilityExceptionIsThrown() throws WorkflowExecutionException {
-
-        final LogicalNodeId localNodeId = localNodeId();
-        final WorkflowNode node = new WorkflowNodeMockBuilder()
-            .identifier(WORKFLOW_NODE_IDENTIFIER)
-            .build();
-
-        final WorkflowDescriptionMock description = new WorkflowDescriptionMock(workflowIdentifier());
-        description.setControllerNode(localNodeId);
-        description.addNode(node);
-
-        List<String> componentRefs = new ArrayList<>();
-        componentRefs
-            .add(StringUtils.escapeAndConcat(WORKFLOW_NODE_IDENTIFIER, WorkflowNodeMockBuilder.IDENTIFIER_WITH_VERSION, LOGICAL_NODE_ID));
-
-        final WorkflowExecutionServiceImplUnitTestBuilder builder = new WorkflowExecutionServiceImplUnitTestBuilder();
-        final WorkflowExecutionServiceImpl service = builder
-            .expectControllerServiceVisibilityVerificationThrowsException(localNodeId, componentRefs)
-            .build();
-
-        Map<String, String> result = service.validateRemoteWorkflowControllerVisibilityOfComponents(description);
-        builder.verifyAllDependencies();
-        assertEquals(
-            WorkflowExecutionServiceImpl.ERROR_MESSAGE_COMPONENT_VISIBILITY_FAILURE
-                + WorkflowExecutionServiceImplUnitTestBuilder.ERROR_MESSAGE,
-            result.get(WORKFLOW_NODE_IDENTIFIER));
-    }
-
-    @Test
     public void whenGetLocalWorkflowExecutionInformations() throws ExecutionControllerException, RemoteOperationException {
 
         final RemotableWorkflowExecutionControllerService controllerService = controllerService(Optional.empty());

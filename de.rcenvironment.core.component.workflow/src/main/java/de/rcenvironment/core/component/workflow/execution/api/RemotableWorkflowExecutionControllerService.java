@@ -76,6 +76,6 @@ public interface RemotableWorkflowExecutionControllerService extends RemotableEx
      *         the values are error messages
      * @throws RemoteOperationException common remote call exception
      */
-    Map<String, String> verifyComponentVisibility(List<String> componentRefs) throws RemoteOperationException;
+    Map<String, String> verifyComponentVisibility(List<String> componentRefs);
 
 }

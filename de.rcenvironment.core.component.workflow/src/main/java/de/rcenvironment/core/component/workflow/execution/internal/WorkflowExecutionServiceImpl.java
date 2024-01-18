@@ -9,7 +9,6 @@
 package de.rcenvironment.core.component.workflow.execution.internal;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -152,16 +151,8 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
         }
         RemotableWorkflowExecutionControllerService remoteWFExecControllerService =
             communicationService.getRemotableService(RemotableWorkflowExecutionControllerService.class, wfDescription.getControllerNode());
-        try {
-            return remoteWFExecControllerService.verifyComponentVisibility(componentRefs);
-        } catch (RemoteOperationException e) {
-            Map<String, String> result = new HashMap<>();
-            for (WorkflowNode wfDescNode : wfDescription.getWorkflowNodes()) {
-                result.put(wfDescNode.getIdentifierAsObject().toString(),
-                    ERROR_MESSAGE_COMPONENT_VISIBILITY_FAILURE + e.getMessage());
-            }
-            return result;
-        }
+
+        return remoteWFExecControllerService.verifyComponentVisibility(componentRefs);
     }
 
     private WorkflowExecutionInformation startWorkflowExecutionInternal(WorkflowExecutionContext wfExeCtx)
