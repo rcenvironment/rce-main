@@ -14,9 +14,11 @@ import java.util.Map;
 import org.easymock.EasyMock;
 
 import de.rcenvironment.core.communication.common.LogicalNodeId;
+import de.rcenvironment.core.component.workflow.api.WorkflowConstants;
 import de.rcenvironment.core.component.workflow.execution.api.RemotableWorkflowExecutionControllerService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContext;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionInformation;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowState;
 import de.rcenvironment.core.component.workflow.execution.impl.WorkflowExecutionInformationImpl;
 import de.rcenvironment.core.component.workflow.execution.internal.WorkflowExecutionControllerServiceImplTestBuilder.WorkflowExecutionControllerServiceImplMock;
 
@@ -77,7 +79,16 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
 
     public WorkflowExecutionServiceImplIntegrationTestBuilder bindWorkflowExecutionControllerServiceWithWfExecutionInformations(
         LogicalNodeId targetNodeId, WorkflowExecutionContext context) {
-        this.controllerService = getControllerServiceWithWfExecutionInformations(targetNodeId, context);
+        this.controllerService = getControllerServiceGetWorkflowExecutionInformationsIsCalled(targetNodeId, context);
+        service.bindWorkflowExecutionControllerService(this.controllerService);
+        return this;
+    }
+
+    public WorkflowExecutionServiceImplIntegrationTestBuilder bindWorkflowExecutionControllerServiceSendHeartbeat(
+        LogicalNodeId localNodeId, WorkflowExecutionContext context) {
+
+        this.controllerService = getControllerServiceGetWorkflowExecutionInformationsIsCalled(localNodeId, context);
+
         service.bindWorkflowExecutionControllerService(this.controllerService);
         return this;
     }
@@ -87,6 +98,12 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
             .expect(communicationService.getRemotableService(RemotableWorkflowExecutionControllerService.class, targetNode))
             .andStubReturn(controllerService);
 
+        return this;
+    }
+
+    public WorkflowExecutionServiceImplIntegrationTestBuilder expectNotificationServiceSendNotification(String wfExecInfoIdentifier) {
+        notificationService.send(WorkflowConstants.STATE_NOTIFICATION_ID + wfExecInfoIdentifier, WorkflowState.IS_ALIVE.name());
+        EasyMock.expectLastCall();
         return this;
     }
 
@@ -151,7 +168,8 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
         return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
     }
 
-    private RemotableWorkflowExecutionControllerService getControllerServiceWithWfExecutionInformations(LogicalNodeId targetNodeId,
+    private RemotableWorkflowExecutionControllerService getControllerServiceGetWorkflowExecutionInformationsIsCalled(
+        LogicalNodeId targetNodeId,
         WorkflowExecutionContext context) {
         WorkflowExecutionControllerServiceImplTestBuilder builder = new WorkflowExecutionControllerServiceImplTestBuilder();
         WorkflowExecutionControllerServiceImpl workflowExecutionControllerService = builder
@@ -162,9 +180,12 @@ class WorkflowExecutionServiceImplIntegrationTestBuilder extends WorkflowExecuti
 
         Map<String, WorkflowExecutionInformation> map = new HashMap<String, WorkflowExecutionInformation>();
         WorkflowExecutionInformationImpl info = new WorkflowExecutionInformationImpl(context);
+        info.setWorkflowExecutionIdentifier(WorkflowExecutionServiceImplTestHelper.WF_EXEC_INFO_IDENTIFIER);
+        info.setIdentifier(WorkflowExecutionServiceImplTestHelper.executionIdentifier());
         map.put(WorkflowExecutionServiceImplTestHelper.executionIdentifier(), info);
         workflowExecutionControllerService.setWorkflowExecutionInformations(map);
 
         return this.controllerServices.computeIfAbsent(targetNodeId, ignored -> workflowExecutionControllerService);
     }
+
 }

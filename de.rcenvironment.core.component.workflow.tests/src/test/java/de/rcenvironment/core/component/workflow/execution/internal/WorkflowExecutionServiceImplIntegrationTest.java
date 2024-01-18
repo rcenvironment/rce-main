@@ -41,8 +41,6 @@ import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
  */
 public class WorkflowExecutionServiceImplIntegrationTest extends WorkflowExecutionServiceImplTestHelper {
 
-    private static final String WORKFLOW_NODE_IDENTIFIER = "workflowNodeIdentifier";
-
     /** Rule for expecting an Exception during test run. */
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
@@ -322,6 +320,24 @@ public class WorkflowExecutionServiceImplIntegrationTest extends WorkflowExecuti
         final long expected = 2345;
         Long current = info.getWorkflowDataManagementId();
         assertEquals(expected, current.longValue());
+    }
+
+    @Test
+    public void whenSendHeartBeatForActiveWorkflowsForStateRunning()
+        throws ExecutionControllerException, RemoteOperationException {
+
+        final LogicalNodeId localNodeId = localNodeId();
+        final WorkflowDescription description = new WorkflowDescription(workflowIdentifier());
+        final WorkflowExecutionContext context = new WorkflowExecutionContextImpl(executionIdentifier(), description);
+
+        final WorkflowExecutionServiceImplIntegrationTestBuilder builder = new WorkflowExecutionServiceImplIntegrationTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .bindWorkflowExecutionControllerServiceSendHeartbeat(localNodeId, context)
+            .expectNotificationServiceSendNotification(executionIdentifier())
+            .build();
+
+        service.sendHeartbeatForActiveWorkflows();
+        builder.verifyAllDependencies();
     }
 
 }

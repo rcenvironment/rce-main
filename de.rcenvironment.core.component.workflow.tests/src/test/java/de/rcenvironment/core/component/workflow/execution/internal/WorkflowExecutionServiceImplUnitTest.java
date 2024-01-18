@@ -59,15 +59,11 @@ import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
  */
 public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServiceImplTestHelper {
 
-    private static final String WF_EXEC_INFO_IDENTIFIER = "wfExecInfoIdentifier";
-
     private static final String TEST_EXCEPTION = "Test Exception";
 
     private static final long WORKFLOW_DATA_MANAGEMENT_ID = (long) 1234;
 
     private static final String WORKFLOW_EXECUTION_HANDLE_IDENTIFIER = "handleIdentifier";
-
-    private static final String WORKFLOW_NODE_IDENTIFIER = "workflowNodeIdentifier";
 
     /** Rule for expecting an Exception during test run. */
     @Rule

@@ -22,6 +22,10 @@ class WorkflowExecutionServiceImplTestHelper {
 
     static final String REMOTE_NODE_ID = "remoteNodeId";
 
+    static final String WORKFLOW_NODE_IDENTIFIER = "workflowNodeIdentifier";
+
+    static final String WF_EXEC_INFO_IDENTIFIER = "wfExecInfoIdentifier";
+
     protected WorkflowExecutionServiceImplTestHelper() {};
 
     static String workflowIdentifier() {
