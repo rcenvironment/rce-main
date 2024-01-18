@@ -61,10 +61,6 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
 
     private static final String TEST_EXCEPTION = "Test Exception";
 
-    private static final long WORKFLOW_DATA_MANAGEMENT_ID = (long) 1234;
-
-    private static final String WORKFLOW_EXECUTION_HANDLE_IDENTIFIER = "handleIdentifier";
-
     /** Rule for expecting an Exception during test run. */
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
@@ -466,8 +462,8 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
         final WorkflowExecutionServiceImplUnitTestBuilder builder = new WorkflowExecutionServiceImplUnitTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
             .expectControllerServiceCreation(localNodeId)
-            .expectControllerServiceReturnsWorkflowDataManagementId(localNodeId, WORKFLOW_EXECUTION_HANDLE_IDENTIFIER,
-                    WORKFLOW_DATA_MANAGEMENT_ID)
+            .expectControllerServiceReturnsWorkflowDataManagementId(localNodeId, executionIdentifier(),
+                DATA_MANAGEMENT_ID)
             .expectMetaDataServiceDeletesWorkflowRun(localNodeId)
             .build();
 
@@ -487,12 +483,12 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
         final WorkflowExecutionServiceImplUnitTestBuilder builder = new WorkflowExecutionServiceImplUnitTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
             .expectControllerServiceCreation(localNodeId)
-            .expectControllerServiceThrowsException(localNodeId, WORKFLOW_EXECUTION_HANDLE_IDENTIFIER)
+            .expectControllerServiceThrowsException(localNodeId, executionIdentifier())
             .build();
 
         exceptionRule.expect(ExecutionControllerException.class);
         exceptionRule.expectMessage(
-            WorkflowExecutionServiceImpl.ERROR_MESSAGE_FAILED_TO_DETERMINE_STORAGE_ID + WORKFLOW_EXECUTION_HANDLE_IDENTIFIER);
+            WorkflowExecutionServiceImpl.ERROR_MESSAGE_FAILED_TO_DETERMINE_STORAGE_ID + executionIdentifier());
         service.deleteFromDataManagement(handle);
     }
 
@@ -506,13 +502,13 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
         final WorkflowExecutionServiceImplUnitTestBuilder builder = new WorkflowExecutionServiceImplUnitTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
             .expectControllerServiceCreation(localNodeId)
-            .expectControllerServiceReturnsWorkflowDataManagementId(localNodeId, WORKFLOW_EXECUTION_HANDLE_IDENTIFIER,
-                    WORKFLOW_DATA_MANAGEMENT_ID)
+            .expectControllerServiceReturnsWorkflowDataManagementId(localNodeId, executionIdentifier(),
+                DATA_MANAGEMENT_ID)
             .expectMetaDataServiceThrowsException(localNodeId)
             .build();
 
         exceptionRule.expect(ExecutionControllerException.class);
-        exceptionRule.expectMessage(WorkflowExecutionServiceImpl.ERROR_MESSAGE_COULD_NOT_DELETE_WORKFLOW_RUN + WORKFLOW_DATA_MANAGEMENT_ID);
+        exceptionRule.expectMessage(WorkflowExecutionServiceImpl.ERROR_MESSAGE_COULD_NOT_DELETE_WORKFLOW_RUN + DATA_MANAGEMENT_ID);
         service.deleteFromDataManagement(handle);
     }
 
@@ -553,7 +549,7 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
         final WorkflowExecutionServiceImplUnitTestBuilder builder = new WorkflowExecutionServiceImplUnitTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
             .expectControllerServiceCreation(localNodeId)
-            .expectControllerServiceReturnsWorkflowState(localNodeId, WORKFLOW_EXECUTION_HANDLE_IDENTIFIER)
+            .expectControllerServiceReturnsWorkflowState(localNodeId, executionIdentifier())
             .build();
 
         service.getWorkflowState(handle);
@@ -602,15 +598,6 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
         EasyMock.expectLastCall();
         EasyMock.replay(log);
         return log;
-    }
-
-    private WorkflowExecutionHandle handle(LogicalNodeId localNodeId) {
-        WorkflowExecutionHandle handle = EasyMock.createStrictMock(WorkflowExecutionHandle.class);
-
-        EasyMock.expect(handle.getLocation()).andStubReturn(localNodeId);
-        EasyMock.expect(handle.getIdentifier()).andStubReturn(WORKFLOW_EXECUTION_HANDLE_IDENTIFIER);
-        EasyMock.replay(handle);
-        return handle;
     }
 
     private WorkflowExecutionInformationCache forceRefreshCache() {

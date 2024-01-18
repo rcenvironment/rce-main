@@ -34,7 +34,7 @@ import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
  * 
  * @author Kathrin Schaffert
  */
-class WorkflowExecutionControllerServiceImplTestBuilder {
+class WorkflowExecutionControllerServiceImplTestBuilder extends WorkflowExecutionServiceImplTestHelper {
 
     class WorkflowExecutionControllerServiceImplMock extends WorkflowExecutionControllerServiceImpl {
 
@@ -77,8 +77,6 @@ class WorkflowExecutionControllerServiceImplTestBuilder {
         }
 
     }
-
-    static final long DATA_MANAGEMENT_ID = 2345;
 
     private WorkflowExecutionControllerServiceImplMock service = new WorkflowExecutionControllerServiceImplMock();
 

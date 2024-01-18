@@ -10,6 +10,7 @@ package de.rcenvironment.core.component.workflow.execution.internal;
 import org.easymock.EasyMock;
 
 import de.rcenvironment.core.communication.common.LogicalNodeId;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionHandle;
 
 /**
  * Parent class for {@link WorkflowExecutionServiceImpl} tests.
@@ -25,6 +26,8 @@ class WorkflowExecutionServiceImplTestHelper {
     static final String WORKFLOW_NODE_IDENTIFIER = "workflowNodeIdentifier";
 
     static final String WF_EXEC_INFO_IDENTIFIER = "wfExecInfoIdentifier";
+
+    static final long DATA_MANAGEMENT_ID = 2345;
 
     protected WorkflowExecutionServiceImplTestHelper() {};
 
@@ -49,5 +52,14 @@ class WorkflowExecutionServiceImplTestHelper {
         EasyMock.expect(localNodeId.getLogicalNodeIdString()).andStubReturn(REMOTE_NODE_ID);
         EasyMock.replay(localNodeId);
         return localNodeId;
+    }
+
+    static WorkflowExecutionHandle handle(LogicalNodeId localNodeId) {
+        WorkflowExecutionHandle handle = EasyMock.createStrictMock(WorkflowExecutionHandle.class);
+
+        EasyMock.expect(handle.getLocation()).andStubReturn(localNodeId);
+        EasyMock.expect(handle.getIdentifier()).andStubReturn(executionIdentifier());
+        EasyMock.replay(handle);
+        return handle;
     }
 }

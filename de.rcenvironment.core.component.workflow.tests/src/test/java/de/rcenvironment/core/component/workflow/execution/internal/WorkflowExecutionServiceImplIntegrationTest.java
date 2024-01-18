@@ -44,10 +44,6 @@ import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
  */
 public class WorkflowExecutionServiceImplIntegrationTest extends WorkflowExecutionServiceImplTestHelper {
 
-    private static final long WORKFLOW_DATA_MANAGEMENT_ID = (long) 1234;
-
-    private static final String WORKFLOW_EXECUTION_HANDLE_IDENTIFIER = "handleIdentifier";
-
     /** Rule for expecting an Exception during test run. */
     @Rule
     public ExpectedException exceptionRule = ExpectedException.none();
@@ -262,27 +258,16 @@ public class WorkflowExecutionServiceImplIntegrationTest extends WorkflowExecuti
 
         WorkflowExecutionHandle handle = handle(localNodeId);
 
-        final long id = 2345;
-
         final WorkflowExecutionServiceImplIntegrationTestBuilder builder = new WorkflowExecutionServiceImplIntegrationTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
             .bindWorkflowExecutionControllerServiceGetWorkflowDataManagementIdIsCalled(localNodeId)
             .expectControllerServiceCreation(localNodeId, executionIdentifier())
-            .expectMetaDataServiceDeleteWorkflowRun(id, localNodeId)
+            .expectMetaDataServiceDeleteWorkflowRun(DATA_MANAGEMENT_ID, localNodeId)
             .build();
 
         service.deleteFromDataManagement(handle);
         EasyMock.verify(handle);
         builder.verifyAllDependencies();
-    }
-
-    private WorkflowExecutionHandle handle(LogicalNodeId localNodeId) {
-        WorkflowExecutionHandle handle = EasyMock.createStrictMock(WorkflowExecutionHandle.class);
-
-        EasyMock.expect(handle.getLocation()).andStubReturn(localNodeId);
-        EasyMock.expect(handle.getIdentifier()).andStubReturn(executionIdentifier());
-        EasyMock.replay(handle);
-        return handle;
     }
 
 }
