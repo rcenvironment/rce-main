@@ -151,8 +151,10 @@ public class OutputWriterEndpointEditDialog extends EndpointEditDialog {
 
             @Override
             public void modifyText(ModifyEvent arg0) {
-                metadataValues.put(OutputWriterComponentConstants.CONFIG_KEY_FOLDERFORSAVING,
-                    OutputWriterComponentConstants.ROOT_DISPLAY_NAME + File.separator + ((Text) arg0.getSource()).getText());
+                if (!(((Text) arg0.getSource()).getText().isBlank()) && !(((Text) arg0.getSource()).getText().isEmpty())) {
+                    metadataValues.put(OutputWriterComponentConstants.CONFIG_KEY_FOLDERFORSAVING,
+                        OutputWriterComponentConstants.ROOT_DISPLAY_NAME + File.separator + ((Text) arg0.getSource()).getText());
+                }
             }
         });
 
