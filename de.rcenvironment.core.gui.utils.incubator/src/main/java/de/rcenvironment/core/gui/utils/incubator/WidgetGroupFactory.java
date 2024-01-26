@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Text;
  * @author Sascha Zur
  * @author Jascha Riedel (#14005)
  * @author Kathrin Schaffert (added GREATER_OR_EQUAL_ONE)
+ * @author Devika Jalgaonkar (#17974 - added WITHIN_FLOAT_RANGE)
  */
 public final class WidgetGroupFactory {
 
@@ -54,6 +55,11 @@ public final class WidgetGroupFactory {
      */
     public static final int GREATER_OR_EQUAL_ONE = 8;
     
+    /**
+     * Option if a textfield should only allow inputs between and including the maximum and minimum double range
+     */
+    public static final int WITHIN_FLOAT_RANGE = 32;
+
     /**
      * Option if a textfield should align the text in the (standard is left).
      */

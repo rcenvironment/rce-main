@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Text;
  * @author Sascha Zur
  * @author Jascha Riedel (#14005)
  * @author Kathrin Schaffert (bug fixes, refactoring)
+ * @author Devika Jalgaonkar (#17974)
  */
 public class NumericalTextConstraintListener implements VerifyListener {
 
@@ -62,6 +63,10 @@ public class NumericalTextConstraintListener implements VerifyListener {
 
         if ((function & WidgetGroupFactory.GREATER_OR_EQUAL_ONE) > 0 && valid) {
             valid &= checkIfGreaterOrEqualOne(newS);
+        }
+
+        if ((function & WidgetGroupFactory.WITHIN_FLOAT_RANGE) > 0 && valid) {
+            valid &= checkIfFloatInputIsWithinRange(newS);
         }
 
         // allow leading dot
@@ -161,4 +166,14 @@ public class NumericalTextConstraintListener implements VerifyListener {
             return false;
         }
     }
+    
+    private boolean checkIfFloatInputIsWithinRange(String newS) {
+        try {
+            double result = Double.parseDouble(newS);
+            return ((result >= Double.MIN_VALUE) && (result <= Double.MAX_VALUE));
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
 }
