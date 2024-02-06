@@ -46,6 +46,7 @@ import de.rcenvironment.core.utils.common.StringUtils;
  * @author Oliver Seebach
  * @author Hendrik Abbenhaus
  * @author Kathrin Schaffert
+ * @author Devika Jalgaonkar (#17974)
  */
 public abstract class AbstractNetworkConnectionDialog extends TitleAreaDialog implements ModifyListener, VerifyListener, PasteListener {
 
@@ -398,7 +399,8 @@ public abstract class AbstractNetworkConnectionDialog extends TitleAreaDialog im
         delayMultiplierTextField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         delayMultiplierTextField
             .addVerifyListener(
-                new NumericalTextConstraintListener(WidgetGroupFactory.ONLY_FLOAT | WidgetGroupFactory.GREATER_OR_EQUAL_ONE));
+                new NumericalTextConstraintListener(
+                    WidgetGroupFactory.ONLY_FLOAT | WidgetGroupFactory.GREATER_OR_EQUAL_ONE | WidgetGroupFactory.WITHIN_FLOAT_RANGE));
         delayMultiplierTextField.addModifyListener(evt -> updateOkButtonActivation());
 
         updateUseDefaultCheckboxActivation();
