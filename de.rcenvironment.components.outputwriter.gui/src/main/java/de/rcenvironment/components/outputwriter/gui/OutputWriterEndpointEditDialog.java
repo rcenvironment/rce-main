@@ -17,8 +17,6 @@ import java.util.Set;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
@@ -60,11 +58,11 @@ public class OutputWriterEndpointEditDialog extends EndpointEditDialog {
     private static final int MINUS_ONE = -1;
 
     private static final String COLON = ":";
-    
+
     private static final int DIALOG_WIDTH = 450;
-    
+
     private static final int DIALOG_HEIGHT = 575;
-    
+
     private final Set<String> paths;
 
     private Text result;
@@ -85,20 +83,18 @@ public class OutputWriterEndpointEditDialog extends EndpointEditDialog {
         hintLabel
             .setText(
                 "You are adding a primitive data type input. Therefore, you also \n"
-                + "need to add this input to a target file in the data sheet tab \n"
-                + "of this Output Writer component.");
+                    + "need to add this input to a target file in the data sheet tab \n"
+                    + "of this Output Writer component.");
         hintLabel.setImage(ImageManager.getInstance().getSharedImage(StandardImages.INFORMATION_16));
         return superControl;
     }
 
-    
-    
     @Override
     protected void createSettings(Map<Integer, String> sortedKeyMap, Composite container) {
         String key = OutputWriterComponentConstants.CONFIG_KEY_FILENAME;
         String text = metaData.getGuiName(key);
         String value = metadataValues.get(key);
-        
+
         final Label nameLabel = new Label(container, SWT.NONE);
         nameLabel.setText(text + "    ");
         result = new Text(container, SWT.SINGLE | SWT.BORDER);
@@ -147,12 +143,11 @@ public class OutputWriterEndpointEditDialog extends EndpointEditDialog {
         final Text additionalFolder = new Text(container, SWT.SINGLE | SWT.BORDER);
         additionalFolder.setMessage(Messages.optionalMessage);
         additionalFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        additionalFolder.addModifyListener(new ModifyListener() {
-
-            @Override
-            public void modifyText(ModifyEvent arg0) {
+        additionalFolder.addModifyListener(source -> {
+            String textString = ((Text) source.getSource()).getText();
+            if (!textString.isBlank() && !textString.isEmpty()) {
                 metadataValues.put(OutputWriterComponentConstants.CONFIG_KEY_FOLDERFORSAVING,
-                    OutputWriterComponentConstants.ROOT_DISPLAY_NAME + File.separator + ((Text) arg0.getSource()).getText());
+                    OutputWriterComponentConstants.ROOT_DISPLAY_NAME + File.separator + textString);
             }
         });
 
@@ -192,7 +187,7 @@ public class OutputWriterEndpointEditDialog extends EndpointEditDialog {
             }
         });
         additionalFolder.addListener(SWT.Verify, new AlphanumericalTextContraintListener(FORBIDDEN_CHARS));
-        
+
     }
 
     @Override

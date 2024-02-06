@@ -54,7 +54,7 @@ import de.rcenvironment.core.utils.common.StringUtils;
  * @author Brigitte Boden
  * @author Dominik Schneider
  * @author Kathrin Schaffert (#17016, #14895, #17673)
- * @author Devika Jalgaonkar (#17349)
+ * @author Devika Jalgaonkar (#17349, #18132)
  */
 
 public class OutputLocationEditDialog extends Dialog {
@@ -490,16 +490,13 @@ public class OutputLocationEditDialog extends Dialog {
         final List<String> validationErrors = new LinkedList<>();
         boolean isValid = true;
         // Check if input fields are empty
-        if (chosenFilename.isEmpty()) {
-            validationErrors.add("File name is empty");
+        if (chosenFilename.isEmpty() || chosenFilename.isBlank()) {
+            validationErrors.add("File name is empty or consists of empty spaces.");
             isValid = false;
         }
-
         if (otherOutputLocationFileNamesWithPaths.contains(chosenFolderForSaving + File.separator + chosenFilename)) {
             validationErrors.add("File name already exists in another target configuration");
-
             isValid = false;
-
         }
 
         List<String> forbiddenFilenames = Arrays.asList(OutputWriterComponentConstants.PROBLEMATICFILENAMES_WIN);

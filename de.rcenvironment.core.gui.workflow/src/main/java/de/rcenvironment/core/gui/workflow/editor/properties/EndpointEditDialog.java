@@ -63,6 +63,7 @@ import de.rcenvironment.core.utils.common.StringUtils;
  * @author Sascha Zur
  * @author Kathrin Schaffert (refactoring, #17986, little bug fix)
  * @author Tim Rosenbach
+ * @author Devika Jalgaonkar (#18132)
  */
 public class EndpointEditDialog extends TitleAreaDialog {
 
@@ -615,7 +616,7 @@ public class EndpointEditDialog extends TitleAreaDialog {
         boolean inputsValid = validateMetaDataInputs();
 
         if (!nameIsValid) {
-            if (name.isEmpty()) {
+            if (name.isEmpty() || name.isBlank()) {
                 updateMessage(StringUtils.format(Messages.missingNameMessage, type.toString()), true);
             } else {
                 updateMessage(Messages.invalidNameMessage, true);
@@ -662,7 +663,7 @@ public class EndpointEditDialog extends TitleAreaDialog {
             if (!dataType.equals(EndpointMetaDataConstants.TYPE_BOOL)
                 && (metaData.getPossibleValues(key) == null || metaData.getPossibleValues(key).contains("*"))) {
                 String widgetText = ((Text) widget).getText();
-                if (widgetText.equals("") && (visible && enabled)
+                if ((widgetText.isEmpty() || widgetText.isBlank()) && (visible && enabled)
                     && (validation != null && (validation.contains("required")))) {
                     isValid = false;
 
