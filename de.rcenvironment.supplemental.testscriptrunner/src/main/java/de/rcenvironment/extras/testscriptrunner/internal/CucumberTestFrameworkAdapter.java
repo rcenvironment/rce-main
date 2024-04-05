@@ -211,7 +211,7 @@ public class CucumberTestFrameworkAdapter {
             } else {
                 outputReceiver.addOutput(
                     StringUtils.format(
-                        "%s%d passed, %d unsuccessful or skipped (%d failed, %d skipped, %d pending, %d undefined, %d ambiguous)",
+                        "%s%d passed, %d unsuccessful or skipped (%d passed, %d failed, %d skipped, %d pending, %d undefined, %d ambiguous)",
                         prefix, passedCount, unsuccessfulCount,
                         passedCount, failedCount, skippedCount, pendingCount, undefinedCount, ambiguousCount));
             }
