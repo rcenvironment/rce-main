@@ -71,7 +71,7 @@ public class InstanceCommandStepDefinitions extends InstanceManagementStepDefini
      *        does that depends on the value of {@code allFlag} and is defined in {@link #resolveInstanceList()}
      * @param executionDesc a string indicating the mode in which the given commands are executed on the instances. This does not refer to
      *        the order or concurrence of the commands, but the order or concurrence of the instances on which the commands are executed.
-     *        The commands are executed in the given ordering. Can be choosen from "in the given order","concurrently","in a random order". 
+     *        The commands are executed in the given ordering. Can be chosen from "in the given order","concurrently","in a random order". 
      *        If null sequentially is the default.
      */
     @When("^executing(?: the)? command[s]? \"([^\"]*)\" on( all)?(?: instance[s])?(?: \"([^\"]*)\")?"
