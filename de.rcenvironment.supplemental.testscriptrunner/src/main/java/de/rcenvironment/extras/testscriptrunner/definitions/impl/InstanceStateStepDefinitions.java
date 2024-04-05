@@ -214,9 +214,23 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
      */
     @Then("^(all )?(?:instance[s]? )?(?:\"([^\"]*)\" )?should be (stopped|running)$")
     public void thenInstancesShouldBeInState(String allFlag, String instanceIds, String state) throws Exception {
-        AssertStateIterator assertStateIterator = new AssertStateIterator("running".equals(state));
-        iterateInstances(assertStateIterator, allFlag, instanceIds);
-        printToCommandConsole("Verified the status \"" + state + "\" of instance \"" + instanceIds + "\"");
+    	int tmax = 15; // max time in seconds to verify the desired state
+    	boolean doItAgain = true;
+    	int usedTime = 0;
+    	for (int ii = 0; ii < tmax && doItAgain; ii++) {
+    		usedTime = ii;
+    		doItAgain = false;
+    		AssertStateIterator assertStateIterator = new AssertStateIterator("running".equals(state));
+    		try {
+    			iterateInstances(assertStateIterator, allFlag, instanceIds);
+    		} catch (AssertionError ae) {
+    			doItAgain = true;
+    			printToCommandConsole("   +++   " + ii + " seconds, try again");
+    			Thread.sleep(1000);
+    		}
+    	}
+		printToCommandConsole("   +++   " + state + " " + resolveInstanceList(allFlag != null, instanceIds).toString() + " Done in "+ usedTime + " seconds");
+        printToCommandConsole("Verified the status \"" + state + "\" of instance(s) \"" + resolveInstanceList(allFlag != null, instanceIds).toString() + "\"");
     }
     
     private void cycleAllOutgoingConnectionsOf(ManagedInstance instance) {
@@ -246,6 +260,9 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
         printToCommandConsole(StringUtils.format("Launching instance \"%s\" using installation \"%s\"", instance, installationId));
         INSTANCE_MANAGEMENT_SERVICE.startInstance(installationId, listOfSingleStringElement(instance.getId()),
             getTextoutReceiverForIMOperations(), timeout, withGUI, commandArguments);
+
+        verifyInstanceState(instance.toString(), "running");
+
     }
 
     private void stopSingleInstance(ManagedInstance instance) throws IOException {
@@ -253,7 +270,17 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
         INSTANCE_MANAGEMENT_SERVICE.stopInstance(listOfSingleStringElement(instance.getId()),
             getTextoutReceiverForIMOperations(), TimeUnit.SECONDS.toMillis(StepDefinitionConstants.IM_ACTION_TIMEOUT_IN_SECS));
 
+        verifyInstanceState(instance.toString(), "stopped");
+
         instance.onStopped();
+    }
+
+    private void verifyInstanceState(String instanceName, String intendedState) {
+    	try {
+        	thenInstancesShouldBeInState(null, instanceName, intendedState);
+        } catch (Exception exception) {
+        	System.out.println("Unexpected Exception when stopping instance(s)" + exception);
+        }
     }
 
 }

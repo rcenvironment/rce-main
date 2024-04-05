@@ -7,10 +7,8 @@ Feature: NetworkingTests
 Scenario: Basic multi-instance handling and command execution
 
   Given instances "NodeA, NodeB" using the default build
-  Then  instances "NodeA, NodeB" should be stopped
 
   When  starting all instances
-  Then  instances "NodeA, NodeB" should be running
   And   the visible network of "NodeA" should consist of "NodeA"
   And   the visible network of "NodeB" should consist of "NodeB"
   
