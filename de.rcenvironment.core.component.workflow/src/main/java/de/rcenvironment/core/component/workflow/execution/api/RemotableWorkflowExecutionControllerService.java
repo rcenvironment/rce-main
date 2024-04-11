@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import de.rcenvironment.core.component.execution.api.ExecutionController;
 import de.rcenvironment.core.component.execution.api.ExecutionControllerException;
 import de.rcenvironment.core.component.execution.api.RemotableExecutionControllerService;
 import de.rcenvironment.core.utils.common.StringUtils;
@@ -63,8 +64,7 @@ public interface RemotableWorkflowExecutionControllerService extends RemotableEx
      * @throws RemoteOperationException if called from remote and remote method call failed
      * @throws ExecutionControllerException if {@link ExecutionController} is not available (anymore)
      */
-    Collection<WorkflowExecutionInformation> getWorkflowExecutionInformations() throws ExecutionControllerException,
-        RemoteOperationException;
+    Collection<WorkflowExecutionInformation> getWorkflowExecutionInformations() throws RemoteOperationException;
 
     /**
      * The remote call performing the actual check behind
@@ -75,6 +75,6 @@ public interface RemotableWorkflowExecutionControllerService extends RemotableEx
      *         the values are error messages
      * @throws RemoteOperationException common remote call exception
      */
-    Map<String, String> verifyComponentVisibility(List<String> componentRefs) throws RemoteOperationException;
+    Map<String, String> verifyComponentVisibility(List<String> componentRefs);
 
 }

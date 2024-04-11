@@ -108,8 +108,7 @@ public class WorkflowExecutionInformationImpl extends ComponentExecutionInformat
             ComponentExecutionIdentifier cei = wfExeCtx.getCompExeIdByWfNode(wfNode);
             componentExecutionInformation.setIdentifier(cei.toString()); // TODO
             componentExecutionInformation.setInstanceName(wfNode.getName());
-            componentExecutionInformation.setNodeId(NodeIdentifierUtils.parseArbitraryIdStringToLogicalNodeIdWithExceptionWrapping(
-                wfNode.getComponentDescription().getComponentInstallation().getNodeId()));
+            componentExecutionInformation.setNodeId(wfNode.getComponentDescription().getComponentInstallation().getNodeIdObject());
             componentExecutionInformation.setComponentIdentifier(wfNode.getComponentDescription().getIdentifier());
             componentExecutionInformation.setStorageNetworkDestination(wfExeCtx.getStorageNetworkDestination());
             componentExecutionInformation.setWorkflowExecutionIdentifier(wfExeCtx.getExecutionIdentifier());

@@ -13,7 +13,7 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
 public final class CaptureMatchers {
-    
+
     private CaptureMatchers() {}
 
     @SafeVarargs

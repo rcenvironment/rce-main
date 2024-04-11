@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.easymock.EasyMock;
 
+import de.rcenvironment.core.communication.common.LogicalNodeId;
 import de.rcenvironment.core.component.model.api.ComponentDescription;
 import de.rcenvironment.core.component.model.api.ComponentInstallation;
 import de.rcenvironment.core.component.model.api.ComponentRevision;
@@ -25,7 +26,16 @@ import de.rcenvironment.core.component.model.endpoint.api.EndpointDescriptionsMa
 import de.rcenvironment.core.component.workflow.model.api.WorkflowNode;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowNodeIdentifier;
 
+/**
+ * Builder to create Mock Objects of type {@link WorkflowNode}.
+ * 
+ * @author Alexander Weinert
+ * @author Kathrin Schaffert
+ */
 public class WorkflowNodeMockBuilder {
+
+    /** Constant. */
+    public static final String IDENTIFIER_WITH_VERSION = "identifierWithVersion";
 
     private final WorkflowNode node = EasyMock.createMock(WorkflowNode.class);
     
@@ -103,6 +113,7 @@ public class WorkflowNodeMockBuilder {
         });
 
         EasyMock.expect(node.getIdentifierAsObject()).andStubReturn(new WorkflowNodeIdentifier(this.workflowIdentifier));
+
         EasyMock.expect(node.getComponentDescription()).andStubAnswer(() -> {
             final ComponentDescription description = EasyMock.createMock(ComponentDescription.class);
             EasyMock.expect(description.getComponentInstallation()).andStubAnswer(() -> {
@@ -116,9 +127,18 @@ public class WorkflowNodeMockBuilder {
                 EasyMock.replay(installation);
                 return installation;
             });
+            EasyMock.expect(description.getNode()).andStubAnswer(() -> {
+                final LogicalNodeId logicalNodeId = EasyMock.createStrictMock(LogicalNodeId.class);
+                EasyMock.expect(logicalNodeId.getLogicalNodeIdString()).andStubReturn("logicalNodeId");
+                EasyMock.replay(logicalNodeId);
+                return logicalNodeId;
+            });
             EasyMock.replay(description);
             return description;
         });
+
+        EasyMock.expect(node.getComponentIdentifierWithVersion()).andStubAnswer(() -> IDENTIFIER_WITH_VERSION);
+
         EasyMock.replay(node);
         return node;
 

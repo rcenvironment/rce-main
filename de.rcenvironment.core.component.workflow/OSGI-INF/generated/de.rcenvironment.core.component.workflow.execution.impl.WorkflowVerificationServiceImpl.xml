@@ -3,6 +3,8 @@
    <service>
       <provide interface="de.rcenvironment.core.component.workflow.execution.api.WorkflowVerificationService"/>
    </service>
-   <reference bind="bindWorkflowExecutionService" interface="de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionService" name="WorkflowExecutionService"/>
+   <reference bind="bindWorkflowExecutionService" interface="de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionService" name="WorkflowExecutionService"/>
+   <reference bind="bindWorkflowFileLoaderFacade" interface="de.rcenvironment.core.component.workflow.execution.api.WorkflowFileLoaderFacade" name="WorkflowFileLoaderFacade"/>
+   <reference bind="bindWorkflowValidationService" interface="de.rcenvironment.core.component.workflow.validation.api.WorkflowDescriptionValidationService" name="WorkflowValidationService"/>
    <implementation class="de.rcenvironment.core.component.workflow.execution.impl.WorkflowVerificationServiceImpl"/>
 </scr:component>

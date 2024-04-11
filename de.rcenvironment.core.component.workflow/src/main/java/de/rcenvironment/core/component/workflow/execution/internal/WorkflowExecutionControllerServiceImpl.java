@@ -65,9 +65,18 @@ import de.rcenvironment.core.utils.incubator.ServiceRegistry;
  * 
  * @author Doreen Seider
  * @author Robert Mischke
+ * @author Kathrin Schaffert (little refactorings)
  */
 @Component
 public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflowExecutionControllerService {
+
+    /** Exception Message. */
+    static final String ERROR_MESSAGE_CANNOT_ACCESS_COMPONENT = "The workflow controller cannot access this component. "
+        + "Check if the controller needs to be in additional authorization groups.";
+
+    /** Exception Message. */
+    static final String ERROR_MESSAGE_WF_EXECUTION_REFUSED =
+        "Workflow execution request refused, as the requested instance is not declared as workflow host:";
 
     private BundleContext bundleContext;
 
@@ -113,12 +122,10 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
         if (calledFromRemote && !workflowHostService.getLogicalWorkflowHostNodes().contains(wfExeCtx.getNodeId())) {
             eventLogEntry.set(EventType.Attributes.SUCCESS, EventLogConstants.FALSE_VALUE);
             EventLog.append(eventLogEntry);
-            throw new WorkflowExecutionException(StringUtils.format("Workflow execution request refused, as the requested instance is "
-                + "not declared as workflow host: %s", wfExeCtx.getNodeId()));
+            throw new WorkflowExecutionException(StringUtils.format(ERROR_MESSAGE_WF_EXECUTION_REFUSED + " %s", wfExeCtx.getNodeId()));
         }
         // TODO use global ServiceRegistryAcccess instance once available
-        WorkflowExecutionController workflowController =
-            new WorkflowExecutionControllerImpl(wfExeCtx, ServiceRegistry.createAccessFor(this));
+        WorkflowExecutionController workflowController = createWorkflowExecutionController(wfExeCtx);
         workflowController.setComponentExecutionAuthTokens(executionAuthTokens);
 
         final String executionId = wfExeCtx.getExecutionIdentifier();
@@ -135,6 +142,10 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
         EventLog.append(eventLogEntry);
 
         return workflowExecutionInformation;
+    }
+
+    WorkflowExecutionControllerImpl createWorkflowExecutionController(WorkflowExecutionContext wfExeCtx) {
+        return new WorkflowExecutionControllerImpl(wfExeCtx, ServiceRegistry.createAccessFor(this));
     }
 
     @Override
@@ -235,8 +246,7 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
 
     @Override
     @AllowRemoteAccess
-    public Collection<WorkflowExecutionInformation> getWorkflowExecutionInformations() throws ExecutionControllerException,
-        RemoteOperationException {
+    public Collection<WorkflowExecutionInformation> getWorkflowExecutionInformations() throws RemoteOperationException {
         Map<String, WorkflowExecutionInformation> wfExeInfoSnapshot = null;
         synchronized (workflowExecutionInformations) {
             wfExeInfoSnapshot = new HashMap<>();
@@ -274,7 +284,7 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
             final String componentIdAndVersion = refParts[1];
             final LogicalNodeId logicalNodeId;
             try {
-                logicalNodeId = NodeIdentifierUtils.parseLogicalNodeIdString(refParts[2]);
+                logicalNodeId = parseLogicalNodeIdString(refParts);
             } catch (IdentifierException e) {
                 result.put(resultKey, "Invalid node id: " + refParts[2]); // should never happen
                 continue;
@@ -285,11 +295,14 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
                 result.put(resultKey, "The instance to run this component on is not visible from the workflow controller's instance. "
                     + "Check if they are located in disconnected networks.");
             } else if (!isComponentVisible(compKnowledge, componentIdAndVersion, logicalNodeId)) {
-                result.put(resultKey, "The workflow controller cannot access this component. "
-                    + "Check if the controller needs to be in additional authorization groups.");
+                result.put(resultKey, ERROR_MESSAGE_CANNOT_ACCESS_COMPONENT);
             }
         }
         return result;
+    }
+
+    LogicalNodeId parseLogicalNodeIdString(String[] refParts) throws IdentifierException {
+        return NodeIdentifierUtils.parseLogicalNodeIdString(refParts[2]);
     }
 
     @Reference
@@ -321,7 +334,7 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
         return reachableLogicalNodes.contains(logicalNodeId);
     }
 
-    private boolean isComponentVisible(DistributedComponentKnowledge compKnowledge, String componentIdAndVersion,
+    boolean isComponentVisible(DistributedComponentKnowledge compKnowledge, String componentIdAndVersion,
         LogicalNodeId logicalNodeId) {
 
         for (DistributedComponentEntry comp : compKnowledge.getKnownSharedInstallationsOnNode(logicalNodeId, false)) {
@@ -335,7 +348,7 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
     }
 
     // TODO there is no real point of registering the controllers at the OSGi service registry - simply use a map instead? -- misc_ro
-    private void registerExecutionController(WorkflowExecutionController workflowController, final String executionId) {
+    void registerExecutionController(WorkflowExecutionController workflowController, final String executionId) {
         Dictionary<String, String> properties = new Hashtable<String, String>();
         properties.put(ExecutionConstants.EXECUTION_ID_OSGI_PROP_KEY, executionId);
         ServiceRegistration<?> serviceRegistration = bundleContext.registerService(
@@ -357,5 +370,13 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
                 workflowServiceRegistrations.remove(executionId);
             }
         }
+    }
+
+    // !Method was added for the integration tests!
+    // Method was added to ensure good test coverage for a major overhaul of the Workflow Engine.
+    // After completing this work, it should be checked whether the integration tests are still relevant.
+    // Jan. 2024, Kathrin Schaffert
+    public void setWorkflowExecutionInformations(Map<String, WorkflowExecutionInformation> workflowExecutionInformations) {
+        this.workflowExecutionInformations = workflowExecutionInformations;
     }
 }

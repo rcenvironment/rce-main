@@ -35,8 +35,8 @@ public final class CommonTestOptions {
     }
 
     /**
-     * @return true if "extended" tests should be run; this can either mean that certain tests should be included, or that any
-     *         "higher intensity" versions of tests should be enabled, for example by increasing iteration counts or test sizes
+     * @return true if "extended" tests should be run; this can either mean that certain tests should be included, or that any "higher
+     *         intensity" versions of tests should be enabled, for example by increasing iteration counts or test sizes
      */
     public static boolean isExtendedTestingEnabled() {
         return sharedInstance.withExtendedTests;

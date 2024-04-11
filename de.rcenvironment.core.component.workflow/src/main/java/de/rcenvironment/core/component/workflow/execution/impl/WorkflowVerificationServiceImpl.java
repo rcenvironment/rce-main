@@ -14,17 +14,21 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
+import de.rcenvironment.core.component.workflow.execution.api.PersistentWorkflowDescriptionLoaderService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowDescriptionValidationResult;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionUtils;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileException;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileLoaderFacade;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowVerificationBuilder;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowVerificationService;
 import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowDescriptionLoaderCallback;
-import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionService;
 import de.rcenvironment.core.component.workflow.execution.internal.WorkflowVerification;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowDescription;
+import de.rcenvironment.core.component.workflow.validation.api.WorkflowDescriptionValidationService;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
+import de.rcenvironment.core.utils.incubator.ServiceRegistry;
 
 
 @Component
@@ -34,9 +38,13 @@ public class WorkflowVerificationServiceImpl implements WorkflowVerificationServ
 
     private static final int PARSING_WORKFLOW_FILE_RETRY_INTERVAL = 2000;
 
-    private HeadlessWorkflowExecutionService workflowExecutionService;
+    private WorkflowExecutionService workflowExecutionService;
 
     private final Log log = LogFactory.getLog(getClass());
+
+    private WorkflowFileLoaderFacade workflowFileLoaderFacade;
+
+	private WorkflowDescriptionValidationService workflowValidationService;
 
     /**
      * Note: retry mechanism applied to ensure that all available components and their updaters are registered (both remote and local); it
@@ -54,7 +62,8 @@ public class WorkflowVerificationServiceImpl implements WorkflowVerificationServ
         int retries = 0;
         while (true) {
             try {
-                workflowDescription = workflowExecutionService
+                workflowDescription = ServiceRegistry.createAccessFor(this)
+                    .getService(PersistentWorkflowDescriptionLoaderService.class)
                     .loadWorkflowDescriptionFromFileConsideringUpdates(wfFile,
                         new HeadlessWorkflowDescriptionLoaderCallback(outputReceiver));
             } catch (WorkflowFileException e) {
@@ -80,7 +89,7 @@ public class WorkflowVerificationServiceImpl implements WorkflowVerificationServ
                             wfFile.getAbsolutePath()));
                 }
                 WorkflowDescriptionValidationResult validationResult =
-                    workflowExecutionService.validateAvailabilityOfNodesAndComponentsFromLocalKnowledge(workflowDescription);
+                		workflowValidationService.validateAvailabilityOfNodesAndComponentsFromLocalKnowledge(workflowDescription);
                 if (validationResult.isSucceeded()) {
                     if (printNonErrorProgressMessages) {
                         outputReceiver.addOutput(
@@ -118,11 +127,22 @@ public class WorkflowVerificationServiceImpl implements WorkflowVerificationServ
     public WorkflowVerificationBuilder getVerificationBuilder() {
         return new WorkflowVerification.Builder()
             .workflowVerificationService(this)
-            .workflowExecutionService(this.workflowExecutionService);
+            .workflowExecutionService(this.workflowExecutionService)
+            .workflowFileLoaderFacade(this.workflowFileLoaderFacade);
     }
 
     @Reference
-    public void bindWorkflowExecutionService(final HeadlessWorkflowExecutionService service) {
+    public void bindWorkflowExecutionService(final WorkflowExecutionService service) {
         this.workflowExecutionService = service;
+    }
+    
+    @Reference
+    public void bindWorkflowValidationService(final WorkflowDescriptionValidationService service) {
+    	this.workflowValidationService = service;
+    }
+    
+    @Reference
+    public void bindWorkflowFileLoaderFacade(final WorkflowFileLoaderFacade service) {
+        this.workflowFileLoaderFacade = service;
     }
 }

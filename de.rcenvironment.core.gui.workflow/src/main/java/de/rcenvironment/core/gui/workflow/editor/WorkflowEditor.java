@@ -99,6 +99,7 @@ import de.rcenvironment.core.component.management.api.LocalComponentRegistration
 import de.rcenvironment.core.component.model.api.ComponentInstallationBuilder;
 import de.rcenvironment.core.component.model.api.ComponentInterface;
 import de.rcenvironment.core.component.validation.api.ComponentValidationMessageStore;
+import de.rcenvironment.core.component.workflow.execution.api.PersistentWorkflowDescriptionLoaderService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileException;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowDescription;
@@ -435,7 +436,8 @@ public class WorkflowEditor extends GraphicalEditor
 
                         monitor.beginTask(Messages.loadingComponents, 2);
                         monitor.worked(1);
-                        workflowDescription = workflowExecutionService
+                        workflowDescription = ServiceRegistry.createAccessFor(this)
+                            .getService(PersistentWorkflowDescriptionLoaderService.class)
                             .loadWorkflowDescriptionFromFileConsideringUpdates(wfFile, wfdc);
                         initializeWorkflowDescriptionListener();
                         monitor.worked(1);

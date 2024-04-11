@@ -20,18 +20,25 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import de.rcenvironment.core.communication.common.LogicalNodeId;
 import de.rcenvironment.core.communication.spi.CallbackMethod;
 import de.rcenvironment.core.component.execution.api.ConsoleRow;
+import de.rcenvironment.core.component.execution.api.ConsoleRowUtils;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContext;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowState;
-import de.rcenvironment.core.component.workflow.execution.headless.internal.ExtendedHeadlessWorkflowExecutionContext;
+import de.rcenvironment.core.component.workflow.execution.api.WorkflowStateNotificationSubscriber.NotificationSubscription;
 import de.rcenvironment.core.component.workflow.execution.internal.ConsoleRowFormatter;
+import de.rcenvironment.core.component.workflow.model.api.WorkflowDescription;
+import de.rcenvironment.core.component.workflow.model.api.WorkflowNode;
 import de.rcenvironment.core.notification.DefaultNotificationSubscriber;
 import de.rcenvironment.core.notification.Notification;
 import de.rcenvironment.core.notification.NotificationSubscriber;
 import de.rcenvironment.core.utils.common.StringUtils;
+import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
 
 /**
- * Subscriber for ConsoleRow events, including workflow life-cycle events.
+ * Subscriber for ConsoleRow events, including workflow life-cycle events. Logs incoming console rows to a file and notifies its registered
+ * observer about those rows.
  * 
  * Note: this subscriber should work for remote subscription now, but this was no tested yet
  * 
@@ -39,7 +46,20 @@ import de.rcenvironment.core.utils.common.StringUtils;
  * @author Robert Mischke
  * @author Doreen Seider
  */
-public class ConsoleRowSubscriber extends DefaultNotificationSubscriber implements Closeable {
+public class LoggingConsoleRowSubscriber extends DefaultNotificationSubscriber implements Closeable {
+
+    /**
+     * An observer that can react to each console row received by this subscriber as well as to the termination of output received by this
+     * subscriber.
+     * 
+     * @author Alexander Weinert
+     *
+     */
+    public interface Observer {
+        void reportConsoleOutputTerminated();
+        
+        void reportConsoleRowReceived(ConsoleRow row);
+    }
 
     private static final String LOG_FILE_SUFFIX = ".log";
 
@@ -51,7 +71,7 @@ public class ConsoleRowSubscriber extends DefaultNotificationSubscriber implemen
 
     private final transient File tempLogFileLocation;
 
-    private final transient ExtendedHeadlessWorkflowExecutionContext workflowExecutionContext;
+    private final transient Observer observer;
 
     private final transient Log log = LogFactory.getLog(getClass());
 
@@ -59,8 +79,8 @@ public class ConsoleRowSubscriber extends DefaultNotificationSubscriber implemen
 
     private transient BufferedWriter bufferedLogWriter;
 
-    public ConsoleRowSubscriber(ExtendedHeadlessWorkflowExecutionContext context, File logDirectory) {
-        this.workflowExecutionContext = context;
+    public LoggingConsoleRowSubscriber(Observer observer, File logDirectory) {
+        this.observer = observer;
         String consoleLogName = "workflow";
         finalLogFileDestination = new File(logDirectory, consoleLogName + LOG_FILE_SUFFIX);
         if (finalLogFileDestination.exists()) {
@@ -148,11 +168,11 @@ public class ConsoleRowSubscriber extends DefaultNotificationSubscriber implemen
         if (row.getType() == ConsoleRow.Type.LIFE_CYCLE_EVENT) {
             log.debug("Received workflow life-cycle event: " + row.getPayload());
             if (ConsoleRow.WorkflowLifecyleEventType.WORKFLOW_FINISHED.name().equals(row.getPayload())) {
-                workflowExecutionContext.reportConsoleOutputTerminated();
+                observer.reportConsoleOutputTerminated();
             }
         }
 
-        workflowExecutionContext.reportConsoleRowReceived(row);
+        observer.reportConsoleRowReceived(row);
     }
 
     @Override
@@ -187,5 +207,25 @@ public class ConsoleRowSubscriber extends DefaultNotificationSubscriber implemen
             log.error("Failed to open log file " + logFile + " for writing", e);
         }
         return fw;
+    }
+
+    /**
+     * Writes a log file header providing information about log file formation version, wf and component controller locations, and the node
+     * that initiated the workflow run.
+     * 
+     * @param workflowExecutionContext Used for obtaining information about the node that started a workflow execution, the controller for
+     *        that execution, as well as the names and locations of individual workflow components
+     */
+    public void insertLogFileMetaInformation(final WorkflowExecutionContext workflowExecutionContext) {
+        insertMetaInformation("Log file format 1.1");
+        final WorkflowDescription workflowDescription = workflowExecutionContext.getWorkflowDescription();
+
+        insertMetaInformation("Workflow run initiated from instance " + workflowExecutionContext.getNodeIdStartedExecution());
+        insertMetaInformation("Location of workflow controller: " + workflowDescription.getControllerNode());
+        for (WorkflowNode wfNode : workflowDescription.getWorkflowNodes()) {
+            final String metaInformation = StringUtils.format("Location of workflow component \"%s\" [%s]: %s", wfNode.getName(),
+                wfNode.getIdentifierAsObject().toString(), wfNode.getComponentDescription().getNode());
+            insertMetaInformation(metaInformation);
+        }
     }
 }

@@ -22,6 +22,24 @@ import de.rcenvironment.core.component.workflow.execution.api.FinalWorkflowState
  */
 public interface HeadlessWorkflowExecutionVerificationRecorder {
 
+    public static class WorkflowExecutionResult {
+
+        final File wfFile;
+
+        final File[] wfLogFiles;
+
+        final FinalWorkflowState finalState;
+
+        final long executionDuration;
+
+        public WorkflowExecutionResult(File wfFile, File[] wfLogFiles, FinalWorkflowState finalState, long executionDuration) {
+            this.wfFile = wfFile;
+            this.wfLogFiles = wfLogFiles;
+            this.finalState = finalState;
+            this.executionDuration = executionDuration;
+        }
+    }
+
     /**
      * Announces an error for the given workflow.
      * 
@@ -37,12 +55,11 @@ public interface HeadlessWorkflowExecutionVerificationRecorder {
      * @param wfLogFiles workflow log of the execution
      * @param finalState {@link FinalWorkflowState} of the given workflow file
      * @param executionDuration duration of the workflow execution
-     * @return <code>true</code> if workflow behaved as expected otherwise <code>false</code>
      * @throws IOException thrown if accessing the workflow log file failed
      */
     boolean addWorkflowExecutionResult(File wfFile, File[] wfLogFiles, FinalWorkflowState finalState, long executionDuration)
         throws IOException;
-    
+
     /**
      * Sets start- and end-time of the current job to calculate duration and total time in verification report.
      * 
