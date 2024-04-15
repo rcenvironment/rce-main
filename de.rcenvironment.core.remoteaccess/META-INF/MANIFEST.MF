@@ -5,6 +5,7 @@ Bundle-SymbolicName: de.rcenvironment.core.remoteaccess
 Bundle-Version: 10.5.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Import-Package: com.fasterxml.jackson.core;version="2.14.0",
+ com.fasterxml.jackson.core.type;version="2.15.2",
  com.fasterxml.jackson.databind;version="2.14.0",
  de.rcenvironment.core.authorization.api,
  de.rcenvironment.core.command.common,
