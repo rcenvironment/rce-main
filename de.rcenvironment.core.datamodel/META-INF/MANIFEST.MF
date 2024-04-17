@@ -6,12 +6,13 @@ Bundle-Version: 10.5.0.qualifier
 Bundle-Vendor: DLR
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
-Import-Package: de.rcenvironment.core.utils.common,
+Import-Package: com.fasterxml.jackson.annotation;version="2.15.2",
+ com.fasterxml.jackson.core;version="2.15.2",
+ com.fasterxml.jackson.databind;version="2.15.2",
+ com.fasterxml.jackson.databind.node;version="2.15.2",
+ de.rcenvironment.core.utils.common,
  org.apache.commons.lang3;version="3.1.0",
- org.apache.commons.logging;version="1.1.1",
- com.fasterxml.jackson.core;version="2.9.9",
- com.fasterxml.jackson.databind;version="2.9.9",
- com.fasterxml.jackson.databind.node;version="2.9.9"
+ org.apache.commons.logging;version="1.1.1"
 Export-Package: de.rcenvironment.core.datamodel.api,
  de.rcenvironment.core.datamodel.testutils,
  de.rcenvironment.core.datamodel.types.api
