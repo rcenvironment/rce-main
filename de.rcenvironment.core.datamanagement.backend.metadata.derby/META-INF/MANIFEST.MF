@@ -22,7 +22,8 @@ Import-Package: de.rcenvironment.core.communication.api,
  de.rcenvironment.core.utils.incubator,
  de.rcenvironment.toolkit.modules.concurrency.api,
  org.apache.commons.dbcp.datasources;version="1.4.0",
- org.apache.commons.logging;version="1.1.1"
+ org.apache.commons.logging;version="1.1.1",
+ org.apache.commons.pool;version="1.5.4"
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
 Automatic-Module-Name: de.rcenvironment.core.datamanagement.backend.metadata.derby
