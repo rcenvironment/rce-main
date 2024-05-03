@@ -119,45 +119,43 @@ Scenario: Connection of client instance to uplink instance established after mul
 
     And executing command "components set-auth common/TestTool public" on "Cli1"
 
-    And scheduling an instance restart of "Cli1" after 1 seconds
-    # A 30 seconds wait is recommended, e. g. 5 seconds will not work.
-    # TODO: Find a way to get the status that instance restart and reconnect are finished/ready
-    And waiting for 30 seconds
+    #And scheduling an instance restart of "Cli1" after 5 seconds
+    #And waiting for 20 seconds
+    #And instance "Cli1" should be running
+    And stopping instance "Cli1"
+    And starting instance "Cli1"
+    #And waiting for 5 seconds
     Then instance "Cli2" should see these components:
         | Cli1 (via userName/Cli1_Upl) | common/TestTool | local |
     #And waiting for 5 seconds
 
-    And scheduling an instance restart of "Cli1" after 1 seconds
-    And waiting for 30 seconds
+    And stopping instance "Cli1"
+    And starting instance "Cli1"
     Then instance "Cli2" should see these components:
         | Cli1 (via userName/Cli1_Upl) | common/TestTool | local |
-    #And waiting for 5 seconds
 
-    And scheduling an instance restart of "Cli1" after 1 seconds
-    And waiting for 30 seconds
+    And stopping instance "Cli1"
+    And starting instance "Cli1"
     Then instance "Cli2" should see these components:
         | Cli1 (via userName/Cli1_Upl) | common/TestTool | local |
-    #And waiting for 5 seconds
 
-    And scheduling an instance restart of "Cli1" after 1 seconds
-    And waiting for 30 seconds
+    And stopping instance "Cli1"
+    And starting instance "Cli1"
     Then instance "Cli2" should see these components:
         | Cli1 (via userName/Cli1_Upl) | common/TestTool | local |
-    #And waiting for 5 seconds
 
-    And scheduling an instance restart of "Cli1" after 1 seconds
-    And waiting for 30 seconds
+    And stopping instance "Cli1"
+    And starting instance "Cli1"
     Then instance "Cli2" should see these components:
         | Cli1 (via userName/Cli1_Upl) | common/TestTool | local |
-    And waiting for 5 seconds
 
     And   stopping instance "Upl, Cli1, Cli2"
 
     #And the log output of "Upl" should indicate a clean shutdown with no warnings or errors
     And the log output of instance "Upl" should indicate a clean shutdown with these allowed warnings or errors:
     """
-	session already closed
-	UNCLEAN_SHUTDOWN_INITIATED
+    session already closed
+    UNCLEAN_SHUTDOWN_INITIATED
     """
     And the log output of instances "Cli1, Cli2" should indicate a clean shutdown with these allowed warnings or errors:
     """
