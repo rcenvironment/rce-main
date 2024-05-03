@@ -261,7 +261,7 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
      * @param componentsTable the expected component data to see (or not see in case of the reserved "absent" marker)
      */
     @Then("^instance \"([^\"]*)\" should see these components:$")
-    public void thenInstanceSeesComponents(String instanceId, DataTable componentsTable) {
+    public void thenInstanceSeesComponents(String instanceId, DataTable componentsTable) throws InterruptedException {
         final ManagedInstance instance = resolveInstance(instanceId);
 
         Map<String, ComponentVisibilityState> visibilityMap = new HashMap<>();
@@ -307,7 +307,38 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
             }
         }
 
-        boolean hasMismatch = false;
+
+
+    	int tmax = 15; // max time in seconds to verify the desired state
+    	boolean doItAgain = true;
+    	int usedTime = 0;
+        boolean hasMismatch = true;
+        StringBuilder errorLines = new StringBuilder();
+       	for (int ii = 0; ii < tmax && doItAgain; ii++) {
+    		usedTime = ii;
+    		doItAgain = false;
+            hasMismatch = false;
+            for (ComponentVisibilityState entry : visibilityMap.values()) {
+                if (!entry.stateMatches()) {
+                    final String errorLine = "  Unexpected visibility state: " + entry;
+                    errorLines.append("\n");
+                    errorLines.append(errorLine);
+                    printToCommandConsole(errorLine);
+                    hasMismatch = true;
+                }
+    		} 
+            if (hasMismatch) {
+    			doItAgain = true;
+    			printToCommandConsole("   +++   " + ii + " seconds, try again");
+    			Thread.sleep(1000);
+    			errorLines = new StringBuilder();
+    		}
+    	}
+		printToCommandConsole("   +++   visibility check:" + " Done in "+ usedTime + " seconds");
+    	
+
+
+        /*boolean hasMismatch = false;
         StringBuilder errorLines = new StringBuilder();
         for (ComponentVisibilityState entry : visibilityMap.values()) {
             if (!entry.stateMatches()) {
@@ -317,7 +348,7 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
                 printToCommandConsole(errorLine);
                 hasMismatch = true;
             }
-        }
+        }*/
 
         if (hasMismatch) {
             fail("At least one component had an unexpected visibility/authorization state: " + errorLines.toString());
