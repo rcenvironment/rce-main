@@ -217,15 +217,19 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
     	int tmax = 15; // max time in seconds to verify the desired state
     	boolean doItAgain = true;
     	int usedTime = 0;
-    	for (int ii = 0; ii < tmax && doItAgain; ii++) {
-    		usedTime = ii;
+    	while (doItAgain) {
     		doItAgain = false;
     		AssertStateIterator assertStateIterator = new AssertStateIterator("running".equals(state));
     		try {
     			iterateInstances(assertStateIterator, allFlag, instanceIds);
     		} catch (AssertionError ae) {
     			doItAgain = true;
-    			printToCommandConsole("   +++   " + ii + " seconds, try again");
+        		usedTime++;
+    			if (usedTime > tmax) {
+    		        printToCommandConsole("Status \"" + state + "\" of instance(s) \"" + resolveInstanceList(allFlag != null, instanceIds).toString() + "\" not verified in " + tmax + " seconds");
+    		        throw ae;
+    			}
+    			printToCommandConsole("   +++   " + usedTime + " seconds, try again");
     			Thread.sleep(1000);
     		}
     	}
@@ -279,7 +283,7 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
     	try {
         	thenInstancesShouldBeInState(null, instanceName, intendedState);
         } catch (Exception exception) {
-        	System.out.println("Unexpected Exception when stopping instance(s)" + exception);
+        	System.out.println("Unexpected Exception when " + intendedState + " instance(s)" + exception);
         }
     }
 

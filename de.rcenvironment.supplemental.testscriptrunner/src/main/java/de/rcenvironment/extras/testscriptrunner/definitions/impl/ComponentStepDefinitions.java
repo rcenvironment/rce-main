@@ -314,8 +314,7 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
     	int usedTime = 0;
         boolean hasMismatch = true;
         StringBuilder errorLines = new StringBuilder();
-       	for (int ii = 0; ii < tmax && doItAgain; ii++) {
-    		usedTime = ii;
+       	while (doItAgain) {
     		doItAgain = false;
             hasMismatch = false;
             for (ComponentVisibilityState entry : visibilityMap.values()) {
@@ -329,29 +328,24 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
     		} 
             if (hasMismatch) {
     			doItAgain = true;
-    			printToCommandConsole("   +++   " + ii + " seconds, try again");
-    			Thread.sleep(1000);
+    			usedTime++;
     			errorLines = new StringBuilder();
+    			if (usedTime > tmax) {
+    				printToCommandConsole("   +++   visibility check:" + " Failed in "+ usedTime + " seconds");
+    				break;
+    			} else {
+	    			printToCommandConsole("   +++   " + usedTime + " seconds, try again");
+	    			Thread.sleep(1000);
+    			}
     		}
     	}
-		printToCommandConsole("   +++   visibility check:" + " Done in "+ usedTime + " seconds");
     	
 
 
-        /*boolean hasMismatch = false;
-        StringBuilder errorLines = new StringBuilder();
-        for (ComponentVisibilityState entry : visibilityMap.values()) {
-            if (!entry.stateMatches()) {
-                final String errorLine = "  Unexpected component state: " + entry;
-                errorLines.append("\n");
-                errorLines.append(errorLine);
-                printToCommandConsole(errorLine);
-                hasMismatch = true;
-            }
-        }*/
-
         if (hasMismatch) {
             fail("At least one component had an unexpected visibility/authorization state: " + errorLines.toString());
+        } else {
+       		printToCommandConsole("   +++   visibility check:" + " Done in "+ usedTime + " seconds");        	
         }
     }
 
