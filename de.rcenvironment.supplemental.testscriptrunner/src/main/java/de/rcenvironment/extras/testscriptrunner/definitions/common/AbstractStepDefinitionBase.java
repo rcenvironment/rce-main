@@ -81,44 +81,45 @@ public abstract class AbstractStepDefinitionBase {
      * This method variant uses the default delay of {@link #DEFAULT_RETRY_DELAY} msec.
      * 
      * @param operation the operation to attempt
+     * @param operationTitle the title to display for the attempted operation
      * @param maxAttempts the maximum number of times to try the operation, including the first one
      * 
      * @return the attempt on which the operation was successful (range 1..maxAttempts)
      * @throws AssertionError if the operation threw an unhandled exception or the maximum retry count was exceeded
      */
-    protected final int executeWithRetry(ExecutionAttempt operation, int maxAttempts) throws AssertionError {
-        return executeWithRetry(operation, maxAttempts, DEFAULT_RETRY_DELAY);
+    protected final int executeWithRetry(ExecutionAttempt operation, String operationTitle, int maxAttempts) throws AssertionError {
+        return executeWithRetry(operation, operationTitle, maxAttempts, DEFAULT_RETRY_DELAY);
     }
 
     /**
-     * Executes the given lambda within a retry loop.Returns normally if an attempt was successful (returned true) and throws an exception
+     * Executes the given lambda within a retry loop. Returns normally if an attempt was successful (returned true) and throws an exception
      * on unexpected or unhandled errors or exceeding the maximum retry count.
      * 
      * @param operation the operation to attempt
+     * @param operationTitle the title to display for the attempted operation
      * @param maxAttempts the maximum number of times to try the operation, including the first one
      * @param delayMsec the custom delay (in msec) to use
      * 
      * @return the attempt on which the operation was successful (range 1..maxAttempts)
      * @throws AssertionError if the operation threw an unhandled exception or the maximum retry count was exceeded
      */
-    protected final int executeWithRetry(ExecutionAttempt operation, int maxAttempts, int delayMsec) throws AssertionError {
+    protected final int executeWithRetry(ExecutionAttempt operation, String operationTitle, int maxAttempts, int delayMsec)
+        throws AssertionError {
         for (int attemptCount = 1; attemptCount <= maxAttempts; attemptCount++) {
             try {
                 if (operation.attempt(attemptCount, attemptCount == maxAttempts)) {
-                    return attemptCount; // operation attempt returned true -> success
+                    printToCommandConsole(StringUtils.format("Operation '%s' succeeded after %d attempt(s)",
+                        operationTitle, attemptCount));
+                    return attemptCount; // operation attempt returned "true" -> success
                 }
-                // fall-through: operation attempt returned false -> retry
-            } catch (AssertionError e) {
-                // exceptions (either intentionally to abort or from uncaught errors) terminate the retry loop
-                // if e is already an AssertionError, rethrow it without change
-                throw (AssertionError) e;
-            } catch (Exception e) { // TODO Checkstyle violation, but currently necessary as test steps declare "throws Exception"
-                // wrap other Throwables
-                throw new AssertionError("An exception occurred within a retry loop", e);
+                // fall-through: the operation attempt returned "false" -> continue with retry loop
+            } catch (Exception e) { // TODO Checkstyle violation, but currently necessary as some operations declare "throws Exception"
+                throw new AssertionError(StringUtils.format("Exception during attempt %d for operation '%s'",
+                    attemptCount, operationTitle), e);
             }
         }
-        throw new AssertionError("Operation not successful within the maximum retry count of " + maxAttempts);
-
+        throw new AssertionError(StringUtils.format("Exceeded the maximum retry count of %d for operation '%s', aborting",
+            maxAttempts, operationTitle));
     }
 
     protected final void assertPropertyOfTextOutput(ManagedInstance instance, String negationFlag, String useRegexpMarker,
