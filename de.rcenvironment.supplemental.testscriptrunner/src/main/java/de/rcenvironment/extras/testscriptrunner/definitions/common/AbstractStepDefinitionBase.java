@@ -16,9 +16,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -105,21 +107,22 @@ public abstract class AbstractStepDefinitionBase {
      */
     protected final int executeWithRetry(ExecutionAttempt operation, String operationTitle, int maxAttempts, int delayMsec)
         throws AssertionError {
+        final StopWatch stopWatch = StopWatch.createStarted();
         for (int attemptCount = 1; attemptCount <= maxAttempts; attemptCount++) {
             try {
                 if (operation.attempt(attemptCount, attemptCount == maxAttempts)) {
-                    printToCommandConsole(StringUtils.format("Operation '%s' succeeded after %d attempt(s)",
-                        operationTitle, attemptCount));
+                    printToCommandConsole(StringUtils.format("Operation '%s' succeeded after %d attempt(s) and %d msec (retry limit: %d)",
+                        operationTitle, attemptCount, stopWatch.getTime(TimeUnit.MILLISECONDS), maxAttempts));
                     return attemptCount; // operation attempt returned "true" -> success
                 }
                 // fall-through: the operation attempt returned "false" -> continue with retry loop
             } catch (Exception e) { // TODO Checkstyle violation, but currently necessary as some operations declare "throws Exception"
-                throw new AssertionError(StringUtils.format("Exception during attempt %d for operation '%s'",
-                    attemptCount, operationTitle), e);
+                throw new AssertionError(StringUtils.format("Exception during attempt %d for operation '%s' after %d msec (total)",
+                    attemptCount, operationTitle, stopWatch.getTime(TimeUnit.MILLISECONDS)), e);
             }
         }
-        throw new AssertionError(StringUtils.format("Exceeded the maximum retry count of %d for operation '%s', aborting",
-            maxAttempts, operationTitle));
+        throw new AssertionError(StringUtils.format("Exceeded the maximum retry count of %d for operation '%s', aborting after %d msec",
+            maxAttempts, operationTitle, stopWatch.getTime(TimeUnit.MILLISECONDS)));
     }
 
     protected final void assertPropertyOfTextOutput(ManagedInstance instance, String negationFlag, String useRegexpMarker,
