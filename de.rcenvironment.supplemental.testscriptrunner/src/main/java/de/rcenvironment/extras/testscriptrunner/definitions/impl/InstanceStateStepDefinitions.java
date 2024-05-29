@@ -258,9 +258,6 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
         printToCommandConsole(StringUtils.format("Launching instance \"%s\" using installation \"%s\"", instance, installationId));
         INSTANCE_MANAGEMENT_SERVICE.startInstance(installationId, listOfSingleStringElement(instance.getId()),
             getTextoutReceiverForIMOperations(), timeout, withGUI, commandArguments);
-
-        verifyInstanceState(instance.toString(), "running");
-
     }
 
     private void stopSingleInstance(ManagedInstance instance) throws IOException {
@@ -268,17 +265,7 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
         INSTANCE_MANAGEMENT_SERVICE.stopInstance(listOfSingleStringElement(instance.getId()),
             getTextoutReceiverForIMOperations(), TimeUnit.SECONDS.toMillis(StepDefinitionConstants.IM_ACTION_TIMEOUT_IN_SECS));
 
-        verifyInstanceState(instance.toString(), "stopped");
-
         instance.onStopped();
-    }
-
-    private void verifyInstanceState(String instanceName, String intendedState) {
-        try {
-            thenInstancesShouldBeInState(null, instanceName, intendedState);
-        } catch (Exception exception) {
-            System.out.println("Unexpected Exception when " + intendedState + " instance(s)" + exception);
-        }
     }
 
 }
