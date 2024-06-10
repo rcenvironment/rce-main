@@ -310,43 +310,26 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
 
 
     	int tmax = 15; // max time in seconds to verify the desired state
-    	boolean doItAgain = true;
-    	int usedTime = 0;
-        boolean hasMismatch = true;
-        StringBuilder errorLines = new StringBuilder();
-       	while (doItAgain) {
-    		doItAgain = false;
-            hasMismatch = false;
-            for (ComponentVisibilityState entry : visibilityMap.values()) {
-                if (!entry.stateMatches()) {
-                    final String errorLine = "  Unexpected visibility state: " + entry;
-                    errorLines.append("\n");
-                    errorLines.append(errorLine);
-                    printToCommandConsole(errorLine);
-                    hasMismatch = true;
-                }
-    		} 
-            if (hasMismatch) {
-    			doItAgain = true;
-    			usedTime++;
-    			errorLines = new StringBuilder();
-    			if (usedTime > tmax) {
-    				printToCommandConsole("   +++   visibility check:" + " Failed in "+ usedTime + " seconds");
-    				break;
-    			} else {
-	    			printToCommandConsole("   +++   " + usedTime + " seconds, try again");
-	    			Thread.sleep(1000);
-    			}
-    		}
-    	}
-    	
+    	String operationTitle = "Check if visibility of components is as expected:" + visibilityMap.toString();
+            executeWithRetry((ExecutionAttempt) (attemptCount, isLastAttempt) -> {
+                StringBuilder errorLines = new StringBuilder();
+                    boolean hasMismatch = false;
+                    for (ComponentVisibilityState entry : visibilityMap.values()) {
+                        if (!entry.stateMatches()) {
+                            final String errorLine = "  Unexpected visibility state: " + entry;
+                            errorLines.append("\n");
+                            errorLines.append(errorLine);
+                            hasMismatch = true;
+                        }
+            		} 
+                    if (hasMismatch) {
+            			if (isLastAttempt) {
+            	            printToCommandConsole("At least one component had an unexpected visibility/authorization state: " + errorLines.toString());
+            			} 
+            		}
+                    return !hasMismatch;
+            	}, operationTitle, tmax);
 
-
-        if (hasMismatch) {
-            fail("At least one component had an unexpected visibility/authorization state: " + errorLines.toString());
-        } else {
-       		printToCommandConsole("   +++   visibility check:" + " Done in "+ usedTime + " seconds");        	
-        }
     }
 
     @Then("^instance \"([^\"]*)\" should see the component \"([^\"]*)\"$")
