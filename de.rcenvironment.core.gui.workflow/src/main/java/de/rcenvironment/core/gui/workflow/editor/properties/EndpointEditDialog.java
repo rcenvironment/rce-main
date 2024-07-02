@@ -324,8 +324,8 @@ public class EndpointEditDialog extends TitleAreaDialog {
                     widgetToKeyMap.put(newCheckbox, key);
                     newCheckbox.addSelectionListener(new SelectionChangedListener());
                 } else if ((metaData.getPossibleValues(key) == null || metaData.getPossibleValues(key).contains("*"))) {
-                    Text newTextfield = createLabelAndTextfield(container,
-                        metaData.getGuiName(key) + COLON, metaData.getDataType(key), value);
+                    Text newTextfield =
+                        createLabelAndTextfield(container, metaData.getGuiName(key) + COLON, metaData.getDataType(key), value);
                     widgetToKeyMap.put(newTextfield, key);
                     newTextfield.addModifyListener(new MethodPropertiesModifyListener());
                 } else {
@@ -379,8 +379,14 @@ public class EndpointEditDialog extends TitleAreaDialog {
     protected Text createLabelAndTextfield(Composite container, String text, String dataType, String value) {
         new Label(container, SWT.NONE).setText(text);
         Text result = new Text(container, SWT.SINGLE | SWT.BORDER);
-        result.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        result.setLayoutData(layoutData);
         result.setText(value);
+        addVerifyListener(dataType, value, result);
+        return result;
+    }
+
+    protected void addVerifyListener(String dataType, String value, Text result) {
         if (dataType.equals(EndpointMetaDataConstants.TYPE_INT)) {
             result.addVerifyListener(new NumericalTextConstraintListener(WidgetGroupFactory.ONLY_INTEGER));
             if (value.equals(MINUS)) {
@@ -399,7 +405,6 @@ public class EndpointEditDialog extends TitleAreaDialog {
                 result.setText("");
             }
         }
-        return result;
     }
 
     protected void createEndpointSettings(Composite parent) {
@@ -825,8 +830,8 @@ public class EndpointEditDialog extends TitleAreaDialog {
         public void widgetDefaultSelected(SelectionEvent e) {
             Button source = (Button) e.getSource();
             if (metaData.getMetaDataKeys().contains(widgetToKeyMap.get(source))) {
-                metadataValues.put(widgetToKeyMap.get(source), "" + source.getSelection());
             }
+            metadataValues.put(widgetToKeyMap.get(source), "" + source.getSelection());
             validateInput();
         }
 
