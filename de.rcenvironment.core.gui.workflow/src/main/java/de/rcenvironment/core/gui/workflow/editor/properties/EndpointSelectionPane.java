@@ -19,17 +19,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.AssertionFailedException;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -43,6 +40,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 
@@ -73,7 +71,7 @@ import de.rcenvironment.core.gui.workflow.editor.commands.endpoint.RemoveDynamic
  * @author Christian Weiss
  * @author Sascha Zur
  * @author Doreen Seider
- * @author Kathrin Schaffert (added TableColumnMinimalWidthControlListener)
+ * @author Kathrin Schaffert (added TableColumnMinimalWidthControlListener, refactoring)
  */
 public class EndpointSelectionPane implements Refreshable {
 
@@ -122,8 +120,6 @@ public class EndpointSelectionPane implements Refreshable {
     protected SelectionAdapter buttonListener;
 
     protected EndpointDescriptionsManager endpointManager;
-
-    protected Image icon;
 
     protected String dynEndpointIdToManage;
 
@@ -194,7 +190,6 @@ public class EndpointSelectionPane implements Refreshable {
         }
         this.executor = executor;
         this.readOnlyType = readOnlyType;
-        icon = Activator.getInstance().getImageRegistry().get(Activator.IMAGE_RCE_ICON_16);
     }
 
     private static int getButtons(boolean readOnly) {
@@ -233,7 +228,7 @@ public class EndpointSelectionPane implements Refreshable {
      * @return control
      */
     public Control createControl(final Composite parent, String title, FormToolkit toolkit) {
-        section = toolkit.createSection(parent, Section.TITLE_BAR | Section.EXPANDED);
+        section = toolkit.createSection(parent, ExpandableComposite.TITLE_BAR | ExpandableComposite.EXPANDED);
         section.setText(title);
         client = toolkit.createComposite(section);
         client.setLayout(new GridLayout(2, false));
@@ -732,7 +727,7 @@ public class EndpointSelectionPane implements Refreshable {
     }
 
     protected void onAddClicked(EndpointEditDialog dialog) {
-        if (dialog.open() == Dialog.OK) {
+        if (dialog.open() == Window.OK) {
             String name = dialog.getChosenName();
             DataType type = dialog.getChosenDataType();
             Map<String, String> metaData = dialog.getMetadataValues();
@@ -747,7 +742,7 @@ public class EndpointSelectionPane implements Refreshable {
                 configuration, endpointType, dynEndpointIdToManage, false,
                 endpointManager.getDynamicEndpointDefinition(dynEndpointIdToManage)
                     .getMetaDataDefinition(),
-                new HashMap<String, String>());
+                new HashMap<>());
 
         onAddClicked(dialog);
     }
@@ -761,7 +756,7 @@ public class EndpointSelectionPane implements Refreshable {
 
         dialog.initializeValues(name);
 
-        if (dialog.open() == Dialog.OK) {
+        if (dialog.open() == Window.OK) {
 
             EndpointDescription oldDesc = endpointManager.getEndpointDescription(name);
 

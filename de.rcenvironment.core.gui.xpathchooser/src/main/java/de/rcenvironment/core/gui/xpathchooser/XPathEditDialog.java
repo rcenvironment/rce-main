@@ -12,7 +12,6 @@ import java.util.Map;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -37,6 +36,7 @@ import de.rcenvironment.core.gui.workflow.editor.properties.EndpointEditDialog;
  * @author Adrian Stock
  * @author Jan Flink
  * @author Tim Rosenbach
+ * @author Kathrin Schaffert (#18178)
  */
 public class XPathEditDialog extends EndpointEditDialog {
 
@@ -49,8 +49,8 @@ public class XPathEditDialog extends EndpointEditDialog {
     private static final int DIALOG_HEIGHT = 435;
 
     public XPathEditDialog(Shell parentShell, EndpointActionType actionType, ComponentInstanceProperties configuration,
-        EndpointType direction, String id, boolean isStatic, Image icon,
-        EndpointMetaDataDefinition metaData, Map<String, String> metadataValues) {
+        EndpointType direction, String id, boolean isStatic, EndpointMetaDataDefinition metaData,
+        Map<String, String> metadataValues) {
         super(parentShell, actionType, configuration, direction, id, isStatic, metaData, metadataValues);
     }
 

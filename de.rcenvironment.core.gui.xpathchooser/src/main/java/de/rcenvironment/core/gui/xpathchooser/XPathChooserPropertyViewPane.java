@@ -56,9 +56,9 @@ public class XPathChooserPropertyViewPane extends EndpointSelectionPane {
         EndpointEditDialog dialog =
             new XPathEditDialog(Display.getDefault().getActiveShell(), EndpointActionType.ADD, configuration,
                 endpointType, dynEndpointIdToManage, false,
-                icon, endpointManager.getDynamicEndpointDefinition(dynEndpointIdToManage)
+                endpointManager.getDynamicEndpointDefinition(dynEndpointIdToManage)
                     .getMetaDataDefinition(),
-                new HashMap<String, String>());
+                new HashMap<>());
         super.onAddClicked(dialog);
     }
 
@@ -72,7 +72,7 @@ public class XPathChooserPropertyViewPane extends EndpointSelectionPane {
         EndpointEditDialog dialog =
             new XPathEditDialog(Display.getDefault().getActiveShell(), EndpointActionType.EDIT, configuration,
                 endpointType, dynEndpointIdToManage, isStaticEndpoint,
-                icon, endpoint.getEndpointDefinition()
+                endpoint.getEndpointDefinition()
                     .getMetaDataDefinition(),
                 newMetaData);
 

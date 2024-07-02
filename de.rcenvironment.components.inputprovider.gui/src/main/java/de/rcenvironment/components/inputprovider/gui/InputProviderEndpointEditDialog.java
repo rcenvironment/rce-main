@@ -20,7 +20,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -96,8 +95,8 @@ public class InputProviderEndpointEditDialog extends EndpointEditDialog implemen
     private boolean isInProject;
 
     public InputProviderEndpointEditDialog(Shell parentShell, EndpointActionType actionType,
-        ComponentInstanceProperties configuration, EndpointType direction, String id, boolean isStatic, Image icon,
-        EndpointMetaDataDefinition metaData, Map<String, String> metadataValues) {
+        ComponentInstanceProperties configuration, EndpointType direction, String id, boolean isStatic, EndpointMetaDataDefinition metaData,
+        Map<String, String> metadataValues) {
         super(parentShell, actionType, configuration, direction, id, isStatic, metaData, metadataValues);
     }
 
@@ -108,7 +107,9 @@ public class InputProviderEndpointEditDialog extends EndpointEditDialog implemen
     }
 
     @Override
-    public void widgetDefaultSelected(SelectionEvent event) {}
+    public void widgetDefaultSelected(SelectionEvent event) {
+        // no implementation needed
+    }
 
     @Override
     public void widgetSelected(SelectionEvent event) {
@@ -198,8 +199,6 @@ public class InputProviderEndpointEditDialog extends EndpointEditDialog implemen
         }
     }
 
-    
-    
     private void setTextFieldOrComboVisible(boolean textFieldVisible) {
         textField.setVisible(textFieldVisible);
         if (combo != null) {
@@ -245,7 +244,9 @@ public class InputProviderEndpointEditDialog extends EndpointEditDialog implemen
             }
 
             @Override
-            public void widgetDefaultSelected(SelectionEvent event) {}
+            public void widgetDefaultSelected(SelectionEvent event) {
+                // no implementation needed
+            }
         });
 
         selectFromProjectButton = new Button(fileSelectionComposite, SWT.PUSH);
@@ -271,7 +272,9 @@ public class InputProviderEndpointEditDialog extends EndpointEditDialog implemen
             }
 
             @Override
-            public void widgetDefaultSelected(SelectionEvent event) {}
+            public void widgetDefaultSelected(SelectionEvent event) {
+                // no implementation needed
+            }
         });
         selectFromFileSystemButton = new Button(fileSelectionComposite, SWT.PUSH);
         selectFromFileSystemButton.setText(Messages.selectFromFileSystem);
@@ -305,7 +308,6 @@ public class InputProviderEndpointEditDialog extends EndpointEditDialog implemen
                     if (dialog instanceof DirectoryDialog) {
                         ((DirectoryDialog) dialog).setFilterPath(isThisPathExisting.toString());
                     } else {
-
                         // Type FileDialog
                         if (isThisPathExisting.getParent() != null) {
                             ((FileDialog) dialog).setFilterPath(isThisPathExisting.getParent().toString());
@@ -316,27 +318,21 @@ public class InputProviderEndpointEditDialog extends EndpointEditDialog implemen
                             File[] paths = File.listRoots();
                             if (paths[0].getPath() != null) {
                                 ((FileDialog) dialog).setFilterPath(paths[0].getPath());
-                            } else {
-                                return;
                             }
-
                         }
-
                     }
-
                     return;
                 }
 
                 if (isThisPathExisting.getParent() != null) {
                     checkIfPathExists(dialog, isThisPathExisting.getParent().toString());
-                } else {
-                    return;
                 }
-
             }
 
             @Override
-            public void widgetDefaultSelected(SelectionEvent event) {}
+            public void widgetDefaultSelected(SelectionEvent event) {
+                // no implementation needed
+            }
         });
         setFileOrDirectorySelected(false);
 
@@ -411,7 +407,7 @@ public class InputProviderEndpointEditDialog extends EndpointEditDialog implemen
         selectAtStartCheckbox.setEnabled(selected);
         selectFromProjectButton.setEnabled(false);
         selectFromFileSystemButton.setEnabled(false);
-        if (!isInProject && warningCompositeCreated) {
+        if (!isInProject && Boolean.TRUE.equals(warningCompositeCreated)) {
             warningComposite.setVisible(!selected);
         }
     }
@@ -422,7 +418,7 @@ public class InputProviderEndpointEditDialog extends EndpointEditDialog implemen
             selectFromProjectButton.setEnabled(selected);
         } else {
             selectFromProjectButton.setEnabled(!selected);
-            if (warningCompositeCreated) {
+            if (Boolean.TRUE.equals(warningCompositeCreated)) {
                 warningComposite.setVisible(selected);
             }
         }

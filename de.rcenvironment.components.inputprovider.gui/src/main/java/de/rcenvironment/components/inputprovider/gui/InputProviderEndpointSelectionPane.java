@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.layout.GridData;
@@ -86,15 +86,15 @@ public class InputProviderEndpointSelectionPane extends EndpointSelectionPane {
 
     @Override
     protected void onAddClicked() {
-        Map<String, String> metaData = new HashMap<String, String>();
+        Map<String, String> metaData = new HashMap<>();
 
         InputProviderEndpointEditDialog dialog =
             new InputProviderEndpointEditDialog(Display.getDefault().getActiveShell(),
                 EndpointActionType.ADD, configuration, endpointType, dynEndpointIdToManage, false,
-                icon, endpointManager.getDynamicEndpointDefinition(dynEndpointIdToManage)
-                    .getMetaDataDefinition(), metaData);
-
-        if (dialog.open() == Dialog.OK) {
+                endpointManager.getDynamicEndpointDefinition(dynEndpointIdToManage)
+                    .getMetaDataDefinition(),
+                metaData);
+        if (dialog.open() == Window.OK) {
             String name = dialog.getChosenName();
             DataType type = dialog.getChosenDataType();
             metaData = dialog.getMetadataValues();
@@ -126,8 +126,9 @@ public class InputProviderEndpointSelectionPane extends EndpointSelectionPane {
         InputProviderEndpointEditDialog dialog =
             new InputProviderEndpointEditDialog(Display.getDefault().getActiveShell(),
                 EndpointActionType.EDIT, configuration, endpointType,
-                dynEndpointIdToManage, false, icon, endpoint.getEndpointDefinition()
-                    .getMetaDataDefinition(), newMetaData);
+                dynEndpointIdToManage, false, endpoint.getEndpointDefinition()
+                    .getMetaDataDefinition(),
+                newMetaData);
 
         onEditClicked(name, dialog);
         setNoteVisible(areFilesOrDirectoriesDefined());
@@ -153,8 +154,8 @@ public class InputProviderEndpointSelectionPane extends EndpointSelectionPane {
             && oldDescription.getMetaData().get(InputProviderComponentConstants.META_FILESOURCETYPE)
                 .equals(InputProviderComponentConstants.META_FILESOURCETYPE_ATWORKFLOWSTART)
             || newDescription.getMetaData().containsKey(InputProviderComponentConstants.META_FILESOURCETYPE)
-            && newDescription.getMetaData().get(InputProviderComponentConstants.META_FILESOURCETYPE)
-                .equals(InputProviderComponentConstants.META_FILESOURCETYPE_ATWORKFLOWSTART)) {
+                && newDescription.getMetaData().get(InputProviderComponentConstants.META_FILESOURCETYPE)
+                    .equals(InputProviderComponentConstants.META_FILESOURCETYPE_ATWORKFLOWSTART)) {
             WorkflowNodeCommand command = new InputProviderEditDynamicEndpointCommand(endpointType, oldDescription, newDescription, this);
             execute(command);
         } else {

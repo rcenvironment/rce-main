@@ -747,38 +747,40 @@ public class EndpointEditDialog extends TitleAreaDialog {
     }
 
     protected boolean checkValidation(double value, String validation) {
+        if (validation == null || validation.equals("")) {
+            return true;
+        }
         boolean result = true;
-        if (validation != null && !validation.equals("")) {
-            String[] splitValidations = validation.split(",");
-            for (String argument : splitValidations) {
-                if (argument.contains("<=")) {
-                    double restriction = Double.parseDouble(argument.substring(2));
-                    if (value > restriction) {
-                        result = false;
-                    }
-                } else if (argument.contains(">=")) {
-                    double restriction = Double.parseDouble(argument.substring(2));
-                    if (value < restriction) {
-                        result = false;
-                    }
-                } else if (argument.contains("<")) {
-                    double restriction = Double.parseDouble(argument.substring(1));
-                    if (value >= restriction) {
-                        result = false;
-                    }
-                } else if (argument.contains(">")) {
-                    double restriction = Double.parseDouble(argument.substring(1));
-                    if (value <= restriction) {
-                        result = false;
-                    }
-                }
-            }
+        String[] splitValidations = validation.split(",");
+        for (String argument : splitValidations) {
+            result = checkArgument(value, result, argument);
         }
         return result;
     }
 
-    private boolean checkValidation(int value, String validation) {
-        return checkValidation((double) value, validation);
+    private boolean checkArgument(double value, boolean result, String argument) {
+        if (argument.contains("<=")) {
+            double restriction = Double.parseDouble(argument.substring(2));
+            if (value > restriction) {
+                result = false;
+            }
+        } else if (argument.contains(">=")) {
+            double restriction = Double.parseDouble(argument.substring(2));
+            if (value < restriction) {
+                result = false;
+            }
+        } else if (argument.contains("<")) {
+            double restriction = Double.parseDouble(argument.substring(1));
+            if (value >= restriction) {
+                result = false;
+            }
+        } else if (argument.contains(">")) {
+            double restriction = Double.parseDouble(argument.substring(1));
+            if (value <= restriction) {
+                result = false;
+            }
+        }
+        return result;
     }
 
     /**
@@ -830,8 +832,8 @@ public class EndpointEditDialog extends TitleAreaDialog {
         public void widgetDefaultSelected(SelectionEvent e) {
             Button source = (Button) e.getSource();
             if (metaData.getMetaDataKeys().contains(widgetToKeyMap.get(source))) {
+                metadataValues.put(widgetToKeyMap.get(source), "" + source.getSelection());
             }
-            metadataValues.put(widgetToKeyMap.get(source), "" + source.getSelection());
             validateInput();
         }
 

@@ -12,7 +12,6 @@ import java.io.File;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.FillLayout;
@@ -49,8 +48,8 @@ public class VariablesEditDialog extends EndpointEditDialog {
     private CellSelectionDialog selectionDialog;
 
     public VariablesEditDialog(Shell parentShell, EndpointActionType actionType, ComponentInstanceProperties configuration,
-        EndpointType direction, String id, boolean isStatic, Image icon,
-        EndpointMetaDataDefinition metaData, Map<String, String> metadataValues, final File xlFile) {
+        EndpointType direction, String id, boolean isStatic, EndpointMetaDataDefinition metaData,
+        Map<String, String> metadataValues, final File xlFile) {
         super(parentShell, actionType, configuration, direction, id, isStatic, metaData, metadataValues);
 
         this.xlFile = xlFile;
