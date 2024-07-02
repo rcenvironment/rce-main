@@ -324,8 +324,8 @@ public class EndpointEditDialog extends TitleAreaDialog {
                     widgetToKeyMap.put(newCheckbox, key);
                     newCheckbox.addSelectionListener(new SelectionChangedListener());
                 } else if ((metaData.getPossibleValues(key) == null || metaData.getPossibleValues(key).contains("*"))) {
-                    Text newTextfield = createLabelAndTextfield(container,
-                        metaData.getGuiName(key) + COLON, metaData.getDataType(key), value);
+                    Text newTextfield =
+                        createLabelAndTextfield(container, metaData.getGuiName(key) + COLON, metaData.getDataType(key), value);
                     widgetToKeyMap.put(newTextfield, key);
                     newTextfield.addModifyListener(new MethodPropertiesModifyListener());
                 } else {
@@ -379,8 +379,14 @@ public class EndpointEditDialog extends TitleAreaDialog {
     protected Text createLabelAndTextfield(Composite container, String text, String dataType, String value) {
         new Label(container, SWT.NONE).setText(text);
         Text result = new Text(container, SWT.SINGLE | SWT.BORDER);
-        result.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        result.setLayoutData(layoutData);
         result.setText(value);
+        addVerifyListener(dataType, value, result);
+        return result;
+    }
+
+    protected void addVerifyListener(String dataType, String value, Text result) {
         if (dataType.equals(EndpointMetaDataConstants.TYPE_INT)) {
             result.addVerifyListener(new NumericalTextConstraintListener(WidgetGroupFactory.ONLY_INTEGER));
             if (value.equals(MINUS)) {
@@ -399,7 +405,6 @@ public class EndpointEditDialog extends TitleAreaDialog {
                 result.setText("");
             }
         }
-        return result;
     }
 
     protected void createEndpointSettings(Composite parent) {
@@ -742,38 +747,40 @@ public class EndpointEditDialog extends TitleAreaDialog {
     }
 
     protected boolean checkValidation(double value, String validation) {
+        if (validation == null || validation.equals("")) {
+            return true;
+        }
         boolean result = true;
-        if (validation != null && !validation.equals("")) {
-            String[] splitValidations = validation.split(",");
-            for (String argument : splitValidations) {
-                if (argument.contains("<=")) {
-                    double restriction = Double.parseDouble(argument.substring(2));
-                    if (value > restriction) {
-                        result = false;
-                    }
-                } else if (argument.contains(">=")) {
-                    double restriction = Double.parseDouble(argument.substring(2));
-                    if (value < restriction) {
-                        result = false;
-                    }
-                } else if (argument.contains("<")) {
-                    double restriction = Double.parseDouble(argument.substring(1));
-                    if (value >= restriction) {
-                        result = false;
-                    }
-                } else if (argument.contains(">")) {
-                    double restriction = Double.parseDouble(argument.substring(1));
-                    if (value <= restriction) {
-                        result = false;
-                    }
-                }
-            }
+        String[] splitValidations = validation.split(",");
+        for (String argument : splitValidations) {
+            result = checkArgument(value, result, argument);
         }
         return result;
     }
 
-    private boolean checkValidation(int value, String validation) {
-        return checkValidation((double) value, validation);
+    private boolean checkArgument(double value, boolean result, String argument) {
+        if (argument.contains("<=")) {
+            double restriction = Double.parseDouble(argument.substring(2));
+            if (value > restriction) {
+                result = false;
+            }
+        } else if (argument.contains(">=")) {
+            double restriction = Double.parseDouble(argument.substring(2));
+            if (value < restriction) {
+                result = false;
+            }
+        } else if (argument.contains("<")) {
+            double restriction = Double.parseDouble(argument.substring(1));
+            if (value >= restriction) {
+                result = false;
+            }
+        } else if (argument.contains(">")) {
+            double restriction = Double.parseDouble(argument.substring(1));
+            if (value <= restriction) {
+                result = false;
+            }
+        }
+        return result;
     }
 
     /**

@@ -229,9 +229,9 @@ public class VariablesSelectionPane extends EndpointSelectionPane {
             EndpointEditDialog dialog =
                 new VariablesEditDialog(Display.getDefault().getActiveShell(), EndpointActionType.ADD, configuration,
                     endpointType, dynEndpointIdToManage, false,
-                    icon, endpointManager.getDynamicEndpointDefinition(dynEndpointIdToManage)
-                        .getMetaDataDefinition(),
-                    new HashMap<String, String>(), xlFile);
+                    endpointManager.getDynamicEndpointDefinition(dynEndpointIdToManage)
+                        .getMetaDataDefinition(), new HashMap<String, String>(),
+                    xlFile);
             super.onAddClicked(dialog);
         } else {
             MessageBox box = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_WARNING);
@@ -258,9 +258,9 @@ public class VariablesSelectionPane extends EndpointSelectionPane {
         EndpointEditDialog dialog =
             new VariablesEditDialog(Display.getDefault().getActiveShell(), EndpointActionType.EDIT, configuration,
                 endpointType, dynEndpointIdToManage, isStaticEndpoint,
-                icon, endpoint.getEndpointDefinition()
-                    .getMetaDataDefinition(),
-                newMetaData, xlFile);
+                endpoint.getEndpointDefinition()
+                    .getMetaDataDefinition(), newMetaData,
+                xlFile);
 
         super.onEditClicked(name, dialog);
     }

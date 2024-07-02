@@ -8,8 +8,6 @@
 
 package de.rcenvironment.components.xml.merger.gui;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +25,7 @@ import de.rcenvironment.core.gui.xpathchooser.XPathChooserPropertyViewPane;
  * EndpointSelectionPane for XMLMerger.
  *
  * @author Brigitte Boden
+ * @author Kathrin Schaffert (little refactoring)
  */
 public class XMLMergerEndpointSelectionPane extends XPathChooserPropertyViewPane {
 
@@ -38,13 +37,7 @@ public class XMLMergerEndpointSelectionPane extends XPathChooserPropertyViewPane
     @Override
     public void setConfiguration(ComponentInstanceProperties configuration) {
         super.setConfiguration(configuration);
-        endpointManager.addPropertyChangeListener(new PropertyChangeListener() {
-
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                updateTable();
-            }
-        });
+        endpointManager.addPropertyChangeListener(evt -> updateTable());
     }
 
     @Override
@@ -52,9 +45,9 @@ public class XMLMergerEndpointSelectionPane extends XPathChooserPropertyViewPane
         EndpointEditDialog dialog =
             new XMLMergerEndpointEditDialog(Display.getDefault().getActiveShell(), EndpointActionType.ADD, configuration,
                 endpointType, dynEndpointIdToManage, false,
-                icon, endpointManager.getDynamicEndpointDefinition(dynEndpointIdToManage)
+                endpointManager.getDynamicEndpointDefinition(dynEndpointIdToManage)
                     .getMetaDataDefinition(),
-                new HashMap<String, String>());
+                new HashMap<>());
 
         super.onAddClicked(dialog);
     }
@@ -69,7 +62,7 @@ public class XMLMergerEndpointSelectionPane extends XPathChooserPropertyViewPane
         EndpointEditDialog dialog =
             new XMLMergerEndpointEditDialog(Display.getDefault().getActiveShell(), EndpointActionType.EDIT, configuration,
                 endpointType, dynEndpointIdToManage, isStaticEndpoint,
-                icon, endpoint.getEndpointDefinition()
+                endpoint.getEndpointDefinition()
                     .getMetaDataDefinition(),
                 newMetaData);
 
