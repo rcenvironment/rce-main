@@ -6,7 +6,7 @@
  * https://rcenvironment.de/
  */
 
-package de.rcenvironment.core.launcher.api;
+package de.rcenvironment.bootstrap.launcher.api;
 
 /**
  * Provides constants for integrating the RCE launcher with the main application via system properties.

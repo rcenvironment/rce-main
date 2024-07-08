@@ -11,7 +11,7 @@ package de.rcenvironment.core.start.validators.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import de.rcenvironment.core.launcher.api.RCELauncherConstants;
+import de.rcenvironment.bootstrap.launcher.api.RCELauncherConstants;
 import de.rcenvironment.core.start.common.validation.api.InstanceValidationResult;
 import de.rcenvironment.core.start.common.validation.api.InstanceValidationResultFactory;
 import de.rcenvironment.core.start.common.validation.spi.DefaultInstanceValidator;

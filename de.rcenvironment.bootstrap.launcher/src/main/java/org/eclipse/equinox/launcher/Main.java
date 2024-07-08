@@ -68,7 +68,7 @@ import java.util.zip.ZipFile;
 
 import org.eclipse.equinox.internal.launcher.Constants;
 
-import de.rcenvironment.core.launcher.internal.RCELauncherCustomization;
+import de.rcenvironment.bootstrap.launcher.internal.RCELauncherCustomization;
 
 /**
  * The launcher for Eclipse.

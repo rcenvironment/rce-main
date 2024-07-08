@@ -6,7 +6,7 @@
  * https://rcenvironment.de/
  */
 
-package de.rcenvironment.core.launcher.internal;
+package de.rcenvironment.bootstrap.launcher.internal;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
-import de.rcenvironment.core.launcher.api.RCELauncherConstants;
+import de.rcenvironment.bootstrap.launcher.api.RCELauncherConstants;
 
 /**
  * As we want to minimize the code changes which have to be performed in the copied org.eclipse.equinox.launcher code, this class is
