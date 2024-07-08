@@ -6,7 +6,7 @@
  * https://rcenvironment.de/
  */
 
-package de.rcenvironment.core.launcher.internal;
+package de.rcenvironment.bootstrap.launcher.internal;
 
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.not;

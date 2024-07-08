@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: RCE Bootstrap - Launcher Bundle Tests
+Bundle-SymbolicName: de.rcenvironment.core.launcher.tests
+Bundle-Version: 10.6.0.qualifier
+Fragment-Host: de.rcenvironment.bootstrap.launcher;bundle-version="10.6.0.qualifier"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: de.rcenvironment.core.utils.testing
+Import-Package: de.rcenvironment.core.utils.common
