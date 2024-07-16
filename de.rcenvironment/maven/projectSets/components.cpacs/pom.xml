@@ -15,9 +15,6 @@
 
 	<modules>
 		<module>${projects-root}/de.rcenvironment.componentgroups.cpacs.feature</module>
-		<module>${projects-root}/de.rcenvironment.components.cpacs.vampzeroinitializer.common</module>
-		<module>${projects-root}/de.rcenvironment.components.cpacs.vampzeroinitializer.execution</module>
-		<module>${projects-root}/de.rcenvironment.components.cpacs.vampzeroinitializer.gui</module>
 		<module>${projects-root}/de.rcenvironment.components.cpacs.writer.common</module>
 		<module>${projects-root}/de.rcenvironment.components.cpacs.writer.execution</module>
 		<module>${projects-root}/de.rcenvironment.components.cpacs.writer.gui</module>

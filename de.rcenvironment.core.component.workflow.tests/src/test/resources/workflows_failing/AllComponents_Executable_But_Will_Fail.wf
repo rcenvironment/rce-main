@@ -1,11 +1,12 @@
 {
   "identifier" : "0fb931ca-dbd4-46d3-a3dc-1412ef74fe86",
-  "workflowVersion" : "4",
+  "workflowVersion" : "5",
   "name" : "AllComponents_but_wont_finish_2016-05-30_11:13:06_02",
   "nodes" : [ {
     "identifier" : "c3e32423-0dc6-4c11-9e6b-dbb0c61e38ba",
     "name" : "CPACS Writer",
     "location" : "100:140",
+    "zIndex" : "8",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.cpacswriter",
@@ -20,21 +21,18 @@
     "staticInputs" : [ {
       "identifier" : "efb03de5-ac87-44c5-b005-88c98986045a",
       "name" : "CPACS",
-      "epIdentifier" : null,
-      "group" : null,
       "datatype" : "FileReference"
     } ],
     "staticOutputs" : [ {
       "identifier" : "ce759f1c-de3f-4ef9-8e4b-d1ab957c3212",
       "name" : "CPACS",
-      "epIdentifier" : null,
-      "group" : null,
       "datatype" : "FileReference"
     } ]
   }, {
     "identifier" : "a3da61be-2c0b-4768-ad36-e6134bf43487",
     "name" : "Cluster",
     "location" : "320:140",
+    "zIndex" : "1",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.cluster",
@@ -56,37 +54,33 @@
     "staticInputs" : [ {
       "identifier" : "3859720e-b413-4fc5-bb58-b8227545290c",
       "name" : "Job count",
-      "epIdentifier" : null,
       "group" : "all",
       "datatype" : "Integer"
     }, {
       "identifier" : "ff4816da-5dc0-4f40-b0d2-d7e09ff15c7e",
       "name" : "Job inputs",
-      "epIdentifier" : null,
       "group" : "all",
       "datatype" : "DirectoryReference"
     }, {
       "identifier" : "29004bc0-939d-4289-95f2-7e84102bf462",
       "name" : "Shared job input",
-      "epIdentifier" : null,
       "group" : "all",
       "datatype" : "DirectoryReference"
     } ],
     "staticOutputs" : [ {
       "identifier" : "be34c794-cf58-4859-bc19-77b31848fa94",
       "name" : "Job outputs",
-      "epIdentifier" : null,
-      "group" : null,
       "datatype" : "DirectoryReference"
     } ]
   }, {
     "identifier" : "331f4a5e-0082-4b8b-b346-4d689b5ca782",
     "name" : "Converger",
     "location" : "40:380",
+    "zIndex" : "12",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.converger",
-      "version" : "5.1.1",
+      "version" : "6",
       "name" : "Converger"
     },
     "configuration" : {
@@ -102,53 +96,25 @@
     "staticOutputs" : [ {
       "identifier" : "7beed200-f8be-4ec9-9545-e3e0c52d52e7",
       "name" : "Converged",
-      "epIdentifier" : null,
-      "group" : null,
-      "datatype" : "Boolean",
-      "metadata" : {
-        "loopEndpointType_5e0ed1cd" : "OuterLoopEndpoint"
-      }
+      "datatype" : "Boolean"
     }, {
       "identifier" : "f02c3f16-bfbb-4dcc-bb98-748b20e7da89",
       "name" : "Converged absolute",
-      "epIdentifier" : null,
-      "group" : null,
-      "datatype" : "Boolean",
-      "metadata" : {
-        "loopEndpointType_5e0ed1cd" : "OuterLoopEndpoint"
-      }
+      "datatype" : "Boolean"
     }, {
       "identifier" : "1b857ff7-615a-4690-aa6f-198d622c095a",
       "name" : "Converged relative",
-      "epIdentifier" : null,
-      "group" : null,
-      "datatype" : "Boolean",
-      "metadata" : {
-        "loopEndpointType_5e0ed1cd" : "OuterLoopEndpoint"
-      }
+      "datatype" : "Boolean"
     }, {
       "identifier" : "d4469945-f544-4e2e-bf38-80ffba5e74ec",
       "name" : "Done",
-      "epIdentifier" : null,
-      "group" : null,
-      "datatype" : "Boolean",
-      "metadata" : {
-        "loopEndpointType_5e0ed1cd" : "OuterLoopEndpoint"
-      }
-    }, {
-      "identifier" : "2784b793-dd80-4e5e-bc16-ec5e28541b3c",
-      "name" : "Outer loop done",
-      "epIdentifier" : null,
-      "group" : null,
-      "datatype" : "Boolean",
-      "metadata" : {
-        "loopEndpointType_5e0ed1cd" : "InnerLoopEndpoint"
-      }
+      "datatype" : "Boolean"
     } ]
   }, {
     "identifier" : "bcc89867-569c-478a-a6af-5a8ccd084710",
     "name" : "Database",
     "location" : "540:280",
+    "zIndex" : "6",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.database",
@@ -169,18 +135,17 @@
     "staticOutputs" : [ {
       "identifier" : "3cac408d-ef42-4e07-af12-55b105bb9016",
       "name" : "Success",
-      "epIdentifier" : null,
-      "group" : null,
       "datatype" : "Boolean"
     } ]
   }, {
     "identifier" : "12e5ce1f-a510-434c-bbd3-6004dc2b83c9",
     "name" : "Design of Experiments",
     "location" : "240:380",
+    "zIndex" : "10",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.doe.v2",
-      "version" : "3.4",
+      "version" : "4.1",
       "name" : "Design of Experiments"
     },
     "configuration" : {
@@ -200,30 +165,18 @@
     "staticOutputs" : [ {
       "identifier" : "3d391c37-5700-46da-8ef1-cde74f9f7194",
       "name" : "Done",
-      "epIdentifier" : null,
-      "group" : null,
-      "datatype" : "Boolean",
-      "metadata" : {
-        "loopEndpointType_5e0ed1cd" : "OuterLoopEndpoint"
-      }
+      "datatype" : "Boolean"
     }, {
-      "identifier" : "70c667f7-9572-47b0-b693-dfb9d5ec3341",
-      "name" : "Outer loop done",
-      "epIdentifier" : null,
-      "group" : null,
-      "datatype" : "Boolean",
-      "metadata" : {
-        "loopEndpointType_5e0ed1cd" : "InnerLoopEndpoint"
-      }
+      "identifier" : "da1d9c62-d0a7-4446-9af8-7a87e1ad5fc3",
+      "name" : "Number of samples",
+      "datatype" : "Integer"
     } ],
     "dynamicOutputs" : [ {
       "identifier" : "dfed25c4-6b7c-43bb-a244-35bd6ef1b021",
       "name" : "x",
       "epIdentifier" : "default",
-      "group" : null,
       "datatype" : "Float",
       "metadata" : {
-        "loopEndpointType_5e0ed1cd" : "SelfLoopEndpoint",
         "lower" : "-1",
         "upper" : "1"
       }
@@ -231,10 +184,8 @@
       "identifier" : "b58fe72b-5f74-42f9-9928-50cb7f0df6e2",
       "name" : "y",
       "epIdentifier" : "default",
-      "group" : null,
       "datatype" : "Float",
       "metadata" : {
-        "loopEndpointType_5e0ed1cd" : "SelfLoopEndpoint",
         "lower" : "-1",
         "upper" : "1"
       }
@@ -243,10 +194,11 @@
     "identifier" : "a6bc77ca-4d53-41df-ba66-5f79f384531f",
     "name" : "Evaluation Memory",
     "location" : "440:400",
+    "zIndex" : "11",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.evaluationmemory",
-      "version" : "1.0",
+      "version" : "2",
       "name" : "Evaluation Memory"
     },
     "configuration" : {
@@ -254,18 +206,12 @@
       "mem_file_wf_start" : "${memory_file}",
       "select_at_wf_start" : "false",
       "storeComponentHistoryData" : "true"
-    },
-    "staticInputs" : [ {
-      "identifier" : "f9fe3912-401d-4b0b-8029-61fd0a5ea929",
-      "name" : "Loop done",
-      "epIdentifier" : null,
-      "group" : "root",
-      "datatype" : "Boolean"
-    } ]
+    }
   }, {
     "identifier" : "e790c8fb-919e-4c36-b0a4-e85481cd23e1",
     "name" : "Excel",
     "location" : "420:140",
+    "zIndex" : "3",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.excel",
@@ -280,6 +226,7 @@
     "identifier" : "86997c34-950d-4d77-a554-e46337846ee7",
     "name" : "Input Provider",
     "location" : "40:280",
+    "zIndex" : "15",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.inputprovider",
@@ -297,7 +244,6 @@
       "identifier" : "3cb61924-1b67-4bb9-a1b8-9e3e57384a85",
       "name" : "1",
       "epIdentifier" : "default",
-      "group" : null,
       "datatype" : "Float",
       "metadata" : {
         "startValue" : "1"
@@ -306,7 +252,6 @@
       "identifier" : "545b0da3-c7e7-4ea2-8510-c88c3437e9e9",
       "name" : "asd",
       "epIdentifier" : "default",
-      "group" : null,
       "datatype" : "ShortText",
       "metadata" : {
         "startValue" : "asd"
@@ -315,7 +260,6 @@
       "identifier" : "a8f3fd09-31c6-4e90-8d20-bae3b118ddc4",
       "name" : "d",
       "epIdentifier" : "default",
-      "group" : null,
       "datatype" : "DirectoryReference",
       "metadata" : {
         "fileSourceType" : "atWorkflowStart",
@@ -325,7 +269,6 @@
       "identifier" : "fc8d95e6-4502-4247-a1ee-4a01d1cdb18b",
       "name" : "f",
       "epIdentifier" : "default",
-      "group" : null,
       "datatype" : "FileReference",
       "metadata" : {
         "fileSourceType" : "atWorkflowStart",
@@ -335,7 +278,6 @@
       "identifier" : "a91b1c6a-29ec-4731-a13a-b83e3e6f8819",
       "name" : "v",
       "epIdentifier" : "default",
-      "group" : null,
       "datatype" : "Boolean",
       "metadata" : {
         "startValue" : "true"
@@ -345,6 +287,7 @@
     "identifier" : "29c4469e-f6b6-4903-9c98-8ec5bbc3a3b8",
     "name" : "Joiner",
     "location" : "100:280",
+    "zIndex" : "5",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.joiner",
@@ -372,14 +315,13 @@
     "staticOutputs" : [ {
       "identifier" : "768de6bb-4e27-4a21-8efd-c5769b8a3e58",
       "name" : "Joined",
-      "epIdentifier" : null,
-      "group" : null,
       "datatype" : "Float"
     } ]
   }, {
     "identifier" : "98aad1af-5912-4989-89a4-ed71a4bf54db",
     "name" : "Optimizer",
     "location" : "140:380",
+    "zIndex" : "4",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.optimizer",
@@ -419,8 +361,7 @@
     "staticOutputs" : [ {
       "identifier" : "7433c88d-e5b4-4172-8b51-fe8880e7b8c5",
       "name" : "Done",
-      "epIdentifier" : null,
-      "group" : null,
+      "group" : "null",
       "datatype" : "Boolean",
       "metadata" : {
         "loopEndpointType_5e0ed1cd" : "OuterLoopEndpoint"
@@ -428,8 +369,7 @@
     }, {
       "identifier" : "46b67f46-90e7-45fb-aa87-7e6973902267",
       "name" : "Gradient request",
-      "epIdentifier" : null,
-      "group" : null,
+      "group" : "null",
       "datatype" : "Boolean",
       "metadata" : {
         "loopEndpointType_5e0ed1cd" : "SelfLoopEndpoint"
@@ -437,8 +377,7 @@
     }, {
       "identifier" : "fdb1d113-8a33-48fa-9cf7-223c2798f8d1",
       "name" : "Iteration",
-      "epIdentifier" : null,
-      "group" : null,
+      "group" : "null",
       "datatype" : "Integer",
       "metadata" : {
         "loopEndpointType_5e0ed1cd" : "SelfLoopEndpoint"
@@ -446,8 +385,7 @@
     }, {
       "identifier" : "30d5244d-ac8f-45b2-b51a-524b5ba2323c",
       "name" : "Outer loop done",
-      "epIdentifier" : null,
-      "group" : null,
+      "group" : "null",
       "datatype" : "Boolean",
       "metadata" : {
         "loopEndpointType_5e0ed1cd" : "InnerLoopEndpoint"
@@ -457,7 +395,6 @@
       "identifier" : "5d125dde-7ac7-42ec-adc1-47de91eb3218",
       "name" : "x",
       "epIdentifier" : "Design",
-      "group" : null,
       "datatype" : "Float",
       "metadata" : {
         "hasSingleBounds" : "true",
@@ -476,7 +413,6 @@
       "identifier" : "343cbf8c-6a1d-430d-bdda-3a3642138a1e",
       "name" : "x_optimal",
       "epIdentifier" : "optima",
-      "group" : null,
       "datatype" : "Float",
       "metadata" : {
         "hasSingleBounds" : "true",
@@ -496,14 +432,16 @@
     "identifier" : "7303e0af-afd2-4f61-ac15-1cacd1baf52b",
     "name" : "Output Writer",
     "location" : "160:280",
+    "zIndex" : "7",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.outputwriter",
-      "version" : "2.0",
+      "version" : "2.1",
       "name" : "Output Writer"
     },
     "configuration" : {
       "OWWritePath" : "${targetRootFolder}",
+      "OverwriteFilesAndDirs" : "false",
       "SelectRootOnWorkflowStart" : "true",
       "SelectedRoot" : "",
       "outputLocations" : "{}",
@@ -526,10 +464,11 @@
     "identifier" : "d7031b9a-681e-4fc7-9b01-afc5e6adea3c",
     "name" : "Parametric Study",
     "location" : "340:380",
+    "zIndex" : "16",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.parametricstudy",
-      "version" : "3.3",
+      "version" : "4",
       "name" : "Parametric Study"
     },
     "configuration" : {
@@ -542,49 +481,36 @@
     "staticOutputs" : [ {
       "identifier" : "8de120a9-6d36-438c-8eab-0a8da2f1a2e6",
       "name" : "Design variable",
-      "epIdentifier" : null,
-      "group" : null,
       "datatype" : "Float",
       "metadata" : {
         "FromValue" : "0",
         "StepSize" : "1",
         "ToValue" : "10",
-        "fitStepSizeToBounds" : "true",
-        "loopEndpointType_5e0ed1cd" : "SelfLoopEndpoint"
+        "UseInputAsFromValue" : "false",
+        "UseInputAsStepSizeValue" : "false",
+        "UseInputAsToValue" : "false",
+        "fitStepSizeToBounds" : "true"
       }
     }, {
       "identifier" : "09c944db-de7f-4248-b80e-ffe19f871045",
       "name" : "Done",
-      "epIdentifier" : null,
-      "group" : null,
-      "datatype" : "Boolean",
-      "metadata" : {
-        "loopEndpointType_5e0ed1cd" : "OuterLoopEndpoint"
-      }
-    }, {
-      "identifier" : "eb158730-04fa-468a-b344-e3d3f4631c91",
-      "name" : "Outer loop done",
-      "epIdentifier" : null,
-      "group" : null,
-      "datatype" : "Boolean",
-      "metadata" : {
-        "loopEndpointType_5e0ed1cd" : "InnerLoopEndpoint"
-      }
+      "datatype" : "Boolean"
     } ]
   }, {
     "identifier" : "6da8a011-d82e-4b89-b4b1-2b3cac987e96",
     "name" : "Script",
     "location" : "520:140",
+    "zIndex" : "9",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.script",
-      "version" : "3.4",
+      "version" : "3.5",
       "name" : "Script"
     },
     "configuration" : {
       "pythonExecutionPath" : "${pythonExecutionPath}",
       "script" : "# You can read inputs with\r\n# \r\n#       RCE.read_input(String input_name)\r\n# \r\n# You can write outputs with\r\n# \r\n#       RCE.write_output(String output_name, OutputDataType value)\r\n#\r\n# Thereby, the type (OutputDataType) of the value must fit the data type of the output (as defined in the tab Inputs/Outputs). File and Directory are represented by the absolute file paths.\r\n#\r\n# (Note: The module RCE used is already imported in the script during execution.)\r\n#\r\n# Examples:\r\n# - If you like to double an incoming value (x is an input of type Integer and y an output of type Integer):\r\n#       RCE.write_output(\"y\", RCE.read_input(2 * x))\r\n# - If you like to access an incoming file (f_in is an input of type File):\r\n#       file = open(RCE.read_input(\"f_in\"),\"r\")\r\n# - If you like to send a file to an output (f_out is an output of type File):\r\n#       absolute_file_path = /home/user_1/my_file.txt\r\n#       RCE.write_output(\"f_out\", absolute_file_path)\r\n#\r\n\r\nimport sys\r\n \r\nsys.stderr.write('Script was not configured')\r\nsys.stderr.flush()",
-      "scriptLanguage" : "Python",
+      "scriptLanguage" : "Jython",
       "storeComponentHistoryData" : "true",
       "usageOfScript" : "NEW"
     }
@@ -592,44 +518,57 @@
     "identifier" : "a5e39202-7480-426f-816a-0759c85b5b71",
     "name" : "Switch",
     "location" : "220:280",
+    "zIndex" : "2",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.switchcmp",
-      "version" : "1.1",
+      "version" : "2.0",
       "name" : "Switch"
     },
     "configuration" : {
-      "closeOutputsOnFalse" : "false",
-      "closeOutputsOnTrue" : "false",
-      "conditionKey" : "1<2",
+      "closeOutputsOnConditionNumber" : "false",
+      "closeOutputsOnNoMatch" : "false",
+      "conditionKey" : "[{\"conditionNumber\":1,\"conditionScript\":\"1<2\"}]",
       "neverCloseOutputs" : "true",
       "scriptErrorMessage" : "",
-      "storeComponentHistoryData" : "true"
+      "selectedCondition" : "0",
+      "storeComponentHistoryData" : "true",
+      "writeOutputKey" : "false"
     },
-    "staticInputs" : [ {
+    "dynamicInputs" : [ {
       "identifier" : "5efb6c20-08b1-46e9-b479-1ad202983aef",
       "name" : "To_forward",
-      "epIdentifier" : null,
-      "group" : null,
-      "datatype" : "Float"
+      "epIdentifier" : "dataToInput",
+      "datatype" : "Float",
+      "metadata" : {
+        "inputExecutionConstraint_4aae3eea" : "Required",
+        "inputHandling_73b1056e" : "Queue"
+      }
     } ],
-    "staticOutputs" : [ {
-      "identifier" : "b8326aef-0337-4ea3-ac41-f3ea44b18d6a",
-      "name" : "False",
-      "epIdentifier" : null,
-      "group" : null,
-      "datatype" : "Float"
-    }, {
+    "dynamicOutputs" : [ {
       "identifier" : "e9d7f42e-50b2-40ae-8ab1-99c0b62d098d",
-      "name" : "True",
-      "epIdentifier" : null,
-      "group" : null,
-      "datatype" : "Float"
+      "name" : "To_forward_condition 1",
+      "epIdentifier" : "dataToOutput",
+      "datatype" : "Float",
+      "metadata" : {
+        "inputExecutionConstraint_4aae3eea" : "Required",
+        "inputHandling_73b1056e" : "Queue"
+      }
+    }, {
+      "identifier" : "b8326aef-0337-4ea3-ac41-f3ea44b18d6a",
+      "name" : "To_forward_no match",
+      "epIdentifier" : "dataToOutput",
+      "datatype" : "Float",
+      "metadata" : {
+        "inputExecutionConstraint_4aae3eea" : "Required",
+        "inputHandling_73b1056e" : "Queue"
+      }
     } ]
   }, {
     "identifier" : "12bd71b5-69cb-4511-accc-41d7670527c6",
     "name" : "TiGL Viewer",
     "location" : "160:140",
+    "zIndex" : "13",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.tiglviewer",
@@ -642,42 +581,18 @@
     "staticInputs" : [ {
       "identifier" : "4d580bd1-e9c8-488f-a32f-31b5e4a6f516",
       "name" : "TiGL Viewer File",
-      "epIdentifier" : null,
-      "group" : null,
       "datatype" : "FileReference"
     } ],
     "staticOutputs" : [ {
       "identifier" : "0923977e-60ee-4961-bf72-35970fea90a0",
       "name" : "TiGL Viewer File",
-      "epIdentifier" : null,
-      "group" : null,
-      "datatype" : "FileReference"
-    } ]
-  }, {
-    "identifier" : "9caf55ac-19da-4e2a-82fc-3bf234ed0555",
-    "name" : "VAMPzero Initializer",
-    "location" : "40:140",
-    "active" : "true",
-    "component" : {
-      "identifier" : "de.rcenvironment.vampzeroinitializer",
-      "version" : "3.1",
-      "name" : "VAMPzero Initializer"
-    },
-    "configuration" : {
-      "storeComponentHistoryData" : "true",
-      "xmlContent" : "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<cpacs>\r\n\t<toolspecific>\r\n\t\t<vampZero>\r\n\t\t\t<components>\r\n\t\t\t\t<component>\r\n\t\t\t\t\t<name>Engine</name>\r\n\t\t\t\t\t<disciplines>\r\n\t\t\t\t\t\t<discipline>\r\n\t\t\t\t\t\t\t<name>Aerodynamic</name>\r\n\t\t\t\t\t\t\t<parameters>\r\n\t\t\t\t\t\t\t\t<parameter>\r\n\t\t\t\t\t\t\t\t\t<name>cfTURB</name>\r\n\t\t\t\t\t\t\t\t\t<description>turbulent friction coefficient</description>\r\n\t\t\t\t\t\t\t\t\t<value>0.0</value>\r\n\t\t\t\t\t\t\t\t\t<factor>1.0</factor>\r\n\t\t\t\t\t\t\t\t</parameter>\r\n\t\t\t\t\t\t\t</parameters>\r\n\t\t\t\t\t\t</discipline>\r\n\t\t\t\t\t</disciplines>\r\n\t\t\t\t</component>\r\n\t\t\t</components>\r\n\t\t</vampZero>\r\n\t</toolspecific>\r\n</cpacs>"
-    },
-    "staticOutputs" : [ {
-      "identifier" : "ac39b709-1901-408f-a2a7-f31ae1cbbb44",
-      "name" : "CPACS",
-      "epIdentifier" : null,
-      "group" : null,
       "datatype" : "FileReference"
     } ]
   }, {
     "identifier" : "9f955aa4-8645-4b5d-8597-76a83f85669d",
     "name" : "XML Loader",
     "location" : "420:280",
+    "zIndex" : "14",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.xmlloader",
@@ -691,14 +606,13 @@
     "staticOutputs" : [ {
       "identifier" : "0c470434-1a67-47c5-ab48-29340b917ddd",
       "name" : "XML",
-      "epIdentifier" : null,
-      "group" : null,
       "datatype" : "FileReference"
     } ]
   }, {
     "identifier" : "7079c326-05e9-4c09-9749-bc6d2510d8e5",
     "name" : "XML Merger",
     "location" : "360:280",
+    "zIndex" : "0",
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.xmlmerger",
@@ -712,14 +626,10 @@
     "staticInputs" : [ {
       "identifier" : "36ecb4f8-4a16-4189-97e6-42169b3708f5",
       "name" : "XML",
-      "epIdentifier" : null,
-      "group" : null,
       "datatype" : "FileReference"
     }, {
       "identifier" : "3e750716-4fef-441a-bff5-89bebfe31ee4",
       "name" : "XML to integrate",
-      "epIdentifier" : null,
-      "group" : null,
       "datatype" : "FileReference"
     } ],
     "dynamicInputs" : [ {
@@ -732,8 +642,6 @@
     "staticOutputs" : [ {
       "identifier" : "5f3f609f-8123-41c2-8fd1-04af8b949dbf",
       "name" : "XML",
-      "epIdentifier" : null,
-      "group" : null,
       "datatype" : "FileReference"
     } ]
   } ],
@@ -783,15 +691,10 @@
     "target" : "7079c326-05e9-4c09-9749-bc6d2510d8e5",
     "input" : "3e750716-4fef-441a-bff5-89bebfe31ee4"
   }, {
-    "source" : "86997c34-950d-4d77-a554-e46337846ee7",
-    "output" : "a91b1c6a-29ec-4731-a13a-b83e3e6f8819",
-    "target" : "a6bc77ca-4d53-41df-ba66-5f79f384531f",
-    "input" : "f9fe3912-401d-4b0b-8029-61fd0a5ea929"
-  }, {
     "source" : "98aad1af-5912-4989-89a4-ed71a4bf54db",
     "output" : "5d125dde-7ac7-42ec-adc1-47de91eb3218",
     "target" : "98aad1af-5912-4989-89a4-ed71a4bf54db",
     "input" : "727b0457-14a7-4728-b1ed-3a2b0584de1e"
   } ],
-  "labels" : "[{\"identifier\":\"0849dc0b-7781-4c09-b847-a77f4ff7ca13\",\"text\":\"Data Flow\",\"location\":\"20:260\",\"size\":\"261:81\",\"alpha\":\"127\",\"colorText\":\"0:0:0\",\"colorBackground\":\"57:146:34\",\"alignmentType\":\"TOPCENTER\",\"border\":\"false\",\"textSize\":\"10\"},{\"identifier\":\"33e2dc99-0c4a-47fe-97ec-2e529d5ff93a\",\"text\":\"Evaluation\",\"location\":\"20:360\",\"size\":\"481:121\",\"alpha\":\"127\",\"colorText\":\"0:0:0\",\"colorBackground\":\"57:146:34\",\"alignmentType\":\"TOPCENTER\",\"border\":\"false\",\"textSize\":\"10\"},{\"identifier\":\"3abb0b4b-87d6-4c7b-930b-53ede09b3ff7\",\"text\":\"CPACS\\r\\n\",\"location\":\"20:120\",\"size\":\"241:121\",\"alpha\":\"127\",\"colorText\":\"0:0:0\",\"colorBackground\":\"57:146:34\",\"alignmentType\":\"TOPCENTER\",\"border\":\"false\",\"textSize\":\"10\"},{\"identifier\":\"58cda629-88f2-45fe-b9c2-4e677df750b7\",\"text\":\"Data\",\"location\":\"520:260\",\"size\":\"121:121\",\"alpha\":\"127\",\"colorText\":\"0:0:0\",\"colorBackground\":\"57:146:34\",\"alignmentType\":\"TOPCENTER\",\"border\":\"false\",\"textSize\":\"10\"},{\"identifier\":\"c61742bf-fbf0-41a6-9ac1-77e8d6ceb3b9\",\"text\":\"XML\",\"location\":\"340:260\",\"size\":\"141:81\",\"alpha\":\"127\",\"colorText\":\"0:0:0\",\"colorBackground\":\"57:146:34\",\"alignmentType\":\"TOPCENTER\",\"border\":\"false\",\"textSize\":\"10\"},{\"identifier\":\"d7efdf1e-6bfb-4c16-85a7-7e81b734ec0a\",\"text\":\"Execution\",\"location\":\"300:120\",\"size\":\"321:121\",\"alpha\":\"127\",\"colorText\":\"0:0:0\",\"colorBackground\":\"57:146:34\",\"alignmentType\":\"TOPCENTER\",\"border\":\"false\",\"textSize\":\"10\"},{\"identifier\":\"ffebdd97-9467-4efd-bdeb-44b47e5154ee\",\"text\":\"This workflow won't finish - it will fail - but write something into the data management anyways\\r\\n\\r\\nIt has the purpose to make 2 checks easier:\\r\\n1. Check icons (workflow editor, data management)\\r\\n2. Check component help\",\"location\":\"20:20\",\"size\":\"581:81\",\"alpha\":\"207\",\"colorText\":\"0:0:0\",\"colorBackground\":\"0:128:192\",\"alignmentType\":\"CENTER\",\"border\":\"false\",\"textSize\":\"10\"}]"
+  "labels" : "[{\"identifier\":\"0849dc0b-7781-4c09-b847-a77f4ff7ca13\",\"headerText\":\"\",\"text\":\"Data Flow\",\"location\":\"20:260\",\"size\":\"261:81\",\"alpha\":\"127\",\"colorHeader\":\"0:0:0\",\"colorText\":\"0:0:0\",\"colorBackground\":\"57:146:34\",\"labelPosition\":\"TOPCENTER\",\"textAlignmentType\":\"LEFT\",\"headerAlignmentType\":\"CENTER\",\"border\":\"false\",\"headerSize\":\"12\",\"textSize\":\"10\",\"zIndex\":\"0\"},{\"identifier\":\"33e2dc99-0c4a-47fe-97ec-2e529d5ff93a\",\"headerText\":\"\",\"text\":\"Evaluation\",\"location\":\"20:360\",\"size\":\"481:121\",\"alpha\":\"127\",\"colorHeader\":\"0:0:0\",\"colorText\":\"0:0:0\",\"colorBackground\":\"57:146:34\",\"labelPosition\":\"TOPCENTER\",\"textAlignmentType\":\"LEFT\",\"headerAlignmentType\":\"CENTER\",\"border\":\"false\",\"headerSize\":\"12\",\"textSize\":\"10\",\"zIndex\":\"1\"},{\"identifier\":\"3abb0b4b-87d6-4c7b-930b-53ede09b3ff7\",\"headerText\":\"\",\"text\":\"CPACS\\r\\n\",\"location\":\"20:120\",\"size\":\"241:121\",\"alpha\":\"127\",\"colorHeader\":\"0:0:0\",\"colorText\":\"0:0:0\",\"colorBackground\":\"57:146:34\",\"labelPosition\":\"TOPCENTER\",\"textAlignmentType\":\"LEFT\",\"headerAlignmentType\":\"CENTER\",\"border\":\"false\",\"headerSize\":\"12\",\"textSize\":\"10\",\"zIndex\":\"2\"},{\"identifier\":\"58cda629-88f2-45fe-b9c2-4e677df750b7\",\"headerText\":\"\",\"text\":\"Data\",\"location\":\"520:260\",\"size\":\"121:121\",\"alpha\":\"127\",\"colorHeader\":\"0:0:0\",\"colorText\":\"0:0:0\",\"colorBackground\":\"57:146:34\",\"labelPosition\":\"TOPCENTER\",\"textAlignmentType\":\"LEFT\",\"headerAlignmentType\":\"CENTER\",\"border\":\"false\",\"headerSize\":\"12\",\"textSize\":\"10\",\"zIndex\":\"3\"},{\"identifier\":\"c61742bf-fbf0-41a6-9ac1-77e8d6ceb3b9\",\"headerText\":\"\",\"text\":\"XML\",\"location\":\"340:260\",\"size\":\"141:81\",\"alpha\":\"127\",\"colorHeader\":\"0:0:0\",\"colorText\":\"0:0:0\",\"colorBackground\":\"57:146:34\",\"labelPosition\":\"TOPCENTER\",\"textAlignmentType\":\"LEFT\",\"headerAlignmentType\":\"CENTER\",\"border\":\"false\",\"headerSize\":\"12\",\"textSize\":\"10\",\"zIndex\":\"4\"},{\"identifier\":\"d7efdf1e-6bfb-4c16-85a7-7e81b734ec0a\",\"headerText\":\"\",\"text\":\"Execution\",\"location\":\"300:120\",\"size\":\"321:121\",\"alpha\":\"127\",\"colorHeader\":\"0:0:0\",\"colorText\":\"0:0:0\",\"colorBackground\":\"57:146:34\",\"labelPosition\":\"TOPCENTER\",\"textAlignmentType\":\"LEFT\",\"headerAlignmentType\":\"CENTER\",\"border\":\"false\",\"headerSize\":\"12\",\"textSize\":\"10\",\"zIndex\":\"5\"},{\"identifier\":\"ffebdd97-9467-4efd-bdeb-44b47e5154ee\",\"headerText\":\"\",\"text\":\"This workflow won't finish - it will fail - but write something into the data management anyways\\r\\n\\r\\nIt has the purpose to make 2 checks easier:\\r\\n1. Check icons (workflow editor, data management)\\r\\n2. Check component help\",\"location\":\"20:20\",\"size\":\"581:81\",\"alpha\":\"207\",\"colorHeader\":\"0:0:0\",\"colorText\":\"0:0:0\",\"colorBackground\":\"0:128:192\",\"labelPosition\":\"CENTER\",\"textAlignmentType\":\"LEFT\",\"headerAlignmentType\":\"CENTER\",\"border\":\"false\",\"headerSize\":\"12\",\"textSize\":\"10\",\"zIndex\":\"6\"}]"
 }
