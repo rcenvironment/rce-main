@@ -71,7 +71,7 @@
                 <code>rce-signing</code> owned by the organization <code>rcenvironment</code>.
             For now, this is the key supplier to use until we determine a new public key server.
             Please verify the integrity of the obtained keyfile by checking its fingerprint against
-            the one published by us via a trusted channel (e.g., the RCE Twitter account). We omit
+            the one published by us via a trusted channel. We omit
             giving direct links as well as the key's fingerprint here on purpose. This slightly
             decreases the chance of attackers directing you toward a forged key.</para>
         <para>The precise steps required for signature verification differ from system to system.

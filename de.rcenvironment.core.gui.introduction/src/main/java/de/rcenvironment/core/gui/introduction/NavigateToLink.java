@@ -39,7 +39,6 @@ public class NavigateToLink implements IIntroAction {
         {
             put("news", "https://rcenvironment.de/#news");
             put("newsletter", "https://rcenvironment.de/pages/newsletter.html");
-            put("twitter", "https://twitter.com/RCEnvironment");
             put("github", "https://github.com/rcenvironment");
         }
     };
