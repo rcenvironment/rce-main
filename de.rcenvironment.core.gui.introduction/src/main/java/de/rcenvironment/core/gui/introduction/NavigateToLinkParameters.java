@@ -26,8 +26,6 @@ final class NavigateToLinkParameters {
 
     private static final String LINK_VALUE_NEWSLETTER = "newsletter";
 
-    private static final String LINK_VALUE_TWITTER = "twitter";
-
     private static final String LINK_VALUE_GITHUB = "github";
 
     private final Properties backingProperties;
@@ -49,15 +47,13 @@ final class NavigateToLinkParameters {
         case LINK_VALUE_NEWS:
         case LINK_VALUE_NEWSLETTER:
         case LINK_VALUE_GITHUB:
-        case LINK_VALUE_TWITTER:
             return;
 
         default:
             final String errorMessage = StringUtils.format(
                 "Properties given for constructing instance of %s do not contain valid value for key %s."
                     + " Contained value: %s. Valid values: %s, %s, %s, %s",
-                NavigateToLinkParameters.class.getName(), LINK_VALUE, linkValue, LINK_VALUE_GITHUB, LINK_VALUE_NEWS, LINK_VALUE_NEWSLETTER,
-                LINK_VALUE_TWITTER);
+                NavigateToLinkParameters.class.getName(), LINK_VALUE, linkValue, LINK_VALUE_GITHUB, LINK_VALUE_NEWS, LINK_VALUE_NEWSLETTER);
             throw new IllegalArgumentException(errorMessage);
         }
     }

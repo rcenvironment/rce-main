@@ -174,19 +174,6 @@ a:hover{
 	background-image: url("../icons/githubIconHover.png");
 }
 
-#twittericon{
-	width: 50px;
-	height: 50px;
-	background-size: cover;
-	background-image: url("../icons/twitterIcon.png");
-	display: inline-block;
-	margin: 0 auto;
-}
-
-#twittericon:hover{
-	background-image: url("../icons/twitterIconHover.png");
-}
-
 #checkbox > label{
 		position: relative;
 		bottom: 2px;
