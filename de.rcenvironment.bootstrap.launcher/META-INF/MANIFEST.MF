@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: RCE Bootstrap - Modified Equinox Launcher
-Bundle-SymbolicName: de.rcenvironment.bootstrap.launcher;singleton:=true
-Bundle-Version: 10.6.0.qualifier
+Bundle-SymbolicName: org.eclipse.equinox.launcher;singleton:=true
+Bundle-Version: 1.5.1.qualifier
 Main-Class: org.eclipse.equinox.launcher.Main
 Bundle-ClassPath: .
 Bundle-RequiredExecutionEnvironment: JavaSE-11
@@ -10,5 +10,5 @@ Export-Package: de.rcenvironment.bootstrap.launcher.api,
  org.eclipse.core.launcher;x-internal:=true,
  org.eclipse.equinox.internal.launcher;x-internal:=true,
  org.eclipse.equinox.launcher;x-internal:=true
-Bundle-Vendor: DLR, Eclipse Foundation (TODO check for other authors)
+Bundle-Vendor: DLR (including code provided by Eclipse.org)
 Automatic-Module-Name: org.eclipse.equinox.launcher

@@ -1,0 +1,9 @@
+# TODO document
+
+provides.0.namespace=org.eclipse.equinox.p2.iu
+provides.0.name=org.eclipse.equinox.launcher
+provides.0.version=1.5.0.v20180512-1130
+
+provides.1.namespace=org.eclipse.equinox.p2.iu
+provides.1.name=org.eclipse.equinox.launcher
+provides.1.version=$version$

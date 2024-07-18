@@ -14,8 +14,10 @@
 	</parent>
 
 	<modules>
+		<!-- bootstrap/launcher -->
+		<module>${projects-root}/de.rcenvironment.bootstrap.launcher</module>
+		<module>${projects-root}/de.rcenvironment.bootstrap.launcher.tests</module>
 		<!-- core headless -->
-		<module>${projects-root}/de.rcenvironment.core.launcher</module>
 		<module>${projects-root}/de.rcenvironment.core.authentication</module>
 		<module>${projects-root}/de.rcenvironment.core.authentication.tests</module>
 		<module>${projects-root}/de.rcenvironment.core.authorization</module>
@@ -72,7 +74,6 @@
 		<module>${projects-root}/de.rcenvironment.core.eventlog.tests</module>
 		<module>${projects-root}/de.rcenvironment.core.instancemanagement</module>
 		<module>${projects-root}/de.rcenvironment.core.instancemanagement.tests</module>
-		<module>${projects-root}/de.rcenvironment.core.launcher.tests</module>
 		<module>${projects-root}/de.rcenvironment.core.log</module>
 		<module>${projects-root}/de.rcenvironment.core.log.tests</module>
 		<module>${projects-root}/de.rcenvironment.core.log.provenance</module>
