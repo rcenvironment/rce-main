@@ -26,10 +26,10 @@
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>target-platform-configuration</artifactId>
-				<!-- This platform setting is not strictly necessary, as it is also inherited 
-					from the parent POM. It is declared here again so that developers can comment 
-					out irrelevant platforms when building locally. - R. Mischke, Feb 2012 -->
 				<configuration>
+					<!-- This platform setting is not strictly necessary, as it is also inherited 
+						from the parent POM. It is declared here again so that developers can comment 
+						out irrelevant platforms when building locally. - R. Mischke, Feb 2012 -->
 					<environments>
 						<!-- starting with RCE 8.1.0, we only support 64 bit builds -->
 						<environment>
