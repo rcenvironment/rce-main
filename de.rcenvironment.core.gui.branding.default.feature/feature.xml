@@ -132,4 +132,9 @@ This Agreement is governed by the laws of the State of New York and the intellec
          version="0.0.0"
          fragment="true"/>
 
+   <!-- temporarily added here to avoid adding a new feature before the planned restructuring -->         
+   <plugin
+         id="org.eclipse.equinox.launcher"
+         version="0.0.0"/>
+
 </feature>

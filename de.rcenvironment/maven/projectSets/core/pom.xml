@@ -14,9 +14,6 @@
 	</parent>
 
 	<modules>
-		<!-- bootstrap/launcher -->
-		<module>${projects-root}/de.rcenvironment.bootstrap.launcher</module>
-		<module>${projects-root}/de.rcenvironment.bootstrap.launcher.tests</module>
 		<!-- core headless -->
 		<module>${projects-root}/de.rcenvironment.core.authentication</module>
 		<module>${projects-root}/de.rcenvironment.core.authentication.tests</module>
