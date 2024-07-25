@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright 2016-2024 DLR, Germany
+ *  
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * https://rcenvironment.de/
+ */
+
+// CHECKSTYLE:DISABLE (e)
 /*******************************************************************************
  * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
@@ -30,6 +40,8 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.eclipse.equinox.internal.launcher.Constants;
+
+import de.rcenvironment.bootstrap.launcher.internal.RCELauncherCustomization;
 
 /**
  * The launcher for Eclipse.
@@ -561,6 +573,10 @@ public class Main {
 			debug = System.getProperty(PROP_DEBUG) != null;
 		setupVMProperties();
 		processConfiguration();
+
+        // RCE customization start
+		RCELauncherCustomization.hookAfterInitialConfigurationProcessing();
+        // RCE customization end
 
 		if (protectBase && (System.getProperty(PROP_SHARED_CONFIG_AREA) == null)) {
 			System.err.println("This application is configured to run in a cascaded mode only."); //$NON-NLS-1$
@@ -1464,7 +1480,13 @@ public class Main {
 	public int run(String[] args) {
 		int result = 0;
 		try {
-			basicRun(args);
+		    
+		    // RCE customization start
+            RCELauncherCustomization.initialize(args);
+            args = RCELauncherCustomization.rewriteCommandLineArguments(args);
+            // RCE customization end
+
+            basicRun(args);
 			String exitCode = System.getProperty(PROP_EXITCODE);
 			try {
 				result = exitCode == null ? 0 : Integer.parseInt(exitCode);
