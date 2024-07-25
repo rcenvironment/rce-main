@@ -1,20 +1,13 @@
-/*
- * Copyright (c) 2006, 2009 IBM Corporation and others
- * Copyright 2015-2023 DLR, Germany (header adaptations only)
- *  
- * SPDX-License-Identifier: EPL-1.0
- * 
- * https://rcenvironment.de/
- */
-
-// CHECKSTYLE:DISABLE (e)
 /*******************************************************************************
  * Copyright (c) 2006, 2009 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at 
- * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
  * Contributors:
  *     Andrew Niefer - IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -25,7 +18,6 @@ package org.eclipse.equinox.internal.launcher;
  *
  */
 public class Constants {
-	public static final String INTERNAL_ARCH_I386 = "i386"; //$NON-NLS-1$
 	public static final String INTERNAL_AMD64 = "amd64"; //$NON-NLS-1$
 	public static final String INTERNAL_OS_SUNOS = "SunOS"; //$NON-NLS-1$
 	public static final String INTERNAL_OS_LINUX = "Linux"; //$NON-NLS-1$
