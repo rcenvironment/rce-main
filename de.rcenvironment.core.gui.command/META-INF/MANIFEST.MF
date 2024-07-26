@@ -22,6 +22,5 @@ Import-Package: de.rcenvironment.core.command.api,
 Export-Package: de.rcenvironment.core.gui.command
 Require-Bundle: org.eclipse.jface,
  org.eclipse.core.runtime,
- org.eclipse.ui.workbench,
- org.apache.commons.io
+ org.eclipse.ui.workbench
 Automatic-Module-Name: de.rcenvironment.core.gui.command

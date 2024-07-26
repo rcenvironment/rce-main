@@ -8,9 +8,9 @@
 
 	<parent>
 		<groupId>de.rcenvironment</groupId>
-		<artifactId>de.rcenvironment.maven.parent.productModule</artifactId>
+		<artifactId>de.rcenvironment.maven.parent.defaultRepository</artifactId>
 		<version>1.0.0</version>
-		<relativePath>../../parent/productModule</relativePath>
+		<relativePath>../../parent/defaultRepository</relativePath>
 	</parent>
 
 	<build>

@@ -2,8 +2,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>de.rcenvironment.modules.productBuild</artifactId>
-	<name>RCE Module ${project.artifactId}</name>
+	<artifactId>de.rcenvironment.projectsets.bootstrap.launcher</artifactId>
+	<name>RCE Project Set ${project.artifactId}</name>
 	<packaging>pom</packaging>
 
 	<parent>
@@ -14,12 +14,9 @@
 	</parent>
 
 	<modules>
-		<module>${project-sets}/branding.default</module>
-		<module>${project-sets}/bootstrap.launcher</module>
-		<module>${project-sets}/documentation</module>
-		<module>${project-sets}/product.filesets.default</module>
-		<module>${project-sets}/product.versionInfo</module>
-		<module>../repository.mainProduct</module>
+		<!-- the customized Equinox launcher -->
+		<module>${projects-root}/de.rcenvironment.bootstrap.launcher</module>
+		<module>${projects-root}/de.rcenvironment.bootstrap.launcher.tests</module>
 	</modules>
 
 </project>
