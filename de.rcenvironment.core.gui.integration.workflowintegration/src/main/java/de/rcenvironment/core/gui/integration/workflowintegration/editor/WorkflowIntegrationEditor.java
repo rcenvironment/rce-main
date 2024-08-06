@@ -38,6 +38,7 @@ import de.rcenvironment.core.gui.integration.workflowintegration.editor.pages.Co
 import de.rcenvironment.core.gui.integration.workflowintegration.editor.pages.MappingPage;
 import de.rcenvironment.core.gui.integration.workflowintegration.editor.pages.MappingTreeContentProvider;
 import de.rcenvironment.core.gui.integration.workflowintegration.editor.pages.WorkflowEditorPage;
+import de.rcenvironment.core.gui.utils.common.EditorsHelper;
 import de.rcenvironment.core.utils.common.StringUtils;
 
 /**
@@ -162,7 +163,7 @@ public class WorkflowIntegrationEditor extends IntegrationEditor implements IPar
     public void integrate() {
         getController().createEndpointAdapters(mappingTreeContentProvider.getEndpointAdapters());
         if (getController().integrateWorkflow()) {
-            getSite().getPage().closeEditor(this, false);
+            EditorsHelper.closeEditor(WorkflowIntegrationEditor.this, false);
         } else {
             MessageDialog.openError(getSite().getShell(), "Error integrating component.",
                 "The integration of the workflow was not successfull. Please see the the log for more details.");
