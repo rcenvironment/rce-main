@@ -34,8 +34,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.services.IEvaluationService;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -53,6 +51,7 @@ import de.rcenvironment.core.component.workflow.execution.spi.SingleWorkflowStat
 import de.rcenvironment.core.component.workflow.model.api.Connection;
 import de.rcenvironment.core.component.workflow.model.api.Location;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowLabel;
+import de.rcenvironment.core.gui.utils.common.EditorsHelper;
 import de.rcenvironment.core.gui.workflow.Activator;
 import de.rcenvironment.core.gui.workflow.UncompletedJobsShutdownListener;
 import de.rcenvironment.core.gui.workflow.editor.WorkflowEditorHelpContextProvider;
@@ -103,13 +102,7 @@ public class WorkflowRunEditor extends GraphicalEditor implements ITabbedPropert
             @Override
             public boolean preShutdown(IWorkbench workbench, boolean arg1) {
                 // Close Workflow Run Editor programmatically on shutdown
-                final IWorkbenchPartSite site = WorkflowRunEditor.this.getSite();
-                if (site != null) {
-                    final IWorkbenchPage page = site.getPage();
-                    if (page != null) {
-                        page.closeEditor(WorkflowRunEditor.this, false);
-                    }
-                }
+                EditorsHelper.closeEditor(WorkflowRunEditor.this, false);
                 return true;
             }
 
@@ -325,7 +318,7 @@ public class WorkflowRunEditor extends GraphicalEditor implements ITabbedPropert
 
                 @Override
                 public void run() {
-                    WorkflowRunEditor.this.getSite().getPage().closeEditor(WorkflowRunEditor.this, false);
+                    EditorsHelper.closeEditor(WorkflowRunEditor.this, false);
                 }
             });
         } else {

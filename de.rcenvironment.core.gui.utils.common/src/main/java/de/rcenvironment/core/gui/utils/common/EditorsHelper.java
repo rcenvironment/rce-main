@@ -21,6 +21,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.FileStoreEditorInput;
@@ -88,6 +90,17 @@ public final class EditorsHelper {
         return editor;
     }
 
+    public static boolean closeEditor(IEditorPart editor, boolean save) {
+        final IWorkbenchPartSite site = editor.getSite();
+        if (site != null) {
+            final IWorkbenchPage page = site.getPage();
+            if (page != null) {
+                return page.closeEditor(editor, save);
+            }
+        }
+        return false;
+    }
+
     /**
      * Open an in-place editor within the editing view. Falls back to txt-editor.
      * @param ifile The file to open
@@ -139,7 +152,7 @@ public final class EditorsHelper {
     
                 @Override
                 public boolean preShutdown(IWorkbench workbench, boolean arg1) {
-                    return editor.getSite().getPage().closeEditor(editor, true);
+                    return closeEditor(editor, true);
                 }
     
                 @Override

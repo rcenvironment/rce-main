@@ -23,6 +23,7 @@ import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.MultiPageEditorPart;
 
+import de.rcenvironment.core.gui.utils.common.EditorsHelper;
 import de.rcenvironment.core.utils.common.StringUtils;
 
 /**
@@ -99,7 +100,7 @@ public abstract class IntegrationEditor extends MultiPageEditorPart implements I
 
     @Override
     public boolean preShutdown(IWorkbench workbench, boolean arg1) {
-        return workbench.getActiveWorkbenchWindow().getActivePage().closeEditor(this, true);
+        return EditorsHelper.closeEditor(IntegrationEditor.this, true);
     }
 
     @Override
@@ -167,7 +168,7 @@ public abstract class IntegrationEditor extends MultiPageEditorPart implements I
     public abstract void integrate();
 
     public void cancelPressed() {
-        getSite().getPage().closeEditor(this, false);
+        EditorsHelper.closeEditor(IntegrationEditor.this, false);
     }
 
     public List<IIntegrationEditorPage> getPages() {

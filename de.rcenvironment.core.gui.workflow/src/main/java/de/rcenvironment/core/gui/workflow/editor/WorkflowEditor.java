@@ -299,7 +299,7 @@ public class WorkflowEditor extends GraphicalEditor
                 (WorkflowNodePart.SMALL_WORKFLOW_NODE_WIDTH - 1) / 2));
 
         // register activate context for context sensitive key bindings
-        IContextService contextService = (IContextService) getSite().getService(IContextService.class);
+        IContextService contextService = getSite().getService(IContextService.class);
         contextService.activateContext("de.rcenvironment.rce.gui.workflow.editor.scope");
 
         // preferences store - initialize labels not to be shown
@@ -520,7 +520,7 @@ public class WorkflowEditor extends GraphicalEditor
     protected void closeEditorAndShowMessage(final String message) {
         MessageDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "Workflow File Error",
             message);
-        WorkflowEditor.this.getSite().getPage().closeEditor(WorkflowEditor.this, false);
+        EditorsHelper.closeEditor(WorkflowEditor.this, false);
     }
 
     /**
@@ -679,7 +679,7 @@ public class WorkflowEditor extends GraphicalEditor
             }
             fw.flush();
             fw.close();
-            this.getEditorSite().getPage().closeEditor(this, false);
+            EditorsHelper.closeEditor(WorkflowEditor.this, false);
             IWorkspace workspace = ResourcesPlugin.getWorkspace();
             if (file.getAbsolutePath().startsWith(workspace.getRoot().getFullPath().toFile().getAbsolutePath())) {
                 IFile[] ifile = workspace.getRoot().findFilesForLocationURI(file.toURI());
@@ -857,10 +857,6 @@ public class WorkflowEditor extends GraphicalEditor
         }
     }
 
-    private void closeEditor(boolean save) {
-        getSite().getPage().closeEditor(WorkflowEditor.this, save);
-    }
-
     private void superSetInput(IEditorInput input) {
 
         if (getEditorInput() != null) {
@@ -980,7 +976,7 @@ public class WorkflowEditor extends GraphicalEditor
                         @Override
                         public void run() {
                             if (!isDirty()) {
-                                closeEditor(false);
+                                EditorsHelper.closeEditor(WorkflowEditor.this, false);
                             }
                         }
                     });

@@ -217,7 +217,7 @@ public final class DataManagementWorkbenchUtils {
                 
                                 @Override
                                 public boolean preShutdown(IWorkbench workbench, boolean arg1) {
-                                    editor.getSite().getPage().closeEditor(editor, false);
+                                    EditorsHelper.closeEditor(editor, false);
                                     return true;
                                 }
                 
