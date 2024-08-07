@@ -161,19 +161,6 @@ a:hover{
 	text-align: center;
 }
 
-#githubicon{
-	width: 50px;
-	height: 50px;
-	background-size: cover;
-	background-image: url("../icons/githubIcon.png");
-	display: inline-block;
-	margin: 0 auto;
-}
-
-#githubicon:hover{
-	background-image: url("../icons/githubIconHover.png");
-}
-
 #checkbox > label{
 		position: relative;
 		bottom: 2px;
