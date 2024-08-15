@@ -25,7 +25,11 @@
 	               </with>
 	               <with variable="selection">
 	                  <iterate ifEmpty="false">
-	                     <test property="org.eclipse.core.resources.name" value="*.wf" />
+		                  <adapt
+	                       type="org.eclipse.core.resources.IFile">
+		                     <test property="org.eclipse.core.resources.extension"
+		                     value="wf" />
+		                  </adapt>
 	                  </iterate>
 	               </with>
                </and>
@@ -155,10 +159,10 @@
                      variable="selection">
                   <iterate
                         ifEmpty="false">
-                     <test
-                           property="org.eclipse.core.resources.name"
-                           value="*.wf">
-                     </test>
+                     <adapt type="org.eclipse.core.resources.IFile">
+		             	<test property="org.eclipse.core.resources.extension"
+		                value="wf" />
+		             </adapt>
                   </iterate>
                </with>
             </visibleWhen>
