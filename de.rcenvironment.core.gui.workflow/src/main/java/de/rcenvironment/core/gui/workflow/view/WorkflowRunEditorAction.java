@@ -11,8 +11,8 @@ package de.rcenvironment.core.gui.workflow.view;
 import java.io.File;
 import java.io.IOException;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
@@ -22,7 +22,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.ide.FileStoreEditorInput;
 
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionInformation;
 import de.rcenvironment.core.utils.common.StringUtils;
@@ -61,13 +61,13 @@ public class WorkflowRunEditorAction extends Action {
         final String filename = StringUtils.format("%s.wfr", wfExeInfo.getExecutionIdentifier());
         final File tempFile = new File(getFolder(), filename);
         final IPath location = new Path(tempFile.getAbsolutePath());
-        final IFile file = ResourcesPlugin.getWorkspace().getRoot().getProject("External Files").getFile(location);
+        final IFileStore fileOnLocalDisk = EFS.getLocalFileSystem().getStore(location);
         final IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
         final IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
         final IEditorDescriptor editorDescriptor = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(filename);
         IEditorPart editorPart;
         try {
-            editorPart = activePage.openEditor(new FileEditorInput(file), editorDescriptor.getId());
+            editorPart = activePage.openEditor(new FileStoreEditorInput(fileOnLocalDisk), editorDescriptor.getId());
         } catch (PartInitException e) {
             throw new RuntimeException(e);
         }
