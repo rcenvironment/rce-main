@@ -370,6 +370,35 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
     }
 
     @Test
+    public void whenVailidatingRemoteWorkflowControllerVisibilityExceptionIsThrown() throws WorkflowExecutionException {
+
+        final LogicalNodeId localNodeId = localNodeId();
+        final WorkflowNode node = new WorkflowNodeMockBuilder()
+            .identifier(WORKFLOW_NODE_IDENTIFIER)
+            .build();
+
+        final WorkflowDescriptionMock description = new WorkflowDescriptionMock(workflowIdentifier());
+        description.setControllerNode(localNodeId);
+        description.addNode(node);
+
+        List<String> componentRefs = new ArrayList<>();
+        componentRefs
+            .add(StringUtils.escapeAndConcat(WORKFLOW_NODE_IDENTIFIER, WorkflowNodeMockBuilder.IDENTIFIER_WITH_VERSION, LOGICAL_NODE_ID));
+
+        final WorkflowExecutionServiceImplUnitTestBuilder builder = new WorkflowExecutionServiceImplUnitTestBuilder();
+        final WorkflowExecutionServiceImpl service = builder
+            .expectControllerServiceVisibilityVerificationThrowsException(localNodeId, componentRefs)
+            .build();
+
+        Map<String, String> result = service.validateRemoteWorkflowControllerVisibilityOfComponents(description);
+        builder.verifyAllDependencies();
+        assertEquals(
+            WorkflowExecutionServiceImpl.ERROR_MESSAGE_COMPONENT_VISIBILITY_FAILURE
+                + WorkflowExecutionServiceImplUnitTestBuilder.ERROR_MESSAGE,
+            result.get(WORKFLOW_NODE_IDENTIFIER));
+    }
+
+    @Test
     public void whenGetLocalWorkflowExecutionInformations() throws ExecutionControllerException, RemoteOperationException {
 
         final RemotableWorkflowExecutionControllerService controllerService = controllerService(Optional.empty());
@@ -384,10 +413,10 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
     }
 
     @Test
-    public void whenGetLocalWorkflowExecutionInformationsThrowsException() throws RemoteOperationException {
+    public void whenGetLocalWorkflowExecutionInformationsThrowsException() throws ExecutionControllerException, RemoteOperationException {
 
         final RemotableWorkflowExecutionControllerService controllerService =
-            controllerServiceThrowsException(new RemoteOperationException(TEST_EXCEPTION));
+            controllerServiceThrowsException(new ExecutionControllerException(TEST_EXCEPTION));
 
         final WorkflowExecutionServiceImplUnitTestBuilder builder = new WorkflowExecutionServiceImplUnitTestBuilder();
         final WorkflowExecutionServiceImpl service = builder
@@ -433,9 +462,10 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
     }
 
     @Test
-    public void whenSendHeartBeatForActiveWorkflowsAndControllerServiceThrowsException() throws RemoteOperationException {
+    public void whenSendHeartBeatForActiveWorkflowsAndControllerServiceThrowsException()
+        throws ExecutionControllerException, RemoteOperationException {
 
-        RemoteOperationException e = new RemoteOperationException(TEST_EXCEPTION);
+        ExecutionControllerException e = new ExecutionControllerException(TEST_EXCEPTION);
 
         final RemotableWorkflowExecutionControllerService controllerService =
             controllerServiceThrowsException(e);
@@ -581,8 +611,8 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
         return controllerService;
     }
 
-    private static RemotableWorkflowExecutionControllerService controllerServiceThrowsException(RemoteOperationException e)
-        throws RemoteOperationException {
+    private static RemotableWorkflowExecutionControllerService controllerServiceThrowsException(ExecutionControllerException e)
+        throws ExecutionControllerException, RemoteOperationException {
         final RemotableWorkflowExecutionControllerService controllerService =
             EasyMock.createMock(RemotableWorkflowExecutionControllerService.class);
 
@@ -591,7 +621,7 @@ public class WorkflowExecutionServiceImplUnitTest extends WorkflowExecutionServi
         return controllerService;
     }
 
-    private static WorkflowExecutionServiceLog log(RemoteOperationException e) {
+    private static WorkflowExecutionServiceLog log(ExecutionControllerException e) {
         WorkflowExecutionServiceLog log = EasyMock.createStrictMock(WorkflowExecutionServiceLog.class);
 
         log.fetchingLocalWorkflowExecutionInformationFailed(e);

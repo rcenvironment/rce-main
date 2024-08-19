@@ -246,7 +246,8 @@ public class WorkflowExecutionControllerServiceImpl implements RemotableWorkflow
 
     @Override
     @AllowRemoteAccess
-    public Collection<WorkflowExecutionInformation> getWorkflowExecutionInformations() throws RemoteOperationException {
+    public Collection<WorkflowExecutionInformation> getWorkflowExecutionInformations() throws ExecutionControllerException,
+        RemoteOperationException {
         Map<String, WorkflowExecutionInformation> wfExeInfoSnapshot = null;
         synchronized (workflowExecutionInformations) {
             wfExeInfoSnapshot = new HashMap<>();
