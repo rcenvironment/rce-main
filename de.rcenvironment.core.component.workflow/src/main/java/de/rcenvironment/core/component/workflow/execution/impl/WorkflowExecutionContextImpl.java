@@ -9,9 +9,9 @@
 package de.rcenvironment.core.component.workflow.execution.impl;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import de.rcenvironment.core.communication.api.ServiceCallContext;
@@ -37,28 +37,33 @@ import de.rcenvironment.core.utils.common.exception.NotImplementedException;
  */
 public class WorkflowExecutionContextImpl implements WorkflowExecutionContext {
 
-    protected class DisplayName {
+    protected class DisplayName implements Serializable {
 
-        private final Optional<String> shortForm;
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -6398070976230532426L;
 
-        private final Optional<String> longForm;
+        private final String shortForm;
+
+        private final String longForm;
 
         public DisplayName() {
-            this.shortForm = Optional.empty();
-            this.longForm = Optional.empty();
+            this.shortForm = "<unknown>";
+            this.longForm = "<unknown>";
         }
 
         public DisplayName(String shortForm, String longForm) {
-            this.shortForm = Optional.of(shortForm);
-            this.longForm = Optional.of(longForm);
+            this.shortForm = shortForm;
+            this.longForm = longForm;
         }
 
         public String getShortForm() {
-            return shortForm.orElse("<unknown>");
+            return shortForm;
         }
 
         public String getLongForm() {
-            return longForm.orElse("<unknown>");
+            return longForm;
         }
     }
 
