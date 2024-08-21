@@ -1,3 +1,11 @@
+/*
+ * Copyright 2006-2023 DLR, Germany
+ * 
+ * SPDX-License-Identifier: EPL-1.0
+ * 
+ * https://rcenvironment.de/
+ */
+
 /**
  * Parses all Manifest files and checks if 'Bundle-Vendor' is declared.
  * Prints all bundles to the console, which misses the 'Bundle-Vendor'.

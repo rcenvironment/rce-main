@@ -412,16 +412,6 @@ public enum StandardImages implements ImageSource {
     /**
      * Attribute icon.
      */
-    TREE_SMALL(fromLocalBundle("XPathChooser/tree16.png")),
-
-    /**
-     * Attribute icon.
-     */
-    TREE_LARGE(fromLocalBundle("XPathChooser/tree64.png")),
-
-    /**
-     * Attribute icon.
-     */
     FILE_SMALL(fromLocalBundle("XPathChooser/value12.png")),
     
     /**

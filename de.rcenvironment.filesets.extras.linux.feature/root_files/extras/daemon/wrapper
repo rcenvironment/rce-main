@@ -1,4 +1,10 @@
 #! /bin/bash
+
+# SPDX-License-Identifier: EPL-1.0
+# Copyright (C) 2014 DLR, Germany
+# All rights reserved
+# http://www.rcenvironment.de/
+
 ### BEGIN INIT INFO
 # Provides:          rce daemon
 # Required-Start:    $all

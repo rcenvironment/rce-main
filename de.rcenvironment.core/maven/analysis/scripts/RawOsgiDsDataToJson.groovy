@@ -1,9 +1,9 @@
 /*
- * Copyright (C) 2013 DLR, Germany
+ * Copyright 2006-2023 DLR, Germany
  * 
- * All rights reserved
+ * SPDX-License-Identifier: EPL-1.0
  * 
- * http://www.rcenvironment.de/
+ * https://rcenvironment.de/
  */
 
 import java.util.jar.Manifest;

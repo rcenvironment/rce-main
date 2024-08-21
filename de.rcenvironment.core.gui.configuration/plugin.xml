@@ -27,7 +27,7 @@
 	            locationURI="menu:de.rcenvironment.configuration.menu">
 	            <command
 	               commandId="de.rcenvironment.core.gui.configuration.configurationInformation"
-	               icon="platform:/plugin/de.rcenvironment.core.gui.configuration/resources/icons/toolbar/openConfigInformation.gif"
+	               icon="platform:/plugin/de.rcenvironment.core.gui.configuration/resources/icons/toolbar/openConfigInformation.png"
 	               label="Open Configuration Information..."
 	               style="push">
 	            </command>
@@ -51,7 +51,7 @@
        		</command>
        		<command
                commandId="de.rcenvironment.core.gui.configuration.configurationInformation"
-               icon="platform:/plugin/de.rcenvironment.core.gui.configuration/resources/icons/toolbar/openConfigInformation.gif"
+               icon="platform:/plugin/de.rcenvironment.core.gui.configuration/resources/icons/toolbar/openConfigInformation.png"
                label="Open Configuration Information..."
                tooltip="Open Configuration Information..."
                style="push">

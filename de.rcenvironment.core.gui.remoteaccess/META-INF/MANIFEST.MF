@@ -15,5 +15,6 @@ Import-Package: de.rcenvironment.core.component.api,
  org.apache.commons.io;version="2.4.0",
  org.eclipse.osgi.util;version="1.1.0",
  org.eclipse.ui.views.properties.tabbed
-Require-Bundle: org.eclipse.ui
+Require-Bundle: org.eclipse.ui,
+ de.rcenvironment.core.gui.resources
 Automatic-Module-Name: de.rcenvironment.core.gui.remoteaccess

@@ -1,3 +1,11 @@
+/*
+ * Copyright 2006-2023 DLR, Germany
+ * 
+ * SPDX-License-Identifier: EPL-1.0
+ * 
+ * https://rcenvironment.de/
+ */
+
 import java.util.jar.Manifest;
 
 import groovy.json.JsonBuilder

@@ -1,3 +1,7 @@
+# Copyright 2006-2023 DLR, Germany
+# SPDX-License-Identifier: EPL-1.0
+# https://rcenvironment.de/
+
 # about.mappings
 # contains fill-ins for the about dialog (plugin.properties) of all distributions
 
