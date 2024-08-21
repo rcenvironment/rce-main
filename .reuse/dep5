@@ -353,7 +353,7 @@ Files: de.rcenvironment.core.configuration.tests/src/test/resources/configuratio
 Copyright: DLR
 License: CC0-1.0
 
-Files: org.eclipse.equinox.launcher/.classpath org.eclipse.equinox.launcher/.project org.eclipse.equinox.launcher/pom.xml org.eclipse.equinox.launcher/META-INF/MANIFEST.MF org.eclipse.equinox.launcher/README-RCE.ad
+Files: org.eclipse.equinox.launcher/.project org.eclipse.equinox.launcher/pom.xml org.eclipse.equinox.launcher/META-INF/MANIFEST.MF de.rcenvironment.bootstrap.launcher/README-RCE.ad org.eclipse.equinox.launcher/bin/.* org.eclipse.equinox.launcher/bin/pom.xml org.eclipse.equinox.launcher/bin/target/*.html de.rcenvironment.bootstrap.launcher/*.html
 Copyright: DLR
 License: EPL-1.0
 
