@@ -40,11 +40,6 @@ public final class EditorsHelper {
      * Default editor extension (fallback editor).
      */
     private static final String TXT = "txt";
-    
-    /**
-     * "Index of" constant.
-     */
-    private static final int NOT_FOUND = -1;
 
 
     /**
@@ -98,7 +93,7 @@ public final class EditorsHelper {
                 return page.closeEditor(editor, save);
             }
         }
-        return false;
+        return true;
     }
 
     /**
