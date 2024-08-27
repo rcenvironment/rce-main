@@ -86,6 +86,7 @@ public class ApplicationWorkbenchAdvisor extends WorkbenchAdvisor {
         super.preStartup();
         // required to be able to use the Resource view
         IDE.registerAdapters();
+        UnwantedUIRemover.removeThemes();
     }
 
     @Override
