@@ -8,10 +8,14 @@
 
 package de.rcenvironment.core.start.gui.internal;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.internal.registry.ExtensionRegistry;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.dynamichelpers.IExtensionChangeHandler;
 import org.eclipse.jface.action.IContributionItem;
@@ -428,6 +432,26 @@ public final class UnwantedUIRemover {
             results.addAll(Arrays.asList(getAllWizards(wizardCategory.getCategories())));
         }
         return results.toArray(new IWizardDescriptor[0]);
+    }
+
+    public static void removeThemes() {
+        ExtensionRegistry registry = (ExtensionRegistry) Platform.getExtensionRegistry();
+        Field field;
+        try {
+            field = ExtensionRegistry.class.getDeclaredField("masterToken");
+            field.setAccessible(true);
+            Object masterToken = field.get(registry);
+            IExtensionPoint extPoint = registry.getExtensionPoint("org.eclipse.e4.ui.css.swt.theme");
+            IExtension[] extensions = extPoint.getExtensions();
+            for (IExtension e : extensions) {
+                if ("org.eclipse.ui.themes".equals(e.getContributor().getName())) { //$NON-NLS-1$
+                    registry.removeExtension(e, masterToken);
+                    return;
+                }
+            }
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e1) {
+            // TODO Auto-generated catch block
+        } // $NON-NLS-1$
     }
 
 }

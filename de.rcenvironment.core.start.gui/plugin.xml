@@ -106,6 +106,36 @@
             	label="Configuration" />
       </menuContribution>
 	</extension>
-	
-	
+	<extension
+         point="org.eclipse.e4.ui.css.swt.theme">
+      <theme
+            basestylesheeturi="platform:/plugin/org.eclipse.ui.themes/css/e4_default_win.css"
+            id="org.eclipse.e4.ui.css.theme.e4_default"
+            label="Light"
+            os="win32">
+      </theme>
+      <theme
+            basestylesheeturi="platform:/plugin/org.eclipse.ui.themes/css/e4_classic.css"
+            id="org.eclipse.e4.ui.css.theme.e4_classic"
+            label="Classic"
+            os="win32">
+      </theme>
+      <theme
+            basestylesheeturi="platform:/plugin/org.eclipse.ui.themes/css/e4_default_gtk.css"
+            id="org.eclipse.e4.ui.css.theme.e4_default"
+            label="Default"
+            os="linux">
+      </theme>
+	  <theme
+			basestylesheeturi="platform:/plugin/org.eclipse.ui.themes/css/high-contrast.css"
+	        id="org.eclipse.e4.ui.css.theme.high-contrast"
+	        label="High Contrast">
+	  </theme>
+
+	  <themeAssociation
+		 themeId="org.eclipse.e4.ui.css.theme.e4_classic"
+		 colorAndFontId="org.eclipse.ui.defaultTheme"> 
+	  </themeAssociation>
+    </extension>
+		
 </plugin>
