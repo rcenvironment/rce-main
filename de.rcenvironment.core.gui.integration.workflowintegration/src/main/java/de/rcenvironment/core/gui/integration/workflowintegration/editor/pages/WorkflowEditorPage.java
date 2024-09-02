@@ -17,6 +17,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.ContextMenuProvider;
 import org.eclipse.gef.MouseWheelHandler;
 import org.eclipse.gef.MouseWheelZoomHandler;
@@ -172,6 +173,7 @@ public class WorkflowEditorPage extends WorkflowEditor implements IIntegrationEd
         updatePageValid();
     }
 
+    @Override
     public boolean isPageValid() {
         return pageValid;
     }
@@ -257,6 +259,7 @@ public class WorkflowEditorPage extends WorkflowEditor implements IIntegrationEd
         editorArea.setFocus();
     }
 
+    @Override
     public void setSaveButtonEnabled(boolean enable) {
         buttonBar.setSaveButtonEnabled(enable);
     }
@@ -264,26 +267,37 @@ public class WorkflowEditorPage extends WorkflowEditor implements IIntegrationEd
     @Override
     public void mouseDoubleClick(MouseEvent ev) {
 
-        // Open Connection Editor filtered to the selected connection
-        ConnectionPart connectionPart = selectConnection(ev);
-        if (connectionPart != null) {
-            WorkflowNode source = null;
-            WorkflowNode target = null;
-            if (connectionPart.getSource().getModel() instanceof WorkflowNode) {
-                source = (WorkflowNode) connectionPart.getSource().getModel();
-            }
-            if (connectionPart.getTarget().getModel() instanceof WorkflowNode) {
-                target = (WorkflowNode) connectionPart.getTarget().getModel();
-            }
-            WIOpenConnectionEditorHandler openConnectionEditorHandler = new WIOpenConnectionEditorHandler(source,
-                target);
+        Object selectedPart = getViewer().findObjectAt(new Point(ev.x, ev.y));
+        if (selectedPart == null) {
+            return;
+        }
+        if (selectedPart instanceof ConnectionPart) {
+            ConnectionPart connectionPart = (ConnectionPart) selectedPart;
+            handleConnectionDoubleClick(connectionPart);
+        } else if (selectedPart instanceof WorkflowNodePart) {
             try {
-                openConnectionEditorHandler.execute(new ExecutionEvent());
-            } catch (ExecutionException e1) {
-                e1.printStackTrace();
+                new WIWorkflowNodeDisEnableHandler().execute(new ExecutionEvent());
+            } catch (ExecutionException e) {
+                // Nothing to do here.
             }
-        } else {
-            switchComponentActivation();
+        }
+    }
+
+    private void handleConnectionDoubleClick(ConnectionPart connectionPart) {
+        WorkflowNode source = null;
+        WorkflowNode target = null;
+        if (connectionPart.getSource().getModel() instanceof WorkflowNode) {
+            source = (WorkflowNode) connectionPart.getSource().getModel();
+        }
+        if (connectionPart.getTarget().getModel() instanceof WorkflowNode) {
+            target = (WorkflowNode) connectionPart.getTarget().getModel();
+        }
+        WIOpenConnectionEditorHandler openConnectionEditorHandler = new WIOpenConnectionEditorHandler(source,
+            target);
+        try {
+            openConnectionEditorHandler.execute(new ExecutionEvent());
+        } catch (ExecutionException e1) {
+            e1.printStackTrace();
         }
     }
 
@@ -389,20 +403,6 @@ public class WorkflowEditorPage extends WorkflowEditor implements IIntegrationEd
         }
     }
     
-    private void switchComponentActivation() {
-        List<?> selectedParts = getViewer().getSelectedEditParts();
-        if (selectedParts.isEmpty() || selectedParts.size() > 1) {
-            return;
-        }
-        if (selectedParts.iterator().hasNext() && selectedParts.iterator().next() instanceof WorkflowNodePart) {
-            try {
-                new WIWorkflowNodeDisEnableHandler().execute(new ExecutionEvent());
-            } catch (ExecutionException e) {
-                // Nothing to do here.
-            }
-        }
-    }
-
     @Override
     public void setBackButtonEnabled(boolean enable) {
         buttonBar.setBackButtonEnabled(enable);
