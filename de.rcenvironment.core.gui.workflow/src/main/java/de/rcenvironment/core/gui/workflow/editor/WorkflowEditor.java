@@ -41,9 +41,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.FigureCanvas;
 import org.eclipse.draw2d.geometry.Dimension;
-import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.ContextMenuProvider;
 import org.eclipse.gef.DefaultEditDomain;
@@ -391,20 +390,9 @@ public class WorkflowEditor extends GraphicalEditor
     }
 
     protected ConnectionPart selectConnection(MouseEvent ev) {
-        for (Object editPart : getViewer().getEditPartRegistry().values()) {
-            if (editPart instanceof ConnectionPart) {
-                int offsetX = ((FigureCanvas) getViewer().getControl()).getViewport().getViewLocation().x;
-                int offsetY = ((FigureCanvas) getViewer().getControl()).getViewport().getViewLocation().y;
-                ConnectionPart connectionPart = ((ConnectionPart) editPart);
-                PointList connectionPoints = connectionPart.getConnectionFigure().getPoints();
-                Rectangle toleranceRectangle = new Rectangle(ev.x + offsetX - DEFAULT_TOLERANCE / 2,
-                    ev.y + offsetY - DEFAULT_TOLERANCE / 2, DEFAULT_TOLERANCE, DEFAULT_TOLERANCE);
-                if (connectionPoints.intersects(toleranceRectangle)) {
-                    getViewer().select(connectionPart);
-                    getViewer().reveal(connectionPart);
-                    return connectionPart;
-                }
-            }
+        Object object = getViewer().findObjectAt(new Point(ev.x, ev.y));
+        if (object instanceof ConnectionPart) {
+            return (ConnectionPart) object;
         }
         return null;
     }
