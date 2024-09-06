@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -799,7 +800,8 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
         // The Example Workflow 02_03_XML_Components.wf contains file inputs located in the project.
         // These files are copied into the temp dir when running the test.
         // The path to these input files have to be updated in the workflow file.
-        if (workflowName.equals("Workflow Examples Project" + File.separator + "02_Component Groups" + File.separator + "02_03_XML_Components.wf")) {
+        if (workflowName
+            .equals("Workflow Examples Project" + File.separator + "02_Component Groups" + File.separator + "02_03_XML_Components.wf")) {
             correctPathToInputFiles(wfFileLocation);
         }
 
@@ -841,7 +843,7 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
         try {
             workflowInfo = INSTANCE_MANAGEMENT_SERVICE.startWorkflowOnInstance(instanceId, wfFileLocation, placeholderFileLocation,
                 commandOutputReceiver);
-        } catch (JSchException | SshParameterException | IOException | InterruptedException e) {
+        } catch (JSchException | SshParameterException | IOException | InterruptedException | TimeoutException e) {
             fail(StringUtils.format("Failed to start workflow %s on instance %s: %s", workflowName, instanceId, e.toString()));
         }
         setLastCommandOutput(instance, workflowName, commandOutputReceiver);
@@ -878,7 +880,7 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
         String[] workflowInfo = null;
         try {
             workflowInfo = INSTANCE_MANAGEMENT_SERVICE.startWorkflowOnInstance(instanceId, wfFileLocation, commandOutputReceiver);
-        } catch (JSchException | SshParameterException | IOException | InterruptedException e) {
+        } catch (JSchException | SshParameterException | IOException | InterruptedException | TimeoutException e) {
             fail(StringUtils.format("Failed to start workflow %s on instance %s: %s", workflowName, instanceId, e.toString()));
         }
         setLastCommandOutput(instance, workflowName, commandOutputReceiver);

@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import com.jcraft.jsch.JSchException;
 
@@ -220,9 +221,10 @@ public interface InstanceManagementService {
      * @throws JSchException on SSH command execution errors
      * @throws IOException on on SSH command execution errors
      * @throws InterruptedException on SSH command execution errors
+     * @throws TimeoutException
      */
     void executeCommandOnInstance(String instanceId, String command, TextOutputReceiver userOutputReceiver) throws JSchException,
-        SshParameterException, IOException, InterruptedException;
+        SshParameterException, IOException, InterruptedException, TimeoutException;
 
     /**
      * Attempts to start a workflow on a managed instance via SSH. Will not wait for completion of the workflow.
@@ -237,9 +239,10 @@ public interface InstanceManagementService {
      * @throws IOException on on SSH command execution errors
      * @throws InterruptedException on SSH command execution errors
      * @return string array, containing info about started workflow. [0]:workflowName [1]:workflowLogDir [2]:workflowId
+     * @throws TimeoutException
      */
     String[] startWorkflowOnInstance(String instanceId, Path workflowFileLocation, CapturingTextOutReceiver userOutputReceiver)
-        throws JSchException, SshParameterException, IOException, InterruptedException;
+        throws JSchException, SshParameterException, IOException, InterruptedException, TimeoutException;
 
     /**
      * Attempts to start a workflow using a placeholder file on a managed instance via SSH. Will not wait for completion of the workflow.
@@ -255,9 +258,11 @@ public interface InstanceManagementService {
      * @throws IOException on on SSH command execution errors
      * @throws InterruptedException on SSH command execution errors
      * @return string array, containing info about started workflow. [0]:workflowName [1]:workflowLogDir [2]:workflowId
+     * @throws TimeoutException
      */
     String[] startWorkflowOnInstance(String instanceId, Path workflowFileLocation, Path placeholderFileLocation,
-        CapturingTextOutReceiver userOutputReceiver) throws JSchException, SshParameterException, IOException, InterruptedException;
+        CapturingTextOutReceiver userOutputReceiver)
+        throws JSchException, SshParameterException, IOException, InterruptedException, TimeoutException;
 
     /**
      * @param input the string to test
