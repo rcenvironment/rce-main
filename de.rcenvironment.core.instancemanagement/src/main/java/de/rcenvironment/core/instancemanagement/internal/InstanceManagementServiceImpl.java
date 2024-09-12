@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -87,6 +88,8 @@ import de.rcenvironment.core.utils.ssh.jsch.executor.JSchRCECommandLineExecutor;
 public class InstanceManagementServiceImpl implements InstanceManagementService {
 
     private static final int THREAD_SLEEP_DEFAULT_IN_MILLIS = 500;
+
+    private static final int THREAD_TIMEOUT_IN_MILLIS = 5000;
 
     private static final String FROM_INSTANCE = " from instance ";
 
@@ -1621,7 +1624,7 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
     private interface AfterInstancePerformance<T> {
 
         T after(JSchRCECommandLineExecutor rceExecutor, TextOutputReceiver userOutputReceiver)
-            throws IOException, InterruptedException;
+            throws IOException, InterruptedException, TimeoutException;
     }
 
     /**
@@ -1633,7 +1636,7 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
 
         @Override
         public String[] after(JSchRCECommandLineExecutor rceExecutor, TextOutputReceiver userOutputReceiver)
-            throws IOException, InterruptedException {
+            throws IOException, InterruptedException, TimeoutException {
             try (InputStream stdoutStream = rceExecutor.getStdout(); InputStream stderrStream = rceExecutor.getStderr();) {
                 String[] workflowInfo = new String[3];
                 TextStreamWatcher stdoutWatcher = TextStreamWatcherFactory.create(stdoutStream, userOutputReceiver);
@@ -1642,6 +1645,7 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
                 stderrWatcher.start();
 
                 // wait until commandOutput contains workflow ID
+                int sleepTime = 0;
                 while (true) {
                     String output = ((CapturingTextOutReceiver) userOutputReceiver).getBufferedOutput();
                     Matcher m = WORKFLOW_START_PATTERN.matcher(output);
@@ -1652,6 +1656,11 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
                         break;
                     }
                     Thread.sleep(THREAD_SLEEP_DEFAULT_IN_MILLIS);
+                    sleepTime += THREAD_SLEEP_DEFAULT_IN_MILLIS;
+                    if (sleepTime > THREAD_TIMEOUT_IN_MILLIS) {
+                        throw new TimeoutException("Waiting for " + THREAD_TIMEOUT_IN_MILLIS
+                            + " milliseconds. Log did not contain expected start pattern for the workflow.");
+                    }
                 }
                 return workflowInfo;
             }
@@ -1683,7 +1692,7 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
 
     private Object performOnInstance(String instanceId, String command, TextOutputReceiver userOutputReceiver,
         AfterInstancePerformance<?> afterInstancePerformance)
-        throws IOException, JSchException, SshParameterException, InterruptedException {
+        throws IOException, JSchException, SshParameterException, InterruptedException, TimeoutException {
         Objects.requireNonNull(instanceId); // sanity check
         if (isInstanceRunning(instanceId)) {
             Logger logger = JschSessionFactory.createDelegateLogger(log);
@@ -1722,14 +1731,14 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
 
     @Override
     public void executeCommandOnInstance(String instanceId, String command, TextOutputReceiver userOutputReceiver) throws JSchException,
-        SshParameterException, IOException, InterruptedException {
+        SshParameterException, IOException, InterruptedException, TimeoutException {
         AfterCommandExecution test = new AfterCommandExecution();
         performOnInstance(instanceId, command, userOutputReceiver, test);
     }
 
     @Override
     public String[] startWorkflowOnInstance(String instanceId, Path workflowFileLocation, CapturingTextOutReceiver userOutputReceiver)
-        throws JSchException, SshParameterException, IOException, InterruptedException {
+        throws JSchException, SshParameterException, IOException, InterruptedException, TimeoutException {
         AfterWorkflowStarting test = new AfterWorkflowStarting();
         return (String[]) performOnInstance(instanceId,
             StringUtils.format("wf run --dispose never --delete never \"%s\"", workflowFileLocation), userOutputReceiver, test);
@@ -1738,7 +1747,7 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
     @Override
     public String[] startWorkflowOnInstance(String instanceId, Path workflowFileLocation, Path placeholderFileLocation,
         CapturingTextOutReceiver userOutputReceiver)
-        throws JSchException, SshParameterException, IOException, InterruptedException {
+        throws JSchException, SshParameterException, IOException, InterruptedException, TimeoutException {
         AfterWorkflowStarting test = new AfterWorkflowStarting();
         return (String[]) performOnInstance(instanceId,
             StringUtils.format("wf run --dispose never --delete never -p \"%s\" \"%s\"", placeholderFileLocation,

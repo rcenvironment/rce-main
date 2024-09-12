@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.jcraft.jsch.JSchException;
@@ -107,7 +108,7 @@ public abstract class InstanceManagementStepDefinitionBase extends AbstractStepD
             instance.setLastCommandOutput(commandOutput);
             log.debug(StringUtils.format("Finished execution of command \"%s\" on instance \"%s\"", commandString, instanceId));
             return commandOutput;
-        } catch (JSchException | SshParameterException | IOException | InterruptedException e) {
+        } catch (JSchException | SshParameterException | IOException | InterruptedException | TimeoutException e) {
             fail(StringUtils.format("Failed to execute command \"%s\" on instance \"%s\": %s", commandString, instanceId, e.toString()));
             return null; // dummy command; never reached
         }
