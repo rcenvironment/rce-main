@@ -46,6 +46,13 @@ public class RCELogEventRewritePolicy implements RewritePolicy {
         // when writing filters, prefer to only check the format string ("template" here) for efficiency
         final String messageTemplate = event.getMessage().getFormat();
 
+        // rule for MANTIS-18211: eliminate highly verbose Felix SCR log output, about 4.000 lines per run;
+        // we have not found a way to actually disable the generation of these messages
+        // TODO review/retest after the next RCP upgrade
+        if (originalLevel == Level.DEBUG && messageTemplate.startsWith("bundle org.apache.felix.scr:")) {
+            return suppressMessage(event);
+        }
+
         // all following filters only affect warnings, so exit immediately for anything else
         if (originalLevel != Level.WARN) {
             return event;
