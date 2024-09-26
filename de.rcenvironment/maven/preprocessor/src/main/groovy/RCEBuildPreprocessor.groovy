@@ -22,8 +22,8 @@ class RCEBuildPreprocessor {
 
     final defaultRepositoryUrlSuffixes = [
         'snapshot': [
-            'platform': 'releases/10.5.0',
-            'intermediate': 'releases/10.5.0'
+            'platform': 'snapshots/dev-mantis-17032-rcp-upgrade',
+            'intermediate': 'snapshots/dev-mantis-17032-rcp-upgrade'
         ],
         'rc_or_release': [
             'platform': 'releases/10.5.0',
