@@ -41,29 +41,41 @@ public class RCELogEventRewritePolicy implements RewritePolicy {
     @Override
     public LogEvent rewrite(LogEvent event) {
 
-        // all current filtering use cases only affect warnings, so exit immediately for anything else
-        if (event.getLevel() != Level.WARN) {
+        // readability alias
+        final Level originalLevel = event.getLevel();
+        // when writing filters, prefer to only check the format string ("template" here) for efficiency
+        final String messageTemplate = event.getMessage().getFormat();
+
+        // all following filters only affect warnings, so exit immediately for anything else
+        if (originalLevel != Level.WARN) {
             return event;
         }
 
-        // if possible, apply the filter selection without actually rendering the message for efficiency
-        String messageTemplate = event.getMessage().getFormat();
-
         // TODO example rule; apply actual filtering rules here
         if ("dummy".equals(messageTemplate)) {
-            return reduceLogLevelToDebug(event);
+            return reduceLogLevelWithMessagePrefix(event, Level.DEBUG);
         }
 
         // return the unmodified event if no filter matched
         return event;
     }
 
-    private Log4jLogEvent reduceLogLevelToDebug(LogEvent event) {
+    private Log4jLogEvent suppressMessage(LogEvent event) {
+        // the log4j documentation states that returning "null" should work, but this actually causes problems,
+        // so we reduce the level and let the default DEBUG level filter eliminate the event instead
+        return reduceLogLevel(event, Level.TRACE);
+    }
+
+    private Log4jLogEvent reduceLogLevel(LogEvent event, Level newLevel) {
+        return new Log4jLogEvent.Builder(event).setLevel(newLevel).build();
+    }
+
+    private Log4jLogEvent reduceLogLevelWithMessagePrefix(LogEvent event, Level newLevel) {
         final Message originalMessage = event.getMessage();
         final Message substituteMessage =
             new FormattedMessage(String.format("[Log level reduced from %s] %s",
                 event.getLevel().name(), originalMessage.getFormat()), originalMessage.getParameters());
-        return new Log4jLogEvent.Builder(event).setMessage(substituteMessage).setLevel(Level.DEBUG).build();
+        return new Log4jLogEvent.Builder(event).setMessage(substituteMessage).setLevel(newLevel).build();
     }
 
 }
