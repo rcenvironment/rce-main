@@ -239,6 +239,12 @@ public final class SelectableLocationFileAppender extends AbstractOutputStreamAp
 
     @Override
     public void append(LogEvent event) {
+
+        if (event == null) {
+            // log events filtered out by a RewritePolicy are replaced by "null", but apparently still forwarded to appenders
+            return;
+        }
+
         // low-overhead defence against a race condition when this field is nulled
         final List<LogEvent> immutableCopyOfEarlyLogEventCaptureList = earlyLogEventCaptureList;
         if (immutableCopyOfEarlyLogEventCaptureList != null) {
