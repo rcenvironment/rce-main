@@ -475,36 +475,32 @@ Scenario: Autoconnect after startup with uplink server started before clients
 
 @UplinkTestsFeature
 @Uplink09
-Scenario: Autoconnect after startup with clients started before uplink server
-    Given instance "Uplink1, Client1, Client2" using the default build
-    And configured network connections "Client1-[upl]->Uplink1 [autoStart autoRetry]"
-    And configured network connections "Client2-[upl]->Uplink1 [autoStart autoRetry]"
+Scenario: Autoconnect after starting Uplink clients before the Uplink server
 
+    Given instance "Server, Client1, Client2" using the default build
+    And configured network connections "Client1-[upl]->Server [autoStart autoRetry]"
+    And configured network connections "Client2-[upl]->Server [autoStart autoRetry]"
+
+	# note: this step implicitly waits for both clients to complete basic startup
     When starting instances "Client1, Client2"
-    And waiting for 15 seconds
-    And starting instance "Uplink1"
+    And starting instance "Server"
 
     And adding tool "common/TestTool" to "Client1"
-    And waiting for 15 seconds
     And executing command "components set-auth common/TestTool public" on "Client1"
-    And waiting for 5 seconds
     
-    Then the visible uplink network of "Client1" should contain "Uplink1"
-    And the visible uplink network of "Client2" should contain "Uplink1"
-    And instance "Client2" should see these components:
+    Then the visible uplink network of "Client1" should contain "Server" within 5 seconds
+    And  the visible uplink network of "Client2" should contain "Server" within 5 seconds
+    And  instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
 
     And stopping instance "Client1"
-    And waiting for 5 seconds
     And stopping instance "Client2"
-    And waiting for 5 seconds
-    And stopping instance "Uplink1"
-    And waiting for 15 seconds
+    And stopping instance "Server"
     And the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     java.net.ConnectException: Connection refused
     """
-    And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
+    And the log output of instance "Server" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
     stream is already closed
