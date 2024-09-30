@@ -53,18 +53,18 @@ public class RCELogEventRewritePolicy implements RewritePolicy {
             return suppressMessage(event);
         }
 
-        // all following filters only affect warnings, so exit immediately for anything else
-        if (originalLevel != Level.WARN) {
-            return event;
-        }
-
         if (messageTemplate == null) {
             // unlikely, but make sure we do not cause NPEs within this filter
             return event;
         }
 
         // rule for MANTIS-17266; this is a library warning which occurs fairly often, but with no clear path to prevent it
-        if (messageTemplate.endsWith("stream is already closed")) {
+        if (originalLevel == Level.WARN && messageTemplate.endsWith("stream is already closed")) {
+            return reduceLogLevelWithMessagePrefix(event, Level.DEBUG);
+        }
+
+        // rule for MANTIS-18210: this is triggered by a NPE in Eclipse RCP code with no apparent way to prevent it
+        if (originalLevel == Level.ERROR && messageTemplate.startsWith("FrameworkEvent ")) {
             return reduceLogLevelWithMessagePrefix(event, Level.DEBUG);
         }
 
