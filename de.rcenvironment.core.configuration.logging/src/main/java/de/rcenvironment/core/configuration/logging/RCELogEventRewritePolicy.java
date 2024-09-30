@@ -58,8 +58,13 @@ public class RCELogEventRewritePolicy implements RewritePolicy {
             return event;
         }
 
-        // TODO example rule; apply actual filtering rules here
-        if ("dummy".equals(messageTemplate)) {
+        if (messageTemplate == null) {
+            // unlikely, but make sure we do not cause NPEs within this filter
+            return event;
+        }
+
+        // rule for MANTIS-17266; this is a library warning which occurs fairly often, but with no clear path to prevent it
+        if (messageTemplate.endsWith("stream is already closed")) {
             return reduceLogLevelWithMessagePrefix(event, Level.DEBUG);
         }
 
