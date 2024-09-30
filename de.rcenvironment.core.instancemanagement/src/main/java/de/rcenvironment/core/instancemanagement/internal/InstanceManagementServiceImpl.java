@@ -1435,16 +1435,20 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
     }
 
     private void prepareAndValidateDirectory(String id, File dir) throws IOException {
-        dir.mkdirs();
         String absolutePath = dir.getAbsolutePath();
-        if (!dir.isDirectory()) {
-            throw new IOException("The configured path '" + id + "' ('" + absolutePath + "') could not be created");
-        }
         // TODO improve and document validation
         if (absolutePath.contains("\"")) {
             throw new IOException("The directory path '" + absolutePath + "' contains illegal characters");
         }
-        log.debug("Set up directory '" + id + "' at " + absolutePath);
+        if (dir.isDirectory()) {
+            return; // already exists, nothing to do
+        }
+
+        dir.mkdirs();
+        if (!dir.isDirectory()) {
+            throw new IOException("The directory path '" + id + "' at '" + absolutePath + "' could not be created");
+        }
+        log.debug("Created directory '" + id + "' at " + absolutePath);
     }
 
     private TextOutputReceiver ensureUserOutputReceiverDefined(TextOutputReceiver userOutputReceiver) {
