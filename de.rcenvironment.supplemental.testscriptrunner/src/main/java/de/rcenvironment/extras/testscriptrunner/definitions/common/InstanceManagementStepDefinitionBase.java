@@ -146,9 +146,8 @@ public abstract class InstanceManagementStepDefinitionBase extends AbstractStepD
                         }
                     }
                 });
-                // TODO this does not seem to execute action.performActionOnInstance in parallel
-                executeRunnablesGroupAndHandlePotentialErrors(runnablesGroup, "performing action on instance");
             }
+            executeRunnablesGroupAndHandlePotentialErrors(runnablesGroup, "performing action on instance");
             break;
         case ORDERED:
             for (ManagedInstance instance : instances) {

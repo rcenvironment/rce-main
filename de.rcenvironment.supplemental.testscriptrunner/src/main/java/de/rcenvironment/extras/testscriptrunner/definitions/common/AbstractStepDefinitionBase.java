@@ -16,9 +16,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -33,15 +35,94 @@ import de.rcenvironment.core.utils.common.textstream.receivers.PrefixingTextOutF
  */
 public abstract class AbstractStepDefinitionBase {
 
+    /**
+     * The default retry wait time in msec used by {@link #executeWithRetry(ExecutionAttempt, int)}.
+     */
+    protected static final int DEFAULT_RETRY_DELAY = 1000;
+
     protected final TestScenarioExecutionContext executionContext;
 
     protected final TextOutputReceiver outputReceiver;
 
     protected final Log log = LogFactory.getLog(getClass());
 
+    /**
+     * A lambda interface for operations in a test step that should be executed in a retry loop.
+     * 
+     * The expected behavior of lambda blocks is:
+     * <ul>
+     * <li>Success - return true
+     * <li>Temporary failure (retry) - return false
+     * <li>Fatal or unhandled error (abort) - throw an AssertionError or an Exception
+     * </ul>
+     */
+    @FunctionalInterface
+    protected interface ExecutionAttempt {
+
+        /**
+         * Lambda definition for the execution of a single attempt within a retry loop.
+         * 
+         * @param attemptCount The index of the current attempt (1..maxAttempts)
+         * @param isLastAttempt Whether the current attempt is the last one that will be performed
+         * @return true on success, false for initiating a retry if possible
+         * @throws AssertionError on non-retryable failure or unexpected error; aborts the retry loop
+         * @throws Exception on non-retryable failure or unexpected error; aborts the retry loop
+         */
+        boolean attempt(int attemptCount, boolean isLastAttempt) throws AssertionError, Exception;
+    }
+
     public AbstractStepDefinitionBase(TestScenarioExecutionContext executionContext) {
         this.executionContext = executionContext;
         this.outputReceiver = executionContext.getOutputReceiver();
+    }
+
+    /**
+     * Executes the given lambda within a retry loop. Returns normally if an attempt was successful (returned true) and throws an exception
+     * on unexpected or unhandled errors or exceeding the maximum retry count.
+     * 
+     * This method variant uses the default delay of {@link #DEFAULT_RETRY_DELAY} msec.
+     * 
+     * @param operation the operation to attempt
+     * @param operationTitle the title to display for the attempted operation
+     * @param maxAttempts the maximum number of times to try the operation, including the first one
+     * 
+     * @return the attempt on which the operation was successful (range 1..maxAttempts)
+     * @throws AssertionError if the operation threw an unhandled exception or the maximum retry count was exceeded
+     */
+    protected final int executeWithRetry(ExecutionAttempt operation, String operationTitle, int maxAttempts) throws AssertionError {
+        return executeWithRetry(operation, operationTitle, maxAttempts, DEFAULT_RETRY_DELAY);
+    }
+
+    /**
+     * Executes the given lambda within a retry loop. Returns normally if an attempt was successful (returned true) and throws an exception
+     * on unexpected or unhandled errors or exceeding the maximum retry count.
+     * 
+     * @param operation the operation to attempt
+     * @param operationTitle the title to display for the attempted operation
+     * @param maxAttempts the maximum number of times to try the operation, including the first one
+     * @param delayMsec the custom delay (in msec) to use
+     * 
+     * @return the attempt on which the operation was successful (range 1..maxAttempts)
+     * @throws AssertionError if the operation threw an unhandled exception or the maximum retry count was exceeded
+     */
+    protected final int executeWithRetry(ExecutionAttempt operation, String operationTitle, int maxAttempts, int delayMsec)
+        throws AssertionError {
+        final StopWatch stopWatch = StopWatch.createStarted();
+        for (int attemptCount = 1; attemptCount <= maxAttempts; attemptCount++) {
+            try {
+                if (operation.attempt(attemptCount, attemptCount == maxAttempts)) {
+                    printToCommandConsole(StringUtils.format("Operation '%s' succeeded after %d attempt(s) and %d msec (retry limit: %d)",
+                        operationTitle, attemptCount, stopWatch.getTime(TimeUnit.MILLISECONDS), maxAttempts));
+                    return attemptCount; // operation attempt returned "true" -> success
+                }
+                // fall-through: the operation attempt returned "false" -> continue with retry loop
+            } catch (Exception e) { // TODO Checkstyle violation, but currently necessary as some operations declare "throws Exception"
+                throw new AssertionError(StringUtils.format("Exception during attempt %d for operation '%s' after %d msec (total)",
+                    attemptCount, operationTitle, stopWatch.getTime(TimeUnit.MILLISECONDS)), e);
+            }
+        }
+        throw new AssertionError(StringUtils.format("Exceeded the maximum retry count of %d for operation '%s', aborting after %d msec",
+            maxAttempts, operationTitle, stopWatch.getTime(TimeUnit.MILLISECONDS)));
     }
 
     protected final void assertPropertyOfTextOutput(ManagedInstance instance, String negationFlag, String useRegexpMarker,
@@ -127,4 +208,5 @@ public abstract class AbstractStepDefinitionBase {
     protected PrefixingTextOutForwarder getTextoutReceiverForIMOperations() {
         return new PrefixingTextOutForwarder("  (IM output) ", outputReceiver);
     }
+
 }

@@ -689,7 +689,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
         } else {
             clientId = commonClientId;
         }
-        
+
         final ParsedMultiParameter uplinkParameters = new ParsedMultiParameter(
             new AbstractParsedCommandParameter[] {
                 new ParsedStringParameter(StringUtils.format(StepDefinitionConstants.CONNECTION_ID_FORMAT,

@@ -162,8 +162,7 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
      * @param delaySeconds the delay, in seconds, after which the action should be performed
      */
     @When("^scheduling (?:a|an instance) (shutdown|restart|reconnect) of \"([^\"]+)\" after (\\d+) second[s]?$")
-    public void whenSchedulingNodeActionsAfterDelay(final String action, final String instanceId, final int delaySeconds)
-        {
+    public void whenSchedulingNodeActionsAfterDelay(final String action, final String instanceId, final int delaySeconds) {
 
         // TODO ensure proper integration with test cleanup
         // TODO as this is the first asynchronous test action, check thread safety
@@ -181,9 +180,9 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
                         stopSingleInstance(instance);
                         break;
                     case "restart":
-                     // assuming headless mode here
+                        // assuming headless mode here
                         stopSingleInstance(instance);
-                        startSingleInstance(instance, false, "", StepDefinitionConstants.IM_ACTION_TIMEOUT_IN_SECS); 
+                        startSingleInstance(instance, false, "", StepDefinitionConstants.IM_ACTION_TIMEOUT_IN_SECS);
                         break;
                     case "reconnect":
                         cycleAllOutgoingConnectionsOf(instance);
@@ -213,12 +212,25 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
      * @param state the expected state (stopped/running)
      */
     @Then("^(all )?(?:instance[s]? )?(?:\"([^\"]*)\" )?should be (stopped|running)$")
-    public void thenInstancesShouldBeInState(String allFlag, String instanceIds, String state) throws Exception {
-        AssertStateIterator assertStateIterator = new AssertStateIterator("running".equals(state));
-        iterateInstances(assertStateIterator, allFlag, instanceIds);
-        printToCommandConsole("Verified the status \"" + state + "\" of instance \"" + instanceIds + "\"");
+    public void thenInstancesShouldBeInState(String allFlag, String instanceIds, String state) throws AssertionError {
+        int tmax = 15; // max time in seconds to verify the desired state
+        String operationTitle = StringUtils.format("Expect instances \"%s\" to be in state \"%s\"",
+            resolveInstanceList(allFlag != null, instanceIds).toString(), state);
+        executeWithRetry((ExecutionAttempt) (attemptCount, isLastAttempt) -> {
+            try {
+                AssertStateIterator assertStateIterator = new AssertStateIterator("running".equals(state));
+                iterateInstances(assertStateIterator, allFlag, instanceIds);
+                return true; // success
+            } catch (AssertionError ae) {
+                if (isLastAttempt) {
+                    // forwards the detailed failure exception; not necessary for aborting the retry loop as it is the last attempt anyway
+                    throw ae;
+                }
+                return false; // retry if possible
+            }
+        }, operationTitle, tmax);
     }
-    
+
     private void cycleAllOutgoingConnectionsOf(ManagedInstance instance) {
         final String cnListOutput = executeCommandOnInstance(instance, "cn list", false);
         Pattern connectionIdPattern = Pattern.compile("^\\s*\\((\\d+)\\) ");
