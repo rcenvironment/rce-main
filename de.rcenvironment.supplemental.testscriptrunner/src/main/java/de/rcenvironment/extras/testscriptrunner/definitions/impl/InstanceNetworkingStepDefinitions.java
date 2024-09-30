@@ -12,6 +12,7 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -49,7 +50,7 @@ import io.cucumber.java.en.When;
  * Steps for setting up, changing or asserting the network connection(s) between instances.
  * 
  * @author Marlon Schroeter
- * @author Robert Mischke (based on code from)
+ * @author Robert Mischke
  * @author Matthias Y. Wagner
  */
 public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDefinitionBase {
@@ -299,10 +300,24 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
      * @param instanceId the node that should have its visible uplink network inspected
      * @param testType if the specified node is currently connected
      * @param listOfExpectedUplinkInstances the comma-separated list of expected instances (i. e. uplink servers)
+     * @param maxiumWaitSeconds the maximum retry time until success
      */
-    @Then("^the visible uplink network of \"([^\"]*)\" should (contain|not contain|be connected to|not be connected to) \"([^\"]*)\"$")
-    public void thenUplinkNetworkConsistsOf(String instanceId, String testType, String listOfExpectedUplinkInstances) {
+    @Then("^the visible uplink network of \"([^\"]*)\" should (contain|not contain|be connected to|not be connected to) "
+        + "\"([^\"]*)\"(?: within (\\d+) seconds?)?$")
+    public void verifyVisibleUplinkNetwork(String instanceId, String testType, String listOfExpectedUplinkInstances,
+        Integer maxiumWaitSeconds) {
 
+        maxiumWaitSeconds = applyFallbackMaximumRetryTime(maxiumWaitSeconds);
+
+        String description =
+            StringUtils.format("Expecting network of instance \"%s\" to %s \"%s\"", instanceId, testType, listOfExpectedUplinkInstances);
+        executeWithRetry((ExecutionAttempt) (attemptCount, isLastAttempt) -> {
+            return executeOnceVerifyVisibleUplinkNetwork(instanceId, testType, listOfExpectedUplinkInstances, isLastAttempt);
+        }, description, maxiumWaitSeconds);
+    }
+
+    private boolean executeOnceVerifyVisibleUplinkNetwork(String instanceId, String testType, String listOfExpectedUplinkInstances,
+        boolean isLastAttempt) {
         String commandOutput = executeCommandOnInstance(resolveInstance(instanceId), "uplink list", false);
         List<String> expectedUplinkInstances = parseCommaSeparatedList(listOfExpectedUplinkInstances);
         /**
@@ -332,6 +347,9 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
         case "be connected to":
             for (String expectedInstanceId : expectedUplinkInstanceIds) {
                 if (!uplinkInstances.getOrDefault(expectedInstanceId, false)) {
+                    if (!isLastAttempt) {
+                        return false;
+                    }
                     fail(StringUtils.format("Instance %s is not connected to %s.", instanceId, expectedInstanceId));
                 }
             }
@@ -339,6 +357,9 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
         case "not be connected to":
             for (String expectedInstanceId : expectedUplinkInstanceIds) {
                 if (uplinkInstances.getOrDefault(expectedInstanceId, false)) {
+                    if (!isLastAttempt) {
+                        return false;
+                    }
                     fail(StringUtils.format("Instance %s should not be connected to %s.", instanceId, expectedInstanceId));
                 }
             }
@@ -346,6 +367,9 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
         case "contain":
             for (String expectedInstanceId : expectedUplinkInstanceIds) {
                 if (!uplinkInstances.containsKey(expectedInstanceId)) {
+                    if (!isLastAttempt) {
+                        return false;
+                    }
                     fail(StringUtils.format("Uplink server %s is not visible for instance %s", expectedInstanceId, instanceId));
                 }
             }
@@ -353,6 +377,9 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
         case "not contain":
             for (String expectedInstanceId : expectedUplinkInstanceIds) {
                 if (uplinkInstances.containsKey(expectedInstanceId)) {
+                    if (!isLastAttempt) {
+                        return false;
+                    }
                     fail(StringUtils.format("Uplink server %s is not expected to be visible from instance %s.", expectedInstanceId,
                         instanceId));
                 }
@@ -363,7 +390,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
             fail(StringUtils.format("Test type %s is not supported.", testType));
         }
 
-        printToCommandConsole("Verified network of instance \"" + instanceId + "\" to " + testType + " " + listOfExpectedUplinkInstances);
+        return true; // attempt successful
     }
 
     /**
@@ -682,7 +709,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
             .build();
         addSSHAccount(serverInstance, accountParametersUpl);
 
-        // if there is a *common* client ID, we have to replace the usual client ID. 
+        // if there is a *common* client ID, we have to replace the usual client ID.
         final String clientId;
         if (commonClientId.equals("")) {
             clientId = clientInstance.getId();

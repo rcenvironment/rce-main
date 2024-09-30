@@ -259,14 +259,18 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
      * 
      * @param instanceId the instance to query
      * @param componentsTable the expected component data to see (or not see in case of the reserved "absent" marker)
+     * @param maxiumWaitSeconds the maximum retry time until success
      */
-    @Then("^instance \"([^\"]*)\" should see these components:$")
-    public void thenInstanceSeesComponents(String instanceId, DataTable componentsTable) throws InterruptedException {
+    @Then("^instance \"([^\"]*)\" should see these components(?: within (\\d+) seconds?)?:$")
+    public void validateComponentNetworkVisibility(String instanceId, Integer maxiumWaitSeconds,
+        DataTable componentsTable) throws InterruptedException {
+
+        maxiumWaitSeconds = applyFallbackMaximumRetryTime(maxiumWaitSeconds);
+
         final ManagedInstance instance = resolveInstance(instanceId);
 
-        Map<String, ComponentVisibilityState> visibilityMap = new HashMap<>();
-
         // parse expectations
+        Map<String, ComponentVisibilityState> visibilityMap = new HashMap<>();
         for (List<String> criteriaRow : componentsTable.cells()) {
             String argNodeName = criteriaRow.get(0);
             String argCompName = criteriaRow.get(1);
@@ -279,6 +283,16 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
 
             log.debug("Parsed component expectation: " + entry);
         }
+
+        final String operationTitle =
+            StringUtils.format("Verify that the visible components of instance \"%s\" are \"%s\"", instanceId, visibilityMap.toString());
+        executeWithRetry((ExecutionAttempt) (attemptCount, isLastAttempt) -> {
+            return executeOnceValidateComponentNetworkVisibility(instance, visibilityMap, isLastAttempt);
+        }, operationTitle, maxiumWaitSeconds);
+    }
+
+    private boolean executeOnceValidateComponentNetworkVisibility(ManagedInstance instance,
+        Map<String, ComponentVisibilityState> visibilityMap, boolean isLastAttempt) {
 
         // parse actual state
         String output = executeCommandOnInstance(instance, "components list --as-table", false);
@@ -307,29 +321,22 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
             }
         }
 
-
-
-    	int tmax = 15; // max time in seconds to verify the desired state
-    	String operationTitle = "Check if visibility of components is as expected:" + visibilityMap.toString();
-            executeWithRetry((ExecutionAttempt) (attemptCount, isLastAttempt) -> {
-                StringBuilder errorLines = new StringBuilder();
-                    boolean hasMismatch = false;
-                    for (ComponentVisibilityState entry : visibilityMap.values()) {
-                        if (!entry.stateMatches()) {
-                            final String errorLine = "  Unexpected visibility state: " + entry;
-                            errorLines.append("\n");
-                            errorLines.append(errorLine);
-                            hasMismatch = true;
-                        }
-            		} 
-                    if (hasMismatch) {
-            			if (isLastAttempt) {
-            	            printToCommandConsole("At least one component had an unexpected visibility/authorization state: " + errorLines.toString());
-            			} 
-            		}
-                    return !hasMismatch;
-            	}, operationTitle, tmax);
-
+        // compare
+        StringBuilder errorLines = new StringBuilder();
+        boolean hasMismatch = false;
+        for (ComponentVisibilityState entry : visibilityMap.values()) {
+            if (!entry.stateMatches()) {
+                final String errorLine = "  Unexpected visibility state: " + entry;
+                errorLines.append("\n");
+                errorLines.append(errorLine);
+                hasMismatch = true;
+            }
+        }
+        if (hasMismatch && isLastAttempt) {
+            fail(
+                "At least one component had an unexpected visibility/authorization state: " + errorLines.toString());
+        }
+        return !hasMismatch;
     }
 
     @Then("^instance \"([^\"]*)\" should see the component \"([^\"]*)\"$")

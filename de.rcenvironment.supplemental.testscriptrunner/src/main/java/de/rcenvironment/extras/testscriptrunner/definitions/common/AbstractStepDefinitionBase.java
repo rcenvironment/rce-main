@@ -40,6 +40,9 @@ public abstract class AbstractStepDefinitionBase {
      */
     protected static final int DEFAULT_RETRY_DELAY = 1000;
 
+    @Deprecated
+    private static final int BACKWARDS_COMPATIBILITY_MAXIMUM_WAIT_TIME = 15;
+
     protected final TestScenarioExecutionContext executionContext;
 
     protected final TextOutputReceiver outputReceiver;
@@ -207,6 +210,18 @@ public abstract class AbstractStepDefinitionBase {
 
     protected PrefixingTextOutForwarder getTextoutReceiverForIMOperations() {
         return new PrefixingTextOutForwarder("  (IM output) ", outputReceiver);
+    }
+
+    protected int applyFallbackMaximumRetryTime(Integer maxiumWaitSeconds) {
+        if (maxiumWaitSeconds != null && maxiumWaitSeconds >= 1) {
+            return maxiumWaitSeconds;
+        } else {
+            printToCommandConsole(
+                "TODO: Undefined timeout in test scenario (accepted for transitional period): replacing " + maxiumWaitSeconds + " with "
+                    + BACKWARDS_COMPATIBILITY_MAXIMUM_WAIT_TIME);
+            return BACKWARDS_COMPATIBILITY_MAXIMUM_WAIT_TIME;
+        }
+
     }
 
 }
