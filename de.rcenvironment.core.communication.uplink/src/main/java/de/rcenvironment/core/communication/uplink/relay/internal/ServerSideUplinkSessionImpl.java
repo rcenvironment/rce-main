@@ -516,7 +516,7 @@ public class ServerSideUplinkSessionImpl extends AbstractUplinkSessionImpl imple
         if (assignedNamespaceIdIfAvailable.isPresent()) {
             entry.set(EventType.Attributes.NAMESPACE, assignedNamespaceIdIfAvailable.get());
         }
-        if (!effectiveAccountName.equals(loginAccountName)) {
+        if (effectiveAccountName == null || !effectiveAccountName.equals(loginAccountName)) {
             entry.set(EventType.Attributes.ORIGINAL_LOGIN_NAME, loginAccountName);
         }
     }
