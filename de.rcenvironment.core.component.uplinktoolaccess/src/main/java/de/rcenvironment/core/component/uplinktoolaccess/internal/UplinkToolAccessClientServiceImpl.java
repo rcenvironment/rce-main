@@ -87,8 +87,6 @@ public class UplinkToolAccessClientServiceImpl implements UplinkToolAccessClient
 
     private static final Log LOG = LogFactory.getLog(UplinkToolAccessClientServiceImpl.class);
 
-    private static LocalComponentRegistrationService registry;
-
     @Reference
     private UserComponentIdMappingService userComponentIdMappingService;
 
@@ -97,6 +95,9 @@ public class UplinkToolAccessClientServiceImpl implements UplinkToolAccessClient
 
     @Reference
     private ToolIntegrationDocumentationService toolDocService;
+
+    @Reference
+    private LocalComponentRegistrationService registry;
 
     private final Map<String, Map<String, ComponentInstallation>> registeredComponentsPerDestinationId;
 
@@ -119,15 +120,6 @@ public class UplinkToolAccessClientServiceImpl implements UplinkToolAccessClient
         registeredComponentsPerDestinationId = Collections.synchronizedMap(new HashMap<String, Map<String, ComponentInstallation>>());
         registeredComponentHashesPerDestinationId = Collections.synchronizedMap(new HashMap<String, Map<String, String>>());
         destinationIdsAndPublicationEntriesPerConnection = new HashMap<>();
-    }
-
-    @Reference(unbind = "unbindComponentRegistry")
-    protected void bindComponentRegistry(LocalComponentRegistrationService newRegistry) {
-        registry = newRegistry;
-    }
-
-    protected void unbindComponentRegistry(LocalComponentRegistrationService oldRegistry) {
-        registry = ServiceUtils.createFailingServiceProxy(LocalComponentRegistrationService.class);
     }
 
     /**
