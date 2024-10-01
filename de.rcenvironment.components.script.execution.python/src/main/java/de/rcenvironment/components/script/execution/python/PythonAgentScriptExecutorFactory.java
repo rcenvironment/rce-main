@@ -21,11 +21,16 @@ import de.rcenvironment.core.utils.scripting.ScriptLanguage;
  * Factory to create {@link PythonAgentScriptExecutor} objects.
  * 
  * @author Adrian Stock
- *
+ * @author Robert Mischke (minor OSGi-DS changes)
  */
 @Component
 public class PythonAgentScriptExecutorFactory implements ScriptExecutorFactory {
 
+    /**
+     * The {@linkPythonInstanceManager} so that the {@linkPythonAgentScriptExecutor} objects created within this factory have access to the
+     * python instances.
+     */
+    @Reference
     private PythonAgentInstanceManager pythonInstanceManager;
 
     @Override
@@ -38,23 +43,4 @@ public class PythonAgentScriptExecutorFactory implements ScriptExecutorFactory {
         return new PythonAgentScriptExecutor(pythonInstanceManager);
     }
 
-    /**
-     * Binds the {@linkPythonInstanceManager} so that the {@linkPythonAgentScriptExecutor} objects created within this factory
-     * have access to the python instances.
-     * 
-     * @param newInstance of the PythonInstanceManager.
-     */
-    @Reference
-    public void bindPythonInstanceManager(PythonAgentInstanceManager newInstance) {
-        this.pythonInstanceManager = newInstance;
-    }
-
-    /**
-     * Unbinds the {@linkPythonInstanceManager}.
-     * 
-     * @param oldInstance which will be unbound.
-     */
-    public void unbindPythonInstanceManager(PythonAgentInstanceManager oldInstance) {
-        this.pythonInstanceManager = null;
-    }
 }

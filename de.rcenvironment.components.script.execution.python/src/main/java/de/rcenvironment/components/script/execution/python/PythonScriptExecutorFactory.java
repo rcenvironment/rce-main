@@ -8,6 +8,8 @@
 
 package de.rcenvironment.components.script.execution.python;
 
+import org.osgi.service.component.annotations.Component;
+
 import de.rcenvironment.components.script.common.registry.ScriptExecutor;
 import de.rcenvironment.components.script.common.registry.ScriptExecutorFactory;
 import de.rcenvironment.components.script.execution.python.internal.PythonScriptExecutor;
@@ -18,7 +20,8 @@ import de.rcenvironment.core.utils.scripting.ScriptLanguage;
  * 
  * @author Sascha Zur
  */
-public class PythonScriptExecutorFactory implements ScriptExecutorFactory{
+@Component
+public class PythonScriptExecutorFactory implements ScriptExecutorFactory {
 
     public ScriptLanguage getSupportingScriptLanguage() {
         return ScriptLanguage.Python;
