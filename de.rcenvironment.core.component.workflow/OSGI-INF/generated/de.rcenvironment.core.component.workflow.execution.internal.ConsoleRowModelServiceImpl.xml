@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" immediate="true" name="de.rcenvironment.core.component.workflow.execution.internal.ConsoleRowModelServiceImpl">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="true" name="de.rcenvironment.core.component.workflow.execution.internal.ConsoleRowModelServiceImpl">
    <service>
       <provide interface="de.rcenvironment.core.component.workflow.execution.api.ConsoleRowModelService"/>
       <provide interface="de.rcenvironment.core.component.workflow.execution.internal.ConsoleRowProcessor"/>

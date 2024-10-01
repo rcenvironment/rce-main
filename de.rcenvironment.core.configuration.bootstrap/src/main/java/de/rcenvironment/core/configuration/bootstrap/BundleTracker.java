@@ -10,6 +10,7 @@ package de.rcenvironment.core.configuration.bootstrap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
@@ -36,6 +37,14 @@ public final class BundleTracker implements BundleListener {
     public static void install() {
         BundleContext context = FrameworkUtil.getBundle(BundleTracker.class).getBundleContext();
         context.addBundleListener(new BundleTracker());
+        // log the initial state
+        Log tempLog = LogFactory.getLog(BundleTracker.class);
+        tempLog.debug("Bundles in state ACTIVE (already STARTED) at BundleTracker initialization:");
+        for (Bundle b : context.getBundles()) {
+            if (b.getState() == Bundle.ACTIVE) {
+                tempLog.debug("  " + b);
+            }
+        }
     }
 
     @Override
@@ -74,7 +83,7 @@ public final class BundleTracker implements BundleListener {
             break;
         }
         // note: not logging the bundle state here, as it is not generally useful; add if needed for debugging
-        String message = StringUtils.format("%s %S", event.getBundle(), eventDescription);
+        String message = StringUtils.format("%s: %s", eventDescription, event.getBundle());
         if (event.getBundle() != event.getOrigin()) {
             // A typical case where "origin" is different is when a bundle is being loaded via simpleconfigurator (which is then the
             // "origin"). As this happens on an earlier OSGi start level, this is typically not seen by this listener, though.
