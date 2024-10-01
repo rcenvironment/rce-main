@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" name="de.rcenvironment.core.component.execution.internal.ComponentExecutionControllerServiceImpl">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" deactivate="deactivate" name="de.rcenvironment.core.component.execution.internal.ComponentExecutionControllerServiceImpl">
    <service>
       <provide interface="de.rcenvironment.core.component.execution.api.ComponentExecutionControllerService"/>
       <provide interface="de.rcenvironment.core.component.execution.api.RemotableComponentExecutionControllerService"/>

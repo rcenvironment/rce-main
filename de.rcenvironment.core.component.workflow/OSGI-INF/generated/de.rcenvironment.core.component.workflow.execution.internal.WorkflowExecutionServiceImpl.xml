@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" name="de.rcenvironment.core.component.workflow.execution.internal.WorkflowExecutionServiceImpl">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" deactivate="deactivate" name="de.rcenvironment.core.component.workflow.execution.internal.WorkflowExecutionServiceImpl">
    <service>
       <provide interface="de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionService"/>
    </service>
