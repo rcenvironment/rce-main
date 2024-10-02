@@ -46,24 +46,36 @@ public class RCELogEventRewritePolicy implements RewritePolicy {
         // when writing filters, prefer to only check the format string ("template" here) for efficiency
         final String messageTemplate = event.getMessage().getFormat();
 
-        // rule for MANTIS-18211: eliminate highly verbose Felix SCR log output, about 4.000 lines per run;
-        // we have not found a way to actually disable the generation of these messages
-        // TODO review/retest after the next RCP upgrade
-        if (originalLevel == Level.DEBUG && messageTemplate.startsWith("bundle org.apache.felix.scr:")) {
-            return suppressMessage(event);
-        }
-
         if (messageTemplate == null) {
             // unlikely, but make sure we do not cause NPEs within this filter
             return event;
         }
 
-        // rule for MANTIS-17266; this is a library warning which occurs fairly often, but with no clear path to prevent it
+        // Rule for MANTIS-18211: Eliminate the highly verbose Felix SCR log output (about 35.500 lines per RCE run,
+        // which bloats the RCE debug.log from <500 kB to >12 MB), and which we have not managed to disable at its
+        // source so far. This filtering is complicated by the fact that Felix SCR uses the log (context) of each
+        // bundle it operates on to log its messages. This mixes the Felix SCR log output with the actual application
+        // log messages. It would still be much preferred to completely disable this logging for performance reasons.
+        //
+        // Attempts to filter this log output at the source included, but were not limited to:
+        // - setting felix.log.level as a system property before OSGi startup
+        // - setting org.osgi.service.log.admin.loglevel as a system property before OSGi startup
+        // - adjusting the log levels for org.apache.felix.scr[.impl] via OSGi LoggerAdmin for the root LoggerContext
+        //
+        // TODO retest the SCR logging behavior after the next RCP upgrade
+        if (originalLevel == Level.DEBUG && messageTemplate.startsWith("bundle ")) {
+            // note that there is a theoretical risk of overfiltering by just checking for the "bundle " prefix;
+            // however, a simple test for the additional presence of " : " does not match all SCR log lines
+            // TODO consider adding a second, stricter regexp-based filter to rule out any false positives
+            return suppressMessage(event);
+        }
+
+        // Rule for MANTIS-17266; a library warning which occurs fairly often, but with no clear path to prevent it
         if (originalLevel == Level.WARN && messageTemplate.endsWith("stream is already closed")) {
             return reduceLogLevelWithMessagePrefix(event, Level.DEBUG);
         }
 
-        // rule for MANTIS-18210: this is triggered by a NPE in Eclipse RCP code with no apparent way to prevent it
+        // Rule for MANTIS-18210: an error triggered by a NPE in Eclipse RCP code with no apparent way to prevent it
         if (originalLevel == Level.ERROR && messageTemplate.startsWith("FrameworkEvent ")) {
             return reduceLogLevelWithMessagePrefix(event, Level.DEBUG);
         }
