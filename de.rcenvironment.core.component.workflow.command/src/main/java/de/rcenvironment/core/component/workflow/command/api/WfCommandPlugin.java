@@ -108,6 +108,7 @@ import de.rcenvironment.core.utils.incubator.ServiceRegistry;
  * @author Brigitte Boden
  * @author Kathrin Schaffert
  * @author Alexander Weinert
+ * @author Jan Flink
  */
 @Component
 public class WfCommandPlugin implements CommandPlugin {
@@ -466,14 +467,19 @@ public class WfCommandPlugin implements CommandPlugin {
             try {
                 final WorkflowDescription description = workflowFileLoaderService.loadAndValidateWorkflowDescription(
                     fileParameter.getResult(), placeholdersParameter.getResult(), false, cmdCtx.getOutputReceiver());
-                // TODO specify log directory?
+
+				File logDirectory = setupLogDirectoryForWfFile(fileParameter.getResult());
+				cmdCtx.getOutputReceiver()
+						.addOutput(StringUtils.format("Log directory: '%s'", logDirectory.getAbsolutePath()));
+
                 final WorkflowExecutionContext exeContext = WorkflowExecutionContextBuilder.createContextBuilder(description)
-                        .setLogDirectory(setupLogDirectoryForWfFile(fileParameter.getResult()))
+						.setLogDirectory(logDirectory)
                         .setOriginDisplayName(fileParameter.getResult().getName(), fileParameter.getResult().getAbsolutePath())
                         .setTextOutputReceiver(cmdCtx.getOutputReceiver(), hasCompactFlag)
                         .setDisposalBehavior(dispose)
                         .setDeletionBehavior(delete)
                         .buildHeadless();
+
 
                 if (waitForTermination) {
                     // spawn and wait for termination
