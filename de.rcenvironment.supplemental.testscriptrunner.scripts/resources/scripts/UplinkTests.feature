@@ -21,25 +21,20 @@ Scenario: Simple check of uplink connections of two client and two uplink server
     And configured network connections "Client2-[upl]->Uplink2 [autoStart autoRetry]"
     
     When starting instances "Uplink1, Uplink2"
-    And waiting for 15 seconds
     And starting instances "Client1, Client2"
-    And waiting for 15 seconds
 
-    Then the visible uplink network of "Client1" should contain "Uplink1"
-    And the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client1" should contain "Uplink2"
-    And the visible uplink network of "Client1" should not be connected to "Uplink2"
-    And the visible uplink network of "Client2" should contain "Uplink2"
-    And the visible uplink network of "Client2" should be connected to "Uplink2"
-    And the visible uplink network of "Client2" should not contain "Uplink1"
-    And the visible uplink network of "Client2" should not be connected to "Uplink1"
-    And waiting for 15 seconds
+    Then the visible uplink network of "Client1" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client1" should contain "Uplink2" within 5 seconds
+    And the visible uplink network of "Client1" should not be connected to "Uplink2" within 5 seconds
+    And the visible uplink network of "Client2" should contain "Uplink2" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink2" within 5 seconds
+    And the visible uplink network of "Client2" should not contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should not be connected to "Uplink1" within 5 seconds
 
     And stopping instances "Client1, Client2"
-    And waiting for 15 seconds
     And stopping instances "Uplink1, Uplink2"
-    And the log output of instances "Client1, Client2" should indicate a clean shutdown with no warnings or errors
-    And waiting for 15 seconds
+    #And the log output of instances "Client1, Client2" should indicate a clean shutdown with no warnings or errors
     And the log output of instances "Uplink1, Uplink2" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
@@ -56,45 +51,37 @@ Scenario: Check of uplink autoconnect after restart of Client1 (provides tool fo
     And configured network connections "Client2-[upl]->Uplink1 [autoStart autoRetry]"
     
     And starting instance "Uplink1"
-    And waiting for 15 seconds
     And starting instances "Client1, Client2"
-    And waiting for 15 seconds
 
-    And the visible uplink network of "Client1" should contain "Uplink1"
-    And the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should contain "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
+    And the visible uplink network of "Client1" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
 
     And adding tool "common/TestTool" to "Client1"
-    And waiting for 15 seconds
 
     And executing command "components set-auth common/TestTool public" on "Client1"
     And waiting for 5 seconds
-    And instance "Client2" should see these components:
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
 
     When stopping instance "Client1"
-    #And waiting for 15 seconds
     And  instance "Client1" should be stopped
-    And the visible uplink network of "Client2" should contain "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
+    And the visible uplink network of "Client2" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
     And starting instance "Client1"
-    And waiting for 15 seconds
 
-    Then the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
-    And instance "Client2" should see these components:
+    Then the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
-    And waiting for 15 seconds
 
     And stopping instances "Client1, Client2"
-    And waiting for 15 seconds
     And stopping instance "Uplink1"
     And the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors:
     """
     #Error in asynchronous callback; shutting down queue
     """
-    And waiting for 15 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
@@ -112,43 +99,37 @@ Scenario: Check of uplink autoconnect after crash and restart of Client1 (provid
     And configured network connections "Client2-[upl]->Uplink1 [autoStart autoRetry]"
 
     And starting instance "Uplink1"
-    And waiting for 15 seconds
     And starting instances "Client1, Client2"
-    And waiting for 15 seconds
 
-    And the visible uplink network of "Client1" should contain "Uplink1"
-    And the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should contain "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
+    And the visible uplink network of "Client1" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
 
     And adding tool "common/TestTool" to "Client1"
-    And waiting for 15 seconds
 
     And executing command "components set-auth common/TestTool public" on "Client1"
     And waiting for 5 seconds
-    And instance "Client2" should see these components:
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
 
     When instance "Client1" crashes
-    And waiting for 15 seconds
+    #And waiting for 15 seconds
     # TODO: we have to define a step which verifies that Client1 is really down
     #And  instance "Client1" should be stopped
-    And the visible uplink network of "Client2" should contain "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
+    And the visible uplink network of "Client2" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
     # This check at this position should fail, TODO: define a step for that the component can NOT be seen
     #And instance "Client2" should see these components:
     #    | Client1 (via userName/Client1_) | common/TestTool | local |
     And starting instance "Client1"
-    And waiting for 60 seconds
 
-    Then the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
-    And instance "Client2" should see these components:
+    Then the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
-    And waiting for 15 seconds
 
     And stopping instances "Client1, Client2"
-    And waiting for 15 seconds
     And stopping instance "Uplink1"
     And the log output of instances "Client1" should indicate a clean shutdown with these allowed warnings or errors:
     """
@@ -159,7 +140,6 @@ Scenario: Check of uplink autoconnect after crash and restart of Client1 (provid
     """
     #Error in asynchronous callback; shutting down queue
     """
-    And waiting for 15 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
@@ -178,44 +158,37 @@ Scenario: Check of uplink autoconnect after restart of Client2 (uses tool from C
     And configured network connections "Client2-[upl]->Uplink1 [autoStart autoRetry]"
     
     And starting instance "Uplink1"
-    And waiting for 15 seconds
     And starting instances "Client1, Client2"
-    And waiting for 15 seconds
 
-    And the visible uplink network of "Client1" should contain "Uplink1"
-    And the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should contain "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
+    And the visible uplink network of "Client1" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
 
     And adding tool "common/TestTool" to "Client1"
-    And waiting for 15 seconds
 
     And executing command "components set-auth common/TestTool public" on "Client1"
     And waiting for 5 seconds
-    And instance "Client2" should see these components:
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
 
     When stopping instance "Client2"
-    #And waiting for 15 seconds
     And  instance "Client2" should be stopped
-    And the visible uplink network of "Client1" should contain "Uplink1"
-    And the visible uplink network of "Client1" should be connected to "Uplink1"
+    And the visible uplink network of "Client1" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
     And starting instance "Client2"
 
-    Then the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
-    And instance "Client2" should see these components:
+    Then the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
-    And waiting for 15 seconds
 
     And stopping instances "Client1, Client2"
-    And waiting for 15 seconds
     And stopping instance "Uplink1"
     And the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors:
     """
     #Error in asynchronous callback; shutting down queue
     """
-    And waiting for 15 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
@@ -232,59 +205,49 @@ Scenario: Check of uplink autoconnect after shutdown and restart of uplink serve
     And configured network connections "Client2-[upl]->Uplink1 [autoStart autoRetry]"
     
     And starting instance "Uplink1"
-    And waiting for 15 seconds
     And starting instances "Client1, Client2"
-    And waiting for 15 seconds
 
-    And the visible uplink network of "Client1" should contain "Uplink1"
-    And the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should contain "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
+    And the visible uplink network of "Client1" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
 
     And adding tool "common/TestTool" to "Client1"
-    And waiting for 15 seconds
     And executing command "components set-auth common/TestTool public" on "Client1"
     And waiting for 5 seconds
-    And instance "Client2" should see these components:
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
 
     When stopping instance "Uplink1"
-    And waiting for 15 seconds
     And  instances "Uplink1" should be stopped
-    And the visible uplink network of "Client1" should contain "Uplink1"
-    And the visible uplink network of "Client1" should not be connected to "Uplink1"
-    And waiting for 15 seconds
+    And the visible uplink network of "Client1" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client1" should not be connected to "Uplink1" within 5 seconds
     # TODO: Clarify if the number of warnings is constant; and, the step is buggy (always shows 1 warning) and need to be fixed
     #And the log output of instance "Client1" should contain 2 warnings
     And the log output of instance "Client1" should contain "An Uplink connection (Uplink1_userName) finished with a warning or error"
     And the log output of instance "Client1" should contain "java.net.ConnectException: Connection refused"
-    And the visible uplink network of "Client2" should contain "Uplink1"
-    And the visible uplink network of "Client2" should not be connected to "Uplink1"
+    And the visible uplink network of "Client2" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should not be connected to "Uplink1" within 5 seconds
     # TODO: Clarify if the number of warnings is constant; and, the step is buggy (always shows 1 warning) and need to be fixed
     #And the log output of instance "Client2" should contain 2 warnings
     And the log output of instance "Client2" should contain "An Uplink connection (Uplink1_userName) finished with a warning or error"
     And the log output of instance "Client2" should contain "java.net.ConnectException: Connection refused"
 
     And starting instance "Uplink1"
-    And waiting for 15 seconds
 
-    Then the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
-    And instance "Client2" should see these components:
+    Then the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
-    And waiting for 15 seconds
 
     And stopping instance "Client1"
-    And waiting for 5 seconds
     And stopping instance "Client2"
-    And waiting for 5 seconds
     And stopping instance "Uplink1"
     And the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     An Uplink connection (Uplink1_userName) finished with a warning or error
     java.net.ConnectException: Connection refused
     """
-    And waiting for 15 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
@@ -302,46 +265,39 @@ Scenario: Check of uplink autoconnect after crash and restart of uplink server
     And configured network connections "Client2-[upl]->Uplink1 [autoStart autoRetry]"
 
     And starting instance "Uplink1"
-    And waiting for 15 seconds
     And starting instances "Client1, Client2"
-    And waiting for 15 seconds
 
-    And the visible uplink network of "Client1" should contain "Uplink1"
-    And the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should contain "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
+    And the visible uplink network of "Client1" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
 
     And adding tool "common/TestTool" to "Client1"
-    And waiting for 15 seconds
     And executing command "components set-auth common/TestTool public" on "Client1"
     And waiting for 5 seconds
-    And instance "Client2" should see these components:
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
 
     When instance "Uplink1" crashes
-    And waiting for 15 seconds
-    And the visible uplink network of "Client1" should contain "Uplink1"
-    And the visible uplink network of "Client1" should not be connected to "Uplink1"
-    And the visible uplink network of "Client2" should contain "Uplink1"
-    And the visible uplink network of "Client2" should not be connected to "Uplink1"
+    #And waiting for 15 seconds
+    And the visible uplink network of "Client1" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client1" should not be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should not be connected to "Uplink1" within 5 seconds
     And starting instance "Uplink1"
-    And waiting for 60 seconds
 
-    Then the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
-    And instance "Client2" should see these components:
+    Then the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
-    And waiting for 15 seconds
 
     And stopping instances "Client1, Client2"
-    And waiting for 15 seconds
     And stopping instance "Uplink1"
     And the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     java.net.ConnectException: Connection refused
     finished with a warning or error; inspect the log output above for details
     """
-    And waiting for 15 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
@@ -361,72 +317,61 @@ Scenario: Combined check of uplink autoconnect after shutdown and restart of cli
     And configured network connections "Client2-[upl]->Uplink1 [autoStart autoRetry]"
     
     And starting instance "Uplink1"
-    And waiting for 15 seconds
     And starting instances "Client1, Client2"
-    And waiting for 15 seconds
 
-    And the visible uplink network of "Client1" should contain "Uplink1"
-    And the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should contain "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
+    And the visible uplink network of "Client1" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
 
     And adding tool "common/TestTool" to "Client1"
-    And waiting for 15 seconds
     And executing command "components set-auth common/TestTool public" on "Client1"
-    And waiting for 5 seconds
-    And instance "Client2" should see these components:
+    #And waiting for 5 seconds
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
 
     When stopping instance "Client1"
-    #And waiting for 15 seconds
     And  instance "Client1" should be stopped
-    And the visible uplink network of "Client2" should contain "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
+    And the visible uplink network of "Client2" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
     And starting instance "Client1"
-    #And waiting for 30 seconds
 
-    Then the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
-    And instance "Client2" should see these components:
+    Then the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
-    And waiting for 15 seconds
 
     When stopping instance "Client2"
-    #And waiting for 15 seconds
     And  instance "Client2" should be stopped
-    And the visible uplink network of "Client1" should contain "Uplink1"
-    And the visible uplink network of "Client1" should be connected to "Uplink1"
+    And the visible uplink network of "Client1" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
     And starting instance "Client2"
 
-    Then the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
-    And instance "Client2" should see these components:
+    Then the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
-    And waiting for 15 seconds
 
     When stopping instance "Uplink1"
     And  instances "Uplink1" should be stopped
-    And the visible uplink network of "Client1" should contain "Uplink1"
-    And the visible uplink network of "Client1" should not be connected to "Uplink1"
-    And the visible uplink network of "Client2" should contain "Uplink1"
-    And the visible uplink network of "Client2" should not be connected to "Uplink1"
+    And the visible uplink network of "Client1" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client1" should not be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should not be connected to "Uplink1" within 5 seconds
     And starting instance "Uplink1"
-    And waiting for 15 seconds
     
-    Then the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
-    And instance "Client2" should see these components:
+    Then the visible uplink network of "Client1" should be connected to "Uplink1" within 15 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 15 seconds
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
-    And waiting for 15 seconds
 
     And stopping instances "Client1, Client2"
-    And waiting for 15 seconds
     And stopping instance "Uplink1"
     And the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors:
     """
     #Error in asynchronous callback; shutting down queue
     """
-    And waiting for 15 seconds
+    #And waiting for 15 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
@@ -442,30 +387,24 @@ Scenario: Autoconnect after startup with uplink server started before clients
     And configured network connections "Client2-[upl]->Uplink1 [autoStart autoRetry]"
 
     When starting instance "Uplink1"
-    And waiting for 15 seconds
     And starting instances "Client1, Client2"
-    And waiting for 15 seconds
 
     And adding tool "common/TestTool" to "Client1"
-    And waiting for 15 seconds
     And executing command "components set-auth common/TestTool public" on "Client1"
-    And waiting for 5 seconds
+    #And waiting for 5 seconds
     
-    Then the visible uplink network of "Client1" should contain "Uplink1"
-    And the visible uplink network of "Client2" should contain "Uplink1"
-    And instance "Client2" should see these components:
+    Then the visible uplink network of "Client1" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should contain "Uplink1" within 5 seconds
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
 
     # Client1 is shut down first, otherwise we sometimes get an error like this:
     # ERROR - de.rcenvironment.toolkit.modules.concurrency.internal.AsyncOrderedCallbackManagerImpl$InternalAsyncOrderedCallbackQueue - Error in asynchronous callback; shutting down queue (as defined by exception policy);
     # java.lang.IllegalStateException: Service not available: de.rcenvironment.core.component.management.api.LocalComponentRegistrationService ...
     And stopping instance "Client1"
-    And waiting for 5 seconds
     And stopping instance "Client2"
-    And waiting for 5 seconds
     And stopping instance "Uplink1"
     And the log output of instances "Client1, Client2" should indicate a clean shutdown with no warnings or errors
-    And waiting for 5 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
@@ -481,7 +420,7 @@ Scenario: Autoconnect after starting Uplink clients before the Uplink server
     And configured network connections "Client1-[upl]->Server [autoStart autoRetry]"
     And configured network connections "Client2-[upl]->Server [autoStart autoRetry]"
 
-	# note: this step implicitly waits for both clients to complete basic startup
+    # note: this step implicitly waits for both clients to complete basic startup
     When starting instances "Client1, Client2"
     And starting instance "Server"
 
@@ -516,60 +455,52 @@ Scenario: Check of disconnect and connect of clients in an uplink connection
     And configured network connections "Client2-[upl]->Uplink1 [autoStart autoRetry]"
     
     And starting instance "Uplink1"
-    And waiting for 15 seconds
     And starting instances "Client1, Client2"
-    And waiting for 15 seconds
 
-    And the visible uplink network of "Client1" should contain "Uplink1"
-    And the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should contain "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
+    And the visible uplink network of "Client1" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
 
     And adding tool "common/TestTool" to "Client1"
-    And waiting for 15 seconds
     And executing command "components set-auth common/TestTool public" on "Client1"
-    And waiting for 45 seconds
-    And instance "Client2" should see these components:
+    #And waiting for 15 seconds
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
 
     When executing command "uplink stop Uplink1_userName" on "Client1"
-    And waiting for 15 seconds
-    And the visible uplink network of "Client1" should contain "Uplink1"
-    And the visible uplink network of "Client1" should not be connected to "Uplink1"
+    #And waiting for 15 seconds
+    And the visible uplink network of "Client1" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client1" should not be connected to "Uplink1" within 5 seconds
     And executing command "uplink start Uplink1_userName" on "Client1"
-    And waiting for 15 seconds
+    #And waiting for 15 seconds
 
-    Then the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
-    And instance "Client2" should see these components:
+    Then the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
-    And waiting for 15 seconds
 
     When executing command "uplink stop Uplink1_userName" on "Client2"
-    And waiting for 15 seconds
-    And the visible uplink network of "Client2" should contain "Uplink1"
-    And the visible uplink network of "Client2" should not be connected to "Uplink1"
+    #And waiting for 15 seconds
+    And the visible uplink network of "Client2" should contain "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should not be connected to "Uplink1" within 5 seconds
     And executing command "uplink start Uplink1_userName" on "Client2"
-    And waiting for 15 seconds
+    #And waiting for 15 seconds
 
-    Then the visible uplink network of "Client1" should be connected to "Uplink1"
-    And the visible uplink network of "Client2" should be connected to "Uplink1"
-    And instance "Client2" should see these components:
+    Then the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client2" should be connected to "Uplink1" within 5 seconds
+    And instance "Client2" should see these components within 5 seconds:
         | Client1 (via userName/Client1_) | common/TestTool | local |
-    And waiting for 15 seconds
     # TODO: The Uplink1 instance has some warnings, has to be investigated with MANTIS #17659
     #And the log output of all instances should not contain any warning
 
     And stopping instance "Client1"
-    And waiting for 5 seconds
     And stopping instance "Client2"
-    And waiting for 5 seconds
     And stopping instance "Uplink1"
     And the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors:
     """
     #Error in asynchronous callback; shutting down queue
     """
-    And waiting for 15 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
@@ -587,39 +518,34 @@ Scenario: Two clients with same ID access the uplink server after startup and di
 
 
     And starting instance "Uplink1"
-    And waiting for 15 seconds
     And starting instance "Client3a"
-    And waiting for 15 seconds
 
-    And the visible uplink network of "Client3a" should be connected to "Uplink1"
+    And the visible uplink network of "Client3a" should be connected to "Uplink1" within 5 seconds
     And starting instance "Client3b"
-    And waiting for 15 seconds
-    And the visible uplink network of "Client3b" should not be connected to "Uplink1"
+    And the visible uplink network of "Client3b" should not be connected to "Uplink1" within 5 seconds
     # The client ID "Client3a" is the cloned one, equal for all instances:
     And the log output of "Client3b" should contain "Uplink handshake failed or connection refused: The combination of account name"
     And the log output of "Client3b" should contain "and client ID \"Client3a\" is already in use. To allow parallel logins, use a different client ID for each client."
 
     When executing command "uplink stop Uplink1_userName" on "Client3a"
-    And waiting for 15 seconds
+    #And waiting for 15 seconds
     And executing command "uplink start Uplink1_userName" on "Client3b"
-    And waiting for 15 seconds
+    #And waiting for 15 seconds
     And executing command "uplink start Uplink1_userName" on "Client3a"
-    And waiting for 15 seconds
+    #And waiting for 15 seconds
 
-    Then the visible uplink network of "Client3a" should not be connected to "Uplink1"
-    And the visible uplink network of "Client3b" should be connected to "Uplink1"
+    Then the visible uplink network of "Client3a" should not be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client3b" should be connected to "Uplink1" within 5 seconds
     And the log output of "Client3a" should contain "Uplink handshake failed or connection refused: The combination of account name"
     And the log output of "Client3a" should contain "and client ID \"Client3a\" is already in use. To allow parallel logins, use a different client ID for each client."
     
     And stopping instances "Client3a, Client3b"
-    And waiting for 15 seconds
     And stopping instance "Uplink1"
     And the log output of instances "Client3a, Client3b" should indicate a clean shutdown with these allowed warnings or errors:
     """
     and client ID "Client3a" is already in use. To allow parallel logins, use a different client ID for each client.
     finished with a warning or error; inspect the log output above for details
     """
-    And waiting for 15 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
@@ -637,51 +563,41 @@ Scenario: Two clients with same ID access the uplink server after startup and re
     And configured cloned network connections "Client3a-[upl]->Uplink1 [autoStart autoRetry], Client3b-[upl]->Uplink1 [autoStart autoRetry]"
 
     And starting instances "Uplink1"
-    And waiting for 15 seconds
     And starting instance "Client3a"
-    And waiting for 15 seconds
 
-    And the visible uplink network of "Client3a" should be connected to "Uplink1"
+    And the visible uplink network of "Client3a" should be connected to "Uplink1" within 5 seconds
     And starting instance "Client3b"
-    And waiting for 15 seconds
-    And the visible uplink network of "Client3b" should not be connected to "Uplink1"
+
+    And the visible uplink network of "Client3b" should not be connected to "Uplink1" within 5 seconds
     # The client ID "Client3a" is the cloned one, equal for all instances:
     And the log output of "Client3b" should contain "Uplink handshake failed or connection refused: The combination of account name"
     And the log output of "Client3b" should contain "and client ID \"Client3a\" is already in use. To allow parallel logins, use a different client ID for each client."
 
     When stopping instances "Client3a, Client3b"
-    And waiting for 15 seconds
     And starting instance "Client3b"
-    And waiting for 45 seconds
     And starting instance "Client3a"
-    And waiting for 15 seconds
 
-    And the visible uplink network of "Client3b" should be connected to "Uplink1"
-    Then the visible uplink network of "Client3a" should not be connected to "Uplink1"
+    And the visible uplink network of "Client3b" should be connected to "Uplink1" within 5 seconds
+    Then the visible uplink network of "Client3a" should not be connected to "Uplink1" within 5 seconds
     And the log output of "Client3a" should contain "Uplink handshake failed or connection refused: The combination of account name"
     And the log output of "Client3a" should contain "and client ID \"Client3a\" is already in use. To allow parallel logins, use a different client ID for each client."
     
     When stopping instances "Client3a, Client3b"
-    And waiting for 15 seconds
     And starting instance "Client3a"
-    And waiting for 15 seconds
     And starting instance "Client3b"
-    And waiting for 15 seconds
 
-    Then the visible uplink network of "Client3a" should be connected to "Uplink1"
-    And the visible uplink network of "Client3b" should not be connected to "Uplink1"
+    Then the visible uplink network of "Client3a" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client3b" should not be connected to "Uplink1" within 5 seconds
     And the log output of "Client3b" should contain "Uplink handshake failed or connection refused: The combination of account name"
     And the log output of "Client3b" should contain "and client ID \"Client3a\" is already in use. To allow parallel logins, use a different client ID for each client."
 
     And stopping instances "Client3a, Client3b"
-    And waiting for 15 seconds
     And stopping instance "Uplink1"
     And the log output of instances "Client3a, Client3b" should indicate a clean shutdown with these allowed warnings or errors:
     """
     and client ID "Client3a" is already in use. To allow parallel logins, use a different client ID for each client.
     finished with a warning or error; inspect the log output above for details
     """
-    And waiting for 15 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
@@ -699,53 +615,47 @@ Scenario: Two clients with same ID access the uplink server after startup and re
     And configured cloned network connections "Client3a-[upl]->Uplink1 [autoStart autoRetry], Client3b-[upl]->Uplink1 [autoStart autoRetry]"
 
     And starting instance "Uplink1"
-    And waiting for 15 seconds
     And starting instance "Client3a"
-    And waiting for 15 seconds
 
-    And the visible uplink network of "Client3a" should be connected to "Uplink1"
+    And the visible uplink network of "Client3a" should be connected to "Uplink1" within 5 seconds
     And starting instance "Client3b"
-    And waiting for 15 seconds
-    And the visible uplink network of "Client3b" should not be connected to "Uplink1"
+
+    And the visible uplink network of "Client3b" should not be connected to "Uplink1" within 5 seconds
     # The client ID "Client3a" is the cloned one, equal for all instances:
     And the log output of "Client3b" should contain "Uplink handshake failed or connection refused: The combination of account name"
     And the log output of "Client3b" should contain "and client ID \"Client3a\" is already in use. To allow parallel logins, use a different client ID for each client."
 
     When instance "Client3a" crashes
-    And waiting for 15 seconds
+    #And waiting for 15 seconds
     And executing command "uplink start Uplink1_userName" on "Client3b"
     # We need sufficient time: after crash some clean-up work is being performed before Client3b can connect
     And waiting for 60 seconds
     And starting instance "Client3a"
-    And waiting for 15 seconds
 
-    Then the visible uplink network of "Client3a" should not be connected to "Uplink1"
-    And the visible uplink network of "Client3b" should be connected to "Uplink1"
+    Then the visible uplink network of "Client3a" should not be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client3b" should be connected to "Uplink1" within 5 seconds
     And the log output of "Client3a" should contain "Uplink handshake failed or connection refused: The combination of account name"
     And the log output of "Client3a" should contain "and client ID \"Client3a\" is already in use. To allow parallel logins, use a different client ID for each client."
     
     When instance "Client3b" crashes
-    And waiting for 15 seconds
+    #And waiting for 15 seconds
     And executing command "uplink start Uplink1_userName" on "Client3a"
     # We need sufficient time: after crash some clean-up work is being performed before Client3a can connect
     And waiting for 60 seconds
     And starting instance "Client3b"
-    And waiting for 15 seconds
 
-    Then the visible uplink network of "Client3a" should be connected to "Uplink1"
-    And the visible uplink network of "Client3b" should not be connected to "Uplink1"
+    Then the visible uplink network of "Client3a" should be connected to "Uplink1" within 5 seconds
+    And the visible uplink network of "Client3b" should not be connected to "Uplink1" within 5 seconds
     And the log output of "Client3b" should contain "Uplink handshake failed or connection refused: The combination of account name"
     And the log output of "Client3b" should contain "and client ID \"Client3a\" is already in use. To allow parallel logins, use a different client ID for each client."
 
     And stopping instances "Client3a, Client3b"
-    And waiting for 15 seconds
     And stopping instance "Uplink1"
     And the log output of instances "Client3a, Client3b" should indicate a clean shutdown with these allowed warnings or errors:
     """
     and client ID "Client3a" is already in use. To allow parallel logins, use a different client ID for each client.
     finished with a warning or error; inspect the log output above for details
     """
-    And waiting for 15 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
@@ -763,29 +673,25 @@ Scenario: After crash, the same client connects again to the uplink server (s. M
     And configured network connection "Client1-[upl]->Uplink1 [autoStart autoRetry]"
 
     And starting instance "Uplink1"
-    And waiting for 15 seconds
     And starting instance "Client1"
-    And waiting for 15 seconds
 
-    And the visible uplink network of "Client1" should be connected to "Uplink1"
+    And the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
 
     When instance "Client1" crashes
-    And waiting for 15 seconds
+    #And waiting for 15 seconds
     And starting instance "Client1"
     # it is essential here to give enough time to wait for the automatic reconnect
     And waiting for 45 seconds
 
-    Then the visible uplink network of "Client1" should be connected to "Uplink1"
+    Then the visible uplink network of "Client1" should be connected to "Uplink1" within 5 seconds
 
     And stopping instance "Client1"
-    And waiting for 15 seconds
     And stopping instance "Uplink1"
     And the log output of instances "Client1" should indicate a clean shutdown with these allowed warnings or errors:
     """
     and client ID "Client1_" is already in use. To allow parallel logins, use a different client ID for each client.
     finished with a warning or error; inspect the log output above for details
     """
-    And waiting for 15 seconds
     And the log output of instance "Uplink1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     as it exceeds the significant character limit (8)
