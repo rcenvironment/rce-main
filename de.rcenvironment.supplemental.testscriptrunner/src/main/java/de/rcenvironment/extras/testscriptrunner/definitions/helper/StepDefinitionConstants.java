@@ -155,7 +155,7 @@ public final class StepDefinitionConstants {
     /**
      * separates option key from option value.
      */
-    public static final String OPTION_SEPARATOR = "_";
+    public static final String OPTION_KV_SEPARATOR = "="; // was previously "_" for an unknown reason
 
     /**
      * char to be replaced by os specific info.

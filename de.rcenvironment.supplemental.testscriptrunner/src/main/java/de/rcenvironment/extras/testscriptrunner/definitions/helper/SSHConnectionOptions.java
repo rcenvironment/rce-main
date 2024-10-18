@@ -158,7 +158,7 @@ public final class SSHConnectionOptions {
         return commonOptions.getHost();
     }
 
-    public String getUserName() {
+    public Optional<String> getUserName() {
         return commonOptions.getUserName();
     }
     

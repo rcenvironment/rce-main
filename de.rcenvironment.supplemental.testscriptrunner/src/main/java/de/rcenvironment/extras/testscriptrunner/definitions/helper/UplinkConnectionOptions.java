@@ -13,6 +13,7 @@ import java.util.Optional;
  * contains option-keys and default values for connection options viable only for uplink connection types.
  * 
  * @author Marlon Schroeter
+ * @author Robert Mischke
  */
 public final class UplinkConnectionOptions {
 
@@ -29,8 +30,6 @@ public final class UplinkConnectionOptions {
     private UplinkConnectionOptions() {
         setAutoRetry(false);
         setGateway(false);
-        setUserName(ConnectionOptionConstants.USER_NAME_DEFAULT);
-        setPassword(ConnectionOptionConstants.USER_NAME_DEFAULT);
     }
 
     /**
@@ -214,8 +213,8 @@ public final class UplinkConnectionOptions {
         return commonOptions.getAutoStart();
     }
 
-    public String getClientId() {
-        return clientId;
+    public Optional<String> getClientId() {
+        return Optional.ofNullable(clientId);
     }
     
     public Optional<String> getConnectionName() {
@@ -230,8 +229,8 @@ public final class UplinkConnectionOptions {
         return commonOptions.getHost();
     }
 
-    public String getPassword() {
-        return password;
+    public Optional<String> getPassword() {
+        return Optional.ofNullable(password);
     }
     
     public Optional<Integer> getPort() {
@@ -242,7 +241,7 @@ public final class UplinkConnectionOptions {
         return commonOptions.getServerNumber();
     }
 
-    public String getUserName() {
+    public Optional<String> getUserName() {
         return commonOptions.getUserName();
     }
 
