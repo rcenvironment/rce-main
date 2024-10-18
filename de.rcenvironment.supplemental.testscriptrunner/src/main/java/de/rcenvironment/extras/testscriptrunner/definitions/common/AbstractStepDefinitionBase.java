@@ -118,8 +118,11 @@ public abstract class AbstractStepDefinitionBase {
                         operationTitle, attemptCount, stopWatch.getTime(TimeUnit.MILLISECONDS), maxAttempts));
                     return attemptCount; // operation attempt returned "true" -> success
                 }
-                // fall-through: the operation attempt returned "false" -> continue with retry loop
-            } catch (Exception e) { // TODO Checkstyle violation, but currently necessary as some operations declare "throws Exception"
+                // fall-through: the operation attempt returned "false" -> continue with retry loop after waiting
+                Thread.sleep(delayMsec);
+            } catch (AssertionError | Exception e) {
+                // TODO nicer wrapping of AssertionErrors?
+                // TODO the above "catch" is a Checkstyle violation, but currently necessary as some operations declare "throws Exception"
                 throw new AssertionError(StringUtils.format("Exception during attempt %d for operation '%s' after %d msec (total)",
                     attemptCount, operationTitle, stopWatch.getTime(TimeUnit.MILLISECONDS)), e);
             }

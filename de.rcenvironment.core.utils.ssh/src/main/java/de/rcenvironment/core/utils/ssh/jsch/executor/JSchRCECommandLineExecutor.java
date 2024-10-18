@@ -32,7 +32,7 @@ public class JSchRCECommandLineExecutor implements RCECommandLineExecutor {
 
     private static final String EXCEPTION_MESSAGE_ALREADY_RUNNING = "Already running";
     
-    private static final int TERMINATION_POLLING_INTERVAL_MSEC = 1000;
+    private static final int TERMINATION_POLLING_INTERVAL_MSEC = 100;
 
     private Session jschSession;
 
