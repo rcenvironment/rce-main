@@ -12,8 +12,6 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -295,31 +293,37 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
     }
 
     /**
-     * Verifies that a given set of instances is present in a given instance's visible network.
+     * Verifies the state of an Uplink connection, more precisely the state of a potential Uplink connection setup -- a configured
+     * configuration which may or may not exist.
      * 
-     * @param instanceId the node that should have its visible uplink network inspected
-     * @param testType if the specified node is currently connected
-     * @param listOfExpectedUplinkInstances the comma-separated list of expected instances (i. e. uplink servers)
+     * "present" vs "absent" tests whether a given connection setup exists at all; "absent" means that such a setup was never configured or
+     * was deleted. "connected" vs "disconnected" represents whether the network connection attached to the given setup is in the state
+     * "connected" or not; intermediate states like "connecting" or "disconnecting" are considered "disconnected".
+     * 
+     * @param sourceInstanceId the id of the instance with the potentially configured connection
+     * @param targetInstanceId the id of the potential connection's target instance
+     * @param criterion the test criterion string
      * @param maxiumWaitSeconds the maximum retry time until success
      */
-    @Then("^the visible uplink network of \"([^\"]*)\" should (contain|not contain|be connected to|not be connected to) "
-        + "\"([^\"]*)\"(?: within (\\d+) seconds?)?$")
-    public void verifyVisibleUplinkNetwork(String instanceId, String testType, String listOfExpectedUplinkInstances,
+    @Then("^the Uplink connection from \"([^\"]*)\" to \"([^\"]*)\" "
+        + "should be (connected|disconnected|present|absent)(?: within (\\d+) seconds?)?$")
+    public void verifyStateOfUplinkConnections(String sourceInstanceId, String targetInstanceId, String criterion,
         Integer maxiumWaitSeconds) {
 
         maxiumWaitSeconds = applyFallbackMaximumRetryTime(maxiumWaitSeconds);
 
         String description =
-            StringUtils.format("Expecting network of instance \"%s\" to %s \"%s\"", instanceId, testType, listOfExpectedUplinkInstances);
+            StringUtils.format("Expecting the Uplink connection from \"%s\" to \"%s\" to be \"%s\"", sourceInstanceId,
+                targetInstanceId, criterion);
         executeWithRetry((ExecutionAttempt) (attemptCount, isLastAttempt) -> {
-            return executeOnceVerifyVisibleUplinkNetwork(instanceId, testType, listOfExpectedUplinkInstances, isLastAttempt);
+            return executeOnceVerifyStateOfUplinkConnections(sourceInstanceId, targetInstanceId, criterion, isLastAttempt);
         }, description, maxiumWaitSeconds);
     }
 
-    private boolean executeOnceVerifyVisibleUplinkNetwork(String instanceId, String testType, String listOfExpectedUplinkInstances,
-        boolean isLastAttempt) {
-        String commandOutput = executeCommandOnInstance(resolveInstance(instanceId), "uplink list", false);
-        List<String> expectedUplinkInstances = parseCommaSeparatedList(listOfExpectedUplinkInstances);
+    private boolean executeOnceVerifyStateOfUplinkConnections(String sourceInstanceId, String targetInstanceId,
+        String criterion, boolean isLastAttempt) {
+        String commandOutput = executeCommandOnInstance(resolveInstance(sourceInstanceId), "uplink list", false);
+        // TODO review this comment
         /**
          * NOTE THAT: From the test case we get only the "simple" name of an instance (e. g. "Uplink"). To be able to check the availability
          * of instances, we need the "Id" of instance, as it is constructed in the test steps which are "using the default build" which are
@@ -332,62 +336,52 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
          * @see InstanceInstantiationStepDefinitions.givenInstancesUsingBuild()
          * @see givenConfiguredNetworkConnections()
          */
-        ArrayList<String> expectedUplinkInstanceIds = new ArrayList<String>();
-        for (String instance : expectedUplinkInstances) {
-            String formattedInstance =
-                StringUtils.format(StepDefinitionConstants.CONNECTION_ID_FORMAT, instance, ConnectionOptionConstants.USER_NAME_DEFAULT);
-            expectedUplinkInstanceIds.add(formattedInstance);
-        }
+        String formattedTargetInstanceId =
+            StringUtils.format(StepDefinitionConstants.CONNECTION_ID_FORMAT, targetInstanceId, ConnectionOptionConstants.USER_NAME_DEFAULT);
 
         String[] outputLines = commandOutput.split(StepDefinitionConstants.LINEBREAK_REGEX);
-        // process the console output into a easier processable map
-        Map<String, Boolean> uplinkInstances = getUplinkInstances(outputLines);
+        Map<String, Boolean> uplinkInstances = getUplinkConnectionsWithConnectedState(outputLines);
 
-        switch (testType) {
-        case "be connected to":
-            for (String expectedInstanceId : expectedUplinkInstanceIds) {
-                if (!uplinkInstances.getOrDefault(expectedInstanceId, false)) {
-                    if (!isLastAttempt) {
-                        return false;
-                    }
-                    fail(StringUtils.format("Instance %s is not connected to %s.", instanceId, expectedInstanceId));
+        switch (criterion) {
+        case "connected":
+            if (!uplinkInstances.getOrDefault(formattedTargetInstanceId, false)) {
+                if (!isLastAttempt) {
+                    return false;
                 }
+                fail(StringUtils.format("Instance %s is not connected to %s", sourceInstanceId, formattedTargetInstanceId));
             }
-            break;
-        case "not be connected to":
-            for (String expectedInstanceId : expectedUplinkInstanceIds) {
-                if (uplinkInstances.getOrDefault(expectedInstanceId, false)) {
-                    if (!isLastAttempt) {
-                        return false;
-                    }
-                    fail(StringUtils.format("Instance %s should not be connected to %s.", instanceId, expectedInstanceId));
-                }
-            }
-            break;
-        case "contain":
-            for (String expectedInstanceId : expectedUplinkInstanceIds) {
-                if (!uplinkInstances.containsKey(expectedInstanceId)) {
-                    if (!isLastAttempt) {
-                        return false;
-                    }
-                    fail(StringUtils.format("Uplink server %s is not visible for instance %s", expectedInstanceId, instanceId));
-                }
-            }
-            break;
-        case "not contain":
-            for (String expectedInstanceId : expectedUplinkInstanceIds) {
-                if (uplinkInstances.containsKey(expectedInstanceId)) {
-                    if (!isLastAttempt) {
-                        return false;
-                    }
-                    fail(StringUtils.format("Uplink server %s is not expected to be visible from instance %s.", expectedInstanceId,
-                        instanceId));
-                }
-            }
-            break;
 
+            break;
+        case "disconnected":
+            if (uplinkInstances.getOrDefault(formattedTargetInstanceId, false)) {
+                if (!isLastAttempt) {
+                    return false;
+                }
+                fail(StringUtils.format("Instance %s should not be connected to %s", sourceInstanceId, formattedTargetInstanceId));
+            }
+
+            break;
+        case "present":
+            if (!uplinkInstances.containsKey(formattedTargetInstanceId)) {
+                if (!isLastAttempt) {
+                    return false;
+                }
+                fail(StringUtils.format("There is no Uplink connection to %s configured at %s", formattedTargetInstanceId,
+                    sourceInstanceId));
+            }
+            break;
+        case "absent":
+            if (uplinkInstances.containsKey(formattedTargetInstanceId)) {
+                if (!isLastAttempt) {
+                    return false;
+                }
+                fail(StringUtils.format("There should be no Uplink connection to %s configured at %s", formattedTargetInstanceId,
+                    sourceInstanceId));
+            }
+
+            break;
         default:
-            fail(StringUtils.format("Test type %s is not supported.", testType));
+            fail(StringUtils.format("Unsopported test criterion %s", criterion));
         }
 
         return true; // attempt successful
@@ -413,7 +407,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
      * @param outputLines the command output split in lines
      * @return a Map with the uplink instances and their respective state of connected (true/false).
      */
-    private Map<String, Boolean> getUplinkInstances(String[] outputLines) {
+    private Map<String, Boolean> getUplinkConnectionsWithConnectedState(String[] outputLines) {
         Map<String, Boolean> uplinkMap = new HashMap<String, Boolean>();
         String foundInstances = "";
         for (String line : outputLines) {
