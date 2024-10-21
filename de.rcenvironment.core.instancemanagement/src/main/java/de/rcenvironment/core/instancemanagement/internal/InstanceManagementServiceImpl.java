@@ -247,12 +247,12 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
     }
 
     @Override
-	public boolean isInstanceManagementStarted() {
+    public boolean isInstanceManagementStarted() {
         return instanceManagementStarted;
     }
 
     @Override
-	public String getReasonInstanceManagementNotStarted() {
+    public String getReasonInstanceManagementNotStarted() {
         return reasonInstanceManagementNotStarted;
     }
 
@@ -1729,12 +1729,13 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
                 userOutputReceiver.addOutput("Finished executing command " + command + ON_INSTANCE + instanceId);
                 return returnValue;
             } else {
-                userOutputReceiver.addOutput("Could not retrieve password and/or port for instance " + instanceId + ".");
+                // TODO temporarily using IOException to signal failure instead of printing to console; use better type?
+                throw new IOException("Could not retrieve password and/or port for instance " + instanceId);
             }
         } else {
-            userOutputReceiver.addOutput("Cannot execute command on instance " + instanceId + " because it is not running.");
+            // TODO temporarily using IOException to signal failure instead of printing to console; use better type?
+            throw new IOException("Cannot execute command on instance " + instanceId + " because it is not running");
         }
-        return null;
     }
 
     @Override

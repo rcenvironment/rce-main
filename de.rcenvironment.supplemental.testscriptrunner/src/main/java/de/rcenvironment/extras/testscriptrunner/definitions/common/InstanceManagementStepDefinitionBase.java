@@ -77,6 +77,7 @@ public abstract class InstanceManagementStepDefinitionBase extends AbstractStepD
      * @param isMainAction true if executing this command is the actual test action; false if this it is incidental, e.g. for testing state
      *        or performing cleanup
      */
+    // TODO this should throw something else than AssertionError on failure
     protected final String executeCommandOnInstance(final ManagedInstance instance, String commandString, boolean isMainAction) {
         final String instanceId = instance.getId();
         final String startInfoText = StringUtils.format("Executing command \"%s\" on instance \"%s\"", commandString, instanceId);
@@ -98,6 +99,11 @@ public abstract class InstanceManagementStepDefinitionBase extends AbstractStepD
                     }
                 }
                 numAttempts++;
+            }
+            if (numAttempts >= maxAttempts) { // ">" should never happen; just for safety
+                fail(StringUtils.format("Failed to execute command \"%s\" on instance \"%s\": Maximum number of attempts exceeded",
+                    commandString, instanceId));
+                return null; // dummy command; never reached
             }
             if (numAttempts > 1) {
                 String retrySuffix = " after retrying the SSH connection for " + (numAttempts - 1) + " times)";

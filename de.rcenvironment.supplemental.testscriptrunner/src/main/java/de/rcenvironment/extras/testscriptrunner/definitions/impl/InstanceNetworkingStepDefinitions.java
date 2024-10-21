@@ -325,7 +325,19 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
 
     private boolean executeOnceVerifyStateOfUplinkConnections(String sourceInstanceId, String targetInstanceId, String loginName,
         String clientId, String criterion, boolean isLastAttempt) {
-        String commandOutput = executeCommandOnInstance(resolveInstance(sourceInstanceId), "uplink list", false);
+
+        String commandOutput;
+        try {
+            commandOutput = executeCommandOnInstance(resolveInstance(sourceInstanceId), "uplink list", false);
+        } catch (AssertionError e) {
+            // remote command execution failing is possible in regular operation if an instance is queried right after its basic startup
+            if (!isLastAttempt) {
+                return false; // retry
+            }
+            fail(StringUtils.format("Failed to execute \"uplink list\" on instance %s: %s", sourceInstanceId, e.toString()));
+            return false; // only to prevent compiler errors; never reached due to fail() above
+        }
+
         // TODO review this comment
         /**
          * NOTE THAT: From the test case we get only the "simple" name of an instance (e. g. "Uplink"). To be able to check the availability
@@ -340,11 +352,10 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
          * @see givenConfiguredNetworkConnections()
          */
 
-        String connectionId = String.join("_", targetInstanceId, loginName, clientId);
-        // StringUtils.format(StepDefinitionConstants.CONNECTION_ID_FORMAT, targetInstanceId, ConnectionOptionConstants.USER_NAME_DEFAULT);
-
         String[] outputLines = commandOutput.split(StepDefinitionConstants.LINEBREAK_REGEX);
         Map<String, Boolean> uplinkInstances = getUplinkConnectionsWithConnectedState(outputLines);
+
+        String connectionId = constructUplinkConnectionSetupId(targetInstanceId, loginName, clientId);
 
         switch (criterion) {
         case "connected":
@@ -393,21 +404,39 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
     }
 
     /**
-     * Performs an ungrateful shutdown of an instance.
+     * Triggers a hard shutdown of an instance. Note that this action does NOT wait for the instance's termination.
      * 
      * @param instanceId the node that is to be shut down.
      */
     @When("^instance \"([^\"]*)\" crashes$")
-    public void thenUplinkNetworkConsistsOf(String instanceId) {
-
-        String commandOutput = executeCommandOnInstance(resolveInstance(instanceId), "force-crash 0", false);
-        printToCommandConsole(commandOutput);
-
-        printToCommandConsole("Hard shutdown of instance \"" + instanceId);
+    public void whenTriggeringACrashOfInstance(String instanceId) {
+        triggerHardShutdownOfInstance(instanceId);
+        printToCommandConsole("Triggered a hard shutdown (crash) of instance \"" + instanceId
+            + "\"; note that this action does NOT wait for the instance's termination");
     }
 
     /**
-     * Extracts the uplink instances from the output of the console command "uplink list".
+     * Triggers a hard shutdown of an instance and waits for its termination.
+     * 
+     * @param instanceId the node that is to be shut down.
+     * @param maxWaitSeconds the maximum time to allow until actual shutdown
+     */
+    @When("^triggering a crash of instance \"([^\"]*)\" and it terminated within (\\d+) seconds?$")
+    public void whenTriggeringACrashOfInstanceAndWaitingForTerminination(String instanceId, int maxWaitSeconds) {
+        triggerHardShutdownOfInstance(instanceId);
+        // wait for shutdown
+        executeWithRetry((ExecutionAttempt) (attempt, isLastAttempt) -> {
+            return !INSTANCE_MANAGEMENT_SERVICE.isInstanceRunning(instanceId); // not running -> return success, otherwise retry
+        }, instanceId, maxWaitSeconds);
+    }
+
+    private void triggerHardShutdownOfInstance(String instanceId) {
+        String commandOutput = executeCommandOnInstance(resolveInstance(instanceId), "force-crash 0", false);
+        printToCommandConsole(commandOutput);
+    }
+
+    /**
+     * Parses the output of "uplink list" and returns a map of connection setup ids with their "connected" state.
      * 
      * @param outputLines the command output split in lines
      * @return a Map with the uplink instances and their respective state of connected (true/false).
@@ -423,7 +452,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
             int positionOfId = line.indexOf("(id:");
             final int minusOne = -1;
             if (positionOfId == minusOne) {
-                fail(StringUtils.format("Unexpected result from command \"uplink list: \n %s", line));
+                fail(StringUtils.format("Failed to parse output line of command \"uplink list\":\n%s", line));
             } else {
                 String foundInstanceId = line.substring(positionOfId + 5, line.indexOf(")", positionOfId));
                 // Alternatively we may want to use the format as when it is originally created:
@@ -439,13 +468,10 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
                 } else if (line.contains("CONNECTED: false")) {
                     uplinkMap.put(foundInstanceId, false);
                 } else {
-                    printToCommandConsole(
-                        StringUtils.format("Line of output from command \\\"uplink list: \\n %s has no connected status", line));
+                    fail(StringUtils.format("Line of output from command \\\"uplink list: \\n %s has no connected status", line));
                 }
             }
-            // TODO sind 4 ebenen zuviel?
         }
-        printToCommandConsole("Found instance(s) " + foundInstances);
         return uplinkMap;
     }
 
@@ -724,7 +750,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
             .build();
         addSSHAccount(serverInstance, accountParametersUpl);
 
-        final String connectionSetupId = String.join("_", serverInstance.getId(), userName, clientId);
+        final String connectionSetupId = constructUplinkConnectionSetupId(serverInstance.getId(), userName, clientId);
         // StringUtils.format(StepDefinitionConstants.CONNECTION_ID_FORMAT, clientInstance.getId(), serverInstance.getId());
 
         final ParsedMultiParameter uplinkParameters = new ParsedMultiParameter(
@@ -754,7 +780,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
         // intended for testing setups (e.g. BDD) only: use the login name as default password
         final String password = connectionOptions.getPassword().orElse(userName);
 
-        final String connectionSetupId = String.join("_", clientInstance.getId(), userName, clientId);
+        final String connectionSetupId = constructUplinkConnectionSetupId(clientInstance.getId(), userName, clientId);
 
         final ParsedMultiParameter uplinkParameters = new ParsedMultiParameter(
             new AbstractParsedCommandParameter[] {
@@ -877,6 +903,10 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
             }
         }
         return false;
+    }
+
+    private String constructUplinkConnectionSetupId(String targetInstanceId, String loginName, String clientId) {
+        return String.join("_", targetInstanceId, loginName, clientId);
     }
 
     private boolean testIfConfiguredOutgoingConnectionsAreConnected(final ManagedInstance instance, boolean isFinalAttempt) {
