@@ -285,7 +285,7 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
         }
 
         final String operationTitle =
-            StringUtils.format("Verify that the visible components of instance \"%s\" are \"%s\"", instanceId, visibilityMap.toString());
+            StringUtils.format("Verify the visibility of certain components on instance \"%s\"", instanceId);
         executeWithRetry((ExecutionAttempt) (attemptCount, isLastAttempt) -> {
             return executeOnceValidateComponentNetworkVisibility(instance, visibilityMap, isLastAttempt);
         }, operationTitle, maxiumWaitSeconds);
@@ -293,6 +293,11 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
 
     private boolean executeOnceValidateComponentNetworkVisibility(ManagedInstance instance,
         Map<String, ComponentVisibilityState> visibilityMap, boolean isLastAttempt) {
+
+        // reset all actual states; otherwise, the state is incorrect when a component "disappears" on retry
+        for (ComponentVisibilityState entry : visibilityMap.values()) {
+            entry.setActualState(null);
+        }
 
         // parse actual state
         String output = executeCommandOnInstance(instance, "components list --as-table", false);
@@ -334,7 +339,8 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
         }
         if (hasMismatch && isLastAttempt) {
             fail(
-                "At least one component had an unexpected visibility/authorization state: " + errorLines.toString());
+                "At least one component had an unexpected visibility/authorization state: " + errorLines.toString()
+                    + "\n\nQuery command output:\n" + output);
         }
         return !hasMismatch;
     }
