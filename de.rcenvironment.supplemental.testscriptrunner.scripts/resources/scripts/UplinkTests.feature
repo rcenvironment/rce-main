@@ -2,16 +2,16 @@ Feature: UplinkTests
 
 # General remark:
 # Many scenarios are here allowed to have warnings which indicate problems with shutdowns etc., like:
-#    stream is already closed
-#    session already closed
 #    Error in asynchronous callback; shutting down queue
 #    Session terminated in non-terminal state UNCLEAN_SHUTDOWN_INITIATED
+#    Failed to register channelClosed() event
 #    as it is already in use by session 
 # This, however, is not the ideal case, these warnings are foremost allowed because they do not affect 
 # the intended test objectives, but hint to general problems at synchronizing shutdowns etc.; these 
 # problems are at least partially addressed in already existing Issues.
 
 @UplinkTestsFeature
+@UplinkReviewed
 @Uplink01
 Scenario: Basic operation of Uplink connections between two clients and two servers (Uplink01)
 
@@ -42,9 +42,18 @@ Scenario: Basic operation of Uplink connections between two clients and two serv
     And  stopping instances "Server1, Server2"
     
     Then the log output of instances "Client1, Client2" should indicate a clean shutdown with no warnings or errors
-    And  the log output of instances "Server1, Server2" should indicate a clean shutdown with no warnings or errors
+    # tracked as #17659; remove filter when fixed    
+    And  the log output of instances "Server1, Server2" should indicate a clean shutdown with these allowed warnings or errors: 
+    """
+    Failed to register channelClosed() event
+    """
+
+# TODO add an explicit test case that verifies a client making unsuccessful auto-retry attempts after a shutdown 
+# or crash of the server; this check has been removed from other test cases as it is unrelated and slows them down   
+
 
 @UplinkTestsFeature
+@UplinkReviewed
 @Uplink02
 Scenario: Remote visibility of Uplink tool after shutdown and restart of providing client (Uplink02)
 
@@ -79,10 +88,16 @@ Scenario: Remote visibility of Uplink tool after shutdown and restart of providi
     And  stopping instance "Server1"
 
     Then the log output of instances "Client1, Client2" should indicate a clean shutdown with no warnings or errors
-    And  the log output of instance "Server1" should indicate a clean shutdown with no warnings or errors
+    # tracked as #17659; remove filter when fixed
+    And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
+    """
+    Failed to register channelClosed() event
+    """
+
 
 # Variant of @Uplink02: crash instead of restart
 @UplinkTestsFeature
+@UplinkReviewed
 # TODO rename this to Uplink02b instead?
 @Uplink06
 Scenario: Remote visibility of Uplink tool after crash and restart of providing client (Uplink06)
@@ -103,8 +118,8 @@ Scenario: Remote visibility of Uplink tool after crash and restart of providing 
 
     When instance "Client1" crashes
     
-	# verify that the tool "disappears" for Client2 after some time
-    Then instance "Client2" should see these components within 15 seconds:
+	# verify that the tool "disappears" for Client2 after the server recognizes "Client1" as gone
+    Then instance "Client2" should see these components within 30 seconds:
         | Client1 (via Client1/default) | common/TestTool | (absent) |
         
     When starting instance "Client1"
@@ -125,12 +140,12 @@ Scenario: Remote visibility of Uplink tool after crash and restart of providing 
     And  the log output of instances "Client2" should indicate a clean shutdown with no warnings or errors
     And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
+    Failed to register channelClosed() event
     Session terminated in non-terminal state UNCLEAN_SHUTDOWN_INITIATED
-    as it is already in use by session
     """
 
-
 @UplinkTestsFeature
+@UplinkReviewed
 @Uplink03
 Scenario: Remote visibility of Uplink tool after shutdown and restart of receiving client (Uplink03)
 # TODO add Client2 crash test case too? 
@@ -162,9 +177,15 @@ Scenario: Remote visibility of Uplink tool after shutdown and restart of receivi
     And  stopping instance "Server1"
     
     Then the log output of instances "Client1, Client2" should indicate a clean shutdown with no warnings or errors
-    And  the log output of instance "Server1" should indicate a clean shutdown with no warnings or errors
+    # tracked as #17659; remove filter when fixed
+    And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
+    """
+    Failed to register channelClosed() event
+    """
+
 
 @UplinkTestsFeature
+@UplinkReviewed
 @Uplink04
 Scenario: Uplink clients auto-reconnecting after shutdown and restart of server (Uplink04)
 
@@ -186,22 +207,20 @@ Scenario: Uplink clients auto-reconnecting after shutdown and restart of server 
     When stopping instance "Server1"
     # note: redundant check until the start/stop commands are reworked
     Then instance "Server1" should be stopped
-    And  the Uplink connection from "Client1" to "Server1" should be disconnected within 5 seconds
+
+    Then the Uplink connection from "Client1" to "Server1" should be disconnected within 5 seconds
     And  the Uplink connection from "Client2" to "Server1" should be disconnected within 5 seconds
-    
-    # the current Uplink auto-retry delay is hardcoded to 10 seconds, so make sure a (failing) attempt was made
-    When waiting for 12 seconds
-    
-    # TODO this test could be unreliable as log output is buffered, so these log lines might not be on disk yet
-    Then the log output of instance "Client1" should contain "An Uplink connection (Server1_Client1_default) finished with a warning or error"
-    And  the log output of instance "Client1" should contain "java.net.ConnectException: Connection refused"
+
+    # note that this test might be unreliable as log output is buffered; generally, it should have been flushed to disk already though
+    And  the log output of instance "Client1" should contain "An Uplink connection (Server1_Client1_default) finished with a warning or error"
     And  the log output of instance "Client2" should contain "An Uplink connection (Server1_Client2_default) finished with a warning or error"
-    And  the log output of instance "Client2" should contain "java.net.ConnectException: Connection refused"
 
     When starting instance "Server1"
+
     # there is no exponential back-off implemented for Uplink yet, so a connection attempt should happen every 10 seconds
     Then the Uplink connection from "Client1" to "Server1" should be connected within 12 seconds
     And  the Uplink connection from "Client2" to "Server1" should be connected within 12 seconds
+
     And  instance "Client2" should see these components within 5 seconds:
         | Client1 (via Client1/default) | common/TestTool | local |
 
@@ -216,8 +235,10 @@ Scenario: Uplink clients auto-reconnecting after shutdown and restart of server 
     """
     And  the log output of instance "Server1" should indicate a clean shutdown with no warnings or errors
 
+
 # Variant of @Uplink04: crash instead of restart
 @UplinkTestsFeature
+@UplinkReviewed
 # TODO rename this to Uplink04b?
 @Uplink07
 Scenario: Uplink clients auto-reconnecting after crash and restart of server (Uplink07)
@@ -239,22 +260,19 @@ Scenario: Uplink clients auto-reconnecting after crash and restart of server (Up
         | Client1 (via Client1/default) | common/TestTool | local |
 
     When instance "Server1" crashes
-    Then the Uplink connection from "Client1" to "Server1" should be disconnected within 15 seconds
-    And  the Uplink connection from "Client2" to "Server1" should be disconnected within 15 seconds
+    Then the Uplink connection from "Client1" to "Server1" should be disconnected within 30 seconds
+    And  the Uplink connection from "Client2" to "Server1" should be disconnected within 30 seconds
     
-    # the current Uplink auto-retry delay is hardcoded to 10 seconds, so make sure a (failing) attempt was made
-    When waiting for 12 seconds
-    
-    # TODO this test could be unreliable as log output is buffered, so these log lines might not be on disk yet
-    Then the log output of instance "Client1" should contain "An Uplink connection (Server1_Client1_default) finished with a warning or error"
-    #And  the log output of instance "Client1" should contain "java.net.ConnectException: Connection refused"
+    # note that this test might be unreliable as log output is buffered; generally, it should have been flushed to disk already though
+    And  the log output of instance "Client1" should contain "An Uplink connection (Server1_Client1_default) finished with a warning or error"
     And  the log output of instance "Client2" should contain "An Uplink connection (Server1_Client2_default) finished with a warning or error"
-    #And  the log output of instance "Client2" should contain "java.net.ConnectException: Connection refused"
 
     When starting instance "Server1"
+    
     # there is no exponential back-off implemented for Uplink yet, so a connection attempt should happen every 10 seconds
     Then the Uplink connection from "Client1" to "Server1" should be connected within 12 seconds
     And  the Uplink connection from "Client2" to "Server1" should be connected within 12 seconds
+    
     And  instance "Client2" should see these components within 5 seconds:
         | Client1 (via Client1/default) | common/TestTool | local |
 
