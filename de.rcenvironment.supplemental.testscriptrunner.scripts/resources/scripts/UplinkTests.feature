@@ -12,6 +12,7 @@ Feature: UplinkTests
 
 @UplinkTestsFeature
 @UplinkReviewed
+@UplinkNew01
 @Uplink01
 Scenario: Basic operation of Uplink connections between two clients and two servers (Uplink01)
 
@@ -48,14 +49,21 @@ Scenario: Basic operation of Uplink connections between two clients and two serv
     Failed to register channelClosed() event
     """
 
+
+#@UplinkNew02
 # TODO add an explicit test case that verifies a client making unsuccessful auto-retry attempts after a shutdown 
 # or crash of the server; this check has been removed from other test cases as it is unrelated and slows them down   
 
 
 @UplinkTestsFeature
 @UplinkReviewed
+@UplinkNew03
+# TODO remove extra tags after transition
 @Uplink02
-Scenario: Remote visibility of Uplink tool after shutdown and restart of providing client (Uplink02)
+@Uplink03
+@Uplink04
+@Uplink05
+Scenario: Remote visibility of Uplink tool after graceful restarts of clients and server (UplinkNew03)
 
     Given instance "Server1, Client1, Client2" using the default build
     And  configured network connections "Client1-[upl]->Server1 [autoStart autoRetry]"
@@ -71,9 +79,12 @@ Scenario: Remote visibility of Uplink tool after shutdown and restart of providi
     Then instance "Client2" should see these components within 5 seconds:
         | Client1 (via Client1/default) | common/TestTool | local |
 
+    # restart Client1 (previous scenario "Uplink02")
+
     When stopping instance "Client1"
     # note: redundant check until the start/stop commands are reworked
     Then instance "Client1" should be stopped
+    And  the log output of instance "Client1" should indicate a clean shutdown with no warnings or errors
 
 	# verify that the tool has "disappeared" for Client2    
     Then instance "Client2" should see these components within 5 seconds:
@@ -84,126 +95,20 @@ Scenario: Remote visibility of Uplink tool after shutdown and restart of providi
     And  instance "Client2" should see these components within 5 seconds:
         | Client1 (via Client1/default) | common/TestTool | local |
 
-    When stopping instances "Client1, Client2"
-    And  stopping instance "Server1"
+    # restart Client2 (previous scenario "Uplink03")
 
-    Then the log output of instances "Client1, Client2" should indicate a clean shutdown with no warnings or errors
-    # tracked as #17659; remove filter when fixed
-    And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
-    """
-    Failed to register channelClosed() event
-    """
-
-
-# Variant of @Uplink02: crash instead of restart
-@UplinkTestsFeature
-@UplinkReviewed
-# TODO rename this to Uplink02b instead?
-@Uplink06
-Scenario: Remote visibility of Uplink tool after crash and restart of providing client (Uplink06)
-
-    Given instance "Server1, Client1, Client2" using the default build
-    And  configured network connections "Client1-[upl]->Server1 [autoStart autoRetry]"
-    And  configured network connections "Client2-[upl]->Server1 [autoStart autoRetry]"
-    
-    When starting instance "Server1"
-    And  starting instances "Client1, Client2"
-    Then the Uplink connection from "Client1" to "Server1" should be connected within 5 seconds
-    And  the Uplink connection from "Client2" to "Server1" should be connected within 5 seconds
-
-    When adding tool "common/TestTool" to "Client1"
-    And  executing command "components set-auth common/TestTool public" on "Client1"
-    Then instance "Client2" should see these components within 5 seconds:
-        | Client1 (via Client1/default) | common/TestTool | local |
-
-    When instance "Client1" crashes
-    
-	# verify that the tool "disappears" for Client2 after the server recognizes "Client1" as gone
-    Then instance "Client2" should see these components within 30 seconds:
-        | Client1 (via Client1/default) | common/TestTool | (absent) |
-        
-    When starting instance "Client1"
-    Then the Uplink connection from "Client1" to "Server1" should be connected within 5 seconds
-    And  instance "Client2" should see these components within 5 seconds:
-        | Client1 (via Client1/default) | common/TestTool | local |
-
-    When stopping instances "Client1, Client2"
-    When stopping instance "Server1"
-    
-	# TODO review if all of these warnings can still occur, or the warnings themselves can be improved/reduced
-	
-    Then the log output of instances "Client1" should indicate a clean shutdown with these allowed warnings or errors:
-    """
-    And  client ID "Client1_" is already in use. To allow parallel logins, use a different client ID for each client.
-    finished with a warning or error; inspect the log output above for details
-    """
-    And  the log output of instances "Client2" should indicate a clean shutdown with no warnings or errors
-    And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
-    """
-    Failed to register channelClosed() event
-    Session terminated in non-terminal state UNCLEAN_SHUTDOWN_INITIATED
-    """
-
-@UplinkTestsFeature
-@UplinkReviewed
-@Uplink03
-Scenario: Remote visibility of Uplink tool after shutdown and restart of receiving client (Uplink03)
-# TODO add Client2 crash test case too? 
-
-    Given instance "Server1, Client1, Client2" using the default build
-    And  configured network connections "Client1-[upl]->Server1 [autoStart autoRetry]"
-    And  configured network connections "Client2-[upl]->Server1 [autoStart autoRetry]"
-    
-    When starting instance "Server1"
-    And  starting instances "Client1, Client2"
-    Then the Uplink connection from "Client1" to "Server1" should be connected within 5 seconds
-    And  the Uplink connection from "Client2" to "Server1" should be connected within 5 seconds
-
-    When adding tool "common/TestTool" to "Client1"
-    And  executing command "components set-auth common/TestTool public" on "Client1"
-    Then instance "Client2" should see these components within 5 seconds:
-        | Client1 (via Client1/default) | common/TestTool | local |
-        
     When stopping instance "Client2"
     # note: redundant check until the start/stop commands are reworked
     Then instance "Client2" should be stopped
+    And  the log output of instance "Client2" should indicate a clean shutdown with no warnings or errors
 
     When starting instance "Client2"
     Then the Uplink connection from "Client2" to "Server1" should be connected within 5 seconds
     And  instance "Client2" should see these components within 5 seconds:
         | Client1 (via Client1/default) | common/TestTool | local |
 
-    When stopping instances "Client1, Client2"
-    And  stopping instance "Server1"
+    # restart Server1 (previous scenario "Uplink04")
     
-    Then the log output of instances "Client1, Client2" should indicate a clean shutdown with no warnings or errors
-    # tracked as #17659; remove filter when fixed
-    And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
-    """
-    Failed to register channelClosed() event
-    """
-
-
-@UplinkTestsFeature
-@UplinkReviewed
-@Uplink04
-Scenario: Uplink clients auto-reconnecting after shutdown and restart of server (Uplink04)
-
-    Given instance "Server1, Client1, Client2" using the default build
-    And  configured network connections "Client1-[upl]->Server1 [autoStart autoRetry]"
-    And  configured network connections "Client2-[upl]->Server1 [autoStart autoRetry]"
-    
-    And  starting instance "Server1"
-    And  starting instances "Client1, Client2"
-
-    Then the Uplink connection from "Client1" to "Server1" should be connected within 5 seconds
-    And  the Uplink connection from "Client2" to "Server1" should be connected within 5 seconds
-
-    When adding tool "common/TestTool" to "Client1"
-    And  executing command "components set-auth common/TestTool public" on "Client1"
-    Then instance "Client2" should see these components within 5 seconds:
-        | Client1 (via Client1/default) | common/TestTool | local |
-
     When stopping instance "Server1"
     # note: redundant check until the start/stop commands are reworked
     Then instance "Server1" should be stopped
@@ -224,33 +129,40 @@ Scenario: Uplink clients auto-reconnecting after shutdown and restart of server 
     And  instance "Client2" should see these components within 5 seconds:
         | Client1 (via Client1/default) | common/TestTool | local |
 
+	# start of teardown 
+
     When stopping instances "Client1, Client2"
     And  stopping instance "Server1"
-    
+
+    # allow expected warnings caused by server restart and potential auto-retry before it was reachable again
     Then the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     An Uplink connection (Server1_Client1_default) finished with a warning or error
     An Uplink connection (Server1_Client2_default) finished with a warning or error
     java.net.ConnectException: Connection refused
     """
-    And  the log output of instance "Server1" should indicate a clean shutdown with no warnings or errors
+
+    # tracked as #17659; remove filter when fixed
+    And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
+    """
+    Failed to register channelClosed() event
+    """
 
 
-# Variant of @Uplink04: crash instead of restart
 @UplinkTestsFeature
 @UplinkReviewed
-# TODO rename this to Uplink04b?
+@UplinkNew04
+# TODO remove extra tags after transition
+@Uplink06
 @Uplink07
-Scenario: Uplink clients auto-reconnecting after crash and restart of server (Uplink07)
-
+Scenario: Remote visibility of Uplink tool after crashes and restarts of clients and server (UplinkNew04)
 
     Given instance "Server1, Client1, Client2" using the default build
     And  configured network connections "Client1-[upl]->Server1 [autoStart autoRetry]"
     And  configured network connections "Client2-[upl]->Server1 [autoStart autoRetry]"
     
-    And  starting instance "Server1"
+    When starting instance "Server1"
     And  starting instances "Client1, Client2"
-
     Then the Uplink connection from "Client1" to "Server1" should be connected within 5 seconds
     And  the Uplink connection from "Client2" to "Server1" should be connected within 5 seconds
 
@@ -259,7 +171,36 @@ Scenario: Uplink clients auto-reconnecting after crash and restart of server (Up
     Then instance "Client2" should see these components within 5 seconds:
         | Client1 (via Client1/default) | common/TestTool | local |
 
-    When instance "Server1" crashes
+    # simulate a crash of Client1 (previous scenario "Uplink06")
+
+    When triggering a crash of instance "Client1" and it terminated within 10 seconds
+    
+	# verify that the tool "disappears" for Client2 after the server recognizes "Client1" as gone
+    Then instance "Client2" should see these components within 30 seconds:
+        | Client1 (via Client1/default) | common/TestTool | (absent) |
+        
+    When starting instance "Client1"
+    # note: redundant check until the start/stop commands are reworked
+    Then instance "Client1" should be running
+
+    # the server may need some time to recognize the crashed client and allow reconnection
+    Then the Uplink connection from "Client1" to "Server1" should be connected within 30 seconds
+    And  instance "Client2" should see these components within 5 seconds:
+        | Client1 (via Client1/default) | common/TestTool | local |
+
+    # simulate a crash of Client2 (no previous equivalent)
+
+    When triggering a crash of instance "Client2" and it terminated within 10 seconds
+
+    When starting instance "Client2"
+    # the server may need some time to recognize the crashed client and allow reconnection
+    Then the Uplink connection from "Client2" to "Server1" should be connected within 30 seconds
+    And  instance "Client2" should see these components within 5 seconds:
+        | Client1 (via Client1/default) | common/TestTool | local |
+        
+    # simulate a crash of Server1 (previous scenario "Uplink07")
+
+    When triggering a crash of instance "Server1" and it terminated within 10 seconds
     Then the Uplink connection from "Client1" to "Server1" should be disconnected within 30 seconds
     And  the Uplink connection from "Client2" to "Server1" should be disconnected within 30 seconds
     
@@ -276,90 +217,25 @@ Scenario: Uplink clients auto-reconnecting after crash and restart of server (Up
     And  instance "Client2" should see these components within 5 seconds:
         | Client1 (via Client1/default) | common/TestTool | local |
 
+	# start of teardown 
+
     When stopping instances "Client1, Client2"
-    And  stopping instance "Server1"
+    When stopping instance "Server1"
     
+    # allow expected warnings caused by server restart and potential auto-retry before it was reachable again
     Then the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     An Uplink connection (Server1_Client1_default) finished with a warning or error
     An Uplink connection (Server1_Client2_default) finished with a warning or error
     java.net.ConnectException: Connection refused
     """
-    And  the log output of instance "Server1" should indicate a clean shutdown with no warnings or errors
-
-# This combines the previous restart options. It is meant to be used in the context of automated
-# regression testing in order to save time (in comparison to running each case independently).
-#Combination of @Uplink02, @Uplink03, @Uplink4
-@UplinkTestsFeature
-@Uplink05
-Scenario: Combined check of uplink autoconnect after shutdown and restart of clients and uplink server
-
-    Given instance "Server1, Client1, Client2" using the default build
-    And  configured network connections "Client1-[upl]->Server1 [autoStart autoRetry]"
-    And  configured network connections "Client2-[upl]->Server1 [autoStart autoRetry]"
     
-    And  starting instance "Server1"
-    And  starting instances "Client1, Client2"
-
-    And  the visible uplink network of "Client1" should contain "Server1" within 5 seconds
-    And  the visible uplink network of "Client1" should be connected to "Server1" within 5 seconds
-    And  the visible uplink network of "Client2" should contain "Server1" within 5 seconds
-    And  the visible uplink network of "Client2" should be connected to "Server1" within 5 seconds
-
-    And  adding tool "common/TestTool" to "Client1"
-    And  executing command "components set-auth common/TestTool public" on "Client1"
-    #And waiting for 5 seconds
-    And  instance "Client2" should see these components within 5 seconds:
-        | Client1 (via Client1/default) | common/TestTool | local |
-
-    When stopping instance "Client1"
-    And  instance "Client1" should be stopped
-    And  the visible uplink network of "Client2" should contain "Server1" within 5 seconds
-    And  the visible uplink network of "Client2" should be connected to "Server1" within 5 seconds
-    And  starting instance "Client1"
-
-    Then the visible uplink network of "Client1" should be connected to "Server1" within 5 seconds
-    And  the visible uplink network of "Client2" should be connected to "Server1" within 5 seconds
-    And  instance "Client2" should see these components within 5 seconds:
-        | Client1 (via Client1/default) | common/TestTool | local |
-
-    When stopping instance "Client2"
-    And  instance "Client2" should be stopped
-    And  the visible uplink network of "Client1" should contain "Server1" within 5 seconds
-    And  the visible uplink network of "Client1" should be connected to "Server1" within 5 seconds
-    And  starting instance "Client2"
-
-    Then the visible uplink network of "Client1" should be connected to "Server1" within 5 seconds
-    And  the visible uplink network of "Client2" should be connected to "Server1" within 5 seconds
-    And  instance "Client2" should see these components within 5 seconds:
-        | Client1 (via Client1/default) | common/TestTool | local |
-
-    When stopping instance "Server1"
-    And  instances "Server1" should be stopped
-    And  the visible uplink network of "Client1" should contain "Server1" within 5 seconds
-    And  the visible uplink network of "Client1" should not be connected to "Server1" within 5 seconds
-    And  the visible uplink network of "Client2" should contain "Server1" within 5 seconds
-    And  the visible uplink network of "Client2" should not be connected to "Server1" within 5 seconds
-    And  starting instance "Server1"
-    
-    Then the visible uplink network of "Client1" should be connected to "Server1" within 15 seconds
-    And  the visible uplink network of "Client2" should be connected to "Server1" within 15 seconds
-    And  instance "Client2" should see these components within 5 seconds:
-        | Client1 (via Client1/default) | common/TestTool | local |
-
-    And  stopping instances "Client1, Client2"
-    And  stopping instance "Server1"
-    And  the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors:
-    """
-    #Error in asynchronous callback; shutting down queue
-    """
-    #And waiting for 15 seconds
     And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
-    as it exceeds the significant character limit (8)
-    stream is already closed
-    session already closed
+    Failed to register channelClosed() event
+    Session terminated in non-terminal state UNCLEAN_SHUTDOWN_INITIATED
     """
+
 
 @UplinkTestsFeature
 @Uplink08
