@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
+import de.rcenvironment.core.utils.common.textstream.receivers.NOPTextOutputReceiver;
 import de.rcenvironment.core.utils.common.textstream.receivers.PrefixingTextOutForwarder;
 
 /**
@@ -39,6 +40,9 @@ public abstract class AbstractStepDefinitionBase {
      * The default retry wait time in msec used by {@link #executeWithRetry(ExecutionAttempt, int)}.
      */
     protected static final int DEFAULT_RETRY_DELAY = 1000;
+
+    // unlikely to be used often, but provide a system property just in case
+    private static final boolean FORWARD_IM_OUTPUT_TO_CONSOLE = System.getProperty("rce.bdd.debug") != null;
 
     @Deprecated
     private static final int BACKWARDS_COMPATIBILITY_MAXIMUM_WAIT_TIME = 15;
@@ -211,8 +215,12 @@ public abstract class AbstractStepDefinitionBase {
         }
     }
 
-    protected PrefixingTextOutForwarder getTextoutReceiverForIMOperations() {
-        return new PrefixingTextOutForwarder("  (IM output) ", outputReceiver);
+    protected TextOutputReceiver getTextoutReceiverForIMOperations() {
+        if (FORWARD_IM_OUTPUT_TO_CONSOLE) {
+            return new PrefixingTextOutForwarder("  (IM output) ", outputReceiver);
+        } else {
+            return new NOPTextOutputReceiver();
+        }
     }
 
     protected int applyFallbackMaximumRetryTime(Integer maxiumWaitSeconds) {

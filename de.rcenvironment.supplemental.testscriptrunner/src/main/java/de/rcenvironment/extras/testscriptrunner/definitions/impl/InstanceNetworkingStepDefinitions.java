@@ -75,7 +75,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
             throw new AssertionError("The 'cloned' flag is deprecated; specify a clientId=... option instead");
         }
 
-        printToCommandConsole(StringUtils.format("Configuring network connections (\"%s\", cloned: \"%s\")", connectionsSetup, cloned));
+        printToCommandConsole(StringUtils.format("Configuring network connections \"%s\"", connectionsSetup));
         // parse the string defining the intended network connections
         Pattern p = Pattern.compile("\\s*(\\w+)-(?:\\[(reg|ssh|upl)\\]-)?>(\\w+)\\s*(?:\\[([\\w\\s]*)\\])?\\s*");
         for (String connectionSetupPart : connectionsSetup.split(",")) {
