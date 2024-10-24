@@ -67,6 +67,7 @@ import de.rcenvironment.core.utils.common.TempFileService;
 import de.rcenvironment.core.utils.common.TempFileServiceAccess;
 import de.rcenvironment.core.utils.common.exception.OperationFailureException;
 import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
+import de.rcenvironment.core.utils.common.textstream.receivers.NOPTextOutputReceiver;
 import de.rcenvironment.core.utils.incubator.ServiceRegistry;
 import de.rcenvironment.core.utils.incubator.ServiceRegistryAccess;
 
@@ -323,15 +324,13 @@ public class ToolExecutionProviderImpl implements ToolExecutionProvider {
         }
         logDir.mkdirs();
 
-        // File for collecting console output
-        // File consoleLogFile = new File(outputDir, "console.log");
-
         Exception executionException = null;
         FinalWorkflowState finalState = FinalWorkflowState.FAILED;
         try {
 
             final WorkflowDescription workflowDescription =
-                workflowFileLoader.loadAndValidateWorkflowDescription(createdWorkflowFile, null, false, null);
+					workflowFileLoader.loadAndValidateWorkflowDescription(createdWorkflowFile, null, false,
+							new NOPTextOutputReceiver());
 
             WorkflowExecutionContext context = buildExecutionContext(eventCollector, logDir, workflowDescription);
             wfExecInf = workflowExecutionService.start(context);
