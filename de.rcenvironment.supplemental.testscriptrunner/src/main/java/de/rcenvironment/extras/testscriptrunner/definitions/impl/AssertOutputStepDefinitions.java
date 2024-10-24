@@ -17,6 +17,7 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import de.rcenvironment.core.utils.common.StringUtils;
+import de.rcenvironment.core.utils.common.exception.OperationFailureException;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.InstanceManagementStepDefinitionBase;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ManagedInstance;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
@@ -57,7 +58,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
         }
 
         @Override
-        public void iterateActionOverInstance(ManagedInstance instance) throws Exception {
+        public void iterateActionOverInstance(ManagedInstance instance) throws OperationFailureException {
             assertPropertyOfLastCommandOutput(instance, shouldContain, useRegex, subString);
         }
 
@@ -86,7 +87,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
         }
 
         @Override
-        public void iterateActionOverInstance(ManagedInstance instance) throws Exception {
+        public void iterateActionOverInstance(ManagedInstance instance) throws OperationFailureException {
             assertRelativeFileContains(instance, relativeFilePath, shouldContain, useRegex, subString);
 
         }
@@ -112,7 +113,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
         }
 
         @Override
-        public void iterateActionOverInstance(ManagedInstance instance) throws Exception {
+        public void iterateActionOverInstance(ManagedInstance instance) throws OperationFailureException {
             assertRelativeFileMayContainOnly(instance, relativeFilePath, allowedWarningList);
         }
     }
@@ -131,7 +132,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
         }
 
         @Override
-        public void iterateActionOverInstance(ManagedInstance instance) throws Exception {
+        public void iterateActionOverInstance(ManagedInstance instance) throws OperationFailureException, IOException {
             assertRelativeFileIsEmpty(instance, relativeFilePath);
         }
     }
@@ -153,7 +154,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
         }
 
         @Override
-        public void iterateActionOverInstance(ManagedInstance instance) throws Exception {
+        public void iterateActionOverInstance(ManagedInstance instance) throws OperationFailureException {
             assertErrorContents(instance, errorTable, unspecifiedAccepted);
         }
     }
@@ -273,8 +274,8 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
     }
 
     /**
-     * Convenience shortcut to test all relevant log files for a clean shutdown, i. e. for the absence
-     * of unfinished operations and the exit code has to be 0.
+     * Convenience shortcut to test all relevant log files for a clean shutdown, i. e. for the absence of unfinished operations and the exit
+     * code has to be 0.
      * 
      * @param allFlag a phrase whose presence (non-null) influences which instances are effected. How it does that depends on the value of
      *        {@code instanceIds} and is defined in {@link #resolveInstanceList()}
@@ -322,9 +323,10 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
      * @param instanceIds a comma-separated list of instances, which when present (non-null) influences which instances are effected. How it
      *        does that depends on the value of {@code allFlag} and is defined in {@link #resolveInstanceList()}
      * @param type currently supports error oder warning
+     * @throws OperationFailureException on execution errors, e.g. when accessing log files
      */
     @Then("^the log output of( all)?(?: instance[s]?)?(?: \"([^\"]*)\")? should not contain(?: any) (error|warning)[s]?$")
-    public void thenLogOutputNoErrors(String allFlag, String instanceIds, String type) {
+    public void thenLogOutputNoErrors(String allFlag, String instanceIds, String type) throws OperationFailureException {
         thenLogOutputNumberErrors(allFlag, instanceIds, 0, null, type);
     }
 
@@ -339,10 +341,11 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
      * @param upperBoundInput if present maximum number of allowed errors in warning log. If not present, lowerBound becomes exact number of
      *        allowed errors.
      * @param type currently supports error oder warning
+     * @throws OperationFailureException on execution errors, e.g. when accessing log files
      */
     @Then("^the log output of( all)?(?: instance[s]?)?(?: \"([^\"]*)\")? should contain (\\d+)(?: to (\\d+))? (error|warning)[s]?$")
     public void thenLogOutputNumberErrors(final String allFlag, final String instanceIds, final Integer lowerBoundInput,
-        final Integer upperBoundInput, final String type) {
+        final Integer upperBoundInput, final String type) throws OperationFailureException {
 
         final int[] assertReturn = assertBounds(lowerBoundInput, upperBoundInput);
         final int lowerBound = assertReturn[0];
@@ -388,16 +391,15 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
         }
     }
 
-    private int countErrorsOrWarnings(final ManagedInstance instance, final Pattern typePattern) {
+    private int countErrorsOrWarnings(final ManagedInstance instance, final Pattern typePattern) throws OperationFailureException {
         String warningLog = getWarningsLog(instance);
 
         Scanner logScanner = new Scanner(warningLog);
 
         int logCount = 0;
         String nextLine;
-        
 
-        while (logScanner.hasNextLine()){
+        while (logScanner.hasNextLine()) {
             nextLine = logScanner.nextLine();
             if (nextLine.contains(" ERROR ") || nextLine.contains(" WARN ")) {
                 logCount++;
@@ -409,12 +411,12 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
 
     }
 
-    private String getWarningsLog(final ManagedInstance instance) {
+    private String getWarningsLog(final ManagedInstance instance) throws OperationFailureException {
         try {
             return instance.getProfileRelativeFileContent(StepDefinitionConstants.WARNINGS_LOG_FILE_NAME, false);
-        } catch (IOException e) {
-            fail(StringUtils.format("Trying to acces warnings log of instance %s produced an error: %s", instance, e));
-            return "";
+        } catch (OperationFailureException e) {
+            throw testExecutionError(StringUtils.format("Trying to access warnings log of instance %s produced an error: %s", instance),
+                e.getCause());
         }
     }
 
@@ -424,7 +426,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
         }
 
         if (upperBound < lowerBound) {
-            fail(StringUtils.format("Upper bound %s is lower than lower bound %s.", upperBound, lowerBound));
+            throw testAssertionFailure(StringUtils.format("Upper bound %s is lower than lower bound %s.", upperBound, lowerBound));
         }
 
         return new int[] { lowerBound, upperBound };
@@ -438,13 +440,13 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
             || type.equals("WARN")) {
             baseFormat = StepDefinitionConstants.LOG_CONTAINS_WARNING_FORMAT;
         } else {
-            fail(StringUtils.format(StepDefinitionConstants.ERROR_MESSAGE_UNSUPPORTED_TYPE, type));
-            return null; // never reached
+            throw internalError(StringUtils.format(StepDefinitionConstants.ERROR_MESSAGE_UNSUPPORTED_TYPE, type));
         }
         return baseFormat;
     }
 
-    private void assertErrorContents(ManagedInstance instance, DataTable errorTable, boolean unspecifiedAccepted) throws Exception {
+    private void assertErrorContents(ManagedInstance instance, DataTable errorTable, boolean unspecifiedAccepted)
+        throws OperationFailureException {
         for (String line : instance.getProfileRelativeFileContent(StepDefinitionConstants.WARNINGS_LOG_FILE_NAME, false).split("\\r?\\n")) {
             handleErrorLine(line, errorTable, unspecifiedAccepted);
         }
@@ -476,14 +478,15 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
                     printToCommandConsole(StringUtils.format("Found and accepted expected error/warning %s", line));
                     return;
                 } else {
-                    fail(StringUtils.format("Found explicitly unwanted error/warning %s", line));
+                    throw testAssertionFailure(StringUtils.format("Found explicitly unwanted error/warning %s", line));
                 }
             }
         }
         if (unspecifiedAccepted) {
-            printToCommandConsole(StringUtils.format("Found unexpected error/warning %s. \n Accepted since in blacklisting mode.", line));
+            printToCommandConsole(StringUtils.format("Found unexpected error/warning %s (accepting since in blacklisting mode)", line));
         } else {
-            fail(StringUtils.format("Found unexpected error/warning %s. \n Failed since in whitelisting mode.", line));
+            throw testAssertionFailure(
+                StringUtils.format("Found unexpected error/warning %s (failing since in whitelisting mode)", line));
         }
     }
 
@@ -496,8 +499,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
         case ("n"):
             return false;
         default:
-            fail(StringUtils.format("%s is not a supported form of presence.", presence));
-            return false;
+            throw internalError(StringUtils.format("%s is not a supported form of presence", presence));
         }
     }
 
@@ -511,7 +513,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
             if (shouldContain) {
                 containError = "not ";
             }
-            fail(StringUtils.format("%s did %scontain %s\"%s\"", errorBase, containError, patternError, subString));
+            throw testAssertionFailure(StringUtils.format("%s did %scontain %s\"%s\"", errorBase, containError, patternError, subString));
         } else {
             String containError = "not ";
             if (shouldContain) {
@@ -529,19 +531,20 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
     }
 
     private void assertRelativeFileContains(final ManagedInstance instance, final String relativeFilePath, final boolean shouldContain,
-        final boolean useRegex, final String subString) throws IOException {
+        final boolean useRegex, final String subString) throws OperationFailureException {
         final String fileContent = instance.getProfileRelativeFileContent(relativeFilePath, false);
 
         if (fileContent == null) {
-            fail(StringUtils.format("The expected file \"%s\" in profile \"%s\" does not exist", relativeFilePath, instance));
+            throw testExecutionError(
+                StringUtils.format("The expected file \"%s\" in profile \"%s\" does not exist", relativeFilePath, instance));
         } else {
             subStringContained(fileContent, subString, shouldContain, useRegex,
-                StringUtils.format("The file \"%s\" of instance \"%s\"", relativeFilePath, instance));
+                StringUtils.format("the file \"%s\" of instance \"%s\"", relativeFilePath, instance));
         }
     }
 
     private void assertRelativeFileMayContainOnly(ManagedInstance instance, String relativeFilePath, String[] allowedWarnings)
-        throws IOException {
+        throws OperationFailureException {
         final String fileContent = instance.getProfileRelativeFileContent(relativeFilePath, false);
         ArrayList<String> failedLines = new ArrayList<String>();
 
@@ -574,7 +577,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
                     }
                 }
                 if (warnCount > 0) {
-                    fail(StringUtils.format(
+                    throw testAssertionFailure(StringUtils.format(
                         "The file \"%s\" in profile \"%s\" should not show these warnings: "
                             + "(error count: %d warnings); full file content:\n%s",
                         relativeFilePath, instance, warnCount, failedLines));
@@ -589,7 +592,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
     }
 
     private void assertRelativeFileIsEmpty(ManagedInstance instance, String relativeFilePath)
-        throws IOException {
+        throws OperationFailureException {
         final String fileContent = instance.getProfileRelativeFileContent(relativeFilePath, false);
 
         if (fileContent == null) {
@@ -600,7 +603,7 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
                 printToCommandConsole(
                     StringUtils.format("As expected the file \"%s\" in profile \"%s\" is empty.", relativeFilePath, instance));
             } else {
-                fail(StringUtils.format(
+                throw testAssertionFailure(StringUtils.format(
                     "The file \"%s\" in profile \"%s\" should have been absent or empty, but exists "
                         + "(content size: %d characters); full file content:\n%s",
                     relativeFilePath, instance, fileContent.length(), fileContent));

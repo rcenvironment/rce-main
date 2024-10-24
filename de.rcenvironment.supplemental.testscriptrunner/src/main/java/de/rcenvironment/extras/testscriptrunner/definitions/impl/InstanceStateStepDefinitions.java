@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import de.rcenvironment.core.toolkitbridge.transitional.ConcurrencyUtils;
 import de.rcenvironment.core.utils.common.StringUtils;
+import de.rcenvironment.core.utils.common.exception.OperationFailureException;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.InstanceManagementStepDefinitionBase;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ManagedInstance;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
@@ -50,7 +51,7 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
         }
 
         @Override
-        public void iterateActionOverInstance(ManagedInstance instance) throws Exception {
+        public void iterateActionOverInstance(ManagedInstance instance) throws IOException {
             boolean isRunning = INSTANCE_MANAGEMENT_SERVICE.isInstanceRunning(instance.getId());
             if (isRunning != shouldBeRunning) {
                 throw new AssertionError(StringUtils.format(
@@ -84,7 +85,7 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
         }
 
         @Override
-        public void performActionOnInstance(ManagedInstance instance, long timeout) throws IOException {
+        public void performActionOnInstance(ManagedInstance instance, long timeout) throws OperationFailureException {
             startSingleInstance(instance, startWithGUI, startWithCommands, timeout);
         }
 
@@ -98,7 +99,7 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
     private class StopInstanceAction implements InstanceAction {
 
         @Override
-        public void performActionOnInstance(ManagedInstance instance, long timeout) throws IOException {
+        public void performActionOnInstance(ManagedInstance instance, long timeout) throws OperationFailureException {
             stopSingleInstance(instance);
         }
 
@@ -190,7 +191,7 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
                     default:
                         throw new IllegalArgumentException(action);
                     }
-                } catch (IOException e) {
+                } catch (OperationFailureException e) {
                     // TODO make outer script fail, probably on shutdown
                     log.error("Error while executing aynchonous action '" + action + "' on instance '" + instanceId + "'", e);
                 }
@@ -231,7 +232,7 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
         }, operationTitle, tmax);
     }
 
-    private void cycleAllOutgoingConnectionsOf(ManagedInstance instance) {
+    private void cycleAllOutgoingConnectionsOf(ManagedInstance instance) throws OperationFailureException {
         final String cnListOutput = executeCommandOnInstance(instance, "cn list", false);
         Pattern connectionIdPattern = Pattern.compile("^\\s*\\((\\d+)\\) ");
         final Matcher matcher = connectionIdPattern.matcher(cnListOutput);
@@ -251,19 +252,27 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
     }
 
     private void startSingleInstance(final ManagedInstance instance, boolean withGUI, String commandArguments, long timeout)
-        throws IOException {
+        throws OperationFailureException {
         instance.onStarting();
 
         final String installationId = instance.getInstallationId();
         printToCommandConsole(StringUtils.format("Launching instance \"%s\" using installation \"%s\"", instance, installationId));
-        INSTANCE_MANAGEMENT_SERVICE.startInstance(installationId, listOfSingleStringElement(instance.getId()),
-            getTextoutReceiverForIMOperations(), timeout, withGUI, commandArguments);
+        try {
+            INSTANCE_MANAGEMENT_SERVICE.startInstance(installationId, listOfSingleStringElement(instance.getId()),
+                getTextoutReceiverForIMOperations(), timeout, withGUI, commandArguments);
+        } catch (IOException e) {
+            throw testExecutionError("Failed to start instance " + instance.getId(), e);
+        }
     }
 
-    private void stopSingleInstance(ManagedInstance instance) throws IOException {
+    private void stopSingleInstance(ManagedInstance instance) throws OperationFailureException {
         printToCommandConsole(StringUtils.format("Stopping instance \"%s\"", instance));
-        INSTANCE_MANAGEMENT_SERVICE.stopInstance(listOfSingleStringElement(instance.getId()),
-            getTextoutReceiverForIMOperations(), TimeUnit.SECONDS.toMillis(StepDefinitionConstants.IM_ACTION_TIMEOUT_IN_SECS));
+        try {
+            INSTANCE_MANAGEMENT_SERVICE.stopInstance(listOfSingleStringElement(instance.getId()),
+                getTextoutReceiverForIMOperations(), TimeUnit.SECONDS.toMillis(StepDefinitionConstants.IM_ACTION_TIMEOUT_IN_SECS));
+        } catch (IOException e) {
+            throw testExecutionError("Failed to start instance " + instance.getId(), e);
+        }
 
         instance.onStopped();
     }

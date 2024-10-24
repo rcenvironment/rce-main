@@ -20,13 +20,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import de.rcenvironment.core.instancemanagement.InstanceManagementService;
+import de.rcenvironment.core.utils.common.exception.OperationFailureException;
 import de.rcenvironment.extras.testscriptrunner.definitions.helper.StepDefinitionConstants;
 
 /**
  * Represents an instance (ie, a profile) managed by these test steps.
  * 
  * @author Robert Mischke
- * @author Marlon Schroeter 
+ * @author Marlon Schroeter
  */
 public final class ManagedInstance {
 
@@ -120,7 +121,7 @@ public final class ManagedInstance {
      * @return the file's content, or null if the file does not exist
      * @throws IOException on I/O errors; note that absence of the target file is not an error
      */
-    public synchronized String getProfileRelativeFileContent(String relativePath, boolean forceReload) throws IOException {
+    public synchronized String getProfileRelativeFileContent(String relativePath, boolean forceReload) throws OperationFailureException {
         if (!potentiallyRunning) {
             if (cachedFileContent.containsKey(relativePath)) {
                 return cachedFileContent.get(relativePath); // may be null if file does not exist
@@ -134,7 +135,12 @@ public final class ManagedInstance {
         if (!fileLocation.exists()) {
             content = null;
         } else {
-            content = FileUtils.readFileToString(fileLocation, "UTF-8"); // no other information available; assume UTF8
+            try {
+                // no other information available; assume UTF8
+                content = FileUtils.readFileToString(fileLocation, "UTF-8");
+            } catch (IOException e) {
+                throw new OperationFailureException("Error opening profile-relative file " + fileLocation, e);
+            }
         }
 
         if (!potentiallyRunning) {

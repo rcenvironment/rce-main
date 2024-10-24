@@ -31,6 +31,7 @@ import de.rcenvironment.core.command.spi.ParsedStringParameter;
 import de.rcenvironment.core.instancemanagement.internal.InstanceConfigurationException;
 import de.rcenvironment.core.instancemanagement.internal.SSHAccountParameters;
 import de.rcenvironment.core.utils.common.StringUtils;
+import de.rcenvironment.core.utils.common.exception.OperationFailureException;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.InstanceManagementStepDefinitionBase;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ManagedInstance;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
@@ -169,13 +170,13 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
     }
 
     /**
-     * 
      * @param clientInstanceId client instance
      * @param serverInstanceId server instance, needs to be configured beforehand
      * @param connectionType type of connection used for connecting. Viable is reg[ular] ssh and upl[ink]. Omitting this leads to a regular
      *        connection
      * @param options list of whitespace separated options
      */
+    // TODO clarify: the step text suggests performing the connection, while it actually only configures it
     @When("^connecting(?: instance)? \"([^\"]+)\" to(?: (?:instance|server))? \"([^\"]+)\"(?: via(reg|ssh|upl))?"
         + "(?: given(?: the)? option[s]? \\[([^\\]]*)\\])?$")
     public void whenConnectingInstances(String clientInstanceId, String serverInstanceId, String connectionType,
@@ -190,7 +191,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
             setupPartialRegularConnection(clientInstance, serverInstance, options);
             break;
         case (StepDefinitionConstants.CONNECTION_TYPE_SSH):
-            setUpPartialSSHConnection(clientInstance, serverInstance, options);
+            setUpClientSideOfSSHConnection(clientInstance, serverInstance, options);
             break;
         case (StepDefinitionConstants.CONNECTION_TYPE_UPLINK):
             setUpPartialUplinkConnection(clientInstance, serverInstance, options);
@@ -207,7 +208,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
      * @param maxWaitTimeSeconds the maximum time to wait for connections to be established
      */
     @Then("^all auto-start network connections should be ready within (\\d+) seconds$")
-    public void thenAutoStartConnectionsReadyIn(int maxWaitTimeSeconds) throws Exception {
+    public void thenVerifyAutoStartConnectionsConnected(int maxWaitTimeSeconds) throws Exception {
         printToCommandConsole("Waiting for all auto-start network connections to complete");
 
         final Set<ManagedInstance> pendingInstances = new HashSet<>();
@@ -254,9 +255,11 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
      * @param instanceId the node that should have its visible network inspected
      * @param testType whether to test for "should contain" or "should consist of" the given list of instances
      * @param listOfExpectedVisibleInstances the comma-separated list of expected instances
+     * @throws OperationFailureException on failure to execute the step (as opposed to an assertion failure)
      */
     @Then("^the visible network of \"([^\"]*)\" should (consist of|contain) \"([^\"]*)\"$")
-    public void thenVisibleNetworkConsistsOf(String instanceId, String testType, String listOfExpectedVisibleInstances) {
+    public void thenVerifyVisibleNetworkConsistsOfOrContains(String instanceId, String testType, String listOfExpectedVisibleInstances)
+        throws OperationFailureException {
 
         String commandOutput = executeCommandOnInstance(resolveInstance(instanceId), "net info", false);
 
@@ -283,7 +286,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
                 }
             }
             // check if all instances expected are present in output
-            thenVisibleNetworkConsistsOf(instanceId, "contain", listOfExpectedVisibleInstances);
+            thenVerifyVisibleNetworkConsistsOfOrContains(instanceId, "contain", listOfExpectedVisibleInstances);
             break;
         default:
             fail(StringUtils.format("Test type %s is not supported.", testType));
@@ -306,7 +309,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
      */
     @Then("^the (?:default )?Uplink connection from \"([^\"]*)\" to \"([^\"]*)\" "
         + "should be (connected|disconnected|present|absent)(?: within (\\d+) seconds?)?$")
-    public void verifyStateOfUplinkConnection(String sourceInstanceId, String targetInstanceId, String criterion,
+    public void thenVerifyStateOfUplinkConnection(String sourceInstanceId, String targetInstanceId, String criterion,
         Integer maxiumWaitSeconds) {
 
         String loginName = sourceInstanceId;
@@ -324,7 +327,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
     }
 
     private boolean executeOnceVerifyStateOfUplinkConnections(String sourceInstanceId, String targetInstanceId, String loginName,
-        String clientId, String criterion, boolean isLastAttempt) {
+        String clientId, String criterion, boolean isLastAttempt) throws OperationFailureException {
 
         String commandOutput;
         try {
@@ -407,9 +410,10 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
      * Triggers a hard shutdown of an instance. Note that this action does NOT wait for the instance's termination.
      * 
      * @param instanceId the node that is to be shut down.
+     * @throws OperationFailureException on failure to execute the step (as opposed to an assertion failure)
      */
     @When("^instance \"([^\"]*)\" crashes$")
-    public void whenTriggeringACrashOfInstance(String instanceId) {
+    public void whenTriggeringACrashOfInstance(String instanceId) throws OperationFailureException {
         triggerHardShutdownOfInstance(instanceId);
         printToCommandConsole("Triggered a hard shutdown (crash) of instance \"" + instanceId
             + "\"; note that this action does NOT wait for the instance's termination");
@@ -420,9 +424,11 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
      * 
      * @param instanceId the node that is to be shut down.
      * @param maxWaitSeconds the maximum time to allow until actual shutdown
+     * @throws OperationFailureException on failure to execute the step (as opposed to an assertion failure)
      */
     @When("^triggering a crash of instance \"([^\"]*)\" and it terminated within (\\d+) seconds?$")
-    public void whenTriggeringACrashOfInstanceAndWaitingForTerminination(String instanceId, int maxWaitSeconds) {
+    public void whenTriggeringACrashOfInstanceAndWaitingForTerminination(String instanceId, int maxWaitSeconds)
+        throws OperationFailureException {
         triggerHardShutdownOfInstance(instanceId);
         // wait for shutdown
         executeWithRetry((ExecutionAttempt) (attempt, isLastAttempt) -> {
@@ -430,7 +436,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
         }, instanceId, maxWaitSeconds);
     }
 
-    private void triggerHardShutdownOfInstance(String instanceId) {
+    private void triggerHardShutdownOfInstance(String instanceId) throws OperationFailureException {
         String commandOutput = executeCommandOnInstance(resolveInstance(instanceId), "force-crash 0", false);
         printToCommandConsole(commandOutput);
     }
@@ -702,12 +708,11 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
     }
 
     // TODO refactor this to eliminate duplication with setUpCompleteSSHConnection()?
-    private void setUpPartialSSHConnection(ManagedInstance clientInstance, ManagedInstance serverInstance, String options)
+    // TODO clarify password configuration
+    private void setUpClientSideOfSSHConnection(ManagedInstance clientInstance, ManagedInstance serverInstance, String options)
         throws Exception {
         SSHConnectionOptions connectionOptions = parseSSHConnectionOptions(options);
         final String userName = connectionOptions.getUserName().orElse(clientInstance.getId());
-        // intended for testing setups (e.g. BDD) only: use the login name as default password
-        final String password = userName; // TODO clarify: why is there no getPassword() method?
 
         final Integer serverPort = connectionOptions.getPort().orElse(
             getServerPort(serverInstance, connectionOptions.getServerNumber(), StepDefinitionConstants.CONNECTION_TYPE_REGULAR));
@@ -909,7 +914,8 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
         return String.join("_", targetInstanceId, loginName, clientId);
     }
 
-    private boolean testIfConfiguredOutgoingConnectionsAreConnected(final ManagedInstance instance, boolean isFinalAttempt) {
+    private boolean testIfConfiguredOutgoingConnectionsAreConnected(final ManagedInstance instance, boolean isFinalAttempt)
+        throws OperationFailureException {
         final List<String> connectionIds = instance.accessConfiguredAutostartConnectionIds();
 
         String commandOutput = executeCommandOnInstance(instance, "cn list", false);
