@@ -54,20 +54,28 @@ public final class JschSessionFactory {
         private static final String FORWARDED_LOG_LINE_PREFIX = "SSH connection: ";
 
         private static final String LOG_FILTER_FULL_MESSAGE_1 =
-            "CheckCiphers: aes256-ctr,aes192-ctr,aes128-ctr,aes256-cbc,aes192-cbc,aes128-cbc,3des-ctr,arcfour,arcfour128,arcfour256";
+            "CheckCiphers: chacha20-poly1305@openssh.com";
 
         private static final String LOG_FILTER_FULL_MESSAGE_2 =
-            "CheckKexes: diffie-hellman-group14-sha1,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521";
+            "CheckKexes: curve25519-sha256,curve25519-sha256@libssh.org,curve448-sha512";
 
         private static final String LOG_FILTER_FULL_MESSAGE_3 =
-            "CheckSignatures: ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521";
+            "CheckSignatures: ssh-ed25519,ssh-ed448";
 
         private static final String LOG_FILTER_FULL_MESSAGE_4 =
-            "ssh_rsa_verify: signature true";
+            "ssh_ecdsa_verify: ecdsa-sha2-nistp521 signature true";
 
-        private static final String LOG_FILTER_STARTS_WITH_1 = "kex: ";
+        private static final String LOG_FILTER_FULL_MESSAGE_5 =
+            "server-sig-algs=<ecdsa-sha2-nistp256-cert-v01@openssh.com,ecdsa-sha2-nistp384-cert-v01@openssh.com,"
+                + "ecdsa-sha2-nistp521-cert-v01@openssh.com,rsa-sha2-512-cert-v01@openssh.com,rsa-sha2-256-cert-v01@openssh.com,"
+                + "ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ecdsa-sha2-nistp256@openssh.com,"
+                + "rsa-sha2-512,rsa-sha2-256,ssh-rsa>";
 
-        private static final String LOG_FILTER_STARTS_WITH_2 = "expecting ";
+        private static final String LOG_FILTER_FULL_MESSAGE_6 = "expecting SSH_MSG_KEX_ECDH_REPLY";
+
+        private static final String LOG_FILTER_STARTS_WITH_1 = "server proposal: ";
+
+        private static final String LOG_FILTER_STARTS_WITH_2 = "client proposal: ";
 
         private static final String LOG_FILTER_ENDS_WITH_1 = " sent";
 
@@ -91,10 +99,13 @@ public final class JschSessionFactory {
                     // always log JSch "info" messages as debug, as they are quite verbose
                     // also, filter out certain messages that are usually irrelevant unless JSch DEBUG level is requested
                     if (minLevel > 0) {
-                        if (rawMessage.equals(LOG_FILTER_FULL_MESSAGE_1) // clumsy, but probably more efficient than a hash-based lookup
+                        // clumsy, but testing against fixed-position strings should be more efficient than a hash-based lookup
+                        if (rawMessage.equals(LOG_FILTER_FULL_MESSAGE_1)
                             || rawMessage.equals(LOG_FILTER_FULL_MESSAGE_2)
                             || rawMessage.equals(LOG_FILTER_FULL_MESSAGE_3)
                             || rawMessage.equals(LOG_FILTER_FULL_MESSAGE_4)
+                            || rawMessage.equals(LOG_FILTER_FULL_MESSAGE_5)
+                            || rawMessage.equals(LOG_FILTER_FULL_MESSAGE_6)
                             || rawMessage.startsWith(LOG_FILTER_STARTS_WITH_1)
                             || rawMessage.startsWith(LOG_FILTER_STARTS_WITH_2)
                             || rawMessage.endsWith(LOG_FILTER_ENDS_WITH_1)
