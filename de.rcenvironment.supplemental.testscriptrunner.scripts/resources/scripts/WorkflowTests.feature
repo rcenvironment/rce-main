@@ -214,13 +214,13 @@ Scenario: Running Workflow with remote tool, published via uplink
     Given instance "Uplink1, Client1, Client2" using the default build
     And configured network connections "Client1-[upl]->Uplink1 [autoStart autoRetry], Client2-[upl]->Uplink1 [autoStart autoRetry]"
     
-    When starting instances "Client1, Client2, Uplink1" in the given order 
+    When starting instances "Uplink1, Client1, Client2" in the given order 
     And adding tool "common/TestTool" to "Client1"
     And executing command "components set-auth common/TestTool public" on "Client1"
     And executing workflow "UplinkRemoteWorkflow.wf" on "Client2"
     
     Then the workflow controller should have been "Client2"
-    And workflow component "Optimizer" should have been run on "Client2"
+    And workflow component "Printer" should have been run on "Client2"
     And workflow component "TestTool" should have been run on "Client1" via uplink
     
     
