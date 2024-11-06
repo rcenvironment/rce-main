@@ -8,8 +8,6 @@
 
 package de.rcenvironment.extras.testscriptrunner.definitions.common;
 
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,7 +23,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import de.rcenvironment.core.utils.common.StringUtils;
+import de.rcenvironment.core.utils.common.exception.OperationFailureException;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
+import de.rcenvironment.core.utils.common.textstream.receivers.NOPTextOutputReceiver;
 import de.rcenvironment.core.utils.common.textstream.receivers.PrefixingTextOutForwarder;
 
 /**
@@ -39,6 +39,9 @@ public abstract class AbstractStepDefinitionBase {
      * The default retry wait time in msec used by {@link #executeWithRetry(ExecutionAttempt, int)}.
      */
     protected static final int DEFAULT_RETRY_DELAY = 1000;
+
+    // unlikely to be used often, but provide a system property just in case
+    private static final boolean FORWARD_IM_OUTPUT_TO_CONSOLE = System.getProperty("rce.bdd.debug") != null;
 
     @Deprecated
     private static final int BACKWARDS_COMPATIBILITY_MAXIMUM_WAIT_TIME = 15;
@@ -69,9 +72,10 @@ public abstract class AbstractStepDefinitionBase {
          * @param isLastAttempt Whether the current attempt is the last one that will be performed
          * @return true on success, false for initiating a retry if possible
          * @throws AssertionError on non-retryable failure or unexpected error; aborts the retry loop
-         * @throws Exception on non-retryable failure or unexpected error; aborts the retry loop
+         * @throws OperationFailureException on non-retryable failure or unexpected error; aborts the retry loop
+         * @throws IOException allowed as an alternative to {@link OperationFailureException} to avoid pointless Exception wrapping
          */
-        boolean attempt(int attemptCount, boolean isLastAttempt) throws AssertionError, Exception;
+        boolean attempt(int attemptCount, boolean isLastAttempt) throws AssertionError, OperationFailureException, IOException;
     }
 
     public AbstractStepDefinitionBase(TestScenarioExecutionContext executionContext) {
@@ -118,14 +122,36 @@ public abstract class AbstractStepDefinitionBase {
                         operationTitle, attemptCount, stopWatch.getTime(TimeUnit.MILLISECONDS), maxAttempts));
                     return attemptCount; // operation attempt returned "true" -> success
                 }
-                // fall-through: the operation attempt returned "false" -> continue with retry loop
-            } catch (Exception e) { // TODO Checkstyle violation, but currently necessary as some operations declare "throws Exception"
+                // fall-through: the operation attempt returned "false" -> continue with retry loop after waiting
+                Thread.sleep(delayMsec);
+            } catch (AssertionError | OperationFailureException | InterruptedException | IOException e) {
+                // TODO nicer wrapping of AssertionErrors?
                 throw new AssertionError(StringUtils.format("Exception during attempt %d for operation '%s' after %d msec (total)",
                     attemptCount, operationTitle, stopWatch.getTime(TimeUnit.MILLISECONDS)), e);
             }
         }
         throw new AssertionError(StringUtils.format("Exceeded the maximum retry count of %d for operation '%s', aborting after %d msec",
             maxAttempts, operationTitle, stopWatch.getTime(TimeUnit.MILLISECONDS)));
+    }
+
+    protected final OperationFailureException testExecutionError(String message) {
+        return new OperationFailureException(message);
+    }
+
+    protected final OperationFailureException testExecutionError(String message, Throwable cause) {
+        return new OperationFailureException(message, cause);
+    }
+
+    protected final AssertionError testAssertionFailure(String message) {
+        return new AssertionError(message);
+    }
+
+    protected final RuntimeException internalError(String message) {
+        return new RuntimeException(message);
+    }
+
+    protected final RuntimeException internalError(String message, Throwable cause) {
+        return new RuntimeException(message, cause);
     }
 
     protected final void assertPropertyOfTextOutput(ManagedInstance instance, String negationFlag, String useRegexpMarker,
@@ -143,13 +169,13 @@ public abstract class AbstractStepDefinitionBase {
         }
         if (expectedPresence && !found) {
             // on failure, write the examined output to a temp file and log its location as dumping a large file is slow in terminals
-            fail(
+            throw testAssertionFailure(
                 StringUtils.format("The %s of instance \"%s\" did not contain %s\"%s\";\n  saving the examined output as %s for inspection",
                     outputType, instance, useRegexpMarker, substring, writeOutputToTempFile(output)));
         }
         if (!expectedPresence && found) {
             // on failure, write the examined output to a temp file and log its location as dumping a large file is slow in terminals
-            fail(StringUtils.format(
+            throw testAssertionFailure(StringUtils.format(
                 "The %s of instance \"%s\" contained %s\"%s\" although it should not;\n  saving the examined output as %s for inspection",
                 outputType, instance, useRegexpMarker, substring, writeOutputToTempFile(output)));
         }
@@ -203,13 +229,16 @@ public abstract class AbstractStepDefinitionBase {
             FileUtils.write(tempFile, output);
             return tempFile.getAbsolutePath();
         } catch (IOException e) {
-            fail("Unexpected error writing temp file: " + e.toString());
-            return null; // never reached
+            throw internalError("Unexpected error writing temp file: " + e.toString());
         }
     }
 
-    protected PrefixingTextOutForwarder getTextoutReceiverForIMOperations() {
-        return new PrefixingTextOutForwarder("  (IM output) ", outputReceiver);
+    protected TextOutputReceiver getTextoutReceiverForIMOperations() {
+        if (FORWARD_IM_OUTPUT_TO_CONSOLE) {
+            return new PrefixingTextOutForwarder("  (IM output) ", outputReceiver);
+        } else {
+            return new NOPTextOutputReceiver();
+        }
     }
 
     protected int applyFallbackMaximumRetryTime(Integer maxiumWaitSeconds) {

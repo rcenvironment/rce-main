@@ -9,12 +9,12 @@
 package de.rcenvironment.extras.testscriptrunner.definitions.common;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import de.rcenvironment.core.utils.common.StringUtils;
+import de.rcenvironment.core.utils.common.exception.OperationFailureException;
 import de.rcenvironment.extras.testscriptrunner.definitions.helper.StepDefinitionConstants;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
@@ -47,9 +47,10 @@ public class RceTestLifeCycleHooks extends InstanceManagementStepDefinitionBase 
      * Common after-scenario hook.
      * 
      * @param scenario the {@link Scenario} object
+     * @throws OperationFailureException if an error occurs while attempting to clean up
      */
     @After
-    public void after(Scenario scenario) {
+    public void after(Scenario scenario) throws OperationFailureException {
         // TODO move this into the execution context
         tearDownLeftoverRunningInstances();
         executionContext.afterExecution(scenario);
@@ -60,7 +61,7 @@ public class RceTestLifeCycleHooks extends InstanceManagementStepDefinitionBase 
         assertTrue(executionContext.getEnabledInstances().isEmpty());
     }
 
-    private void tearDownLeftoverRunningInstances() {
+    private void tearDownLeftoverRunningInstances() throws OperationFailureException {
         for (ManagedInstance instance : executionContext.getEnabledInstances()) {
             final String instanceId = instance.getId();
             try {
@@ -81,12 +82,12 @@ public class RceTestLifeCycleHooks extends InstanceManagementStepDefinitionBase 
             final String instanceId = instance.getId();
             try {
                 if (INSTANCE_MANAGEMENT_SERVICE.isInstanceRunning(instanceId)) {
-                    fail(StringUtils.format(
+                    throw testAssertionFailure(StringUtils.format(
                         "Instance \"%s\" is still detected as \"running\" after the post-test shutdown for scenario \"%s\"", instanceId,
                         executionContext.getScenarioName()));
                 }
             } catch (IOException e) {
-                printToCommandConsole("Error verifying shutdown state of instance " + instanceId + ": " + e.toString());
+                throw testExecutionError("Error verifying shutdown state of instance " + instanceId + ": " + e.toString());
             }
         }
     }

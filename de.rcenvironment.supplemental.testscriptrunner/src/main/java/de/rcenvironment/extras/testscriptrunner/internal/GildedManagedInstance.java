@@ -7,8 +7,6 @@
  */
 package de.rcenvironment.extras.testscriptrunner.internal;
 
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.rcenvironment.core.utils.common.StringUtils;
+import de.rcenvironment.core.utils.common.exception.OperationFailureException;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ManagedInstance;
 import de.rcenvironment.extras.testscriptrunner.definitions.helper.StepDefinitionConstants;
 import de.rcenvironment.extras.testscriptrunner.definitions.impl.WorkflowStepDefinitions;
@@ -52,11 +51,12 @@ public class GildedManagedInstance {
         return this.executeActionOnInstance.apply(action);
     }
 
-    public String exportWorkflowRun(File tmpDirInst, String workflowRun) {
+    public String exportWorkflowRun(File tmpDirInst, String workflowRun) throws OperationFailureException {
         String outputExportInst = this.executeCommandOnInstance(StringUtils.format("tc export_wf_run %s %s", tmpDirInst, workflowRun));
         this.printToCommandConsole(outputExportInst);
         if (!outputExportInst.contains(StepDefinitionConstants.SUCCESS_MESSAGE_WORKFLOW_EXPORT)) {
-            fail(StringUtils.format("The workflow run %s could not be exported from instance %s", workflowRun, instance));
+            throw new OperationFailureException(
+                StringUtils.format("Export of workflow run %s on instance %s failed", workflowRun, instance));
         }
         return StringUtils.format("%s\\%s.json", tmpDirInst, workflowRun.replace(":", "_"));
     }

@@ -39,6 +39,7 @@ import com.jcraft.jsch.JSchException;
 
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.common.TempFileServiceAccess;
+import de.rcenvironment.core.utils.common.exception.OperationFailureException;
 import de.rcenvironment.core.utils.common.textstream.receivers.CapturingTextOutReceiver;
 import de.rcenvironment.core.utils.ssh.jsch.SshParameterException;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.InstanceManagementStepDefinitionBase;
@@ -79,6 +80,8 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
 
     private static final String EXPORTED_WORKFLOW_RUNS_SUB_DIR = "workspace\\exported_wfs";
 
+    private static final int REMOTE_WORKFLOW_STATE_QUERY_RETRY_INTERVAL = 2000;
+
     private String lastWorkflowName;
 
     private Path lastWorkflowLogDir;
@@ -109,7 +112,7 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
         }
 
         @Override
-        public void performActionOnInstance(ManagedInstance instance, long timeout) throws IOException {
+        public void performActionOnInstance(ManagedInstance instance, long timeout) throws OperationFailureException {
             String commandOutput = executeCommandOnInstance(instance, LIST_WORKFLOWS_COMMAND, false);
             instance.setLastCommandOutput(commandOutput);
             executionContext.setLastInstanceWithSingleCommandExecution(instance);
@@ -153,7 +156,7 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
         }
 
         @Override
-        public void performActionOnInstance(ManagedInstance instance, long timeout) throws IOException {
+        public void performActionOnInstance(ManagedInstance instance, long timeout) throws OperationFailureException {
             String commandOutput = executeCommandOnInstance(instance, LIST_WORKFLOWS_COMMAND, false);
             instance.setLastCommandOutput(commandOutput);
             executionContext.setLastInstanceWithSingleCommandExecution(instance);
@@ -181,7 +184,8 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
             }
         }
 
-        protected Iterable<String> findWorkflowRunsByPattern(final ManagedInstance instance, String workflowName) {
+        protected Iterable<String> findWorkflowRunsByPattern(final ManagedInstance instance, String workflowName)
+            throws OperationFailureException {
             String commandOutput = executeCommandOnInstance(instance, LIST_WORKFLOWS_COMMAND, false);
             instance.setLastCommandOutput(commandOutput);
             executionContext.setLastInstanceWithSingleCommandExecution(instance);
@@ -195,7 +199,7 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
             return returnValue;
         }
 
-        protected void createGoldenMaster(String workflowRun) {
+        protected void createGoldenMaster(String workflowRun) throws OperationFailureException {
             String outputExportBase = executeCommandOnInstance(comparator,
                 StringUtils.format("tc export_wf_run %s %s", tmpDirBase, workflowRun), false);
             printToCommandConsole(outputExportBase);
@@ -204,7 +208,7 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
             }
         }
 
-        protected String exportWorkflowRun(ManagedInstance instance, File tmpDirInst, String workflowRun) {
+        protected String exportWorkflowRun(ManagedInstance instance, File tmpDirInst, String workflowRun) throws OperationFailureException {
             String outputExportInst =
                 executeCommandOnInstance(instance, StringUtils.format("tc export_wf_run %s %s", tmpDirInst, workflowRun), false);
             printToCommandConsole(outputExportInst);
@@ -214,7 +218,7 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
             return StringUtils.format("%s\\%s.json", tmpDirInst, workflowRun.replace(":", "_"));
         }
 
-        protected boolean compareWorkflowRuns(final String masterPath, final String exportedRunPath) {
+        protected boolean compareWorkflowRuns(final String masterPath, final String exportedRunPath) throws OperationFailureException {
             String outputComparison = executeCommandOnInstance(comparator, StringUtils.format("tc compare_wf_runs %s %s",
                 masterPath, exportedRunPath), false);
             printToCommandConsole(outputComparison);
@@ -381,13 +385,16 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
                 Pattern workflowFinishedPattern = Pattern.compile("(FINISHED|FAILED|CANCELLED) \\[" + workflowId + "\\]");
                 while (true) {
                     try {
+                        // TODO improve this once IM has more detailed instance states than "running yes/no"
                         if (INSTANCE_MANAGEMENT_SERVICE.isInstanceRunning(instanceId)) {
                             String commandOutput = null;
                             try {
                                 commandOutput = executeCommandOnInstance(instance, LIST_WORKFLOWS_COMMAND, false);
-                            } catch (AssertionFailedError e) {
-                                // In this case the remote instance is already shut down and no workflows are running.
+                            } catch (AssertionFailedError | OperationFailureException e) {
+                                // TODO this does not seem semantically sound, but with IM's simple "running" state it cannot be
+                                // handled better at this time
                                 runningWorkflows.remove(workflowKey);
+                                // In this case the remote instance is already shut down and no workflows are running.
                                 return Status.OK_STATUS;
                             }
                             Matcher m = workflowFinishedPattern.matcher(commandOutput);
@@ -397,7 +404,7 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
                             }
 
                             try {
-                                Thread.sleep(StepDefinitionConstants.SLEEP_DEFAULT_IN_MILLISECS);
+                                Thread.sleep(REMOTE_WORKFLOW_STATE_QUERY_RETRY_INTERVAL);
                             } catch (InterruptedException e) {
                                 log.error("Exception while trying to sleep tread", e);
                                 return Status.CANCEL_STATUS;
@@ -425,9 +432,10 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
      * @param operation one of the following operations is possible: cancelling, deleting, opening, pausing, resuming
      * @param workflowNameInput name of the workflow file
      * @param instanceId instance on which the workflow is running
+     * @throws OperationFailureException
      */
     @When("^(cancelling|deleting|opening|pausing|resuming) workflow \"([^\"]*)\" on (?:instance )?\"([^\"]*)\"$")
-    public void operationOnRunningWorkflow(String operation, String workflowNameInput, String instanceId) {
+    public void operationOnRunningWorkflow(String operation, String workflowNameInput, String instanceId) throws OperationFailureException {
         final ManagedInstance instance = resolveInstance(instanceId);
         final String workflowName = convertWorkflowPathToName(addExtension(workflowNameInput, WORKFLOW_EXTENSION));
         String workflowKey = getWorkflowKey(workflowName, instanceId);
@@ -468,10 +476,12 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
      * @param instanceId Instance on which the workflow is running
      * @param state state for which is waited
      * @param timeoutString custom timeout in seconds, after which waiting is aborted
+     * @throws OperationFailureException
      */
     @When("^waiting until workflow \"([^\"]*)\" on (?:instance )?\"([^\"]*)\" (?:has|is) (finished|cancelled|canceling|failed)"
         + "(?: or (\\d+) seconds have passed)?")
-    public void whenWaitingUntilWorkflowReachedState(String workflowNameInput, String instanceId, String state, String timeoutString) {
+    public void whenWaitingUntilWorkflowReachedState(String workflowNameInput, String instanceId, String state, String timeoutString)
+        throws OperationFailureException {
         final ManagedInstance instance = resolveInstance(instanceId);
         final String workflowName = convertWorkflowPathToName(addExtension(workflowNameInput, WORKFLOW_EXTENSION));
         final int timeoutInSecs = parseTimeout(timeoutString);
@@ -497,8 +507,8 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
                     printToCommandConsole(StringUtils.format("Workflow %s has reached state %s on %s.", workflowName, state, instanceId));
                     return;
                 }
-                Thread.sleep(StepDefinitionConstants.SLEEP_DEFAULT_IN_MILLISECS);
-                countMillis -= StepDefinitionConstants.SLEEP_DEFAULT_IN_MILLISECS;
+                Thread.sleep(REMOTE_WORKFLOW_STATE_QUERY_RETRY_INTERVAL);
+                countMillis -= REMOTE_WORKFLOW_STATE_QUERY_RETRY_INTERVAL;
             } catch (InterruptedException e) {
                 fail(StringUtils.format("InterruptedException caused when waiting for workflow to reach state. Exception: \n%s", e));
                 return;
@@ -509,19 +519,26 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
     }
 
     @Then("^that workflow run should be identical to \"([^\"]*)\"$")
-    public void thenThatWorkflowRunShouldBeIdenticalTo(String goldenMasterId) throws Throwable {
+    public void thenThatWorkflowRunShouldBeIdenticalTo(String goldenMasterId) throws OperationFailureException, IOException {
         final Optional<GoldenMaster> master = this.goldenMasters.get(goldenMasterId);
 
         if (!master.isPresent()) {
-            fail(StringUtils.format("Golden master '%s' not present", goldenMasterId));
-            return; // Superfluous return to terminate the control flow for analysis by SonarCube
+            throw testExecutionError(StringUtils.format("Golden master '%s' not present", goldenMasterId));
         }
 
         final File tempDir = TempFileServiceAccess.getInstance().createManagedTempDir();
         final GildedManagedInstance instance = new GildedManagedInstance(
             lastWorkflowInitiatingInstance,
             this::printToCommandConsole,
-            (instanceParam, command) -> executeCommandOnInstance(instanceParam, command, false));
+            (instanceParam, command) -> {
+                // stop-gap try/catch to work around the lambda construct without introducing a functional interface just for this
+                // TODO (p3) rework this more cleanly
+                try {
+                    return executeCommandOnInstance(instanceParam, command, false);
+                } catch (OperationFailureException e) {
+                    throw new AssertionFailedError(e.toString());
+                }
+            });
 
         final File tmpDirInst = new File(tempDir, lastWorkflowInitiatingInstance.getId());
 
@@ -559,8 +576,8 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
                     return;
                 }
             }
-            Thread.sleep(StepDefinitionConstants.SLEEP_DEFAULT_IN_MILLISECS);
-            countMillis -= StepDefinitionConstants.SLEEP_DEFAULT_IN_MILLISECS;
+            Thread.sleep(REMOTE_WORKFLOW_STATE_QUERY_RETRY_INTERVAL);
+            countMillis -= REMOTE_WORKFLOW_STATE_QUERY_RETRY_INTERVAL;
         }
         printToCommandConsole(
             StringUtils.format("%s second(s) have passed and not all workflows are finished. Timeout was reached.", timeoutInSecs));
@@ -569,9 +586,10 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
     /**
      * @param instanceId instance whose workflow runs are to be exported
      * @param relativeExportPath relative directory within instances workspace in which to export the workflow runs
+     * @throws OperationFailureException on failure to execute the step (as opposed to an assertion failure)
      */
     @When("^exporting all workflow runs from \"([^\"]*)\" to \"([^\"]*)\"")
-    public void whenExportingAllWorkflows(String instanceId, String relativeExportPath) {
+    public void whenExportingAllWorkflows(String instanceId, String relativeExportPath) throws OperationFailureException {
         ManagedInstance instance = resolveInstance(instanceId);
         final File exportDir =
             instance.getAbsolutePathFromRelative(StringUtils.format("%s\\%s", EXPORTED_WORKFLOW_RUNS_SUB_DIR, relativeExportPath));
@@ -582,9 +600,10 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
      * Verifies all previously exported workflow runs are identical.
      * 
      * @param instanceId the instance whose exported workflow runs are to be identical.
+     * @throws OperationFailureException on failure to execute the step (as opposed to an assertion failure)
      */
     @Then("all exported workflow run directories from \"([^\"]*)\" should be identical$")
-    public void thenAllExportWorkflowRunsIdenical(String instanceId) {
+    public void thenAllExportWorkflowRunsIdenical(String instanceId) throws OperationFailureException {
         ManagedInstance instance = resolveInstance(instanceId);
         final File wfParentDir = instance.getAbsolutePathFromRelative(EXPORTED_WORKFLOW_RUNS_SUB_DIR);
 
@@ -735,9 +754,10 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
      * @param instanceIds a comma-separated list of instances, which when present (non-null) influences which instances are effected. How it
      *        does that depends on the value of {@code allFlag} and is defined in {@link #resolveInstanceList()}
      * @param workflowNames a comma-separated list of workflownames which are to be seen.
+     * @throws OperationFailureException on execution failure (e.g. an invalid instance id)
      */
     @Then("^(all )?(?:instance[s]? )?(?:\"([^\"]+)\" )?should see(?: workflow[s]?)? \"([^\"]+)\"$")
-    public void thenInstancesShouldSeeworkflow(String allFlag, String instanceIds, String workflowNames) {
+    public void thenInstancesShouldSeeworkflow(String allFlag, String instanceIds, String workflowNames) throws OperationFailureException {
         performActionOnInstances(
             new AssertWorkflowVisibilityAction(parseCommaSeparatedList(workflowNames)),
             resolveInstanceList(allFlag != null, instanceIds),
@@ -752,9 +772,11 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
      * @param instanceIds a comma-separated list of instances, which when present (non-null) influences which instances are effected. How it
      *        does that depends on the value of {@code allFlag} and is defined in {@link #resolveInstanceList()}
      * @param workflowNames a comma-separated list of workflownames which are to be seen.
+     * @throws OperationFailureException on execution failure (e.g. an invalid instance id)
      */
     @Then("^(all )?(?:instance[s]? )?(?:\"([^\"]+)\" )?should see identical data for(?: workflow[s]?)? \"([^\"]+)\"$")
-    public void thenInstancesShouldSeeIdenticalData(String allFlag, String instanceIds, String workflowNames) {
+    public void thenInstancesShouldSeeIdenticalData(String allFlag, String instanceIds, String workflowNames)
+        throws OperationFailureException {
         List<ManagedInstance> instances = resolveInstanceList(allFlag != null, instanceIds);
         if (instances.size() < 2) {
             fail("At least two instances are neccessara to have a meaningful comparison. Less were provided.");

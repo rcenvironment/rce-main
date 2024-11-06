@@ -224,14 +224,15 @@ public class CucumberTestFrameworkAdapter {
      * {@link CucumberTestFrameworkAdapter} thread safe again after the Cucumber 7.x upgrade.
      * 
      * @author Robert Mischke
+     * @author Devika Jalgaonkar
      */
     private final class ExecutionContext {
 
-        private final EventHandler<TestStepFinished> cucumberTestStepFinishedHandler = this::cucumberTestStepFinished;
+        private final EventHandler<TestStepFinished> cucumberTestStepFinishedHandler = this::onTestStepFinished;
 
-        private final EventHandler<TestCaseFinished> cucumberTestCaseFinishedHandler = this::cucumberTestCaseResult;
+        private final EventHandler<TestCaseFinished> cucumberTestCaseFinishedHandler = this::onTestCaseFinished;
 
-        private final EventHandler<TestRunFinished> cucumberTestRunFinishedHandler = this::cucumberTestRunFinished;
+        private final EventHandler<TestRunFinished> cucumberTestRunFinishedHandler = this::onTestRunFinished;
 
         private Map<String, String> unsuccessfulScenarios = new HashMap<String, String>();
 
@@ -440,7 +441,7 @@ public class CucumberTestFrameworkAdapter {
             executor = new SingleThreadedExecutionService();
         }
 
-        private void cucumberTestRunFinished(TestRunFinished event) {
+        private void onTestRunFinished(TestRunFinished event) {
 
             final String textSeparatorLine =
                 "-----------------------------------------------------------------------------------------------";
@@ -463,15 +464,15 @@ public class CucumberTestFrameworkAdapter {
             outputReceiver.addOutput(textSeparatorLine);
         }
 
-        private void cucumberTestStepFinished(TestStepFinished event) {
+        private void onTestStepFinished(TestStepFinished event) {
             if (event.getTestStep() instanceof PickleStepTestStep) {
                 stepStatistics.totalCount++;
                 PickleStepTestStep testStep = (PickleStepTestStep) event.getTestStep();
-                cucumberStepResult(testStep, event.getResult());
+                registerTestStepResult(testStep, event.getResult());
             }
         }
 
-        private void cucumberStepResult(PickleStepTestStep testStep, Result result) {
+        private void registerTestStepResult(PickleStepTestStep testStep, Result result) {
             Status testStepResult = result.getStatus();
             if (testStepResult.equals(Status.SKIPPED)) {
                 stepStatistics.skippedCount++;
@@ -488,32 +489,30 @@ public class CucumberTestFrameworkAdapter {
             } else {
                 log.warn("Ignoring unhandled test step outcome " + testStepResult);
             }
-
         }
 
-        private void cucumberTestCaseResult(TestCaseFinished scenario) {
+        private void onTestCaseFinished(TestCaseFinished scenario) {
             scenarioStatistics.totalCount++;
-            Status testCaseStatus = scenario.getResult().getStatus();
+            final String testCaseName = scenario.getTestCase().getName();
+            final Status testCaseStatus = scenario.getResult().getStatus();
             if (testCaseStatus.equals(Status.PASSED)) {
                 scenarioStatistics.passedCount++;
+                return;
             } else {
-                unsuccessfulScenarios.put(scenario.getTestCase().getName(), scenario.getResult().getStatus().toString());
+                unsuccessfulScenarios.put(testCaseName, testCaseStatus.toString());
                 if (testCaseStatus.equals(Status.SKIPPED)) {
                     scenarioStatistics.skippedCount++;
-                    log.info("Skipped");
                 } else if (testCaseStatus.equals(Status.UNDEFINED)) {
                     scenarioStatistics.undefinedCount++;
-                    log.error("Undefined Scenario");
                 } else if (testCaseStatus.equals(Status.FAILED)) {
                     scenarioStatistics.failedCount++;
-                    log.error("Failed Scenario");
                 } else if (testCaseStatus.equals(Status.AMBIGUOUS)) {
                     scenarioStatistics.ambiguousCount++;
-                    log.error("Ambiguous Scenario");
                 } else if (testCaseStatus.equals(Status.PENDING)) {
                     scenarioStatistics.pendingCount++;
-                    log.error("Pending Scenario");
                 }
+                log.info(StringUtils.format("BDD scenario \"%s\" finished with result %s", testCaseName,
+                    testCaseStatus.toString()));
             }
         }
 

@@ -13,29 +13,28 @@ import java.util.Optional;
  * contains option-keys and default values for connection options viable for at least two connection types.
  * 
  * @author Marlon Schroeter
+ * @author Robert Mischke
  */
 public class CommonConnectionOptions {
 
-
     private boolean autoStartFlag;
-    
+
     private Optional<String> connectionName = Optional.empty();
-    
+
     private String host;
-    
+
     private Optional<Integer> port = Optional.empty();
-    
+
     private int serverNumber;
 
     private String userName;
-    
+
     private Optional<String> userRole = Optional.empty();
 
     CommonConnectionOptions() {
         setAutoStart(false);
         setHost(ConnectionOptionConstants.HOST_DEFAULT);
         setServerNumber(0);
-        setUserName(ConnectionOptionConstants.USER_NAME_DEFAULT);
     }
 
     public boolean getAutoStart() {
@@ -78,8 +77,8 @@ public class CommonConnectionOptions {
         this.serverNumber = serverNumber;
     }
 
-    public String getUserName() {
-        return userName;
+    public Optional<String> getUserName() {
+        return Optional.ofNullable(userName);
     }
 
     public void setUserName(String userName) {

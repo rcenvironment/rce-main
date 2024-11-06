@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import de.rcenvironment.core.toolkitbridge.transitional.ConcurrencyUtils;
 import de.rcenvironment.core.utils.common.StringUtils;
+import de.rcenvironment.core.utils.common.exception.OperationFailureException;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.InstanceManagementStepDefinitionBase;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ManagedInstance;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
@@ -50,7 +51,7 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
         }
 
         @Override
-        public void iterateActionOverInstance(ManagedInstance instance) throws Exception {
+        public void iterateActionOverInstance(ManagedInstance instance) throws IOException {
             boolean isRunning = INSTANCE_MANAGEMENT_SERVICE.isInstanceRunning(instance.getId());
             if (isRunning != shouldBeRunning) {
                 throw new AssertionError(StringUtils.format(
@@ -84,7 +85,7 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
         }
 
         @Override
-        public void performActionOnInstance(ManagedInstance instance, long timeout) throws IOException {
+        public void performActionOnInstance(ManagedInstance instance, long timeout) throws OperationFailureException {
             startSingleInstance(instance, startWithGUI, startWithCommands, timeout);
         }
 
@@ -98,7 +99,7 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
     private class StopInstanceAction implements InstanceAction {
 
         @Override
-        public void performActionOnInstance(ManagedInstance instance, long timeout) throws IOException {
+        public void performActionOnInstance(ManagedInstance instance, long timeout) throws OperationFailureException {
             stopSingleInstance(instance);
         }
 
@@ -116,11 +117,12 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
      *        order","concurrently","sequentially". If null sequentially is the default.
      * @param startWithGuiFlag a phrase that is present (non-null) if the instances should be started with GUIs
      * @param commandArguments console arguments that are used to start the instance.
+     * @throws OperationFailureException on execution failure (e.g. an invalid instance id)
      */
     @When("^starting( all)? instance[s]?(?: \"([^\"]*)\")?(?: (in the given order|concurrently|in a random order))?"
         + "( in GUI mode)?(?: with console command[s]? (-{1,2}.+))?$")
     public void whenStartingInstances(String allFlag, String instanceIds, String executionDesc, String startWithGuiFlag,
-        String commandArguments) {
+        String commandArguments) throws OperationFailureException {
         StartInstanceAction startInstanceAction;
         if (startWithGuiFlag == null) {
             startInstanceAction = new StartInstanceAction(startWithGuiFlag != null);
@@ -144,9 +146,10 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
      *        does that depends on the value of {@code allFlag} and is defined in {@link #resolveInstanceList()}
      * @param executionDesc a string indicating the mode in which the instances are stopped. Can be choosen from "in the given
      *        order","concurrently","sequentially". If null sequentially is the default.
+     * @throws OperationFailureException on execution failure (e.g. an invalid instance id)
      */
     @When("^stopping( all)? instance[s]?(?: \"([^\"]*)\")?(?: (in the given order|concurrently|in a random order))?$")
-    public void whenStoppingInstances(String allFlag, String instanceIds, String executionDesc) {
+    public void whenStoppingInstances(String allFlag, String instanceIds, String executionDesc) throws OperationFailureException {
         performActionOnInstances(
             new StopInstanceAction(),
             resolveInstanceList(allFlag != null, instanceIds),
@@ -160,9 +163,11 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
      * @param action a phrase indicating what should happen with the instance; currently supported: "shutdown", "restart"
      * @param instanceId the id of the instance to modify
      * @param delaySeconds the delay, in seconds, after which the action should be performed
+     * @throws OperationFailureException on execution failure (e.g. an invalid instance id)
      */
     @When("^scheduling (?:a|an instance) (shutdown|restart|reconnect) of \"([^\"]+)\" after (\\d+) second[s]?$")
-    public void whenSchedulingNodeActionsAfterDelay(final String action, final String instanceId, final int delaySeconds) {
+    public void whenSchedulingNodeActionsAfterDelay(final String action, final String instanceId, final int delaySeconds)
+        throws OperationFailureException {
 
         // TODO ensure proper integration with test cleanup
         // TODO as this is the first asynchronous test action, check thread safety
@@ -190,7 +195,7 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
                     default:
                         throw new IllegalArgumentException(action);
                     }
-                } catch (IOException e) {
+                } catch (OperationFailureException e) {
                     // TODO make outer script fail, probably on shutdown
                     log.error("Error while executing aynchonous action '" + action + "' on instance '" + instanceId + "'", e);
                 }
@@ -210,9 +215,11 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
      * @param instanceIds a comma-separated list of instances, which when present (non-null) influences which instances are effected. How it
      *        does that depends on the value of {@code allFlag} and is defined in {@link #resolveInstanceList()}
      * @param state the expected state (stopped/running)
+     * @throws OperationFailureException on execution failure (e.g. an invalid instance id)
      */
     @Then("^(all )?(?:instance[s]? )?(?:\"([^\"]*)\" )?should be (stopped|running)$")
-    public void thenInstancesShouldBeInState(String allFlag, String instanceIds, String state) throws AssertionError {
+    public void thenInstancesShouldBeInState(String allFlag, String instanceIds, String state)
+        throws AssertionError, OperationFailureException {
         int tmax = 15; // max time in seconds to verify the desired state
         String operationTitle = StringUtils.format("Expect instances \"%s\" to be in state \"%s\"",
             resolveInstanceList(allFlag != null, instanceIds).toString(), state);
@@ -231,7 +238,7 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
         }, operationTitle, tmax);
     }
 
-    private void cycleAllOutgoingConnectionsOf(ManagedInstance instance) {
+    private void cycleAllOutgoingConnectionsOf(ManagedInstance instance) throws OperationFailureException {
         final String cnListOutput = executeCommandOnInstance(instance, "cn list", false);
         Pattern connectionIdPattern = Pattern.compile("^\\s*\\((\\d+)\\) ");
         final Matcher matcher = connectionIdPattern.matcher(cnListOutput);
@@ -251,19 +258,27 @@ public class InstanceStateStepDefinitions extends InstanceManagementStepDefiniti
     }
 
     private void startSingleInstance(final ManagedInstance instance, boolean withGUI, String commandArguments, long timeout)
-        throws IOException {
+        throws OperationFailureException {
         instance.onStarting();
 
         final String installationId = instance.getInstallationId();
         printToCommandConsole(StringUtils.format("Launching instance \"%s\" using installation \"%s\"", instance, installationId));
-        INSTANCE_MANAGEMENT_SERVICE.startInstance(installationId, listOfSingleStringElement(instance.getId()),
-            getTextoutReceiverForIMOperations(), timeout, withGUI, commandArguments);
+        try {
+            INSTANCE_MANAGEMENT_SERVICE.startInstance(installationId, listOfSingleStringElement(instance.getId()),
+                getTextoutReceiverForIMOperations(), timeout, withGUI, commandArguments);
+        } catch (IOException e) {
+            throw testExecutionError("Failed to start instance " + instance.getId(), e);
+        }
     }
 
-    private void stopSingleInstance(ManagedInstance instance) throws IOException {
+    private void stopSingleInstance(ManagedInstance instance) throws OperationFailureException {
         printToCommandConsole(StringUtils.format("Stopping instance \"%s\"", instance));
-        INSTANCE_MANAGEMENT_SERVICE.stopInstance(listOfSingleStringElement(instance.getId()),
-            getTextoutReceiverForIMOperations(), TimeUnit.SECONDS.toMillis(StepDefinitionConstants.IM_ACTION_TIMEOUT_IN_SECS));
+        try {
+            INSTANCE_MANAGEMENT_SERVICE.stopInstance(listOfSingleStringElement(instance.getId()),
+                getTextoutReceiverForIMOperations(), TimeUnit.SECONDS.toMillis(StepDefinitionConstants.IM_ACTION_TIMEOUT_IN_SECS));
+        } catch (IOException e) {
+            throw testExecutionError("Failed to start instance " + instance.getId(), e);
+        }
 
         instance.onStopped();
     }

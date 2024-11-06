@@ -25,7 +25,7 @@ import de.rcenvironment.core.instancemanagement.InstanceManagementService.Instal
 import de.rcenvironment.core.instancemanagement.internal.DeploymentOperationsImpl;
 import de.rcenvironment.core.instancemanagement.internal.InstanceConfigurationException;
 import de.rcenvironment.core.utils.common.StringUtils;
-import de.rcenvironment.core.utils.common.textstream.receivers.PrefixingTextOutForwarder;
+import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.InstanceManagementStepDefinitionBase;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ManagedInstance;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
@@ -72,7 +72,7 @@ public class InstanceInstantiationStepDefinitions extends InstanceManagementStep
             throws Exception {
 
         final boolean wipeProfile = keepProfile == null;
-        final PrefixingTextOutForwarder imOperationOutputReceiver = getTextoutReceiverForIMOperations();
+        final TextOutputReceiver imOperationOutputReceiver = getTextoutReceiverForIMOperations();
         final String installationId = parseInstallationId(buildShort, buildExplicit, imOperationOutputReceiver);
 
         final List<String> instanceDefinitionParts = parseCommaSeparatedList(instanceList);
@@ -94,7 +94,7 @@ public class InstanceInstantiationStepDefinitions extends InstanceManagementStep
             final ManagedInstance instance = new ManagedInstance(instanceId, installationId, INSTANCE_MANAGEMENT_SERVICE);
             executionContext.putInstance(instanceId, instance);
             executionContext.addInstance(instance);
-            printToCommandConsole(StringUtils.format("Configuring test instance \"%s\"", instanceId));
+            printToCommandConsole(StringUtils.format("Configuring instance \"%s\"", instanceId));
 
             int imSshPortNumber = PORT_NUMBER_GENERATOR.incrementAndGet();
             while (!isPortAvailable(imSshPortNumber)) {
@@ -131,7 +131,7 @@ public class InstanceInstantiationStepDefinitions extends InstanceManagementStep
         return false;
     }
 
-    private void configureInstance(final PrefixingTextOutForwarder imOperationOutputReceiver, final String instanceId,
+    private void configureInstance(final TextOutputReceiver imOperationOutputReceiver, final String instanceId,
         final String optionString, final int imSshPortNumber, final boolean wipe, String imMasterRole)
         throws InstanceConfigurationException, IOException {
         InstanceConfigurationOperationSequence setupSequence = INSTANCE_MANAGEMENT_SERVICE.newConfigurationOperationSequence();
@@ -165,7 +165,7 @@ public class InstanceInstantiationStepDefinitions extends InstanceManagementStep
 
     // Standard build ids are converted to implicit installation ids by removing all special characters;
     // special build ids are passed on as they are.
-    private String parseInstallationId(String buildShort, String buildExplicit, final PrefixingTextOutForwarder imOperationOutputReceiver)
+    private String parseInstallationId(String buildShort, String buildExplicit, final TextOutputReceiver imOperationOutputReceiver)
         throws IOException {
 
         if (buildShort != null) {
@@ -198,7 +198,7 @@ public class InstanceInstantiationStepDefinitions extends InstanceManagementStep
     }
 
     private String installPreviousBuild(int version, String installationFolderName, String url,
-        final PrefixingTextOutForwarder imOperationOutputReceiver) throws IOException {
+        final TextOutputReceiver imOperationOutputReceiver) throws IOException {
         File downloadFile = new File(INSTANCE_MANAGEMENT_SERVICE.getDownloadsCacheDir(),
             StepDefinitionConstants.SLASH + installationFolderName + version + StepDefinitionConstants.ZIP);
         String replacement;
@@ -221,7 +221,7 @@ public class InstanceInstantiationStepDefinitions extends InstanceManagementStep
         return installationFolderName + StepDefinitionConstants.SLASH + version;
     }
 
-    private String parseInstallationId(final PrefixingTextOutForwarder imOperationOutputReceiver, String buildOrInstallationId)
+    private String parseInstallationId(final TextOutputReceiver imOperationOutputReceiver, String buildOrInstallationId)
         throws IOException {
         if (INSTANCE_MANAGEMENT_SERVICE.isSpecialInstallationId(buildOrInstallationId)) {
             return buildOrInstallationId;

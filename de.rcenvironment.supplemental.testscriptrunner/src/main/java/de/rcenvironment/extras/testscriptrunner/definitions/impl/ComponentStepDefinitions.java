@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 
 import de.rcenvironment.core.utils.common.StringUtils;
+import de.rcenvironment.core.utils.common.exception.OperationFailureException;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.InstanceManagementStepDefinitionBase;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ManagedInstance;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
@@ -146,7 +147,7 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
         }
 
         @Override
-        public void iterateActionOverInstance(ManagedInstance instance) throws Exception {
+        public void iterateActionOverInstance(ManagedInstance instance) throws IOException {
             for (String tool : parseCommaSeparatedList(toolList)) {
                 printToCommandConsole(StringUtils.format("Removing tool %s from instance %s", tool, instance));
                 File toolFile = instance.getAbsolutePathFromRelative(StringUtils.format("integration/tools/%s", tool));
@@ -239,7 +240,8 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
     }
 
     @When("^integrating workflow \"([^\"]*)\" as component \"([^\"]*)\" on instance \"([^\"]*)\" with the following endpoint definitions:$")
-    public void whenIntegratingWorkflow(String workflowName, String componentName, String instanceId, DataTable endpointDefinitionTable) {
+    public void whenIntegratingWorkflow(String workflowName, String componentName, String instanceId, DataTable endpointDefinitionTable)
+        throws OperationFailureException {
         final List<List<String>> endpointDefinitions = endpointDefinitionTable.cells();
 
         final String endpointsDefinitionsString = "--expose " + endpointDefinitions.stream()
@@ -260,10 +262,11 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
      * @param instanceId the instance to query
      * @param componentsTable the expected component data to see (or not see in case of the reserved "absent" marker)
      * @param maxiumWaitSeconds the maximum retry time until success
+     * @throws OperationFailureException on execution failure (e.g. an invalid instance id)
      */
     @Then("^instance \"([^\"]*)\" should see these components(?: within (\\d+) seconds?)?:$")
     public void validateComponentNetworkVisibility(String instanceId, Integer maxiumWaitSeconds,
-        DataTable componentsTable) throws InterruptedException {
+        DataTable componentsTable) throws InterruptedException, OperationFailureException {
 
         maxiumWaitSeconds = applyFallbackMaximumRetryTime(maxiumWaitSeconds);
 
@@ -285,14 +288,19 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
         }
 
         final String operationTitle =
-            StringUtils.format("Verify that the visible components of instance \"%s\" are \"%s\"", instanceId, visibilityMap.toString());
+            StringUtils.format("Verify the visibility of certain components on instance \"%s\"", instanceId);
         executeWithRetry((ExecutionAttempt) (attemptCount, isLastAttempt) -> {
             return executeOnceValidateComponentNetworkVisibility(instance, visibilityMap, isLastAttempt);
         }, operationTitle, maxiumWaitSeconds);
     }
 
     private boolean executeOnceValidateComponentNetworkVisibility(ManagedInstance instance,
-        Map<String, ComponentVisibilityState> visibilityMap, boolean isLastAttempt) {
+        Map<String, ComponentVisibilityState> visibilityMap, boolean isLastAttempt) throws OperationFailureException {
+
+        // reset all actual states; otherwise, the state is incorrect when a component "disappears" on retry
+        for (ComponentVisibilityState entry : visibilityMap.values()) {
+            entry.setActualState(null);
+        }
 
         // parse actual state
         String output = executeCommandOnInstance(instance, "components list --as-table", false);
@@ -333,14 +341,15 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
             }
         }
         if (hasMismatch && isLastAttempt) {
-            fail(
-                "At least one component had an unexpected visibility/authorization state: " + errorLines.toString());
+            throw testAssertionFailure(
+                "At least one component had an unexpected visibility/authorization state: " + errorLines.toString()
+                    + "\n\nQuery command output:\n" + output);
         }
         return !hasMismatch;
     }
 
     @Then("^instance \"([^\"]*)\" should see the component \"([^\"]*)\"$")
-    public void instanceShouldSeeTheComponent(String instanceId, String componentId) {
+    public void instanceShouldSeeTheComponent(String instanceId, String componentId) throws OperationFailureException {
         final ManagedInstance instance = resolveInstance(instanceId);
         final String command = StringUtils.format("components show %s", componentId);
         final String output = executeCommandOnInstance(instance, command, false);

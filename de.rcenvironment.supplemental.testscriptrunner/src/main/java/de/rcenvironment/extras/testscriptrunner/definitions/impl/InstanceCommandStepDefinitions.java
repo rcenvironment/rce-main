@@ -13,18 +13,18 @@ import static org.junit.Assert.fail;
 import java.awt.AWTException;
 import java.awt.Robot;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
 import de.rcenvironment.core.utils.common.StringUtils;
+import de.rcenvironment.core.utils.common.exception.OperationFailureException;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.InstanceManagementStepDefinitionBase;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ManagedInstance;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
 import io.cucumber.java.en.When;
 
 /**
- * Step definitons for executing commands on instances.
+ * Step definitions for executing commands on instances.
  * 
  * @author Marlon Schroeter
  */
@@ -51,7 +51,7 @@ public class InstanceCommandStepDefinitions extends InstanceManagementStepDefini
         }
 
         @Override
-        public void performActionOnInstance(ManagedInstance instance, long timeout) throws IOException {
+        public void performActionOnInstance(ManagedInstance instance, long timeout) throws OperationFailureException {
             for (String command : commands) {
                 String commandOutput = executeCommandOnInstance(instance, command, mainAction);
                 instance.setLastCommandOutput(commandOutput);
@@ -71,12 +71,14 @@ public class InstanceCommandStepDefinitions extends InstanceManagementStepDefini
      *        does that depends on the value of {@code allFlag} and is defined in {@link #resolveInstanceList()}
      * @param executionDesc a string indicating the mode in which the given commands are executed on the instances. This does not refer to
      *        the order or concurrence of the commands, but the order or concurrence of the instances on which the commands are executed.
-     *        The commands are executed in the given ordering. Can be chosen from "in the given order","concurrently","in a random order". 
+     *        The commands are executed in the given ordering. Can be chosen from "in the given order","concurrently","in a random order".
      *        If null sequentially is the default.
+     * @throws OperationFailureException on execution failure (e.g. an invalid instance id)
      */
     @When("^executing(?: the)? command[s]? \"([^\"]*)\" on( all)?(?: instance[s])?(?: \"([^\"]*)\")?"
         + "(?: (in the given order|concurrently|in a random order))?$")
-    public void whenExecutingCommandOnInstances(String commandList, String allFlag, String instanceIds, String executionDesc) {
+    public void whenExecutingCommandOnInstances(String commandList, String allFlag, String instanceIds, String executionDesc)
+        throws OperationFailureException {
         performActionOnInstances(
             new ExecuteCommandOnInstanceAction(parseCommaSeparatedList(commandList), true),
             resolveInstanceList(allFlag != null, instanceIds),
@@ -87,9 +89,10 @@ public class InstanceCommandStepDefinitions extends InstanceManagementStepDefini
      * Executes command order on top layer UI screen.
      * 
      * @param operations comma-separated list of operations to execute
+     * @throws OperationFailureException on failure to execute a test action
      */
     @When("^executing command order \"([^\"]*)\"(?: on(?: the)? top layer(?: UI)?)?$")
-    public void whenClosingConfigureUIAfterStartUp(String operations) {
+    public void whenClosingConfigureUIAfterStartUp(String operations) throws OperationFailureException {
 
         try {
             final Robot robot = new Robot();
@@ -113,14 +116,14 @@ public class InstanceCommandStepDefinitions extends InstanceManagementStepDefini
                     keys.add(KeyEvent.VK_ENTER);
                     break;
                 default:
-                    fail(StringUtils.format("Command %s is not a valid execution command.", command));
+                    throw internalError(StringUtils.format("Command %s is not a valid execution command.", command));
                 }
             }
 
             performKeyboardActions(robot, keys);
 
         } catch (AWTException e) {
-            fail("Error attempting to execute commands");
+            throw testExecutionError("Error attempting to execute commands");
         }
     }
 

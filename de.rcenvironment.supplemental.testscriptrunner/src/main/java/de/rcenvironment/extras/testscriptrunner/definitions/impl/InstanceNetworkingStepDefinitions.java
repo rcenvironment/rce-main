@@ -12,8 +12,6 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +31,7 @@ import de.rcenvironment.core.command.spi.ParsedStringParameter;
 import de.rcenvironment.core.instancemanagement.internal.InstanceConfigurationException;
 import de.rcenvironment.core.instancemanagement.internal.SSHAccountParameters;
 import de.rcenvironment.core.utils.common.StringUtils;
+import de.rcenvironment.core.utils.common.exception.OperationFailureException;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.InstanceManagementStepDefinitionBase;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.ManagedInstance;
 import de.rcenvironment.extras.testscriptrunner.definitions.common.TestScenarioExecutionContext;
@@ -73,20 +72,19 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
     @Given("^configured( cloned)? network connection[s]? \"([^\"]*)\"$")
     public void givenConfiguredNetworkConnections(String cloneFlag, String connectionsSetup) throws Exception {
         Boolean cloned = cloneFlag != null;
-        printToCommandConsole(StringUtils.format("Configuring network connections (\"%s\", cloned: \"%s\")", connectionsSetup, cloned));
+        if (cloned) {
+            throw new AssertionError("The 'cloned' flag is deprecated; specify a clientId=... option instead");
+        }
+
+        printToCommandConsole(StringUtils.format("Configuring network connections \"%s\"", connectionsSetup));
         // parse the string defining the intended network connections
         Pattern p = Pattern.compile("\\s*(\\w+)-(?:\\[(reg|ssh|upl)\\]-)?>(\\w+)\\s*(?:\\[([\\w\\s]*)\\])?\\s*");
-        String clonedId = "";
         for (String connectionSetupPart : connectionsSetup.split(",")) {
             Matcher m = p.matcher(connectionSetupPart);
             if (!m.matches()) {
                 fail("Syntax error in connection setup part: " + connectionSetupPart);
             }
             final ManagedInstance clientInstance = resolveInstance(m.group(1));
-
-            if (cloned && clonedId.equals("")) {
-                clonedId = clientInstance.getId();
-            }
 
             final String connectionType;
             if (m.group(2) == null) {
@@ -106,7 +104,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
                 setUpCompleteSSHConnection(clientInstance, serverInstance, options);
                 break;
             case (StepDefinitionConstants.CONNECTION_TYPE_UPLINK):
-                setUpCompleteUplinkConnection(clientInstance, clonedId, serverInstance, options);
+                setUpBothEndsOfUplinkConnection(clientInstance, serverInstance, options);
                 break;
             default:
                 fail(StringUtils.format(StepDefinitionConstants.ERROR_MESSAGE_UNSUPPORTED_TYPE, connectionType));
@@ -134,7 +132,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
         if (options == null) {
             serverNumber = 0;
         } else {
-            serverNumber = Integer.parseInt(options.split(StepDefinitionConstants.OPTION_SEPARATOR)[1]);
+            serverNumber = Integer.parseInt(options.split(StepDefinitionConstants.OPTION_KV_SEPARATOR)[1]);
         }
         switch (connectionType) {
         case (StepDefinitionConstants.CONNECTION_TYPE_REGULAR):
@@ -172,13 +170,13 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
     }
 
     /**
-     * 
      * @param clientInstanceId client instance
      * @param serverInstanceId server instance, needs to be configured beforehand
      * @param connectionType type of connection used for connecting. Viable is reg[ular] ssh and upl[ink]. Omitting this leads to a regular
      *        connection
      * @param options list of whitespace separated options
      */
+    // TODO clarify: the step text suggests performing the connection, while it actually only configures it
     @When("^connecting(?: instance)? \"([^\"]+)\" to(?: (?:instance|server))? \"([^\"]+)\"(?: via(reg|ssh|upl))?"
         + "(?: given(?: the)? option[s]? \\[([^\\]]*)\\])?$")
     public void whenConnectingInstances(String clientInstanceId, String serverInstanceId, String connectionType,
@@ -193,7 +191,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
             setupPartialRegularConnection(clientInstance, serverInstance, options);
             break;
         case (StepDefinitionConstants.CONNECTION_TYPE_SSH):
-            setUpPartialSSHConnection(clientInstance, serverInstance, options);
+            setUpClientSideOfSSHConnection(clientInstance, serverInstance, options);
             break;
         case (StepDefinitionConstants.CONNECTION_TYPE_UPLINK):
             setUpPartialUplinkConnection(clientInstance, serverInstance, options);
@@ -210,7 +208,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
      * @param maxWaitTimeSeconds the maximum time to wait for connections to be established
      */
     @Then("^all auto-start network connections should be ready within (\\d+) seconds$")
-    public void thenAutoStartConnectionsReadyIn(int maxWaitTimeSeconds) throws Exception {
+    public void thenVerifyAutoStartConnectionsConnected(int maxWaitTimeSeconds) throws Exception {
         printToCommandConsole("Waiting for all auto-start network connections to complete");
 
         final Set<ManagedInstance> pendingInstances = new HashSet<>();
@@ -257,9 +255,11 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
      * @param instanceId the node that should have its visible network inspected
      * @param testType whether to test for "should contain" or "should consist of" the given list of instances
      * @param listOfExpectedVisibleInstances the comma-separated list of expected instances
+     * @throws OperationFailureException on failure to execute the step (as opposed to an assertion failure)
      */
     @Then("^the visible network of \"([^\"]*)\" should (consist of|contain) \"([^\"]*)\"$")
-    public void thenVisibleNetworkConsistsOf(String instanceId, String testType, String listOfExpectedVisibleInstances) {
+    public void thenVerifyVisibleNetworkConsistsOfOrContains(String instanceId, String testType, String listOfExpectedVisibleInstances)
+        throws OperationFailureException {
 
         String commandOutput = executeCommandOnInstance(resolveInstance(instanceId), "net info", false);
 
@@ -286,7 +286,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
                 }
             }
             // check if all instances expected are present in output
-            thenVisibleNetworkConsistsOf(instanceId, "contain", listOfExpectedVisibleInstances);
+            thenVerifyVisibleNetworkConsistsOfOrContains(instanceId, "contain", listOfExpectedVisibleInstances);
             break;
         default:
             fail(StringUtils.format("Test type %s is not supported.", testType));
@@ -295,31 +295,53 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
     }
 
     /**
-     * Verifies that a given set of instances is present in a given instance's visible network.
+     * Verifies the state of an Uplink connection, more precisely the state of a potential Uplink connection setup -- a configured
+     * configuration which may or may not exist.
      * 
-     * @param instanceId the node that should have its visible uplink network inspected
-     * @param testType if the specified node is currently connected
-     * @param listOfExpectedUplinkInstances the comma-separated list of expected instances (i. e. uplink servers)
+     * "present" vs "absent" tests whether a given connection setup exists at all; "absent" means that such a setup was never configured or
+     * was deleted. "connected" vs "disconnected" represents whether the network connection attached to the given setup is in the state
+     * "connected" or not; intermediate states like "connecting" or "disconnecting" are considered "disconnected".
+     * 
+     * @param sourceInstanceId the id of the instance with the potentially configured connection
+     * @param targetInstanceId the id of the potential connection's target instance
+     * @param criterion the test criterion string
      * @param maxiumWaitSeconds the maximum retry time until success
      */
-    @Then("^the visible uplink network of \"([^\"]*)\" should (contain|not contain|be connected to|not be connected to) "
-        + "\"([^\"]*)\"(?: within (\\d+) seconds?)?$")
-    public void verifyVisibleUplinkNetwork(String instanceId, String testType, String listOfExpectedUplinkInstances,
+    @Then("^the (?:default )?Uplink connection from \"([^\"]*)\" to \"([^\"]*)\" "
+        + "should be (connected|disconnected|present|absent)(?: within (\\d+) seconds?)?$")
+    public void thenVerifyStateOfUplinkConnection(String sourceInstanceId, String targetInstanceId, String criterion,
         Integer maxiumWaitSeconds) {
+
+        String loginName = sourceInstanceId;
+        String clientId = "default";
 
         maxiumWaitSeconds = applyFallbackMaximumRetryTime(maxiumWaitSeconds);
 
         String description =
-            StringUtils.format("Expecting network of instance \"%s\" to %s \"%s\"", instanceId, testType, listOfExpectedUplinkInstances);
+            StringUtils.format("Expecting the Uplink connection from \"%s\" to \"%s\" to be \"%s\"", sourceInstanceId,
+                targetInstanceId, criterion);
         executeWithRetry((ExecutionAttempt) (attemptCount, isLastAttempt) -> {
-            return executeOnceVerifyVisibleUplinkNetwork(instanceId, testType, listOfExpectedUplinkInstances, isLastAttempt);
+            return executeOnceVerifyStateOfUplinkConnections(sourceInstanceId, targetInstanceId, loginName, clientId, criterion,
+                isLastAttempt);
         }, description, maxiumWaitSeconds);
     }
 
-    private boolean executeOnceVerifyVisibleUplinkNetwork(String instanceId, String testType, String listOfExpectedUplinkInstances,
-        boolean isLastAttempt) {
-        String commandOutput = executeCommandOnInstance(resolveInstance(instanceId), "uplink list", false);
-        List<String> expectedUplinkInstances = parseCommaSeparatedList(listOfExpectedUplinkInstances);
+    private boolean executeOnceVerifyStateOfUplinkConnections(String sourceInstanceId, String targetInstanceId, String loginName,
+        String clientId, String criterion, boolean isLastAttempt) throws OperationFailureException {
+
+        String commandOutput;
+        try {
+            commandOutput = executeCommandOnInstance(resolveInstance(sourceInstanceId), "uplink list", false);
+        } catch (AssertionError e) {
+            // remote command execution failing is possible in regular operation if an instance is queried right after its basic startup
+            if (!isLastAttempt) {
+                return false; // retry
+            }
+            fail(StringUtils.format("Failed to execute \"uplink list\" on instance %s: %s", sourceInstanceId, e.toString()));
+            return false; // only to prevent compiler errors; never reached due to fail() above
+        }
+
+        // TODO review this comment
         /**
          * NOTE THAT: From the test case we get only the "simple" name of an instance (e. g. "Uplink"). To be able to check the availability
          * of instances, we need the "Id" of instance, as it is constructed in the test steps which are "using the default build" which are
@@ -332,88 +354,100 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
          * @see InstanceInstantiationStepDefinitions.givenInstancesUsingBuild()
          * @see givenConfiguredNetworkConnections()
          */
-        ArrayList<String> expectedUplinkInstanceIds = new ArrayList<String>();
-        for (String instance : expectedUplinkInstances) {
-            String formattedInstance =
-                StringUtils.format(StepDefinitionConstants.CONNECTION_ID_FORMAT, instance, ConnectionOptionConstants.USER_NAME_DEFAULT);
-            expectedUplinkInstanceIds.add(formattedInstance);
-        }
 
         String[] outputLines = commandOutput.split(StepDefinitionConstants.LINEBREAK_REGEX);
-        // process the console output into a easier processable map
-        Map<String, Boolean> uplinkInstances = getUplinkInstances(outputLines);
+        Map<String, Boolean> uplinkInstances = getUplinkConnectionsWithConnectedState(outputLines);
 
-        switch (testType) {
-        case "be connected to":
-            for (String expectedInstanceId : expectedUplinkInstanceIds) {
-                if (!uplinkInstances.getOrDefault(expectedInstanceId, false)) {
-                    if (!isLastAttempt) {
-                        return false;
-                    }
-                    fail(StringUtils.format("Instance %s is not connected to %s.", instanceId, expectedInstanceId));
-                }
-            }
-            break;
-        case "not be connected to":
-            for (String expectedInstanceId : expectedUplinkInstanceIds) {
-                if (uplinkInstances.getOrDefault(expectedInstanceId, false)) {
-                    if (!isLastAttempt) {
-                        return false;
-                    }
-                    fail(StringUtils.format("Instance %s should not be connected to %s.", instanceId, expectedInstanceId));
-                }
-            }
-            break;
-        case "contain":
-            for (String expectedInstanceId : expectedUplinkInstanceIds) {
-                if (!uplinkInstances.containsKey(expectedInstanceId)) {
-                    if (!isLastAttempt) {
-                        return false;
-                    }
-                    fail(StringUtils.format("Uplink server %s is not visible for instance %s", expectedInstanceId, instanceId));
-                }
-            }
-            break;
-        case "not contain":
-            for (String expectedInstanceId : expectedUplinkInstanceIds) {
-                if (uplinkInstances.containsKey(expectedInstanceId)) {
-                    if (!isLastAttempt) {
-                        return false;
-                    }
-                    fail(StringUtils.format("Uplink server %s is not expected to be visible from instance %s.", expectedInstanceId,
-                        instanceId));
-                }
-            }
-            break;
+        String connectionId = constructUplinkConnectionSetupId(targetInstanceId, loginName, clientId);
 
+        switch (criterion) {
+        case "connected":
+            if (!uplinkInstances.getOrDefault(connectionId, false)) {
+                if (!isLastAttempt) {
+                    return false;
+                }
+                fail(StringUtils.format("Connection %s at instance %s is not connected", connectionId, sourceInstanceId));
+            }
+
+            break;
+        case "disconnected":
+            if (uplinkInstances.getOrDefault(connectionId, false)) {
+                if (!isLastAttempt) {
+                    return false;
+                }
+                fail(StringUtils.format("Connection %s at instance %s is connected when it should be disconnected", connectionId,
+                    sourceInstanceId));
+            }
+
+            break;
+        case "present":
+            if (!uplinkInstances.containsKey(connectionId)) {
+                if (!isLastAttempt) {
+                    return false;
+                }
+                fail(StringUtils.format("There is no Uplink connection %s configured at %s", connectionId,
+                    sourceInstanceId));
+            }
+            break;
+        case "absent":
+            if (uplinkInstances.containsKey(connectionId)) {
+                if (!isLastAttempt) {
+                    return false;
+                }
+                fail(StringUtils.format("There should be no Uplink connection %s configured at %s", connectionId,
+                    sourceInstanceId));
+            }
+
+            break;
         default:
-            fail(StringUtils.format("Test type %s is not supported.", testType));
+            fail(StringUtils.format("Unsopported test criterion %s", criterion));
         }
 
         return true; // attempt successful
     }
 
     /**
-     * Performs an ungrateful shutdown of an instance.
+     * Triggers a hard shutdown of an instance. Note that this action does NOT wait for the instance's termination.
      * 
      * @param instanceId the node that is to be shut down.
+     * @throws OperationFailureException on failure to execute the step (as opposed to an assertion failure)
      */
     @When("^instance \"([^\"]*)\" crashes$")
-    public void thenUplinkNetworkConsistsOf(String instanceId) {
-
-        String commandOutput = executeCommandOnInstance(resolveInstance(instanceId), "force-crash 0", false);
-        printToCommandConsole(commandOutput);
-
-        printToCommandConsole("Hard shutdown of instance \"" + instanceId);
+    public void whenTriggeringACrashOfInstance(String instanceId) throws OperationFailureException {
+        triggerHardShutdownOfInstance(instanceId);
+        printToCommandConsole("Triggered a hard shutdown (crash) of instance \"" + instanceId
+            + "\"; note that this action does NOT wait for the instance's termination");
     }
 
     /**
-     * Extracts the uplink instances from the output of the console command "uplink list".
+     * Triggers a hard shutdown of an instance and waits for its termination.
+     * 
+     * @param instanceId the node that is to be shut down.
+     * @param maxWaitSeconds the maximum time to allow until actual shutdown
+     * @throws OperationFailureException on failure to execute the step (as opposed to an assertion failure)
+     */
+    @When("^triggering a crash of instance \"([^\"]*)\" and it terminated within (\\d+) seconds?$")
+    public void whenTriggeringACrashOfInstanceAndWaitingForTerminination(String instanceId, int maxWaitSeconds)
+        throws OperationFailureException {
+        triggerHardShutdownOfInstance(instanceId);
+        // wait for shutdown
+        executeWithRetry((ExecutionAttempt) (attempt, isLastAttempt) -> {
+            return !INSTANCE_MANAGEMENT_SERVICE.isInstanceRunning(instanceId); // not running -> return success, otherwise retry
+        }, instanceId, maxWaitSeconds);
+    }
+
+    private void triggerHardShutdownOfInstance(String instanceId) throws OperationFailureException {
+        String commandOutput = executeCommandOnInstance(resolveInstance(instanceId), "force-crash 0", false);
+        printToCommandConsole(commandOutput);
+    }
+
+    /**
+     * Parses the output of "uplink list" and returns a map of connection setup ids with their "connected" state.
      * 
      * @param outputLines the command output split in lines
      * @return a Map with the uplink instances and their respective state of connected (true/false).
      */
-    private Map<String, Boolean> getUplinkInstances(String[] outputLines) {
+    private Map<String, Boolean> getUplinkConnectionsWithConnectedState(String[] outputLines) {
         Map<String, Boolean> uplinkMap = new HashMap<String, Boolean>();
         String foundInstances = "";
         for (String line : outputLines) {
@@ -424,7 +458,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
             int positionOfId = line.indexOf("(id:");
             final int minusOne = -1;
             if (positionOfId == minusOne) {
-                fail(StringUtils.format("Unexpected result from command \"uplink list: \n %s", line));
+                fail(StringUtils.format("Failed to parse output line of command \"uplink list\":\n%s", line));
             } else {
                 String foundInstanceId = line.substring(positionOfId + 5, line.indexOf(")", positionOfId));
                 // Alternatively we may want to use the format as when it is originally created:
@@ -440,13 +474,10 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
                 } else if (line.contains("CONNECTED: false")) {
                     uplinkMap.put(foundInstanceId, false);
                 } else {
-                    printToCommandConsole(
-                        StringUtils.format("Line of output from command \\\"uplink list: \\n %s has no connected status", line));
+                    fail(StringUtils.format("Line of output from command \\\"uplink list: \\n %s has no connected status", line));
                 }
             }
-            // TODO sind 4 ebenen zuviel?
         }
-        printToCommandConsole("Found instance(s) " + foundInstances);
         return uplinkMap;
     }
 
@@ -460,14 +491,14 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
     }
 
     private Optional<String> extractValueFromOption(String option) {
-        String[] keyValuePair = option.split(StepDefinitionConstants.OPTION_SEPARATOR);
+        String[] keyValuePair = option.split(StepDefinitionConstants.OPTION_KV_SEPARATOR);
         switch (keyValuePair.length) {
         case (1):
             return Optional.empty();
         case (2):
             return Optional.of(keyValuePair[1]);
         default:
-            fail(StringUtils.format("Option %s contains multiple %s", option, StepDefinitionConstants.OPTION_SEPARATOR));
+            fail(StringUtils.format("Option %s contains multiple %s", option, StepDefinitionConstants.OPTION_KV_SEPARATOR));
             return null; // never reaches, since fail breaks
         }
     }
@@ -657,106 +688,120 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
 
     private void setUpCompleteSSHConnection(ManagedInstance clientInstance, ManagedInstance serverInstance, String options)
         throws Exception {
+
         SSHConnectionOptions connectionOptions = parseSSHConnectionOptions(options);
+        final String userName = connectionOptions.getUserName().orElse(clientInstance.getId());
+        // intended for testing setups (e.g. BDD) only: use the login name as default password
+        final String password = userName; // TODO clarify: why is there no getPassword() method?
+
         final Integer serverPort = configureSSHServer(serverInstance, connectionOptions.getServerNumber());
         final SSHAccountParameters accountParametersSSH = SSHAccountParameters.builder()
-            .userRole(connectionOptions.getUserRole().orElse("ra_demo"))
-            .userName(connectionOptions.getUserName())
-            .password(connectionOptions.getUserName())
+            .userRole(connectionOptions.getUserRole().orElse("ra_demo")) // FIXME this is not a role; pick a better default
+            .userName(userName)
+            .password(password)
             .isEnabled(true)
             .build();
         addSSHAccount(serverInstance, accountParametersSSH);
         configureSSHConnection(clientInstance,
             StringUtils.format(StepDefinitionConstants.CONNECTION_ID_FORMAT, serverInstance.getId(), connectionOptions.getPort()),
-            clientInstance.getId(), ConnectionOptionConstants.HOST_DEFAULT, serverPort, connectionOptions.getUserName());
+            clientInstance.getId(), ConnectionOptionConstants.HOST_DEFAULT, serverPort, userName);
     }
 
-    private void setUpPartialSSHConnection(ManagedInstance clientInstance, ManagedInstance serverInstance, String options)
+    // TODO refactor this to eliminate duplication with setUpCompleteSSHConnection()?
+    // TODO clarify password configuration
+    private void setUpClientSideOfSSHConnection(ManagedInstance clientInstance, ManagedInstance serverInstance, String options)
         throws Exception {
         SSHConnectionOptions connectionOptions = parseSSHConnectionOptions(options);
+        final String userName = connectionOptions.getUserName().orElse(clientInstance.getId());
+
+        final Integer serverPort = connectionOptions.getPort().orElse(
+            getServerPort(serverInstance, connectionOptions.getServerNumber(), StepDefinitionConstants.CONNECTION_TYPE_REGULAR));
         configureSSHConnection(clientInstance,
             connectionOptions.getConnectionName()
                 .orElse(StringUtils.format(StepDefinitionConstants.CONNECTION_ID_FORMAT, serverInstance.getId(),
-                    connectionOptions.getUserName())),
+                    userName)),
             connectionOptions.getDisplayName()
                 .orElse(StringUtils.format(StepDefinitionConstants.CONNECTION_ID_FORMAT, serverInstance.getId(),
-                    connectionOptions.getUserName())),
-            connectionOptions.getHost(),
-            connectionOptions.getPort().orElse(
-                getServerPort(serverInstance, connectionOptions.getServerNumber(), StepDefinitionConstants.CONNECTION_TYPE_REGULAR)),
-            connectionOptions.getUserName());
+                    userName)),
+            connectionOptions.getHost(), serverPort, userName);
     }
 
     /**
-     * Sets up the uplink connections with the same "cloned" ID for all clientInstances. The ID is optionally cloned from the first client
-     * in the array clientInstances and used for all instances.
+     * Sets up an Uplink connection for test scenarios (e.g. BDD testing) by configuring both the client and the server side. Previous
+     * versions of this method offered a special "clone" parameter; this is superseded by specifying "clientId=..." as part of the options
+     * string.
      * 
-     * @param clientInstance the client instances to be connected to the uplink server
-     * @param commonClientId the client ID if the ID of the client instances should be the same for all ("cloned"), otherwise ""
-     * @param serverInstance
-     * @param options
+     * @param clientInstance the client instance where a connection is to be registered
+     * @param serverInstance the Uplink server where an account is to be registered
+     * @param options a string of options, separated by {@link StepDefinitionConstants#WHITESPACE_SEPARATOR}, with each option either being
+     *        a flag (key only) or a key-value pair separated by {@link StepDefinitionConstants#OPTION_KV_SEPARATOR}
      */
-    private void setUpCompleteUplinkConnection(ManagedInstance clientInstance, String commonClientId, ManagedInstance serverInstance,
-        String options)
+    private void setUpBothEndsOfUplinkConnection(ManagedInstance clientInstance, ManagedInstance serverInstance, String options)
         throws Exception {
+
         UplinkConnectionOptions connectionOptions = parseUplinkConnectionOptions(options);
         final Integer serverPort = configureSSHServer(serverInstance, connectionOptions.getServerNumber());
+        final String userName = connectionOptions.getUserName().orElse(clientInstance.getId());
+        // the default value should (but doesn't have to) match UplinkProtocolConstants.SESSION_QUALIFIER_DEFAULT
+        final String clientId = connectionOptions.getClientId().orElse("default");
+        // intended for testing setups (e.g. BDD) only: use the login name as default password
+        final String password = connectionOptions.getPassword().orElse(userName);
+
         final SSHAccountParameters accountParametersUpl = SSHAccountParameters.builder()
             .userRole(connectionOptions.getUserRole().orElse("uplink_client"))
-            .userName(connectionOptions.getUserName())
-            .password(connectionOptions.getUserName())
+            .userName(userName)
+            .password(password)
             .isEnabled(true)
             .build();
         addSSHAccount(serverInstance, accountParametersUpl);
 
-        // if there is a *common* client ID, we have to replace the usual client ID.
-        final String clientId;
-        if (commonClientId.equals("")) {
-            clientId = clientInstance.getId();
-        } else {
-            clientId = commonClientId;
-        }
+        final String connectionSetupId = constructUplinkConnectionSetupId(serverInstance.getId(), userName, clientId);
+        // StringUtils.format(StepDefinitionConstants.CONNECTION_ID_FORMAT, clientInstance.getId(), serverInstance.getId());
 
         final ParsedMultiParameter uplinkParameters = new ParsedMultiParameter(
             new AbstractParsedCommandParameter[] {
-                new ParsedStringParameter(StringUtils.format(StepDefinitionConstants.CONNECTION_ID_FORMAT,
-                    serverInstance.getId(), connectionOptions.getUserName())),
+                new ParsedStringParameter(connectionSetupId),
                 new ParsedStringParameter(ConnectionOptionConstants.HOST_DEFAULT),
                 new ParsedIntegerParameter(serverPort),
-                new ParsedStringParameter(
-                    StringUtils.format(StepDefinitionConstants.CONNECTION_ID_FORMAT, clientId, serverInstance.getId())),
+                new ParsedStringParameter(clientId),
                 new ParsedBooleanParameter(connectionOptions.getGateway()),
                 new ParsedBooleanParameter(connectionOptions.getAutoStart()),
                 new ParsedBooleanParameter(connectionOptions.getAutoRetry()),
-                new ParsedStringParameter(connectionOptions.getUserName()),
+                new ParsedStringParameter(userName),
                 new ParsedStringParameter("password"),
-                new ParsedStringParameter(connectionOptions.getUserName()) // for test purposes, the pw equals the userName
+                new ParsedStringParameter(password)
             });
 
         configureUplinkConnection(clientInstance, uplinkParameters);
     }
 
+    // TODO refactor this to eliminate duplication with setUpUplinkConnectionForTesting()?
     private void setUpPartialUplinkConnection(ManagedInstance clientInstance, ManagedInstance serverInstance, String options)
         throws Exception {
         UplinkConnectionOptions connectionOptions = parseUplinkConnectionOptions(options);
+        final String userName = connectionOptions.getUserName().orElse(clientInstance.getId());
+        // the default value should (but doesn't have to) match UplinkProtocolConstants.SESSION_QUALIFIER_DEFAULT
+        final String clientId = connectionOptions.getClientId().orElse("default");
+        // intended for testing setups (e.g. BDD) only: use the login name as default password
+        final String password = connectionOptions.getPassword().orElse(userName);
+
+        final String connectionSetupId = constructUplinkConnectionSetupId(clientInstance.getId(), userName, clientId);
 
         final ParsedMultiParameter uplinkParameters = new ParsedMultiParameter(
             new AbstractParsedCommandParameter[] {
-                new ParsedStringParameter(StringUtils.format(StepDefinitionConstants.CONNECTION_ID_FORMAT,
-                    serverInstance.getId(), connectionOptions.getUserName())),
+                new ParsedStringParameter(connectionSetupId),
                 new ParsedStringParameter(ConnectionOptionConstants.HOST_DEFAULT),
                 new ParsedIntegerParameter(connectionOptions.getPort()
                     .orElse(
                         getServerPort(serverInstance, connectionOptions.getServerNumber(),
                             StepDefinitionConstants.CONNECTION_TYPE_REGULAR))),
-                new ParsedStringParameter(
-                    StringUtils.format(StepDefinitionConstants.CONNECTION_ID_FORMAT, clientInstance.getId(), serverInstance.getId())),
+                new ParsedStringParameter(clientId),
                 new ParsedBooleanParameter(connectionOptions.getGateway()),
                 new ParsedBooleanParameter(connectionOptions.getAutoStart()),
                 new ParsedBooleanParameter(connectionOptions.getAutoRetry()),
-                new ParsedStringParameter(connectionOptions.getUserName()),
+                new ParsedStringParameter(userName),
                 new ParsedStringParameter("password"),
-                new ParsedStringParameter(connectionOptions.getUserName()) // for test purposes, the pw equals the userName
+                new ParsedStringParameter(password)
             });
 
         configureUplinkConnection(clientInstance, uplinkParameters);
@@ -865,7 +910,12 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
         return false;
     }
 
-    private boolean testIfConfiguredOutgoingConnectionsAreConnected(final ManagedInstance instance, boolean isFinalAttempt) {
+    private String constructUplinkConnectionSetupId(String targetInstanceId, String loginName, String clientId) {
+        return String.join("_", targetInstanceId, loginName, clientId);
+    }
+
+    private boolean testIfConfiguredOutgoingConnectionsAreConnected(final ManagedInstance instance, boolean isFinalAttempt)
+        throws OperationFailureException {
         final List<String> connectionIds = instance.accessConfiguredAutostartConnectionIds();
 
         String commandOutput = executeCommandOnInstance(instance, "cn list", false);
@@ -908,7 +958,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
     }
 
     private String extractKeyFromOption(String option) {
-        return option.split(StepDefinitionConstants.OPTION_SEPARATOR)[0];
+        return option.split(StepDefinitionConstants.OPTION_KV_SEPARATOR)[0];
     }
 
 }

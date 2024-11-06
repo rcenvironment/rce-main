@@ -16,10 +16,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 import de.rcenvironment.core.utils.executor.testutils.IntegrationTestExecutorUtils.ExecutionResult;
 import io.cucumber.java.Scenario;
@@ -48,6 +51,8 @@ public final class TestScenarioExecutionContext {
     private Scenario initialScenarioObject;
 
     private Thread initialExecutionThread;
+
+    private StopWatch stopWatch;
 
     private final Log log = LogFactory.getLog(getClass());
 
@@ -113,7 +118,8 @@ public final class TestScenarioExecutionContext {
 
         this.initialScenarioObject = newScenario;
         this.initialExecutionThread = Thread.currentThread();
-        outputReceiver.addOutput("> Starting test scenario \"" + newScenario.getName() + "\"");
+        this.stopWatch = StopWatch.createStarted();
+        outputReceiver.addOutput(StringUtils.format("> Starting test scenario \"%s\"", newScenario.getName()));
     }
 
     /**
@@ -136,10 +142,11 @@ public final class TestScenarioExecutionContext {
 
         if (initialScenarioObject.isFailed()) {
             outputReceiver
-                .addOutput(
-                    "*** Error in test scenario \"" + initialScenarioObject.getName() + "\"; dumping any captured StdOut/StdErr output");
+                .addOutput(StringUtils.format("*** Error in test scenario \"%s\"", initialScenarioObject.getName()));
             initialScenarioObject
-                .log("*** Error in test scenario \"" + initialScenarioObject.getName() + "\"; dumping any captured StdOut/StdErr output");
+                .log(StringUtils.format("*** Error in test scenario \"%s\"", initialScenarioObject.getName()));
+
+            // TODO review: it seems that this field is never set, so it should always be "null"?
             if (currentExecutionResult != null) {
                 for (String line : currentExecutionResult.stdoutLines) {
                     String logLine = "[StdOut] " + line;
@@ -152,9 +159,9 @@ public final class TestScenarioExecutionContext {
                     log.error(logLine);
                 }
             }
-        } else {
-            outputReceiver.addOutput("< Completed test scenario \"" + initialScenarioObject.getName() + "\"");
         }
+        outputReceiver.addOutput(StringUtils.format("< Test scenario \"%s\" finished (result: %s, duration: %d msec)",
+            initialScenarioObject.getName(), initialScenarioObject.getStatus(), stopWatch.getTime(TimeUnit.MILLISECONDS)));
     }
 
     public TextOutputReceiver getOutputReceiver() {
