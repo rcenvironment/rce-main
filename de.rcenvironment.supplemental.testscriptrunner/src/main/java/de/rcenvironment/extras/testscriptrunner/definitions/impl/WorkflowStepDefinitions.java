@@ -80,6 +80,8 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
 
     private static final String EXPORTED_WORKFLOW_RUNS_SUB_DIR = "workspace\\exported_wfs";
 
+    private static final int REMOTE_WORKFLOW_STATE_QUERY_RETRY_INTERVAL = 2000;
+
     private String lastWorkflowName;
 
     private Path lastWorkflowLogDir;
@@ -402,7 +404,7 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
                             }
 
                             try {
-                                Thread.sleep(StepDefinitionConstants.SLEEP_DEFAULT_IN_MILLISECS);
+                                Thread.sleep(REMOTE_WORKFLOW_STATE_QUERY_RETRY_INTERVAL);
                             } catch (InterruptedException e) {
                                 log.error("Exception while trying to sleep tread", e);
                                 return Status.CANCEL_STATUS;
@@ -505,8 +507,8 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
                     printToCommandConsole(StringUtils.format("Workflow %s has reached state %s on %s.", workflowName, state, instanceId));
                     return;
                 }
-                Thread.sleep(StepDefinitionConstants.SLEEP_DEFAULT_IN_MILLISECS);
-                countMillis -= StepDefinitionConstants.SLEEP_DEFAULT_IN_MILLISECS;
+                Thread.sleep(REMOTE_WORKFLOW_STATE_QUERY_RETRY_INTERVAL);
+                countMillis -= REMOTE_WORKFLOW_STATE_QUERY_RETRY_INTERVAL;
             } catch (InterruptedException e) {
                 fail(StringUtils.format("InterruptedException caused when waiting for workflow to reach state. Exception: \n%s", e));
                 return;
@@ -574,8 +576,8 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
                     return;
                 }
             }
-            Thread.sleep(StepDefinitionConstants.SLEEP_DEFAULT_IN_MILLISECS);
-            countMillis -= StepDefinitionConstants.SLEEP_DEFAULT_IN_MILLISECS;
+            Thread.sleep(REMOTE_WORKFLOW_STATE_QUERY_RETRY_INTERVAL);
+            countMillis -= REMOTE_WORKFLOW_STATE_QUERY_RETRY_INTERVAL;
         }
         printToCommandConsole(
             StringUtils.format("%s second(s) have passed and not all workflows are finished. Timeout was reached.", timeoutInSecs));
@@ -752,9 +754,10 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
      * @param instanceIds a comma-separated list of instances, which when present (non-null) influences which instances are effected. How it
      *        does that depends on the value of {@code allFlag} and is defined in {@link #resolveInstanceList()}
      * @param workflowNames a comma-separated list of workflownames which are to be seen.
+     * @throws OperationFailureException on execution failure (e.g. an invalid instance id)
      */
     @Then("^(all )?(?:instance[s]? )?(?:\"([^\"]+)\" )?should see(?: workflow[s]?)? \"([^\"]+)\"$")
-    public void thenInstancesShouldSeeworkflow(String allFlag, String instanceIds, String workflowNames) {
+    public void thenInstancesShouldSeeworkflow(String allFlag, String instanceIds, String workflowNames) throws OperationFailureException {
         performActionOnInstances(
             new AssertWorkflowVisibilityAction(parseCommaSeparatedList(workflowNames)),
             resolveInstanceList(allFlag != null, instanceIds),
@@ -769,9 +772,11 @@ public class WorkflowStepDefinitions extends InstanceManagementStepDefinitionBas
      * @param instanceIds a comma-separated list of instances, which when present (non-null) influences which instances are effected. How it
      *        does that depends on the value of {@code allFlag} and is defined in {@link #resolveInstanceList()}
      * @param workflowNames a comma-separated list of workflownames which are to be seen.
+     * @throws OperationFailureException on execution failure (e.g. an invalid instance id)
      */
     @Then("^(all )?(?:instance[s]? )?(?:\"([^\"]+)\" )?should see identical data for(?: workflow[s]?)? \"([^\"]+)\"$")
-    public void thenInstancesShouldSeeIdenticalData(String allFlag, String instanceIds, String workflowNames) {
+    public void thenInstancesShouldSeeIdenticalData(String allFlag, String instanceIds, String workflowNames)
+        throws OperationFailureException {
         List<ManagedInstance> instances = resolveInstanceList(allFlag != null, instanceIds);
         if (instances.size() < 2) {
             fail("At least two instances are neccessara to have a meaningful comparison. Less were provided.");

@@ -73,10 +73,12 @@ public class InstanceCommandStepDefinitions extends InstanceManagementStepDefini
      *        the order or concurrence of the commands, but the order or concurrence of the instances on which the commands are executed.
      *        The commands are executed in the given ordering. Can be chosen from "in the given order","concurrently","in a random order".
      *        If null sequentially is the default.
+     * @throws OperationFailureException on execution failure (e.g. an invalid instance id)
      */
     @When("^executing(?: the)? command[s]? \"([^\"]*)\" on( all)?(?: instance[s])?(?: \"([^\"]*)\")?"
         + "(?: (in the given order|concurrently|in a random order))?$")
-    public void whenExecutingCommandOnInstances(String commandList, String allFlag, String instanceIds, String executionDesc) {
+    public void whenExecutingCommandOnInstances(String commandList, String allFlag, String instanceIds, String executionDesc)
+        throws OperationFailureException {
         performActionOnInstances(
             new ExecuteCommandOnInstanceAction(parseCommaSeparatedList(commandList), true),
             resolveInstanceList(allFlag != null, instanceIds),

@@ -262,10 +262,11 @@ public class ComponentStepDefinitions extends InstanceManagementStepDefinitionBa
      * @param instanceId the instance to query
      * @param componentsTable the expected component data to see (or not see in case of the reserved "absent" marker)
      * @param maxiumWaitSeconds the maximum retry time until success
+     * @throws OperationFailureException on execution failure (e.g. an invalid instance id)
      */
     @Then("^instance \"([^\"]*)\" should see these components(?: within (\\d+) seconds?)?:$")
     public void validateComponentNetworkVisibility(String instanceId, Integer maxiumWaitSeconds,
-        DataTable componentsTable) throws InterruptedException {
+        DataTable componentsTable) throws InterruptedException, OperationFailureException {
 
         maxiumWaitSeconds = applyFallbackMaximumRetryTime(maxiumWaitSeconds);
 

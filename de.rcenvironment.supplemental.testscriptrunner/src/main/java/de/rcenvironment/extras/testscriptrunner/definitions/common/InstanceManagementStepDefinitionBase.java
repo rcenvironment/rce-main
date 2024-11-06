@@ -212,8 +212,12 @@ public abstract class InstanceManagementStepDefinitionBase extends AbstractStepD
         return resolveExecutionMode(executionDesc, null); // null = no fallback
     }
 
-    protected final ManagedInstance resolveInstance(String instanceId) {
-        return executionContext.getInstanceFromId(instanceId);
+    protected final ManagedInstance resolveInstance(String instanceId) throws OperationFailureException {
+        final ManagedInstance instanceIfPresent = executionContext.getInstanceFromId(instanceId);
+        if (instanceIfPresent == null) {
+            throw new OperationFailureException(StringUtils.format("Unregistered instance id '%s'", instanceId));
+        }
+        return instanceIfPresent;
     }
 
     /**
@@ -224,8 +228,9 @@ public abstract class InstanceManagementStepDefinitionBase extends AbstractStepD
      * @param instanceIds list of instances that should be effected
      * 
      * @return List of ManagedInstances
+     * @throws OperationFailureException on execution failure (e.g. an invalid instance id)
      */
-    protected List<ManagedInstance> resolveInstanceList(boolean allFlag, String instanceIds) {
+    protected List<ManagedInstance> resolveInstanceList(boolean allFlag, String instanceIds) throws OperationFailureException {
         List<ManagedInstance> instances;
         if (instanceIds == null) {
             instances = new ArrayList<ManagedInstance>(executionContext.getEnabledInstances());
