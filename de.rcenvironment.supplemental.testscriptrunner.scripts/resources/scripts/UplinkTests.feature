@@ -1,16 +1,8 @@
 Feature: UplinkTests
 
-# General remark:
-# Many scenarios are here allowed to have warnings which indicate problems with shutdowns etc., like:
-#    Error in asynchronous callback; shutting down queue
-#    Session terminated in non-terminal state UNCLEAN_SHUTDOWN_INITIATED
-#    Failed to register channelClosed() event
-#    as it is already in use by session 
-# This, however, is not the ideal case, these warnings are foremost allowed because they do not affect 
-# the intended test objectives, but hint to general problems at synchronizing shutdowns etc.; these 
-# problems are at least partially addressed in already existing Issues.
 
 @UplinkTestsFeature
+@DefaultTestSuite
 @UplinkReviewed
 @UplinkNew01
 @Uplink01
@@ -60,6 +52,7 @@ Scenario: Basic operation of Uplink connections between two clients and two serv
 
 
 @UplinkTestsFeature
+@DefaultTestSuite
 @UplinkReviewed
 @UplinkNew03
 # TODO remove extra tags after transition
@@ -154,6 +147,7 @@ Scenario: Remote visibility of Uplink tool after graceful restarts of clients an
 
 
 @UplinkTestsFeature
+@DefaultTestSuite
 @UplinkReviewed
 @UplinkNew04
 # TODO remove extra tags after transition
@@ -224,7 +218,7 @@ Scenario: Remote visibility of Uplink tool after crashes and restarts of clients
 	# start of teardown 
 
     When stopping instances "Client1, Client2"
-    When stopping instance "Server1"
+    And  stopping instance "Server1"
     
     # allow expected warnings caused by server restart and potential auto-retry before it was reachable again
     Then the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors: 
@@ -242,6 +236,7 @@ Scenario: Remote visibility of Uplink tool after crashes and restarts of clients
 
 
 @UplinkTestsFeature
+@DefaultTestSuite
 @UplinkReviewed
 @UplinkNew05
 @Uplink09
@@ -264,7 +259,9 @@ Scenario: Uplink clients autoconnecting when they are started before the server
     Then instance "Client2" should see these components within 5 seconds:
         | Client1 (via Client1/default) | common/TestTool | local |
 
-    When stopping all instances
+    # shut down the clients first to avoid irrelevant warnings
+    When stopping instances "Client1, Client2"
+    And  stopping instance "Server1"
     Then the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     java.net.ConnectException: Connection refused
@@ -277,6 +274,7 @@ Scenario: Uplink clients autoconnecting when they are started before the server
 
 
 @UplinkTestsFeature
+@DefaultTestSuite
 @UplinkReviewed
 @UplinkNew06
 @Server10
