@@ -49,8 +49,8 @@
     "platform" : "00000000000000000000000000000002:0",
     "component" : {
       "identifier" : "de.rcenvironment.script",
-      "version" : "3.4",
-      "name" : "Script"
+      "name" : "Script",
+      "version" : "3.5"
     },
     "configuration" : {
       "pythonExecutionPath" : "${pythonExecutionPath}",
@@ -83,8 +83,8 @@
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.script",
-      "version" : "3.4",
-      "name" : "Script"
+      "name" : "Script",
+      "version" : "3.5"
     },
     "configuration" : {
       "pythonExecutionPath" : "${pythonExecutionPath}",
