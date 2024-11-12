@@ -90,6 +90,7 @@ import de.rcenvironment.core.utils.common.TempFileServiceAccess;
 import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 import de.rcenvironment.core.utils.common.textstream.receivers.CapturingTextOutReceiver;
+import de.rcenvironment.core.utils.common.textstream.receivers.NOPTextOutputReceiver;
 import de.rcenvironment.core.utils.incubator.ServiceRegistry;
 import de.rcenvironment.core.utils.incubator.ServiceRegistryPublisherAccess;
 
@@ -1550,7 +1551,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         }
         logDir.mkdirs();
 
-        CapturingTextOutReceiver outputReceiver = new CapturingTextOutReceiver();
+		NOPTextOutputReceiver outputReceiver = new NOPTextOutputReceiver();
 
         // TODO specify log directory?
         WorkflowExecutionException executionException = null;
