@@ -9,7 +9,6 @@
 package de.rcenvironment.core.component.workflow.execution.internal;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -152,16 +151,8 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
         }
         RemotableWorkflowExecutionControllerService remoteWFExecControllerService =
             communicationService.getRemotableService(RemotableWorkflowExecutionControllerService.class, wfDescription.getControllerNode());
-        try {
-            return remoteWFExecControllerService.verifyComponentVisibility(componentRefs);
-        } catch (RemoteOperationException e) {
-            Map<String, String> result = new HashMap<>();
-            for (WorkflowNode wfDescNode : wfDescription.getWorkflowNodes()) {
-                result.put(wfDescNode.getIdentifierAsObject().toString(),
-                    ERROR_MESSAGE_COMPONENT_VISIBILITY_FAILURE + e.getMessage());
-            }
-            return result;
-        }
+
+        return remoteWFExecControllerService.verifyComponentVisibility(componentRefs);
     }
 
     private WorkflowExecutionInformation startWorkflowExecutionInternal(WorkflowExecutionContext wfExeCtx)
@@ -264,7 +255,7 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
     public Set<WorkflowExecutionInformation> getLocalWorkflowExecutionInformations() {
         try {
             return new HashSet<>(wfExeCtrlService.getWorkflowExecutionInformations());
-        } catch (ExecutionControllerException | RemoteOperationException e) {
+        } catch (RemoteOperationException e) {
             // should not happen as it is finally a local call and the ExecutionController are directly fetched before
             throw new IllegalStateException(ERROR_MESSAGE_FAILED_TO_GET_WF_EXEC_INFO + e.getMessage());
         }
@@ -316,7 +307,7 @@ public class WorkflowExecutionServiceImpl implements WorkflowExecutionService {
         Set<WorkflowExecutionInformation> wfExeInfoSnapshot = new HashSet<>();
         try {
             wfExeInfoSnapshot.addAll(wfExeCtrlService.getWorkflowExecutionInformations());
-        } catch (ExecutionControllerException | RemoteOperationException e) {
+        } catch (RemoteOperationException e) {
             log.fetchingLocalWorkflowExecutionInformationFailed(e);
         }
         return wfExeInfoSnapshot;
