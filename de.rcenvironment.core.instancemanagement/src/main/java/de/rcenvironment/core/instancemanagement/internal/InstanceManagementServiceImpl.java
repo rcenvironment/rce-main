@@ -154,7 +154,7 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
 
     private static final Pattern WORKFLOW_START_PATTERN =
 			Pattern.compile(
-					"(?:.+\\n)*Validating target instances of '([^']+)'.+\\n.+'[^']+' validated successfully.+\\nLoading: '[^']+'.+\\nLog directory: '(\\S+)'\\nExecuting: '[^']+'.+; id: ([^\\s]+)");
+					"Validating target instances of '([^']+)'.+\\n.+'[^']+' validated successfully.+\\nLoading: '[^']+'.+\\nLog directory: '(\\S+)'\\nExecuting: '[^']+'.+; id: ([^\\s]+)");
 
     // Only the first mayor-version of a new profile version has to be entered. If the next mayor-versions use the
     // same profile-version, it is not necessary to include these mayor-version in this array.
