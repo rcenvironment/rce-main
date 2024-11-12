@@ -10,8 +10,8 @@
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.script",
-      "name" : "Script",
-      "version" : "3.5"
+      "version" : "3.4",
+      "name" : "Script"
     },
     "configuration" : {
       "pythonExecutionPath" : "${pythonExecutionPath}",
@@ -109,8 +109,8 @@
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.optimizer",
-      "name" : "Optimizer",
-      "version" : "8.1"
+      "version" : "8",
+      "name" : "Optimizer"
     },
     "configuration" : {
       "CustomDakotaPath" : "false",
@@ -204,8 +204,8 @@
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.script",
-      "name" : "Script",
-      "version" : "3.5"
+      "version" : "3.4",
+      "name" : "Script"
     },
     "configuration" : {
       "pythonExecutionPath" : "${pythonExecutionPath}",

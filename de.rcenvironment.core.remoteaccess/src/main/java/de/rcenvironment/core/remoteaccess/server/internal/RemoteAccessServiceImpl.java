@@ -90,7 +90,6 @@ import de.rcenvironment.core.utils.common.TempFileServiceAccess;
 import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 import de.rcenvironment.core.utils.common.textstream.receivers.CapturingTextOutReceiver;
-import de.rcenvironment.core.utils.common.textstream.receivers.NOPTextOutputReceiver;
 import de.rcenvironment.core.utils.incubator.ServiceRegistry;
 import de.rcenvironment.core.utils.incubator.ServiceRegistryPublisherAccess;
 
@@ -522,7 +521,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             }
 
             if (systemLoadData != null) {
-                String nodeId = tokens[2];
+                String nodeId = (String) tokens[2];
                 LogicalNodeId nodeIdObj = NodeIdentifierUtils.parseLogicalNodeIdStringWithExceptionWrapping(nodeId);
                 // TODO (p3) extract common code with above method?
                 final SystemLoadInformation loadDataEntry = systemLoadData.get(nodeIdObj);
@@ -1274,7 +1273,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             }
 
             if (systemLoadData != null) {
-                String nodeId = tokens[2];
+                String nodeId = (String) tokens[2];
                 LogicalNodeId nodeIdObj = NodeIdentifierUtils.parseLogicalNodeIdStringWithExceptionWrapping(nodeId);
                 // TODO (p3) extract common code with above method?
                 final SystemLoadInformation loadDataEntry = systemLoadData.get(nodeIdObj);
@@ -1551,7 +1550,9 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         }
         logDir.mkdirs();
 
-		NOPTextOutputReceiver outputReceiver = new NOPTextOutputReceiver();
+        // TODO review >5.0.0: remove this output capture, as it is only used for debug
+        // output? - misc_ro
+        CapturingTextOutReceiver outputReceiver = new CapturingTextOutReceiver();
 
         // TODO specify log directory?
         WorkflowExecutionException executionException = null;
