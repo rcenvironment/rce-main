@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2022 DLR, Germany
+ * Copyright 2006-2023 DLR, Germany
  * 
  * SPDX-License-Identifier: EPL-1.0
  * 
@@ -39,7 +39,7 @@ import de.rcenvironment.core.utils.common.TempFileServiceAccess;
  * @author Doreen Seider
  * @author Robert Mischke (minor fix)
  */
-public class PersistentWorkflowDescriptionLoaderServiceImplTest {
+public class WorkflowExecutionServiceImplTest {
 
     private TempFileService tempFileService = TempFileServiceAccess.getInstance();
 
@@ -94,7 +94,8 @@ public class PersistentWorkflowDescriptionLoaderServiceImplTest {
 
         WorkflowDescriptionPersistenceHandlerTestUtils.createWorkflowDescriptionPersistenceHandlerTestInstance();
 
-        PersistentWorkflowDescriptionLoaderServiceImpl wfExeService = new PersistentWorkflowDescriptionLoaderServiceImpl();
+        WorkflowExecutionServiceImpl wfExeService = new WorkflowExecutionServiceImpl();
+        wfExeService.bindPersistentWorkflowDescriptionLoaderService(new PersistentWorkflowDescriptionLoaderServiceImpl());
 
         File wfFileOrigin = new File(tempDir, "test_origin.wf");
         File wfFile = new File(tempDir, "test.wf");

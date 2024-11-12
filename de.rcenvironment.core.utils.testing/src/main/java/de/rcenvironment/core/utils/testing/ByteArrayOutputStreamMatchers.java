@@ -15,12 +15,10 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
 public final class ByteArrayOutputStreamMatchers {
-
     private ByteArrayOutputStreamMatchers() {}
 
     public static Matcher<ByteArrayOutputStream> isUTF8StringThat(Matcher<String> matcher) {
         return new TypeSafeMatcher<ByteArrayOutputStream>() {
-
             @Override
             public void describeTo(Description arg0) {
                 arg0.appendText("is a UTF8-encoded string that ");

@@ -16,9 +16,8 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
 public final class MapMatchers {
-
     private MapMatchers() {}
-
+    
     public static <T, U> Matcher<Object> map(Matcher<Map<T, U>> matcher) {
         return new BaseMatcher<Object>() {
 
@@ -37,15 +36,15 @@ public final class MapMatchers {
     public static <T, U> Matcher<Map<T, U>> containsMapping(T key, U value) {
         return containsMapping(CoreMatchers.equalTo(key), CoreMatchers.equalTo(value));
     }
-
+    
     public static <T, U> Matcher<Map<T, U>> containsMapping(Matcher<T> key, U value) {
         return containsMapping(key, CoreMatchers.equalTo(value));
     }
-
+    
     public static <T, U> Matcher<Map<T, U>> containsMapping(T key, Matcher<U> value) {
         return containsMapping(CoreMatchers.equalTo(key), value);
     }
-
+    
     public static <T, U> Matcher<Map<T, U>> containsMapping(Matcher<T> key, Matcher<U> value) {
         return new TypeSafeMatcher<Map<T, U>>() {
 

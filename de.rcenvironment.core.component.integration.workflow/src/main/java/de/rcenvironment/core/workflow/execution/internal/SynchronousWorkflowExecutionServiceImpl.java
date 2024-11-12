@@ -41,8 +41,8 @@ public class SynchronousWorkflowExecutionServiceImpl implements SynchronousWorkf
 
         final WorkflowExecutionInformation handle;
         try {
-            handle = workflowExecutionService.start(workflowExecutionContext);
-        } catch (WorkflowExecutionException e) {
+            handle = workflowExecutionService.startWorkflowExecution(workflowExecutionContext);
+        } catch (WorkflowExecutionException | RemoteOperationException e) {
             throw new ComponentException("Unexpected exception thrown during start of workflow execution", e);
         }
         return handle;

@@ -200,7 +200,7 @@ class WorkflowFunctionImpl implements WorkflowFunction {
     }
 
     private boolean executeWorkflow(final WorkflowDescription augmentedWorkflowDescription) throws WorkflowFunctionException {
-        final WorkflowExecutionContext workflowExecutionContext = WorkflowExecutionContextBuilder.createContextBuilder(augmentedWorkflowDescription)
+        final WorkflowExecutionContext workflowExecutionContext = new WorkflowExecutionContextBuilder(augmentedWorkflowDescription)
             .setInstanceName(this.workflowExecutionName)
             .setNodeIdentifierStartedExecution(idOfStartingNode)
             .build();

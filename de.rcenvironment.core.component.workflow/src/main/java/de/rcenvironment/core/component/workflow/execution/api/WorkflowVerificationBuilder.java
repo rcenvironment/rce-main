@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
+import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionService;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 
 public interface WorkflowVerificationBuilder {
@@ -38,15 +39,13 @@ public interface WorkflowVerificationBuilder {
 
     WorkflowVerificationBuilder numberOfSequentialRuns(int sequentialRunsParam);
 
-    WorkflowVerificationBuilder disposalBehavior(WorkflowExecutionContext.DisposalBehavior disposeParam);
+    WorkflowVerificationBuilder disposalBehavior(HeadlessWorkflowExecutionService.DisposalBehavior disposeParam);
 
-    WorkflowVerificationBuilder deletionBehavior(WorkflowExecutionContext.DeletionBehavior deleteParam);
+    WorkflowVerificationBuilder deletionBehavior(HeadlessWorkflowExecutionService.DeletionBehavior deleteParam);
 
-    WorkflowVerificationBuilder workflowExecutionService(WorkflowExecutionService service);
+    WorkflowVerificationBuilder workflowExecutionService(HeadlessWorkflowExecutionService service);
 
     WorkflowVerificationResults verify() throws IOException;
 
     WorkflowVerificationBuilder outputReceiver(TextOutputReceiver receiver);
-
-    WorkflowVerificationBuilder workflowFileLoaderFacade(WorkflowFileLoaderFacade service);
 }

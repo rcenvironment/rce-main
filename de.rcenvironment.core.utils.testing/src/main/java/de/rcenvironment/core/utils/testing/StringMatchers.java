@@ -11,9 +11,8 @@ import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
 public final class StringMatchers {
-
     private StringMatchers() {}
-
+    
     public static TypeSafeMatcher<String> equalToIgnoringWhiteSpace(final String expectedValue) {
         return new TypeSafeMatcher<String>() {
 
@@ -28,7 +27,7 @@ public final class StringMatchers {
                 final String expectedWithoutWhitespace = removeWhitespace(expectedValue);
                 return actualWithoutWhitespace.equals(expectedWithoutWhitespace);
             }
-
+            
             private String removeWhitespace(final String string) {
                 return string
                     .replace(" ", "")

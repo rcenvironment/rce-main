@@ -627,12 +627,4 @@ public class WorkflowDescription extends PropertiesChangeSupport implements Seri
         }
     }
 
-    // !Method was added for testing purposes only!
-    // Method was added to ensure good test coverage for a major overhaul of the Workflow Engine.
-    // After this work is completed, the method should again be removed.
-    // Dec. 2023, Kathrin Schaffert
-    public List<WorkflowNode> getNodes() {
-        return nodes;
-    }
-
 }
