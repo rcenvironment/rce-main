@@ -331,103 +331,60 @@ Scenario: Active stopping/restarting of connections during runtime
     """
 
 
-# TODO fix test failure @Matthias Wagner
-#@UplinkTestsFeature
-@Server11
-Scenario: Two clients with same ID access the uplink server after startup and dis- and reconnecting, uplink server rejects the second. 
+@UplinkTestsFeature
+@DefaultTestSuite
+@UplinkReviewed
+# note 1: this was previously tagged @Server11 for unknown reasons
+# note 2: the related test @Server12, which tested the same behavior using restarts, was removed as it was slow and provided no additional benefit
+@UplinkNew07
+Scenario: Proper server-side handling of two Uplink clients using the same ClientId (UplinkNew07)
 
-    Given instances "Server1, Client3a, Client3b" using the default build
-    And  configured cloned network connections "Client3a-[upl]->Server1 [autoStart autoRetry], Client3b-[upl]->Server1 [autoStart autoRetry]"
+    Given instances "Server1, Client1, Client2" using the default build
+    And  configured network connections "Client1-[upl]->Server1 [autoStart userName=sameUser clientId=sameCId]"
+    And  configured network connections "Client2-[upl]->Server1 [autoStart userName=sameUser clientId=sameCId]"
 
+    When starting instance "Server1"
+    And  starting instance "Client1"
+    Then the Uplink connection from "Client1" to "Server1" with userName="sameUser" and clientId="sameCId" should be connected within 5 seconds
 
-    And  starting instance "Server1"
-    And  starting instance "Client3a"
+    # the second client with the same ClientId should be rejected
 
-    And  the visible uplink network of "Client3a" should be connected to "Server1" within 5 seconds
-    And  starting instance "Client3b"
-    And  the visible uplink network of "Client3b" should not be connected to "Server1" within 5 seconds
-    # The client ID "Client3a" is the cloned one, equal for all instances:
-    And  the log output of "Client3b" should contain "Uplink handshake failed or connection refused: The combination of account name"
-    And  the log output of "Client3b" should contain "and client ID \"Client3a\" is already in use. To allow parallel logins, use a different client ID for each client."
+    When starting instance "Client2"
+    # do not test before a connection attempt was even made
+    And  waiting for 3 seconds
+    Then the Uplink connection from "Client2" to "Server1" with userName="sameUser" and clientId="sameCId" should be disconnected within 5 seconds
+    And  the log output of "Client2" should contain "Uplink handshake failed or connection refused: The combination of account name"
+    And  the log output of "Client2" should contain "and client ID \"sameCId\" is already in use. To allow parallel logins, use a different client ID for each client."
 
-    When executing command "uplink stop Server1_userName" on "Client3a"
-    #And waiting for 15 seconds
-    And  executing command "uplink start Server1_userName" on "Client3b"
-    #And waiting for 15 seconds
-    And  executing command "uplink start Server1_userName" on "Client3a"
-    #And waiting for 15 seconds
+    # after disconnecting Client1, however, Client2 should be able to connect normally
 
-    Then the visible uplink network of "Client3a" should not be connected to "Server1" within 5 seconds
-    And  the visible uplink network of "Client3b" should be connected to "Server1" within 5 seconds
-    And  the log output of "Client3a" should contain "Uplink handshake failed or connection refused: The combination of account name"
-    And  the log output of "Client3a" should contain "and client ID \"Client3a\" is already in use. To allow parallel logins, use a different client ID for each client."
+    When executing command "uplink stop Server1_sameUser_sameCId" on "Client1"
+    Then the Uplink connection from "Client1" to "Server1" with userName="sameUser" and clientId="sameCId" should be disconnected within 5 seconds
+
+    When executing command "uplink start Server1_sameUser_sameCId" on "Client2"
+    Then the Uplink connection from "Client2" to "Server1" with userName="sameUser" and clientId="sameCId" should be connected within 5 seconds
     
-    And  stopping instances "Client3a, Client3b"
+    # attempt to connect Client1 again, which should be rejected
+
+    When executing command "uplink start Server1_sameUser_sameCId" on "Client1"
+    # do not test before a connection attempt was even made
+    And  waiting for 1 seconds
+    Then the Uplink connection from "Client1" to "Server1" with userName="sameUser" and clientId="sameCId" should be disconnected within 5 seconds
+    And  the log output of "Client1" should contain "Uplink handshake failed or connection refused: The combination of account name"
+    And  the log output of "Client1" should contain "and client ID \"sameCId\" is already in use. To allow parallel logins, use a different client ID for each client."
+    
+    And  stopping instances "Client1, Client2"
     And  stopping instance "Server1"
-    And  the log output of instances "Client3a, Client3b" should indicate a clean shutdown with these allowed warnings or errors:
+    And  the log output of instances "Client1, Client2" should indicate a clean shutdown with these allowed warnings or errors:
     """
-    And  client ID "Client3a" is already in use. To allow parallel logins, use a different client ID for each client.
-    finished with a warning or error; inspect the log output above for details
+    An Uplink connection (Server1_sameUser_sameCId) finished with a warning or error
+    client ID "sameCId" is already in use. To allow parallel logins, use a different client ID for each client.
     """
     And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
-    as it exceeds the significant character limit (8)
-    stream is already closed
-    session already closed
-    from using namespace userNameClient3a as it is already in use
+    from using namespace sameUsersameCId- as it is already in use by
     """
 
-# TODO fix test failure @Matthias Wagner
-#@UplinkTestsFeature
-@Server12
-Scenario: Two clients with same ID access the uplink server after startup and repeated stop/restart, uplink server rejects the second. 
-
-    Given instances "Server1, Client3a, Client3b" using the default build
-    And  configured cloned network connections "Client3a-[upl]->Server1 [autoStart autoRetry], Client3b-[upl]->Server1 [autoStart autoRetry]"
-
-    And  starting instances "Server1"
-    And  starting instance "Client3a"
-
-    And  the visible uplink network of "Client3a" should be connected to "Server1" within 5 seconds
-    And  starting instance "Client3b"
-
-    And  the visible uplink network of "Client3b" should not be connected to "Server1" within 5 seconds
-    # The client ID "Client3a" is the cloned one, equal for all instances:
-    And  the log output of "Client3b" should contain "Uplink handshake failed or connection refused: The combination of account name"
-    And  the log output of "Client3b" should contain "and client ID \"Client3a\" is already in use. To allow parallel logins, use a different client ID for each client."
-
-    When stopping instances "Client3a, Client3b"
-    And  starting instance "Client3b"
-    And  starting instance "Client3a"
-
-    And  the visible uplink network of "Client3b" should be connected to "Server1" within 5 seconds
-    Then the visible uplink network of "Client3a" should not be connected to "Server1" within 5 seconds
-    And  the log output of "Client3a" should contain "Uplink handshake failed or connection refused: The combination of account name"
-    And  the log output of "Client3a" should contain "and client ID \"Client3a\" is already in use. To allow parallel logins, use a different client ID for each client."
-    
-    When stopping instances "Client3a, Client3b"
-    And  starting instance "Client3a"
-    And  starting instance "Client3b"
-
-    Then the visible uplink network of "Client3a" should be connected to "Server1" within 5 seconds
-    And  the visible uplink network of "Client3b" should not be connected to "Server1" within 5 seconds
-    And  the log output of "Client3b" should contain "Uplink handshake failed or connection refused: The combination of account name"
-    And  the log output of "Client3b" should contain "and client ID \"Client3a\" is already in use. To allow parallel logins, use a different client ID for each client."
-
-    And  stopping instances "Client3a, Client3b"
-    And  stopping instance "Server1"
-    And  the log output of instances "Client3a, Client3b" should indicate a clean shutdown with these allowed warnings or errors:
-    """
-    And  client ID "Client3a" is already in use. To allow parallel logins, use a different client ID for each client.
-    finished with a warning or error; inspect the log output above for details
-    """
-    And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
-    """
-    as it exceeds the significant character limit (8)
-    stream is already closed
-    session already closed
-    from using namespace userNameClient3a as it is already in use
-    """
 
 # TODO fix test failure @Matthias Wagner
 #@UplinkTestsFeature
