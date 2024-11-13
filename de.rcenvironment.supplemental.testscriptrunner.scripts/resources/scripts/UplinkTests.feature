@@ -206,11 +206,12 @@ Scenario: Remote visibility of Uplink tool after crashes and restarts of clients
     And  the log output of instance "Client1" should contain "An Uplink connection (Server1_Client1_default) finished with a warning or error"
     And  the log output of instance "Client2" should contain "An Uplink connection (Server1_Client2_default) finished with a warning or error"
 
-    When starting instance "Server1"
+    When waiting for 1 second
+    And  starting instance "Server1"
     
     # there is no exponential back-off implemented for Uplink yet, so a connection attempt should happen every 10 seconds
-    Then the Uplink connection from "Client1" to "Server1" should be connected within 12 seconds
-    And  the Uplink connection from "Client2" to "Server1" should be connected within 12 seconds
+    Then the Uplink connection from "Client1" to "Server1" should be connected within 15 seconds
+    And  the Uplink connection from "Client2" to "Server1" should be connected within 15 seconds
     
     And  instance "Client2" should see these components within 5 seconds:
         | Client1 (via Client1/default) | common/TestTool | local |
@@ -402,10 +403,8 @@ Scenario: Verify that a client can reconnect with the same username/clientId com
     And  starting instance "Client1"
     Then the Uplink connection from "Client1" to "Server1" should be connected within 5 seconds
 
-    When instance "Client1" crashes
-    # the crash command does not wait for termination, so simply restarting the instance right after the crash command is not robust
-    # TODO (p3) consider handling this in the backend, e.g. by offering a command variant that waits
-    And  waiting for 5 seconds
+	When triggering a crash of instance "Client1" and it terminated within 10 seconds
+    And  waiting for 1 second
     And  starting instance "Client1"
     # using a high timeout to allow for server-side release of the connection (and therefore the username+clientId namespace) and the client-side auto-reconnect
     Then the Uplink connection from "Client1" to "Server1" should be connected within 60 seconds

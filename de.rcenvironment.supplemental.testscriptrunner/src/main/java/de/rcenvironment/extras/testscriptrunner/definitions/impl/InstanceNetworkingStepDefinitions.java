@@ -440,10 +440,11 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
     public void whenTriggeringACrashOfInstanceAndWaitingForTerminination(String instanceId, int maxWaitSeconds)
         throws OperationFailureException {
         triggerHardShutdownOfInstance(instanceId);
+        final String operationTitle = StringUtils.format("Trigger a crash of '%s' and wait for its termination", instanceId);
         // wait for shutdown
         executeWithRetry((ExecutionAttempt) (attempt, isLastAttempt) -> {
             return !INSTANCE_MANAGEMENT_SERVICE.isInstanceRunning(instanceId); // not running -> return success, otherwise retry
-        }, instanceId, maxWaitSeconds);
+        }, operationTitle, maxWaitSeconds);
     }
 
     private void triggerHardShutdownOfInstance(String instanceId) throws OperationFailureException {
