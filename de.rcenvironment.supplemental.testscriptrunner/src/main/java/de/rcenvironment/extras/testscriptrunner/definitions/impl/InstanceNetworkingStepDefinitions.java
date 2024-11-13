@@ -334,6 +334,14 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
         String commandOutput;
         try {
             commandOutput = executeCommandOnInstance(resolveInstance(sourceInstanceId), "uplink list", false);
+        } catch (OperationFailureException e) {
+            // in a retry loop, a failure to execute the query command on the instance should not generally cause a fatal error but a retry
+            if (isLastAttempt) {
+                throw e; // rethrow
+            } else {
+                log.debug(StringUtils.format("Failed to query the state of uplink connections on %s; retrying", targetInstanceId));
+                return false; // retry
+            }
         } catch (AssertionError e) {
             // remote command execution failing is possible in regular operation if an instance is queried right after its basic startup
             if (!isLastAttempt) {

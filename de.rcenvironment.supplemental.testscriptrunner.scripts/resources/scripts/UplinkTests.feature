@@ -8,7 +8,7 @@ Feature: UplinkTests
 @Uplink01
 # Includes the "clients started after server" autostart behavior 
 @Uplink08
-Scenario: Basic operation of Uplink connections between two clients and two servers (Uplink01)
+Scenario: Basic operation of Uplink connections between two clients and two servers (UplinkNew01)
 
     Given instances "Server1, Server2, Client1, Client2" using the default build
     And  configured network connections "Client1-[upl]->Server1 [autoStart autoRetry]"
@@ -240,7 +240,7 @@ Scenario: Remote visibility of Uplink tool after crashes and restarts of clients
 @UplinkReviewed
 @UplinkNew05
 @Uplink09
-Scenario: Uplink clients autoconnecting when they are started before the server
+Scenario: Uplink clients autoconnecting when they are started before the server (UplinkNew05)
 
     Given instance "Server1, Client1, Client2" using the default build
     And  configured network connections "Client1-[upl]->Server1 [autoStart autoRetry]"
@@ -278,7 +278,7 @@ Scenario: Uplink clients autoconnecting when they are started before the server
 @UplinkReviewed
 @UplinkNew06
 @Server10
-Scenario: Active stopping/restarting of connections during runtime
+Scenario: Active stopping/restarting of connections during runtime (UplinkNew06)
 
     Given instances "Server1, Client1, Client2" using the default build
     And  configured network connections "Client1-[upl]->Server1 [autoRetry]"
@@ -335,7 +335,8 @@ Scenario: Active stopping/restarting of connections during runtime
 @DefaultTestSuite
 @UplinkReviewed
 # note 1: this was previously tagged @Server11 for unknown reasons
-# note 2: the related test @Server12, which tested the same behavior using restarts, was removed as it was slow and provided no additional benefit
+# note 2: the related tests @Server12 and @Server13, which tested similar behavior using clean restarts,
+#         were removed as they were slow and provided little additional benefit
 @UplinkNew07
 Scenario: Proper server-side handling of two Uplink clients using the same ClientId (UplinkNew07)
 
@@ -386,133 +387,42 @@ Scenario: Proper server-side handling of two Uplink clients using the same Clien
     """
 
 
-# TODO fix test failure @Matthias Wagner
-#@UplinkTestsFeature
-@Server13
-Scenario: Two clients with same ID access the uplink server after startup and repeated crash/restart, uplink server rejects the second. 
-
-    Given instances "Server1, Client3a, Client3b" using the default build
-    And  configured cloned network connections "Client3a-[upl]->Server1 [autoStart autoRetry], Client3b-[upl]->Server1 [autoStart autoRetry]"
-
-    And  starting instance "Server1"
-    And  starting instance "Client3a"
-
-    And  the visible uplink network of "Client3a" should be connected to "Server1" within 5 seconds
-    And  starting instance "Client3b"
-
-    And  the visible uplink network of "Client3b" should not be connected to "Server1" within 5 seconds
-    # The client ID "Client3a" is the cloned one, equal for all instances:
-    And  the log output of "Client3b" should contain "Uplink handshake failed or connection refused: The combination of account name"
-    And  the log output of "Client3b" should contain "and client ID \"Client3a\" is already in use. To allow parallel logins, use a different client ID for each client."
-
-    When instance "Client3a" crashes
-    #And waiting for 15 seconds
-    And  executing command "uplink start Server1_userName" on "Client3b"
-    # We need sufficient time: after crash some clean-up work is being performed before Client3b can connect
-    And  waiting for 60 seconds
-    And  starting instance "Client3a"
-
-    Then the visible uplink network of "Client3a" should not be connected to "Server1" within 5 seconds
-    And  the visible uplink network of "Client3b" should be connected to "Server1" within 5 seconds
-    And  the log output of "Client3a" should contain "Uplink handshake failed or connection refused: The combination of account name"
-    And  the log output of "Client3a" should contain "and client ID \"Client3a\" is already in use. To allow parallel logins, use a different client ID for each client."
-    
-    When instance "Client3b" crashes
-    #And waiting for 15 seconds
-    And  executing command "uplink start Server1_userName" on "Client3a"
-    # We need sufficient time: after crash some clean-up work is being performed before Client3a can connect
-    And  waiting for 60 seconds
-    And  starting instance "Client3b"
-
-    Then the visible uplink network of "Client3a" should be connected to "Server1" within 5 seconds
-    And  the visible uplink network of "Client3b" should not be connected to "Server1" within 5 seconds
-    And  the log output of "Client3b" should contain "Uplink handshake failed or connection refused: The combination of account name"
-    And  the log output of "Client3b" should contain "and client ID \"Client3a\" is already in use. To allow parallel logins, use a different client ID for each client."
-
-    And  stopping instances "Client3a, Client3b"
-    And  stopping instance "Server1"
-    And  the log output of instances "Client3a, Client3b" should indicate a clean shutdown with these allowed warnings or errors:
-    """
-    And  client ID "Client3a" is already in use. To allow parallel logins, use a different client ID for each client.
-    finished with a warning or error; inspect the log output above for details
-    """
-    And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
-    """
-    as it exceeds the significant character limit (8)
-    stream is already closed
-    session already closed
-    from using namespace userNameClient3a as it is already in use
-    Session terminated in non-terminal state UNCLEAN_SHUTDOWN_INITIATED
-    """
-
 @UplinkTestsFeature
+@DefaultTestSuite
+@UplinkReviewed
+@UplinkNew08
+# old scenario id; remove when rework is complete
 @Server14
-Scenario: After crash, the same client connects again to the uplink server (s. Mantis #17415).
+Scenario: Verify that a client can reconnect with the same username/clientId combination after a client crash (UplinkNew08)
 
     Given instances "Server1, Client1" using the default build
     And  configured network connection "Client1-[upl]->Server1 [autoStart autoRetry]"
 
-    And  starting instance "Server1"
+    When starting instance "Server1"
     And  starting instance "Client1"
-
-    And  the visible uplink network of "Client1" should be connected to "Server1" within 5 seconds
+    Then the Uplink connection from "Client1" to "Server1" should be connected within 5 seconds
 
     When instance "Client1" crashes
-    #And waiting for 15 seconds
+    # the crash command does not wait for termination, so simply restarting the instance right after the crash command is not robust
+    # TODO (p3) consider handling this in the backend, e.g. by offering a command variant that waits
+    And  waiting for 5 seconds
     And  starting instance "Client1"
-    # it is essential here to give enough time to wait for the automatic reconnect
-    And  waiting for 45 seconds
+    # using a high timeout to allow for server-side release of the connection (and therefore the username+clientId namespace) and the client-side auto-reconnect
+    Then the Uplink connection from "Client1" to "Server1" should be connected within 60 seconds
 
-    Then the visible uplink network of "Client1" should be connected to "Server1" within 5 seconds
-
-    And  stopping instance "Client1"
+    When stopping instance "Client1"
     And  stopping instance "Server1"
-    And  the log output of instances "Client1" should indicate a clean shutdown with these allowed warnings or errors:
+
+    Then the log output of instance "Client1" should indicate a clean shutdown with these allowed warnings or errors:
     """
-    And  client ID "Client1_" is already in use. To allow parallel logins, use a different client ID for each client.
+    And  client ID "default" is already in use. To allow parallel logins, use a different client ID for each client.
     finished with a warning or error; inspect the log output above for details
     """
-    And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
+
+    And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors:
+    # channelClosed() entry tracked as #17659; remove filter when fixed    
     """
-    as it exceeds the significant character limit (8)
-    stream is already closed
-    session already closed
-    from using namespace userNameClient1_ as it is already in use
+    from using namespace userNamedefault- as it is already in use by
     Session terminated in non-terminal state UNCLEAN_SHUTDOWN_INITIATED
-    )
+    Failed to register channelClosed() event
     """
-# The following scenario is meant as demonstrative example to allow certain warnings at shutdown.
-@UplinkExperimental01
-Scenario: Check of allowed warnings after shutdown
-
-    Given instance "Server1, Client1" using the default build
-    And  configured network connections "Client1-[upl]->Server1 [autoStart autoRetry]"
-    
-    When starting instance "Server1"
-    And  waiting for 15 seconds
-    And  starting instance "Client1"
-    And  waiting for 15 seconds
-    And  the visible uplink network of "Client1" should be connected to "Server1"
-    And  waiting for 15 seconds
-
-    And  stopping instance "Client1"
-    And  waiting for 15 seconds
-    And  stopping instance "Server1"
-    
-    Then the log output of instance "Client1" should indicate a clean shutdown with no warnings or errors
-    #Then the log output of instance "Client1" should indicate a clean shutdown with these allowed warnings or errors:
-    #    """
-    #    finished with a warning or error
-    #    java.net.ConnectException: Connection refused
-    #    """
-    
-    #And the log output of all instances should indicate a clean shutdown with no warnings or errors
-    And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
-        """
-        stream is already closed
-        as it exceeds the significant character limit (8)
-        Unregistered session or session already closed
-        Session terminated in non-terminal state UNCLEAN_SHUTDOWN_INITIATED
-        """
-    And  the log output of instance "Server1" should contain 2 warnings
-
