@@ -34,7 +34,6 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.rcenvironment.core.communication.api.PlatformService;
@@ -57,16 +56,15 @@ import de.rcenvironment.core.component.model.endpoint.api.EndpointDescriptionsMa
 import de.rcenvironment.core.component.spi.DistributedComponentKnowledgeListener;
 import de.rcenvironment.core.component.workflow.api.WorkflowConstants;
 import de.rcenvironment.core.component.workflow.execution.api.FinalWorkflowState;
-import de.rcenvironment.core.component.workflow.execution.api.PersistentWorkflowDescriptionLoaderService;
-import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContext;
-import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContextBuilder;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionException;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionInformation;
-import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileException;
-import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileLoaderFacade;
-import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileLoaderFacade.PlaceholderFileException;
 import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowDescriptionLoaderCallback;
+import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionContext;
+import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionContextBuilder;
+import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionService;
+import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionService.DeletionBehavior;
+import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionService.DisposalBehavior;
 import de.rcenvironment.core.component.workflow.model.api.Connection;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowDescription;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowDescriptionPersistenceHandler;
@@ -83,7 +81,6 @@ import de.rcenvironment.core.remoteaccess.common.RemoteAccessConstants;
 import de.rcenvironment.core.toolkitbridge.transitional.ConcurrencyUtils;
 import de.rcenvironment.core.utils.common.CommonIdRules;
 import de.rcenvironment.core.utils.common.InvalidFilenameException;
-import de.rcenvironment.core.utils.common.JsonUtils;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.common.TempFileService;
 import de.rcenvironment.core.utils.common.TempFileServiceAccess;
@@ -186,7 +183,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
 
     private DistributedComponentKnowledgeService componentKnowledgeService;
 
-    private WorkflowExecutionService workflowExecutionService;
+    private HeadlessWorkflowExecutionService workflowExecutionService;
 
     private PlatformService platformService;
 
@@ -195,8 +192,6 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
     private LocalSystemMonitoringAggregationService localSystemMonitoringAggregationService;
 
     private PersistentSettingsService persistentSettingsService;
-
-    private WorkflowFileLoaderFacade workflowFileLoaderFacade;
 
     private File publishedWfStorageDir;
 
@@ -294,11 +289,6 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
     @Reference
     public void bindToolIntegrationDocumentationService(ToolIntegrationDocumentationService newInstance) {
         this.toolDocService = newInstance;
-    }
-
-    @Reference
-    public void bindWorkflowFileLoaderFacade(WorkflowFileLoaderFacade newInstance) {
-        this.workflowFileLoaderFacade = newInstance;
     }
 
     private void registerChangeListener() {
@@ -521,7 +511,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             }
 
             if (systemLoadData != null) {
-                String nodeId = tokens[2];
+                String nodeId = (String) tokens[2];
                 LogicalNodeId nodeIdObj = NodeIdentifierUtils.parseLogicalNodeIdStringWithExceptionWrapping(nodeId);
                 // TODO (p3) extract common code with above method?
                 final SystemLoadInformation loadDataEntry = systemLoadData.get(nodeIdObj);
@@ -713,9 +703,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
 
         WorkflowDescription wd;
         try {
-            final PersistentWorkflowDescriptionLoaderService loaderService =
-                ServiceRegistry.createAccessFor(this).getService(PersistentWorkflowDescriptionLoaderService.class);
-            wd = loaderService.loadWorkflowDescriptionFromFileConsideringUpdates(wfFile,
+            wd = workflowExecutionService.loadWorkflowDescriptionFromFileConsideringUpdates(wfFile,
                 new HeadlessWorkflowDescriptionLoaderCallback(outputReceiver));
         } catch (WorkflowFileException e) { // review migration code, which was introduced due to changed exception type
             throw new WorkflowExecutionException("Failed to load workflow file: " + wfFile.getAbsolutePath(), e);
@@ -723,7 +711,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
 
         if (placeholdersFile != null) {
             try {
-                validatePlaceholdersFile(placeholdersFile);
+                workflowExecutionService.validatePlaceholdersFile(placeholdersFile);
             } catch (WorkflowFileException e) { // review migration code, which was introduced due to changed exception
                                                 // type
                 throw new WorkflowExecutionException(
@@ -784,24 +772,6 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             Boolean.toString(neverDeleteExecutionData));
 
         addOrReplaceWorkflowInWfTokens(publishId, groupName, wd);
-    }
-
-    private void validatePlaceholdersFile(File placeholdersFile) throws WorkflowFileException {
-        if (!placeholdersFile.isFile()) {
-            throw new WorkflowFileException(StringUtils.format("File doesn't exis: %s", placeholdersFile.getAbsolutePath()));
-        }
-        if (!placeholdersFile.canRead()) {
-            throw new WorkflowFileException(StringUtils.format("File can not be read: %s", placeholdersFile.getAbsolutePath()));
-        }
-
-        ObjectMapper mapper = JsonUtils.getDefaultObjectMapper();
-        try {
-            mapper.readValue(placeholdersFile, new TypeReference<HashMap<String, Map<String, String>>>() {
-            });
-        } catch (IOException e) {
-            throw new WorkflowFileException(StringUtils.format("Failed to parse placeholders file: %s",
-                placeholdersFile.getAbsolutePath()), e);
-        }
     }
 
     @Override
@@ -931,7 +901,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
      * @param newInstance the new service instance
      */
     @Reference
-    public void bindWorkflowExecutionService(WorkflowExecutionService newInstance) {
+    public void bindWorkflowExecutionService(HeadlessWorkflowExecutionService newInstance) {
         this.workflowExecutionService = newInstance;
     }
 
@@ -1068,10 +1038,8 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
                 public void onFinished() {}
             };
 
-            wd = ServiceRegistry.createAccessFor(this)
-                .getService(PersistentWorkflowDescriptionLoaderService.class)
-                .loadWorkflowDescriptionFromFileConsideringUpdates(f,
-                    new HeadlessWorkflowDescriptionLoaderCallback(outputReceiver), true);
+            wd = workflowExecutionService.loadWorkflowDescriptionFromFileConsideringUpdates(f,
+                new HeadlessWorkflowDescriptionLoaderCallback(outputReceiver), true);
             if (validateWorkflowFileAsTemplate(wd, outputReceiver)) {
                 String groupName = persistentSettingsService.readStringValue(PUBLISHED_WF_GROUP_KEY_PREFIX + wfId);
                 addOrReplaceWorkflowInWfTokens(wfId, groupName, wd);
@@ -1273,7 +1241,7 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
             }
 
             if (systemLoadData != null) {
-                String nodeId = tokens[2];
+                String nodeId = (String) tokens[2];
                 LogicalNodeId nodeIdObj = NodeIdentifierUtils.parseLogicalNodeIdStringWithExceptionWrapping(nodeId);
                 // TODO (p3) extract common code with above method?
                 final SystemLoadInformation loadDataEntry = systemLoadData.get(nodeIdObj);
@@ -1550,37 +1518,50 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         }
         logDir.mkdirs();
 
+        // TODO review >5.0.0: remove this output capture, as it is only used for debug
+        // output? - misc_ro
         CapturingTextOutReceiver outputReceiver = new CapturingTextOutReceiver();
 
         // TODO specify log directory?
-        WorkflowExecutionException executionException = null;
-        WorkflowDescription description = null;
+        HeadlessWorkflowExecutionContextBuilder exeContextBuilder;
         try {
-            description = workflowFileLoaderFacade.loadAndValidateWorkflowDescription(
-                executionSetup.getWorkflowFile(), null, true, outputReceiver);
-        } catch (WorkflowFileException | PlaceholderFileException e) {
-            executionException = new WorkflowExecutionException(e);
-            logWorkflowExecutionException(logDir, e);
-        } catch (WorkflowExecutionException e) {
-            executionException = e;
-            logWorkflowExecutionException(logDir, e);
+            exeContextBuilder = new HeadlessWorkflowExecutionContextBuilder(executionSetup.getWorkflowFile()).setLogDirectory(logDir);
         } catch (InvalidFilenameException e) {
             // This exception should never occur since the name of the workflow file used
             // here is generated by the
             // generateWorkflowExecutionSetup method and is always valid
             throw new IllegalStateException();
         }
+        exeContextBuilder.setPlaceholdersFile(executionSetup.getPlaceholderFile());
+        exeContextBuilder.setTextOutputReceiver(outputReceiver);
+        exeContextBuilder.setSingleConsoleRowsProcessor(customConsoleRowReceiver);
+        exeContextBuilder.setAbortIfWorkflowUpdateRequired(true); // fail on out-of-date templates
 
+        if (neverDeleteExecutionData) {
+            exeContextBuilder.setDeletionBehavior(DeletionBehavior.Never);
+            exeContextBuilder.setDisposalBehavior(DisposalBehavior.Never);
+        }
+
+        WorkflowExecutionException executionException = null;
         FinalWorkflowState finalState = FinalWorkflowState.FAILED;
-        if (executionException != null) {
+        try {
+            HeadlessWorkflowExecutionContext context = exeContextBuilder.buildExtended();
+            WorkflowExecutionInformation execInf = workflowExecutionService.startHeadlessWorkflowExecution(context);
+            sessionTokenToWfExecInf.put(executionSetup.getSessionToken(), execInf);
+            finalState = workflowExecutionService.waitForWorkflowTerminationAndCleanup(context);
+            sessionTokenToWfExecInf.remove(executionSetup.getSessionToken());
+        } catch (WorkflowExecutionException e) {
+            executionException = e;
+            File exceptionLogFile = new File(logDir, "error.log");
+            // create a log file so the error cause is accessible via the log directory
             try {
-                finalState = executeWorkflow(executionSetup, customConsoleRowReceiver,
-                    neverDeleteExecutionData, logDir, outputReceiver, description);
-            } catch (WorkflowExecutionException e) {
-                executionException = e;
-                logWorkflowExecutionException(logDir, e);
+                FileUtils.writeStringToFile(exceptionLogFile,
+                    "Workflow execution failed with an error: " + e.toString());
+            } catch (IOException e1) {
+                log.error("Failed to write exception log file " + exceptionLogFile.getAbsolutePath());
             }
         }
+        log.debug("Finished remote access workflow; captured output:\n" + outputReceiver.getBufferedOutput());
 
         // move the input directory to avoid future collisions
         if (inputFilesDir.isDirectory()) {
@@ -1603,47 +1584,6 @@ public class RemoteAccessServiceImpl implements RemoteAccessService {
         }
 
         return finalState;
-    }
-
-    private FinalWorkflowState executeWorkflow(ExecutionSetup executionSetup, SingleConsoleRowsProcessor customConsoleRowReceiver,
-        boolean neverDeleteExecutionData, File logDir, CapturingTextOutReceiver outputReceiver, WorkflowDescription description)
-        throws WorkflowExecutionException {
-
-        final File workflowFile = executionSetup.getWorkflowFile();
-        final WorkflowExecutionContextBuilder exeContextBuilder =
-            WorkflowExecutionContextBuilder.createContextBuilder(description)
-                .setOriginDisplayName(workflowFile.getName(), workflowFile.getAbsolutePath())
-                .setLogDirectory(logDir)
-                .setTextOutputReceiver(outputReceiver)
-                .setSingleConsoleRowsProcessor(customConsoleRowReceiver);
-
-        if (neverDeleteExecutionData) {
-            exeContextBuilder
-                .setDeletionBehavior(WorkflowExecutionContext.DeletionBehavior.Never)
-                .setDisposalBehavior(WorkflowExecutionContext.DisposalBehavior.Never);
-        }
-
-        final WorkflowExecutionContext context = exeContextBuilder.buildHeadless();
-
-        WorkflowExecutionInformation execInf = workflowExecutionService.start(context);
-        sessionTokenToWfExecInf.put(executionSetup.getSessionToken(), execInf);
-
-        final FinalWorkflowState finalState = workflowExecutionService.waitForWorkflowTermination(context);
-        sessionTokenToWfExecInf.remove(executionSetup.getSessionToken());
-        log.debug("Finished remote access workflow; captured output:\n" + outputReceiver.getBufferedOutput());
-
-        return finalState;
-    }
-
-    private void logWorkflowExecutionException(File logDir, Throwable e) {
-        File exceptionLogFile = new File(logDir, "error.log");
-        // create a log file so the error cause is accessible via the log directory
-        try {
-            FileUtils.writeStringToFile(exceptionLogFile,
-                "Workflow execution failed with an error: " + e.toString());
-        } catch (IOException e1) {
-            log.error("Failed to write exception log file " + exceptionLogFile.getAbsolutePath());
-        }
     }
 
     private CharSequence formatPathForWorkflowFile(File directory) {

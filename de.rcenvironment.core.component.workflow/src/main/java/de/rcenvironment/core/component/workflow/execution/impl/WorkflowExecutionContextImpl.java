@@ -8,8 +8,6 @@
 
 package de.rcenvironment.core.component.workflow.execution.impl;
 
-import java.io.File;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -19,15 +17,10 @@ import de.rcenvironment.core.communication.common.LogicalNodeId;
 import de.rcenvironment.core.communication.common.NetworkDestination;
 import de.rcenvironment.core.component.execution.api.ComponentExecutionIdentifier;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContext;
-import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionException;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionHandle;
-import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionService;
-import de.rcenvironment.core.component.workflow.execution.api.WorkflowState;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowDescription;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowNode;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowNodeIdentifier;
-import de.rcenvironment.core.notification.DistributedNotificationService;
-import de.rcenvironment.core.utils.common.exception.NotImplementedException;
 
 /**
  * Implementation of {@link WorkflowExecutionContext}.
@@ -37,39 +30,7 @@ import de.rcenvironment.core.utils.common.exception.NotImplementedException;
  */
 public class WorkflowExecutionContextImpl implements WorkflowExecutionContext {
 
-    protected class DisplayName implements Serializable {
-
-        /**
-         * 
-         */
-        private static final long serialVersionUID = -6398070976230532426L;
-
-        private final String shortForm;
-
-        private final String longForm;
-
-        public DisplayName() {
-            this.shortForm = "<unknown>";
-            this.longForm = "<unknown>";
-        }
-
-        public DisplayName(String shortForm, String longForm) {
-            this.shortForm = shortForm;
-            this.longForm = longForm;
-        }
-
-        public String getShortForm() {
-            return shortForm;
-        }
-
-        public String getLongForm() {
-            return longForm;
-        }
-    }
-
     private static final long serialVersionUID = 238066231055021678L;
-
-    private DisplayName originDisplayName = new DisplayName();
 
     private String executionIdentifier;
 
@@ -85,14 +46,11 @@ public class WorkflowExecutionContextImpl implements WorkflowExecutionContext {
 
     private String additionalInformation;
 
+    private LogicalNodeId storageNetworkDestination;
+
     public WorkflowExecutionContextImpl(String executionIdentifier, WorkflowDescription workflowDescription) {
         this.executionIdentifier = executionIdentifier;
         this.workflowDescription = workflowDescription;
-
-        if (workflowDescription == null) {
-            return;
-        }
-
         this.workflowHandle = new ExecutionHandleImpl(executionIdentifier, workflowDescription.getControllerNode());
         componentExecutionIdentifiers = new HashMap<>();
         for (WorkflowNode wfNode : workflowDescription.getWorkflowNodes()) {
@@ -156,7 +114,6 @@ public class WorkflowExecutionContextImpl implements WorkflowExecutionContext {
         this.instanceName = instanceName;
     }
 
-    @Override
     public void setNodeIdentifierStartedExecution(LogicalNodeId nodeIdentifier) {
         this.nodeIdentifierStartedExecution = nodeIdentifier;
     }
@@ -168,74 +125,5 @@ public class WorkflowExecutionContextImpl implements WorkflowExecutionContext {
     @Override
     public ServiceCallContext getServiceCallContext() {
         return null; // implement this once needed
-    }
-
-    @Override
-    public String getWorkflowOriginDisplayName() {
-        return this.workflowDescription.getFileName();
-    }
-
-    @Override
-    public WorkflowState waitForTermination() throws InterruptedException {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public void reportFinalWorkflowState(WorkflowState finalState) {
-        // Do nothing
-    }
-
-    @Override
-    public void closeResourcesQuietly() {
-        // Do nothing, since there are no resources to be closed
-    }
-
-    @Override
-    public File getWorkflowFile() {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public File[] getLogFiles() {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public synchronized long getExecutionDuration() {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public File getLogDirectory() {
-        throw new NotImplementedException();
-    }
-
-    @Override
-    public void beforeExecutionStarted(DistributedNotificationService notificationServiceParam, LogicalNodeId localNodeId)
-        throws WorkflowExecutionException {
-        // Do nothing
-    }
-
-    @Override
-    public void afterExecutionStarted() {
-        // Do nothing
-    }
-
-    @Override
-    public void afterExecutionTerminated(DistributedNotificationService notificationService,
-        WorkflowExecutionService workflowExecutionService, boolean behavedAsExpected) {
-        // Do nothing
-    }
-
-    protected String getLongOriginDisplayName() {
-        return originDisplayName.getLongForm();
-    }
-
-    protected String getShortOriginDisplayName() {
-        return originDisplayName.getShortForm();
-    }
-
-    public void setOriginDisplayName(String shortName, String longName) {
-        this.originDisplayName = new DisplayName(shortName, longName);
     }
 }

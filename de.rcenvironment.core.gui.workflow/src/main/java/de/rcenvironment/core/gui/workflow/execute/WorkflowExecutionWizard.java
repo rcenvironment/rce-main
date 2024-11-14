@@ -65,7 +65,6 @@ import de.rcenvironment.core.component.workflow.model.api.WorkflowDescription;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowDescriptionPersistenceHandler;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowNode;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowNodeIdentifier;
-import de.rcenvironment.core.component.workflow.validation.api.WorkflowDescriptionValidationService;
 import de.rcenvironment.core.configuration.ConfigurationService;
 import de.rcenvironment.core.gui.workflow.Activator;
 import de.rcenvironment.core.gui.workflow.editor.validator.WorkflowDescriptionValidationUtils;
@@ -112,8 +111,6 @@ public class WorkflowExecutionWizard extends Wizard implements DistributedCompon
     private final ServiceRegistryPublisherAccess serviceRegistryAccess;
 
     private final WorkflowExecutionService workflowExecutionService;
-    
-    private final WorkflowDescriptionValidationService workflowDescriptionValidationService;
 
     private final NodeIdentifierConfigurationHelper nodeIdConfigHelper;
 
@@ -130,7 +127,6 @@ public class WorkflowExecutionWizard extends Wizard implements DistributedCompon
     public WorkflowExecutionWizard(final IFile workflowFile, WorkflowDescription workflowDescription) {
         serviceRegistryAccess = ServiceRegistry.createPublisherAccessFor(this);
         workflowExecutionService = serviceRegistryAccess.getService(WorkflowExecutionService.class);
-        workflowDescriptionValidationService = serviceRegistryAccess.getService(WorkflowDescriptionValidationService.class);
         Activator.getInstance().registerUndisposedWorkflowShutdownListener();
 
         this.inputTabEnabled = serviceRegistryAccess.getService(ConfigurationService.class)
@@ -259,8 +255,8 @@ public class WorkflowExecutionWizard extends Wizard implements DistributedCompon
      * @return true if all selected instances available.
      */
     public synchronized boolean performValidations() {
-		final WorkflowDescriptionValidationResult validationResult = workflowDescriptionValidationService
-				.validateAvailabilityOfNodesAndComponentsFromLocalKnowledge(wfDescription);
+        WorkflowDescriptionValidationResult validationResult = workflowExecutionService
+            .validateAvailabilityOfNodesAndComponentsFromLocalKnowledge(wfDescription);
         workflowPage.getWorkflowComposite().refreshContent();
 
         if (getContainer().getCurrentPage() == placeholdersPage) {
@@ -427,7 +423,7 @@ public class WorkflowExecutionWizard extends Wizard implements DistributedCompon
             name = Messages.bind(Messages.defaultWorkflowName, wfFile.getName().toString());
         }
 
-        WorkflowExecutionContextBuilder wfExeCtxBuilder = WorkflowExecutionContextBuilder.createContextBuilder(clonedWfDesc);
+        WorkflowExecutionContextBuilder wfExeCtxBuilder = new WorkflowExecutionContextBuilder(clonedWfDesc);
         wfExeCtxBuilder.setInstanceName(name);
         wfExeCtxBuilder.setNodeIdentifierStartedExecution(localDefaultNodeId);
         if (clonedWfDesc.getAdditionalInformation() != null && !clonedWfDesc.getAdditionalInformation().isEmpty()) {
@@ -437,8 +433,8 @@ public class WorkflowExecutionWizard extends Wizard implements DistributedCompon
 
         final WorkflowExecutionInformation wfExeInfo;
         try {
-            wfExeInfo = workflowExecutionService.start(wfExecutionContext);
-        } catch (WorkflowExecutionException e) {
+            wfExeInfo = workflowExecutionService.startWorkflowExecution(wfExecutionContext);
+        } catch (WorkflowExecutionException | RemoteOperationException e) {
             handleWorkflowExecutionError(clonedWfDesc, e);
             return;
         }

@@ -235,8 +235,8 @@ public class SynchronousWorkflowExecutionServiceImplTest {
     private void expectWorkflowStartAndSucceed(final WorkflowExecutionContext expectedExecutionContext,
         final WorkflowExecutionInformation info) throws InterruptedException {
         try {
-            EasyMock.expect(this.mockExecutionService.start(expectedExecutionContext)).andStubReturn(info);
-        } catch (WorkflowExecutionException e) {
+            EasyMock.expect(this.mockExecutionService.startWorkflowExecution(expectedExecutionContext)).andStubReturn(info);
+        } catch (WorkflowExecutionException | RemoteOperationException e) {
             // Not handled as the potentially throwing method is only invoked on a mock object
         }
 
@@ -245,8 +245,8 @@ public class SynchronousWorkflowExecutionServiceImplTest {
 
     private void expectWorkflowStartAndThrowException(WorkflowExecutionContext contextToExecute, Throwable exceptionToThrow) {
         try {
-            EasyMock.expect(this.mockExecutionService.start(contextToExecute)).andThrow(exceptionToThrow);
-        } catch (WorkflowExecutionException e) {
+            EasyMock.expect(this.mockExecutionService.startWorkflowExecution(contextToExecute)).andThrow(exceptionToThrow);
+        } catch (WorkflowExecutionException | RemoteOperationException e) {
             // Not handled as the potentially throwing method is only invoked on a mock object
         }
 
@@ -255,7 +255,7 @@ public class SynchronousWorkflowExecutionServiceImplTest {
 
     protected WorkflowExecutionContext createWorkflowExecutionContext() {
         final WorkflowExecutionContext context =
-            WorkflowExecutionContextBuilder.createContextBuilder(new WorkflowDescription("some workflow description identifier")).build();
+            new WorkflowExecutionContextBuilder(new WorkflowDescription("some workflow description identifier")).build();
         return context;
     }
 

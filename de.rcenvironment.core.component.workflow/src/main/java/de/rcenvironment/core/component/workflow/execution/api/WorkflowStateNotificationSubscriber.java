@@ -11,10 +11,7 @@ package de.rcenvironment.core.component.workflow.execution.api;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import de.rcenvironment.core.communication.common.LogicalNodeId;
-import de.rcenvironment.core.communication.common.ResolvableNodeId;
 import de.rcenvironment.core.component.workflow.api.WorkflowConstants;
-import de.rcenvironment.core.component.workflow.execution.api.WorkflowStateNotificationSubscriber.NotificationSubscription;
 import de.rcenvironment.core.component.workflow.execution.spi.MultipleWorkflowsStateChangeListener;
 import de.rcenvironment.core.component.workflow.execution.spi.SingleWorkflowStateChangeListener;
 import de.rcenvironment.core.notification.DefaultNotificationSubscriber;
@@ -32,21 +29,6 @@ import de.rcenvironment.core.utils.common.StringUtils;
  * @author Robert Mischke (refactoring/API adaptation)
  */
 public class WorkflowStateNotificationSubscriber extends DefaultNotificationSubscriber {
-
-    /**
-     * Encapsulates information about {@link NotificationSubscriber} subscribed.
-     * 
-     * @author Doreen Seider
-     * 
-     */
-    public static class NotificationSubscription {
-    
-        public NotificationSubscriber subscriber;
-    
-        public String notificationId;
-    
-        public ResolvableNodeId nodeId;
-    }
 
     private static final long serialVersionUID = 421042056359014273L;
 
@@ -154,14 +136,6 @@ public class WorkflowStateNotificationSubscriber extends DefaultNotificationSubs
         if (isWorkflowAliveCheckTask != null) {
             isWorkflowAliveCheckTask.cancel(false);
         }
-    }
-
-    public WorkflowStateNotificationSubscriber.NotificationSubscription createSubscriberContext(String executionIdentifier, LogicalNodeId nodeId) {
-        WorkflowStateNotificationSubscriber.NotificationSubscription subscriberContext = new WorkflowStateNotificationSubscriber.NotificationSubscription();
-        subscriberContext.subscriber = this;
-        subscriberContext.notificationId = WorkflowConstants.STATE_NOTIFICATION_ID + executionIdentifier;
-        subscriberContext.nodeId = nodeId;
-        return subscriberContext;
     }
 
 }

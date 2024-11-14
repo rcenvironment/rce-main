@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import de.rcenvironment.core.component.execution.api.ExecutionController;
 import de.rcenvironment.core.component.execution.api.ExecutionControllerException;
 import de.rcenvironment.core.component.execution.api.RemotableExecutionControllerService;
 import de.rcenvironment.core.utils.common.StringUtils;

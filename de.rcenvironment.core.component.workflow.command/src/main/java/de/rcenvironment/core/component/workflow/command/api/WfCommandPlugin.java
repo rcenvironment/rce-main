@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
@@ -46,9 +47,11 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 
 import de.rcenvironment.core.command.common.CommandException;
 import de.rcenvironment.core.command.spi.AbstractCommandParameter;
+import de.rcenvironment.core.command.spi.AbstractParsedCommandParameter;
 import de.rcenvironment.core.command.spi.CommandContext;
 import de.rcenvironment.core.command.spi.CommandFlag;
 import de.rcenvironment.core.command.spi.CommandModifierInfo;
+import de.rcenvironment.core.command.spi.CommandParser;
 import de.rcenvironment.core.command.spi.CommandPlugin;
 import de.rcenvironment.core.command.spi.FileParameter;
 import de.rcenvironment.core.command.spi.IntegerParameter;
@@ -71,19 +74,15 @@ import de.rcenvironment.core.component.execution.api.ComponentExecutionInformati
 import de.rcenvironment.core.component.execution.api.ExecutionControllerException;
 import de.rcenvironment.core.component.execution.api.WorkflowGraph;
 import de.rcenvironment.core.component.workflow.api.WorkflowConstants;
-import de.rcenvironment.core.component.workflow.execution.api.PersistentWorkflowDescriptionLoaderService;
-import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContext;
-import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionContextBuilder;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionException;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionInformation;
-import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionService;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowExecutionUtils;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileException;
-import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileLoaderFacade;
-import de.rcenvironment.core.component.workflow.execution.api.WorkflowFileLoaderFacade.PlaceholderFileException;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowState;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowVerificationResults;
 import de.rcenvironment.core.component.workflow.execution.api.WorkflowVerificationService;
+import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionContextBuilder;
+import de.rcenvironment.core.component.workflow.execution.headless.api.HeadlessWorkflowExecutionService;
 import de.rcenvironment.core.component.workflow.execution.spi.WorkflowDescriptionLoaderCallback;
 import de.rcenvironment.core.component.workflow.model.api.WorkflowDescription;
 import de.rcenvironment.core.datamanagement.MetaDataService;
@@ -98,7 +97,6 @@ import de.rcenvironment.core.utils.common.TempFileServiceAccess;
 import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 import de.rcenvironment.core.utils.executor.LocalApacheCommandLineExecutor;
-import de.rcenvironment.core.utils.incubator.ServiceRegistry;
 
 /**
  * A {@link CommandPlugin} providing "wf [...]" commands.
@@ -108,7 +106,6 @@ import de.rcenvironment.core.utils.incubator.ServiceRegistry;
  * @author Brigitte Boden
  * @author Kathrin Schaffert
  * @author Alexander Weinert
- * @author Jan Flink
  */
 @Component
 public class WfCommandPlugin implements CommandPlugin {
@@ -132,6 +129,10 @@ public class WfCommandPlugin implements CommandPlugin {
 
     private static final String DISPOSE_COMMAND = "dispose";
 
+    private static final int PARSING_WORKFLOW_FILE_RETRY_INTERVAL = 2000;
+
+    private static final int MAXIMUM_WORKFLOW_PARSE_RETRIES = 5;
+
     private static final String BASEDIR_OPTION = "--basedir";
     
     private static final String INCLUDEDIRS_OPTION = "--includedirs";
@@ -141,6 +142,8 @@ public class WfCommandPlugin implements CommandPlugin {
     private static final int WORKFLOW_SUFFIX_NUMBER_MODULO = 100;
 
     private static final String WRONG_STATE_ERROR = "%s workflow not possible in current workflow state: %s";
+
+    private static final String WORKFLOW_ID = "<id>";
 
     private static final String WF = "wf";
     
@@ -182,6 +185,9 @@ public class WfCommandPlugin implements CommandPlugin {
     private static final StringParameter ID_PARAMETER = new StringParameter(null, "id", "id of the workflow");
     
     private static final StringParameter CASES_PARAMETER = new StringParameter("", "cases", "parameter for the cases");
+    
+    private static final ListCommandParameter WORKFLOW_LIST_PARAMETER =
+            new ListCommandParameter(WORKFLOW_FILE_PARAMETER, "workflows", "list of workflow files");
     
     private static final ListCommandParameter WORKFLOW_LIST_BASEDIR_PARAMETER =
     		new ListCommandParameter(WORKFLOW_FILE_BASEDIR_PARAMETER, "workflows", "list of workflow files");
@@ -229,13 +235,11 @@ public class WfCommandPlugin implements CommandPlugin {
     // TODO >5.0.0: crude fix for #10436 - align better with generated workflow name - misc_ro
     private static final AtomicInteger GLOBAL_WORKFLOW_SUFFIX_SEQUENCE_COUNTER = new AtomicInteger();
 
-    private WorkflowExecutionService workflowExecutionService;
+    private HeadlessWorkflowExecutionService workflowExecutionService;
 
     private WorkflowExecutionDisplayService workflowExecutionDisplayService;
 
     private WorkflowVerificationService workflowVerificationService;
-
-    private WorkflowFileLoaderFacade workflowFileLoaderService;
 
     private MetaDataService metaDataService;
 
@@ -367,15 +371,15 @@ public class WfCommandPlugin implements CommandPlugin {
                 "check if all test workflows are part of at least one test case",
                 this::performWfCheckSelfTestCases, true),
             new SubCommandDescription("graph",
-                    "prints .dot string representation of a workflow (can be used to create graph visualization with Graphviz)",
-                    this::performWfGraph,
-                    new CommandModifierInfo(
-                        new AbstractCommandParameter[] {
-                            WORKFLOW_FILE_PARAMETER
-                        }
-                    ),
-                    true
-                )
+                "prints .dot string representation of a workflow (can be used to create graph visualization with Graphviz)",
+                this::performWfGraph,
+                new CommandModifierInfo(
+                    new AbstractCommandParameter[] {
+                        WORKFLOW_FILE_PARAMETER
+                    }
+                ),
+                true
+            )
         );
         return new MainCommandDescription[] { commands };
     }
@@ -396,7 +400,7 @@ public class WfCommandPlugin implements CommandPlugin {
      * @param newInstance the new service instance
      */
     @Reference
-    public void bindWorkflowExecutionService(WorkflowExecutionService newInstance) {
+    public void bindWorkflowExecutionService(HeadlessWorkflowExecutionService newInstance) {
         this.workflowExecutionService = newInstance;
     }
 
@@ -408,11 +412,6 @@ public class WfCommandPlugin implements CommandPlugin {
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
     public void bindWorkflowExecutionDisplayService(WorkflowExecutionDisplayService newInstance) {
         this.workflowExecutionDisplayService = newInstance;
-    }
-
-    @Reference
-    public void bindWorkflowFileLoaderFacade(WorkflowFileLoaderFacade newInstance) {
-        this.workflowFileLoaderService = newInstance;
     }
 
     /**
@@ -458,43 +457,35 @@ public class WfCommandPlugin implements CommandPlugin {
         ParsedFileParameter fileParameter = (ParsedFileParameter) modifiers.getPositionalCommandParameter(0);
         boolean hasCompactFlag = modifiers.hasCommandFlag("-c");
         
-        WorkflowExecutionContext.DisposalBehavior dispose = toDisposal(disposeParameter.getResult(), cmdCtx);
+        HeadlessWorkflowExecutionService.DisposalBehavior dispose = toDisposal(disposeParameter.getResult(), cmdCtx);
 
-        WorkflowExecutionContext.DeletionBehavior delete = toDeletion(deleteParameter.getResult(), cmdCtx);
+        HeadlessWorkflowExecutionService.DeletionBehavior delete = toDeletion(deleteParameter.getResult(), cmdCtx);
 
         if (workflowVerificationService.preValidateWorkflow(cmdCtx.getOutputReceiver(), fileParameter.getResult(), true)) { // true = always print
                                                                                                          // pre-verification output
             try {
-                final WorkflowDescription description = workflowFileLoaderService.loadAndValidateWorkflowDescription(
-                    fileParameter.getResult(), placeholdersParameter.getResult(), false, cmdCtx.getOutputReceiver());
-
-				File logDirectory = setupLogDirectoryForWfFile(fileParameter.getResult());
-				cmdCtx.getOutputReceiver()
-						.addOutput(StringUtils.format("Log directory: '%s'", logDirectory.getAbsolutePath()));
-
-                final WorkflowExecutionContext exeContext = WorkflowExecutionContextBuilder.createContextBuilder(description)
-						.setLogDirectory(logDirectory)
-                        .setOriginDisplayName(fileParameter.getResult().getName(), fileParameter.getResult().getAbsolutePath())
-                        .setTextOutputReceiver(cmdCtx.getOutputReceiver(), hasCompactFlag)
-                        .setDisposalBehavior(dispose)
-                        .setDeletionBehavior(delete)
-                        .buildHeadless();
-
+                // TODO specify log directory?
+                HeadlessWorkflowExecutionContextBuilder exeContextBuilder =
+                    new HeadlessWorkflowExecutionContextBuilder(fileParameter.getResult()).setLogDirectory(setupLogDirectoryForWfFile(fileParameter.getResult()));
+                exeContextBuilder.setPlaceholdersFile(placeholdersParameter.getResult());
+                exeContextBuilder.setTextOutputReceiver(cmdCtx.getOutputReceiver(), hasCompactFlag);
+                exeContextBuilder.setDisposalBehavior(dispose);
+                exeContextBuilder.setDeletionBehavior(delete);
 
                 if (waitForTermination) {
                     // spawn and wait for termination
-                    workflowExecutionService.executeWorkflow(exeContext);
+                    workflowExecutionService.executeWorkflow(exeContextBuilder.buildExtended());
                 } else {
                     // spawn only
                     WorkflowExecutionInformation execInfo =
-                        workflowExecutionService.start(exeContext);
+                        workflowExecutionService.startHeadlessWorkflowExecution(exeContextBuilder.buildExtended());
                     // print workflow id; only reached if no validation errors occurred
                     cmdCtx.println("Workflow Id: " + execInfo.getWorkflowExecutionHandle().getIdentifier());
                 }
             } catch (WorkflowExecutionException | IOException e) {
                 log.error("Exception while executing workflow: " + fileParameter.getResult().getAbsolutePath(), e);
                 throw CommandException.executionError(ComponentUtils.createErrorLogMessage(e), cmdCtx);
-            } catch (InvalidFilenameException | WorkflowFileException | PlaceholderFileException e) {
+            } catch (InvalidFilenameException e) {
                 throw CommandException.executionError(ComponentUtils.createErrorLogMessage(e), cmdCtx);
             }
         } else {
@@ -504,17 +495,32 @@ public class WfCommandPlugin implements CommandPlugin {
         }
     }
     
-    private WorkflowExecutionContext.DisposalBehavior toDisposal(String token, CommandContext context) throws CommandException {
+    private HeadlessWorkflowExecutionService.DisposalBehavior toDisposal(String token, CommandContext context) throws CommandException {
         
-        if (WorkflowExecutionContext.DisposalBehavior.Always.name().equalsIgnoreCase(token)) {
-            return WorkflowExecutionContext.DisposalBehavior.Always;
-        } else if (WorkflowExecutionContext.DisposalBehavior.Never.name().equalsIgnoreCase(token)) {
-            return WorkflowExecutionContext.DisposalBehavior.Never;
+        if (HeadlessWorkflowExecutionService.DisposalBehavior.Always.name().equalsIgnoreCase(token)) {
+            return HeadlessWorkflowExecutionService.DisposalBehavior.Always;
+        } else if (HeadlessWorkflowExecutionService.DisposalBehavior.Never.name().equalsIgnoreCase(token)) {
+            return HeadlessWorkflowExecutionService.DisposalBehavior.Never;
         } else if (ONFINISHED.equalsIgnoreCase(token)) {
-            return WorkflowExecutionContext.DisposalBehavior.OnExpected;
+            return HeadlessWorkflowExecutionService.DisposalBehavior.OnExpected;
         }
         
         throw CommandException.syntaxError("Invalid disposal behavior: " + token, context);
+        
+    }
+    
+    private HeadlessWorkflowExecutionService.DeletionBehavior toDeletion(String token, CommandContext context) throws CommandException {
+        
+        if (HeadlessWorkflowExecutionService.DeletionBehavior.Always.name().equalsIgnoreCase(token)) {
+            return HeadlessWorkflowExecutionService.DeletionBehavior.Always;
+        } else if (HeadlessWorkflowExecutionService.DeletionBehavior.Never.name().equalsIgnoreCase(token)) {
+            return HeadlessWorkflowExecutionService.DeletionBehavior.Never;
+        } else if (ONFINISHED.equalsIgnoreCase(token)) {
+            return HeadlessWorkflowExecutionService.DeletionBehavior.OnExpected;
+        }
+        
+        throw CommandException.syntaxError("Invalid delete behavior: " + token, context);
+        
     }
     
     private void performWfVerify(final CommandContext context) throws CommandException {
@@ -529,8 +535,8 @@ public class WfCommandPlugin implements CommandPlugin {
     	ParsedIntegerParameter sequentialRunsParameter = (ParsedIntegerParameter) modifiers.getCommandParameter(SR);
     	ParsedFileParameter placeholderFileParameter = (ParsedFileParameter) modifiers.getCommandParameter(JSON_FILE);
         
-        WorkflowExecutionContext.DisposalBehavior dispose = toDisposal(disposeParameter.getResult(), context);
-        WorkflowExecutionContext.DeletionBehavior delete = toDeletion(deleteParameter.getResult(), context);
+        HeadlessWorkflowExecutionService.DisposalBehavior dispose = toDisposal(disposeParameter.getResult(), context);
+        HeadlessWorkflowExecutionService.DeletionBehavior delete = toDeletion(deleteParameter.getResult(), context);
 
         List<String> workflowList = workflowListParameter.getResult().stream()
                 .map(parameter -> ((ParsedStringParameter) parameter).getResult()).collect(Collectors.toList());
@@ -566,20 +572,6 @@ public class WfCommandPlugin implements CommandPlugin {
         } catch (IOException e) {
             throw CommandException.executionError("Failed to initialze expected workflow behavior: " + e.getMessage(), context);
         }
-    }
-    
-    private WorkflowExecutionContext.DeletionBehavior toDeletion(String token, CommandContext context) throws CommandException {
-        
-        if (WorkflowExecutionContext.DeletionBehavior.Always.name().equalsIgnoreCase(token)) {
-            return WorkflowExecutionContext.DeletionBehavior.Always;
-        } else if (WorkflowExecutionContext.DeletionBehavior.Never.name().equalsIgnoreCase(token)) {
-            return WorkflowExecutionContext.DeletionBehavior.Never;
-        } else if (ONFINISHED.equalsIgnoreCase(token)) {
-            return WorkflowExecutionContext.DeletionBehavior.OnExpected;
-        }
-        
-        throw CommandException.syntaxError("Invalid delete behavior: " + token, context);
-        
     }
     
 //    private List<File> collectFiles(CommandContext context, ParsedListParameter workflowList,
@@ -1040,7 +1032,6 @@ public class WfCommandPlugin implements CommandPlugin {
         }
         return testCaseFileNamesWithoutEnding;
     }
-    
 
     private void performWfSelfTest(final CommandContext context) throws CommandException {
     	ParsedCommandModifiers modifiers = context.getParsedModifiers();
@@ -1051,8 +1042,8 @@ public class WfCommandPlugin implements CommandPlugin {
     	ParsedIntegerParameter sequentialRunsParameter = (ParsedIntegerParameter) modifiers.getCommandParameter(SR);
     	ParsedListParameter casesParameter = (ParsedListParameter) modifiers.getCommandParameter(CASES);
     	
-        WorkflowExecutionContext.DisposalBehavior dispose = toDisposal(disposeParameter.getResult(), context);
-        WorkflowExecutionContext.DeletionBehavior delete = toDeletion(deleteParameter.getResult(), context);
+        HeadlessWorkflowExecutionService.DisposalBehavior dispose = toDisposal(disposeParameter.getResult(), context);
+        HeadlessWorkflowExecutionService.DeletionBehavior delete = toDeletion(deleteParameter.getResult(), context);
 
         int parallelRuns = parallelRunsParameter.getResult();
         int sequentialRuns = sequentialRunsParameter.getResult();
@@ -1092,7 +1083,7 @@ public class WfCommandPlugin implements CommandPlugin {
         }
 
         try {
-            copyWorkflowsForSelfTest(tempSelfTestWorkflowDir, tempSelfTestWorkflowFailureDir, cases);
+            copyWorkflowsForSelfTest(tempFileService, tempSelfTestWorkflowDir, tempSelfTestWorkflowFailureDir, cases);
         } catch (IOException e) {
             String message = "Failed to copy workflow files from self-test folder to temp directory: " + e.getMessage();
             handleWfSelfTestExecutionError(context, tempFileService, tempSelfTestWorkflowDir, tempPlaceholdersStuffDir, e, message);
@@ -1140,10 +1131,10 @@ public class WfCommandPlugin implements CommandPlugin {
                 .verify();
             context.println(wfVerifyResultVerification.getVerificationReport());
 
-            if (!delete.equals(WorkflowExecutionContext.DeletionBehavior.Never)
-                && (wfVerifyResultVerification.isVerified() || delete.equals(WorkflowExecutionContext.DeletionBehavior.Always))) {
+            if (!delete.equals(HeadlessWorkflowExecutionService.DeletionBehavior.Never)
+                && (wfVerifyResultVerification.isVerified() || delete.equals(HeadlessWorkflowExecutionService.DeletionBehavior.Always))) {
                 disposeTempDirsCreatedForSelfTest(tempFileService, tempSelfTestWorkflowDir, tempPlaceholdersStuffDir);
-            } else if (delete.equals(WorkflowExecutionContext.DeletionBehavior.OnExpected)) {
+            } else if (delete.equals(HeadlessWorkflowExecutionService.DeletionBehavior.OnExpected)) {
                 for (File file : wfVerifyResultVerification.getWorkflowRelatedFilesToDelete()) {
                     try {
                         tempFileService.disposeManagedTempDirOrFile(file);
@@ -1224,8 +1215,8 @@ public class WfCommandPlugin implements CommandPlugin {
         return wfs;
     }
 
-    private void copyWorkflowsForSelfTest(File tempSelfTestWorkflowDir, File tempSelfTestWorkflowFailureDir,
-        List<String> cases) throws IOException {
+    private void copyWorkflowsForSelfTest(TempFileService tempFileService, File tempSelfTestWorkflowDir,
+        File tempSelfTestWorkflowFailureDir, List<String> cases) throws IOException {
 
         // always create the target "failure" sub-directory in advance; it was created on demand in previous releases, but Equinox platform
         // enumeration order changes made this unreliable (issue #16090)
@@ -1402,31 +1393,29 @@ public class WfCommandPlugin implements CommandPlugin {
         WorkflowDescription wfDesc;
         try {
             wfDesc =
-                ServiceRegistry.createAccessFor(this)
-                    .getService(PersistentWorkflowDescriptionLoaderService.class)
-                    .loadWorkflowDescriptionFromFile(wfFile, new WorkflowDescriptionLoaderCallback() {
+                workflowExecutionService.loadWorkflowDescriptionFromFile(wfFile, new WorkflowDescriptionLoaderCallback() {
 
-                        @Override
-                        public void onWorkflowFileParsingPartlyFailed(String backupFilename) {
-                            cmdCtx.getOutputReceiver()
-                                .addOutput("Workflow partly invalid, some parts are removed; backup file: " + backupFilename);
-                        }
+                    @Override
+                    public void onWorkflowFileParsingPartlyFailed(String backupFilename) {
+                        cmdCtx.getOutputReceiver()
+                            .addOutput("Workflow partly invalid, some parts are removed; backup file: " + backupFilename);
+                    }
 
-                        @Override
-                        public void onSilentWorkflowFileUpdated(String message) {
-                            cmdCtx.getOutputReceiver().addOutput("Workflow updated (silent update): " + message);
-                        }
+                    @Override
+                    public void onSilentWorkflowFileUpdated(String message) {
+                        cmdCtx.getOutputReceiver().addOutput("Workflow updated (silent update): " + message);
+                    }
 
-                        @Override
-                        public void onNonSilentWorkflowFileUpdated(String message, String backupFilename) {
-                            cmdCtx.getOutputReceiver().addOutput("Workflow updated: " + message + "; backup file: " + backupFilename);
-                        }
+                    @Override
+                    public void onNonSilentWorkflowFileUpdated(String message, String backupFilename) {
+                        cmdCtx.getOutputReceiver().addOutput("Workflow updated: " + message + "; backup file: " + backupFilename);
+                    }
 
-                        @Override
-                        public boolean arePartlyParsedWorkflowConsiderValid() {
-                            return false;
-                        }
-                    });
+                    @Override
+                    public boolean arePartlyParsedWorkflowConsiderValid() {
+                        return false;
+                    }
+                });
         } catch (WorkflowFileException e) {
             throw CommandException.executionError("Failed to load workflow: " + e.getMessage(), cmdCtx);
         }

@@ -12,8 +12,7 @@ Export-Package: de.rcenvironment.core.component.workflow.api,
  de.rcenvironment.core.component.workflow.model.api,
  de.rcenvironment.core.component.workflow.model.api.testutils,
  de.rcenvironment.core.component.workflow.model.spi,
- de.rcenvironment.core.component.workflow.update.api,
- de.rcenvironment.core.component.workflow.validation.api
+ de.rcenvironment.core.component.workflow.update.api
 Bundle-ClassPath: .
 Import-Package: com.fasterxml.jackson.core;version="2.9.9",
  com.fasterxml.jackson.core.type;version="2.9.9",
@@ -44,7 +43,6 @@ Import-Package: com.fasterxml.jackson.core;version="2.9.9",
  de.rcenvironment.core.component.model.spi,
  de.rcenvironment.core.component.spi,
  de.rcenvironment.core.component.update.api,
- de.rcenvironment.core.component.workflow.execution.api,
  de.rcenvironment.core.configuration,
  de.rcenvironment.core.configuration.bootstrap,
  de.rcenvironment.core.datamanagement,

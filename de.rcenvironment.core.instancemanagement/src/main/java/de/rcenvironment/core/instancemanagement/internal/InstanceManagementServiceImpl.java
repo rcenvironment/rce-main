@@ -84,7 +84,6 @@ import de.rcenvironment.core.utils.ssh.jsch.executor.JSchRCECommandLineExecutor;
  * @author Lukas Rosenbach
  * @author Alexander Weinert
  * @author Marlon Schroeter
- * @author Jan Flink (fixed WORKFLOW_START_PATTERN)
  */
 public class InstanceManagementServiceImpl implements InstanceManagementService {
 
@@ -153,8 +152,7 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
     private static final String OF_INSTANCE = " of instance ";
 
     private static final Pattern WORKFLOW_START_PATTERN =
-			Pattern.compile(
-					"Loading: '(.+)';(?:.|\\n)*[l|L]og directory: '?([^'\\(]+)'?(?: \\(.+\\))?\\nExecuting: '[^']+'.*; id: ([^\\s]+)");
+        Pattern.compile("Loading: '(.+)'; log directory: (\\S+) .*\\nExecuting: '[^']+'; id: ([^\\s]+)");
 
     // Only the first mayor-version of a new profile version has to be entered. If the next mayor-versions use the
     // same profile-version, it is not necessary to include these mayor-version in this array.
