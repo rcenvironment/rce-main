@@ -54,6 +54,8 @@ import io.cucumber.java.en.When;
  */
 public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDefinitionBase {
 
+    private static final String DEFAULT_UPLINK_CLIENT_ID = "default";
+
     private static final ManagedInstance[] EMPTY_INSTANCE_ARRAY = new ManagedInstance[0];
 
     public InstanceNetworkingStepDefinitions(TestScenarioExecutionContext executionContext) {
@@ -73,12 +75,12 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
     public void givenConfiguredNetworkConnections(String cloneFlag, String connectionsSetup) throws Exception {
         Boolean cloned = cloneFlag != null;
         if (cloned) {
-            throw new AssertionError("The 'cloned' flag is deprecated; specify a clientId=... option instead");
+            throw internalError("The 'cloned' flag is deprecated; specify a clientId=... option instead");
         }
 
         printToCommandConsole(StringUtils.format("Configuring network connections \"%s\"", connectionsSetup));
         // parse the string defining the intended network connections
-        Pattern p = Pattern.compile("\\s*(\\w+)-(?:\\[(reg|ssh|upl)\\]-)?>(\\w+)\\s*(?:\\[([\\w\\s]*)\\])?\\s*");
+        Pattern p = Pattern.compile("\\s*(\\w+)-(?:\\[(reg|ssh|upl)\\]-)?>(\\w+)\\s*(?:\\[([\\w\\s=]*)\\])?\\s*");
         for (String connectionSetupPart : connectionsSetup.split(",")) {
             Matcher m = p.matcher(connectionSetupPart);
             if (!m.matches()) {
@@ -307,13 +309,13 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
      * @param criterion the test criterion string
      * @param maxiumWaitSeconds the maximum retry time until success
      */
-    @Then("^the (?:default )?Uplink connection from \"([^\"]*)\" to \"([^\"]*)\" "
+    @Then("the Uplink connection from \"([^\"]+)\" to \"([^\"]+)\" (?:with userName=\"([^\"]+)\" and clientId=\"([^\"]+)\" )?"
         + "should be (connected|disconnected|present|absent)(?: within (\\d+) seconds?)?$")
-    public void thenVerifyStateOfUplinkConnection(String sourceInstanceId, String targetInstanceId, String criterion,
-        Integer maxiumWaitSeconds) {
+    public void thenVerifyStateOfUplinkConnection(String sourceInstanceId, String targetInstanceId, String userNameOverride,
+        String clientIdOverride, String criterion, Integer maxiumWaitSeconds) {
 
-        String loginName = sourceInstanceId;
-        String clientId = "default";
+        String loginName = Optional.ofNullable(userNameOverride).orElse(sourceInstanceId);
+        String clientId = Optional.ofNullable(clientIdOverride).orElse(DEFAULT_UPLINK_CLIENT_ID);
 
         maxiumWaitSeconds = applyFallbackMaximumRetryTime(maxiumWaitSeconds);
 
@@ -332,6 +334,14 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
         String commandOutput;
         try {
             commandOutput = executeCommandOnInstance(resolveInstance(sourceInstanceId), "uplink list", false);
+        } catch (OperationFailureException e) {
+            // in a retry loop, a failure to execute the query command on the instance should not generally cause a fatal error but a retry
+            if (isLastAttempt) {
+                throw e; // rethrow
+            } else {
+                log.debug(StringUtils.format("Failed to query the state of uplink connections on %s; retrying", targetInstanceId));
+                return false; // retry
+            }
         } catch (AssertionError e) {
             // remote command execution failing is possible in regular operation if an instance is queried right after its basic startup
             if (!isLastAttempt) {
@@ -430,10 +440,11 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
     public void whenTriggeringACrashOfInstanceAndWaitingForTerminination(String instanceId, int maxWaitSeconds)
         throws OperationFailureException {
         triggerHardShutdownOfInstance(instanceId);
+        final String operationTitle = StringUtils.format("Trigger a crash of '%s' and wait for its termination", instanceId);
         // wait for shutdown
         executeWithRetry((ExecutionAttempt) (attempt, isLastAttempt) -> {
             return !INSTANCE_MANAGEMENT_SERVICE.isInstanceRunning(instanceId); // not running -> return success, otherwise retry
-        }, instanceId, maxWaitSeconds);
+        }, operationTitle, maxWaitSeconds);
     }
 
     private void triggerHardShutdownOfInstance(String instanceId) throws OperationFailureException {
@@ -743,7 +754,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
         final Integer serverPort = configureSSHServer(serverInstance, connectionOptions.getServerNumber());
         final String userName = connectionOptions.getUserName().orElse(clientInstance.getId());
         // the default value should (but doesn't have to) match UplinkProtocolConstants.SESSION_QUALIFIER_DEFAULT
-        final String clientId = connectionOptions.getClientId().orElse("default");
+        final String clientId = connectionOptions.getClientId().orElse(DEFAULT_UPLINK_CLIENT_ID);
         // intended for testing setups (e.g. BDD) only: use the login name as default password
         final String password = connectionOptions.getPassword().orElse(userName);
 
@@ -781,7 +792,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
         UplinkConnectionOptions connectionOptions = parseUplinkConnectionOptions(options);
         final String userName = connectionOptions.getUserName().orElse(clientInstance.getId());
         // the default value should (but doesn't have to) match UplinkProtocolConstants.SESSION_QUALIFIER_DEFAULT
-        final String clientId = connectionOptions.getClientId().orElse("default");
+        final String clientId = connectionOptions.getClientId().orElse(DEFAULT_UPLINK_CLIENT_ID);
         // intended for testing setups (e.g. BDD) only: use the login name as default password
         final String password = connectionOptions.getPassword().orElse(userName);
 
