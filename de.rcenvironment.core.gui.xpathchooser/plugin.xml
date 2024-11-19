@@ -3,6 +3,6 @@
 <plugin>  
   <!-- Dynamic Help -->
   <extension point="org.eclipse.help.contexts">
-      <contexts file="help/contexts.xml" />
+      <contexts file="help/contexts.xml" plugin="de.rcenvironment" />
    </extension>
 </plugin>

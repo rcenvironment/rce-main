@@ -28,11 +28,6 @@
          </propertyTab>
       </propertyTabs>
    </extension>
-
-    <!-- Dynamic Help -->
-   <extension point="org.eclipse.help.contexts">
-      <contexts file="help/contexts.xml" plugin="de.rcenvironment" />
-   </extension>
    
    <extension point="de.rcenvironment.core.gui.datamanagement.browser.historysubtreebuilder">
       <builder class="de.rcenvironment.core.component.integration.workflow.gui.EndpointAdapterDataItemSubtreeBuilder"/>
