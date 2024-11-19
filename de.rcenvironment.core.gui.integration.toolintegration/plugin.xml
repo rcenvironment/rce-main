@@ -2,14 +2,11 @@
 <?eclipse version="3.2"?>
 <plugin>
 	
-<extension point="org.eclipse.help.contexts">
-	<contexts
-		file="help/context.xml"
-		plugin="de.rcenvironment.core.gui.wizard.toolintegration">
-		</contexts>
+	<extension point="org.eclipse.help.contexts">
+		<contexts file="help/context.xml" plugin="de.rcenvironment.core.gui.wizard.toolintegration" />
 	</extension>
 
-   <extension point="org.eclipse.help.toc">
+   	<extension point="org.eclipse.help.toc">
    		<toc file="help/toc.xml"/>
  	</extension>
 	
