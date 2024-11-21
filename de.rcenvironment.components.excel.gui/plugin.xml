@@ -110,9 +110,7 @@
    
     <!-- Dynamic Help -->
     <extension point="org.eclipse.help.contexts">
-        <contexts 
-            file="help/contexts.xml" plugin="de.rcenvironment">
-         </contexts>
+        <contexts file="help/contexts.xml" plugin="de.rcenvironment" />
      </extension>
      
      <extension point="org.eclipse.help.toc">

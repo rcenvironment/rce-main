@@ -40,11 +40,5 @@
                id="workflow.editor.tab.encrypter.InOutputs">
          </propertyTab>
       </propertyTabs>
-        
-
-   </extension>
-    <!-- Dynamic Help -->
-   <extension point="org.eclipse.help.contexts">
-      <contexts file="resources/help/contexts.xml" plugin="de.rcenvironment.components.examples.encrypter.execution" />
    </extension>
 </plugin>

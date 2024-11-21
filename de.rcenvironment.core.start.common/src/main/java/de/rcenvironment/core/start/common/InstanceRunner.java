@@ -78,8 +78,10 @@ public abstract class InstanceRunner {
         // Write versions to log file
         log.debug("Core version: " + VersionUtils.getCoreBundleVersion());
         log.debug("Product version: " + VersionUtils.getProductVersion());
-
-        log.debug("Command line arguments passed: " + System.getProperty("sun.java.command"));
+        log.debug("JVM version: " + System.getProperty("java.version"));
+        log.debug(StringUtils.format("OS name and version (as reported by the JVM): %s / %s",
+            System.getProperty("os.name"), System.getProperty("os.version")));
+        log.debug("Command line arguments (as reported by the JVM): " + System.getProperty("sun.java.command"));
 
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
 
@@ -113,7 +115,7 @@ public abstract class InstanceRunner {
 
             log.debug(StringUtils.format(
                 "Instance validation results [%d in total]: %d passed, %d failed with confirmation required, "
-                + "%d passed with recovery required, %d failed with shutdown required",
+                    + "%d passed with recovery required, %d failed with shutdown required",
                 passed + failedWithConfirmationRequired + failedWithRecoveryRequired + failedWithShutdownRequired,
                 passed, failedWithConfirmationRequired, failedWithRecoveryRequired, failedWithShutdownRequired));
 
@@ -131,13 +133,13 @@ public abstract class InstanceRunner {
                 log.error(StringUtils.format("Instance validation '%s' failed irrecoverably: %s. RCE is shutting down",
                     result.getValidationDisplayName(), result.getLogMessage()));
             }
-            
+
             final boolean shutdownRequired = (failedWithShutdownRequired > 0);
             if (shutdownRequired) {
                 onShutdownRequired(validationResults.get(InstanceValidationResultType.FAILED_SHUTDOWN_REQUIRED));
                 return false;
             }
-            
+
             final boolean recoveryRequired = (failedWithRecoveryRequired > 0);
             if (recoveryRequired) {
                 final boolean recoverySucceeded =
@@ -148,7 +150,7 @@ public abstract class InstanceRunner {
                     return false;
                 }
             }
-            
+
             final boolean confirmationRequired = (failedWithConfirmationRequired > 0);
             if (confirmationRequired) {
                 final boolean confirmationGiven =
@@ -168,7 +170,7 @@ public abstract class InstanceRunner {
      * @throws Exception on uncaught exceptions
      */
     public abstract int performRun() throws Exception;
-    
+
     /**
      * Called if the validation determines that RCE needs to be shut down. Must be overridden to inform the users about the reason for the
      * shutdown.
@@ -179,7 +181,7 @@ public abstract class InstanceRunner {
      * @param validationResults The validation results that cause the necessary shutdown.
      */
     public abstract void onShutdownRequired(List<InstanceValidationResult> validationResults);
-    
+
     /**
      * Called if the validation determines that RCE may be started if the user explicitly confirms the recovery from a failed validation.
      * Must be overridden to actually query the user. If the user confirms the recovery actions, this necessitates another round of
