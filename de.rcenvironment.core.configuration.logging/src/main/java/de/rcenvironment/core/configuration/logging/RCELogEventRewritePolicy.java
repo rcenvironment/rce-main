@@ -77,6 +77,18 @@ public class RCELogEventRewritePolicy implements RewritePolicy {
 
         // Rule for MANTIS-18210: an error triggered by a NPE in Eclipse RCP code with no apparent way to prevent it
         if (originalLevel == Level.ERROR && messageTemplate.startsWith("FrameworkEvent ")) {
+            final Throwable cause = event.getThrown();
+            if (cause != null && cause.getMessage() != null) {
+                if (cause.getMessage().startsWith("Exception in org.eclipse.debug.core.DebugPlugin.stop()")) {
+                    return reduceLogLevelWithMessagePrefix(event, Level.DEBUG);
+                }
+            }
+        }
+
+        // Rule for some help index warnings that are part of the current Eclipse RCP (2023-03) being used, and
+        // therefore out of our control. Note that these warnings seem to be remaining cases that were not fixed
+        // as part of https://github.com/eclipse-platform/eclipse.platform.ua/issues/80 .
+        if (originalLevel == Level.WARN && messageTemplate.startsWith("Unable to consume Lucene index from bundle 'org.eclipse.")) {
             return reduceLogLevelWithMessagePrefix(event, Level.DEBUG);
         }
 
