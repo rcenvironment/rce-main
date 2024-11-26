@@ -120,43 +120,6 @@ Scenario: Network disruptions during distributed workflow with remote controller
   And  the log output of "NodeB" should contain the pattern "Component 'Remote 2' .* is now PROCESSING_INPUTS"
   And  the log output of "NodeB" should contain the pattern "Component 'Remote 4' .* is now PROCESSING_INPUTS"
 
-#TODO: Note: this scenario does not seem to make sense: the "normal" network configurations do not work with uplink?
-@Workflow25
-Scenario: Remote node restart repeatedly during distributed workflow with local controller
-
-  Given instances "Uplink, NodeB [Id=00000000000000000000000000000002], NodeC [Id=00000000000000000000000000000003]" using the default build
-  #And   configured network connections "NodeA->NodeB [autoStart]"
-  And   configured network connections "NodeB-[upl]->Uplink [autoRetry], NodeC-[upl]->Uplink [autoRetry]" 
-  When  starting instances "Uplink, NodeB" concurrently
-  # set public access to the Joiner component on NodeB 
-  And  executing command "components set-auth rce/Joiner public" on "NodeB"
-  And  the output should contain "Set access authorization"
-  # wait for network connections after setting the component permissions to avoid needing extra wait time
-  And   all auto-start network connections should be ready within 20 seconds
-  
-  # even though the network connection may have been established, wait for NodeB to fully announce components etc.
-  And  waiting for 2 seconds
-  # schedule restart of NodeB while the workflow should be running
-  #And   scheduling a restart of "NodeB" after 2 seconds
-  And   starting workflow "bdd_wf_robustness_basic_loop_2_nodes_wf_ctrl_undefined.wf" on "Uplink"
-
-  And   waiting for 15 seconds
-
-  And   starting instance "NodeC" 
-  And   waiting for 55 seconds
-
-  Then  the workflow controller should have been "Uplink"
-  And   workflow component "Local 1" should have been run on "Uplink"
-  And   workflow component "Remote 2" should have been run on "NodeB" using node id "00000000000000000000000000000002"
-  And   workflow component "Local 3" should have been run on "Uplink"
-  And   workflow component "Remote 4" should have been run on "NodeB" using node id "00000000000000000000000000000002"
-  # The workflow should have failed within a reasonable time (instead of waiting indefinitely)
-  And   the workflow should have reached the FAILED state
-  # Also, NodeA should have received and logged an exception stating that the remote node restart was specifically detected
-  And   the log output of "NodeA" should contain the pattern "(?:has been restarted|the remote node was restarte|The destination instance for this request was restarted)"
-
-  # Current workaround for the problem that NodeB may still be finishing its restart on test shutdown, causing an irrelevant failure
-  When  waiting for 15 seconds
   
 @WorkflowTestsFeature
 @Workflow05
