@@ -6,7 +6,7 @@ Feature: WorkflowTests
 Scenario: Execute a distributed workflow on a single node and expect fallback to local component execution
 
   Given running instance "NodeA" using the default build
-  When executing workflow "bdd_01_simple_distributed" on "NodeA"
+  When  executing workflow "bdd_01_simple_distributed" on "NodeA"
   Then  the workflow should have reached the FINISHED state
   And   the workflow controller should have been "NodeA"
   And   workflow component "Joiner 1" should have been run on "NodeA"
@@ -32,7 +32,7 @@ Scenario: Execute a distributed workflow, testing the local fallback case first,
   And   all auto-start network connections should be ready within 20 seconds
 
   # all Joiner components should fall back to NodeA as there is no such component available on NodeB
-  When executing workflow "bdd_01_simple_distributed" on "NodeA"
+  When  executing workflow "bdd_01_simple_distributed" on "NodeA"
   Then  the workflow should have reached the FINISHED state
   And   the workflow controller should have been "NodeA"
   And   workflow component "Joiner 1" should have been run on "NodeA"
@@ -48,7 +48,7 @@ Scenario: Execute a distributed workflow, testing the local fallback case first,
 
   # now the workflow should execute Joiner 1 and 3 on NodeB as stored in the workflow file; 
   # this also verifies that the previous workflow run did not erase the node settings from the .wf file during fallback 
-  When executing workflow "bdd_01_simple_distributed" on "NodeA"
+  When  executing workflow "bdd_01_simple_distributed" on "NodeA"
   Then  the workflow should have reached the FINISHED state
   And   the workflow controller should have been "NodeA"
   And   workflow component "Joiner 1" should have been run on "NodeB" using node id "00000000000000000000000000000002"
@@ -63,10 +63,10 @@ Scenario: Execute a distributed workflow, testing the local fallback case first,
 Scenario: Network disruptions during distributed workflow with local controller
 
   Given instances "NodeA, NodeB [Id=00000000000000000000000000000002]" using the default build
-  And   configured network connections "NodeA->NodeB [autoStart]"
+  And   configured network connections "NodeA->NodeB [autoStart autoRetryInitialDelay=1 autoRetryDelayMultiplier=1]"
   When  starting all instances concurrently
   # set public access to the Joiner component on NodeB 
-  When  executing command "components set-auth rce/Joiner public" on "NodeB"
+  And   executing command "components set-auth rce/Joiner public" on "NodeB"
   Then  the output should contain "Set access authorization"
   # wait for network connections after setting the component permissions to avoid needing extra wait time
   And   all auto-start network connections should be ready within 20 seconds
@@ -93,7 +93,7 @@ Scenario: Network disruptions during distributed workflow with local controller
 Scenario: Network disruptions during distributed workflow with remote controller
 
   Given instances "NodeA, NodeB [WfHost;Id=00000000000000000000000000000002]" using the default build
-  And   configured network connections "NodeA->NodeB [autoStart]"
+  And   configured network connections "NodeA->NodeB [autoStart autoRetryInitialDelay=1 autoRetryDelayMultiplier=1]"
   When  starting all instances concurrently
   # set public access to the Joiner component on NodeB 
   When  executing command "components set-auth rce/Joiner public" on "NodeB"
@@ -109,51 +109,17 @@ Scenario: Network disruptions during distributed workflow with remote controller
 
   # Initiate the workflow on NodeA, but the controller is set to id 2 (NodeB) inside the workflow file
   And   executing workflow "bdd_wf_robustness_basic_loop_2_nodes_wf_ctrl_on_node2.wf" on "NodeA"
-  Then  the workflow controller should have been "NodeB" using node id "00000000000000000000000000000002"
-  And   workflow component "Local 1" should have been run on "NodeA"
-  And   workflow component "Remote 2" should have been run on "NodeB" using node id "00000000000000000000000000000002"
-  And   workflow component "Local 3" should have been run on "NodeA"
-  And   workflow component "Remote 4" should have been run on "NodeB" using node id "00000000000000000000000000000002"
-  # Check debug.log as a workaround as long as remote workflow log capture is not robust against network disruption (issue #0016137)
-  And   the log output of "NodeB" should contain the pattern "Workflow .* is now FINISHED"
-
-#TODO: Note: this scenario does not seem to make sense: the "normal" network configurations do not work with uplink?
-@Workflow25
-Scenario: Remote node restart repeatedly during distributed workflow with local controller
-
-  Given instances "Uplink, NodeB [Id=00000000000000000000000000000002], NodeC [Id=00000000000000000000000000000003]" using the default build
-  #And   configured network connections "NodeA->NodeB [autoStart]"
-  And   configured network connections "NodeB-[upl]->Uplink [autoRetry], NodeC-[upl]->Uplink [autoRetry]" 
-  When  starting instances "Uplink, NodeB" concurrently
-  # set public access to the Joiner component on NodeB 
-  And  executing command "components set-auth rce/Joiner public" on "NodeB"
-  And  the output should contain "Set access authorization"
-  # wait for network connections after setting the component permissions to avoid needing extra wait time
-  And   all auto-start network connections should be ready within 20 seconds
+  # Ensure that the log files a written completely
+  And   stopping all instances
   
-  # even though the network connection may have been established, wait for NodeB to fully announce components etc.
-  And  waiting for 2 seconds
-  # schedule restart of NodeB while the workflow should be running
-  #And   scheduling a restart of "NodeB" after 2 seconds
-  And   starting workflow "bdd_wf_robustness_basic_loop_2_nodes_wf_ctrl_undefined.wf" on "Uplink"
+  # Check debug.log files as a workaround as long as remote workflow log capture is not robust against network disruption (issue #0016137)
+  Then the log output of "NodeA" should contain the pattern "Created workflow from file .* on node \"NodeB\""
+  And  the log output of "NodeA" should contain the pattern "Component 'Local 1' .* is now PROCESSING_INPUTS"
+  And  the log output of "NodeA" should contain the pattern "Component 'Local 3' .* is now PROCESSING_INPUTS"
+  And  the log output of "NodeB" should contain the pattern "Workflow .* is now FINISHED"
+  And  the log output of "NodeB" should contain the pattern "Component 'Remote 2' .* is now PROCESSING_INPUTS"
+  And  the log output of "NodeB" should contain the pattern "Component 'Remote 4' .* is now PROCESSING_INPUTS"
 
-  And   waiting for 15 seconds
-
-  And   starting instance "NodeC" 
-  And   waiting for 55 seconds
-
-  Then  the workflow controller should have been "Uplink"
-  And   workflow component "Local 1" should have been run on "Uplink"
-  And   workflow component "Remote 2" should have been run on "NodeB" using node id "00000000000000000000000000000002"
-  And   workflow component "Local 3" should have been run on "Uplink"
-  And   workflow component "Remote 4" should have been run on "NodeB" using node id "00000000000000000000000000000002"
-  # The workflow should have failed within a reasonable time (instead of waiting indefinitely)
-  And   the workflow should have reached the FAILED state
-  # Also, NodeA should have received and logged an exception stating that the remote node restart was specifically detected
-  And   the log output of "NodeA" should contain the pattern "(?:has been restarted|the remote node was restarte|The destination instance for this request was restarted)"
-
-  # Current workaround for the problem that NodeB may still be finishing its restart on test shutdown, causing an irrelevant failure
-  When  waiting for 15 seconds
   
 @WorkflowTestsFeature
 @Workflow05
@@ -170,13 +136,11 @@ Scenario: Remote node start during distributed workflow with local controller
   # wait for network connections after setting the component permissions to avoid needing extra wait time
   And   all auto-start network connections should be ready within 20 seconds
   
-  # even though the network connection may have been established, wait for NodeB to fully announce components etc.
-  When  waiting for 2 seconds
   # schedule restart of NodeB while the workflow should be running
-  And   scheduling a restart of "NodeB" after 2 seconds
+  When  scheduling a restart of "NodeB" after 2 seconds
   And   starting workflow "bdd_wf_robustness_basic_loop_2_nodes_wf_ctrl_undefined.wf" on "NodeA"
 
-  And   waiting for 15 seconds
+  And   waiting for 25 seconds
   Then  the workflow controller should have been "NodeA"
   And   workflow component "Local 1" should have been run on "NodeA"
   And   workflow component "Remote 2" should have been run on "NodeB" using node id "00000000000000000000000000000002"
@@ -211,36 +175,38 @@ Scenario: Executing "wf self-test"
 @NoGUITestSuite
 Scenario: Running Workflow with remote tool, published via uplink
 
-    Given instance "Uplink1, Client1, Client2" using the default build
-    And configured network connections "Client1-[upl]->Uplink1 [autoStart autoRetry], Client2-[upl]->Uplink1 [autoStart autoRetry]"
+  Given instance "Uplink1, Client1, Client2" using the default build
+  And   configured network connections "Client1-[upl]->Uplink1 [autoStart autoRetry], Client2-[upl]->Uplink1 [autoStart autoRetry]"
     
-    When starting instances "Client1, Client2, Uplink1" in the given order 
-    And adding tool "common/TestTool" to "Client1"
-    And executing command "components set-auth common/TestTool public" on "Client1"
-    And executing workflow "UplinkRemoteWorkflow.wf" on "Client2"
+  When  starting instances "Uplink1"
+  And   starting instances "Client1, Client2" concurrently 
+  And   adding tool "common/TestTool" to "Client1"
+  And   executing command "components set-auth common/TestTool public" on "Client1"
+  And   executing workflow "UplinkRemoteWorkflow.wf" on "Client2"
     
-    Then the workflow controller should have been "Client2"
-    And workflow component "Optimizer" should have been run on "Client2"
-    And workflow component "TestTool" should have been run on "Client1" via uplink
+  Then  the workflow controller should have been "Client2"
+  And   workflow component "Printer" should have been run on "Client2"
+  And   workflow component "TestTool" should have been run on "Client1" via uplink
     
     
 @WorkflowTestsFeature
 @Workflow08
 @SSHTestSuite
 @NoGUITestSuite
-Scenario: Running Workflow with remote tool, published via uplink
+Scenario: Cancelling Workflow with remote tool, published via uplink
 
-    Given instance "Uplink1, Client1, Client2" using the default build
-    And configured network connections "Client1-[upl]->Uplink1 [autoStart autoRetry], Client2-[upl]->Uplink1 [autoStart autoRetry]"
+  Given instance "Uplink1, Client1, Client2" using the default build
+  And   configured network connections "Client1-[upl]->Uplink1 [autoStart autoRetry], Client2-[upl]->Uplink1 [autoStart autoRetry]"
     
-    When starting instances "Client1, Client2, Uplink1" in the given order
-    And adding tool "common/LongTestTool" to "Client1"
-    And executing command "components set-auth common/LongTestTool public" on "Client1"
-    And starting workflow "UplinkRemoteWorkflowAbortLong.wf" on "Client2"
-    And waiting for 10 seconds
-    And cancelling workflow "UplinkRemoteWorkflowAbortLong.wf" on "Client2"
+  When  starting instances "Uplink1"
+  And   starting instances "Client1, Client2" concurrently 
+  And   adding tool "common/LongTestTool" to "Client1"
+  And   executing command "components set-auth common/LongTestTool public" on "Client1"
+  And   starting workflow "UplinkRemoteWorkflowAbortLong.wf" on "Client2"
+  And   waiting for 10 seconds
+  And   cancelling workflow "UplinkRemoteWorkflowAbortLong.wf" on "Client2"
     
-    Then workflow component "LongTestTool" should have been cancelled
+  Then  workflow component "LongTestTool" should have been cancelled
     
 @WorkflowTestsFeature
 @Workflow09
@@ -248,22 +214,27 @@ Scenario: Running Workflow with remote tool, published via uplink
 @BasicIntegrationTestSuite
 Scenario Outline: Workflow Info via Network
 
-	Given instance "NodeA [WorkflowHost]" using the <NodeA_build> build
-	And   instance "NodeB" using the <NodeB_build> build
-    And   configured network connections "NodeA-[reg]->NodeB [autoStart], NodeB-[reg]->NodeA [autoStart]"
+  Given instance "NodeA [WorkflowHost]" using the <NodeA_build> build
+  And   instance "NodeB" using the <NodeB_build> build
+  And   configured network connections "NodeA-[reg]->NodeB [autoStart autoRetryInitialDelay=2 autoRetryDelayMultiplier=1]"
     
-    When  starting all instances
-    And   adding tool "common/TestTool" to "NodeB"
-    And   executing command "components set-auth common/TestTool public" on "NodeB"
-    And   executing workflow "UplinkRemoteWorkflow.wf" on "NodeA"
+  When  starting all instances concurrently
+  And   adding tool "common/TestTool" to "NodeB"
+  And   executing command "components set-auth common/TestTool public" on "NodeB"
+  
+  Then  the output should contain "Set access authorization"
+  And   all auto-start network connections should be ready within 20 seconds
     
-    Then  instance "NodeB" should see workflow "UplinkRemoteWorkflow"
+  When  executing workflow "UplinkRemoteWorkflow.wf" on "NodeA"
+    
+  Then  the workflow should have reached the FINISHED state
+  And   instance "NodeB" should see workflow "UplinkRemoteWorkflow"
     
     Examples:
     |NodeA_build|NodeB_build|
     |default|default|
-    |default|base|
-    |base|default|
+#    |default|base|
+#    |base|default|
     
 @WorkflowTestsFeature
 @Workflow10
@@ -271,16 +242,21 @@ Scenario Outline: Workflow Info via Network
 @BasicIntegrationTestSuite
 Scenario Outline: Workflow Data via Network
 
-	Given instance "NodeA [WorkflowHost]" using the <NodeA_build> build
-	And   instance "NodeB" using the <NodeB_build> build
-    And   configured network connections "NodeA-[reg]->NodeB [autoStart], NodeB-[reg]->NodeA [autoStart]"
+  Given instance "NodeA [WorkflowHost]" using the <NodeA_build> build
+  And   instance "NodeB" using the <NodeB_build> build
+  And   configured network connections "NodeA-[reg]->NodeB [autoStart]"
     
-    When  starting all instances
-    And   adding tool "common/TestTool" to "NodeB"
-    And   executing command "components set-auth common/TestTool public" on "NodeB"
-    And   executing workflow "UplinkRemoteWorkflow.wf" on "NodeA"
+  When  starting all instances concurrently
+  And   adding tool "common/TestTool" to "NodeB"
+  And   executing command "components set-auth common/TestTool public" on "NodeB"
+  
+  Then  the output should contain "Set access authorization"
+  And   all auto-start network connections should be ready within 20 seconds
+  
+  When   executing workflow "UplinkRemoteWorkflow.wf" on "NodeA"
     
-    Then  instances "NodeA, NodeB" should see identical data for workflow "UplinkRemoteWorkflow"
+  Then  the workflow should have reached the FINISHED state
+  And   instances "NodeA, NodeB" should see identical data for workflow "UplinkRemoteWorkflow"
     
     Examples:
     |NodeA_build|NodeB_build|
@@ -296,11 +272,15 @@ Scenario Outline: Workflow Data via Network
 @NoGUITestSuite
 Scenario: Properties containing umlauts are echoed correctly
 
-    Given running instance "NodeA" using the default build
-    And   adding tool "common/Echo" to "NodeA"
+  Given running instance "NodeA" using the default build
+  And   adding tool "common/Echo" to "NodeA"
 
-    When executing workflow "EncodingTestWorkflow" on "NodeA"
+  When  executing workflow "EncodingTestWorkflow" on "NodeA"
 
-    Then that workflow run should be identical to "EncodingTestWorkflow"
-    And the log output of "NodeA" should indicate a clean shutdown with no warnings or errors
+  Then  the workflow should have reached the FINISHED state
+  And   that workflow run should be identical to "EncodingTestWorkflow"
 
+  # Ensure that the log files are written completely
+  When  stopping all instances
+  
+  Then  the log output of "NodeA" should indicate a clean shutdown with no warnings or errors

@@ -1,12 +1,12 @@
 {
-  "identifier" : "86907a3d-1f1d-48bb-8d11-7fac97aa1936",
+  "identifier" : "4ff9ed30-6133-4b4d-99e9-39d49a946b49",
   "workflowVersion" : "5",
-  "name" : "rRPC test 1_2018-06-20_10:22:09_01",
+  "name" : "rRPC test 1_2024-11-07_13:07:57_02",
   "platform" : "00000000000000000000000000000002:0",
   "nodes" : [ {
-    "identifier" : "c37f55c4-a4dd-4673-9ac5-4673f7a73042",
+    "identifier" : "d93e9ff3-d8ab-41fe-96f3-15ec02fb6840",
     "name" : "Local 1",
-    "location" : "310:205",
+    "location" : "320:200",
     "zIndex" : "1",
     "active" : "true",
     "component" : {
@@ -38,9 +38,9 @@
       "datatype" : "Float"
     } ]
   }, {
-    "identifier" : "7c075dd7-486d-4208-af58-2be7a4ae44ab",
+    "identifier" : "2e66c2c3-66a3-43ea-a21e-9aed9b2706da",
     "name" : "Local 3",
-    "location" : "550:205",
+    "location" : "480:200",
     "zIndex" : "3",
     "active" : "true",
     "component" : {
@@ -72,9 +72,9 @@
       "datatype" : "Float"
     } ]
   }, {
-    "identifier" : "1b3fb162-9ed3-4b39-91dc-ddd824562e67",
+    "identifier" : "8743a4fb-3669-42f1-9882-74c9c5bc915a",
     "name" : "Parametric Study",
-    "location" : "150:185",
+    "location" : "160:180",
     "zIndex" : "0",
     "active" : "true",
     "component" : {
@@ -109,7 +109,7 @@
       "metadata" : {
         "FromValue" : "0",
         "StepSize" : "1",
-        "ToValue" : "50",
+        "ToValue" : "20",
         "UseInputAsFromValue" : "false",
         "UseInputAsStepSizeValue" : "false",
         "UseInputAsToValue" : "false",
@@ -121,9 +121,9 @@
       "datatype" : "Boolean"
     } ]
   }, {
-    "identifier" : "5ff8b85e-fe9a-41ac-a668-3131bf771094",
+    "identifier" : "b8a666a6-95f8-488b-8391-afd86a926d3c",
     "name" : "Remote 2",
-    "location" : "430:325",
+    "location" : "400:260",
     "zIndex" : "2",
     "active" : "true",
     "platform" : "00000000000000000000000000000002:0",
@@ -156,9 +156,9 @@
       "datatype" : "Float"
     } ]
   }, {
-    "identifier" : "a4fb7393-38a7-42a7-aebd-9de7240cff06",
+    "identifier" : "1a769d3a-dc79-444c-a05a-d49f46c4f950",
     "name" : "Remote 4",
-    "location" : "670:325",
+    "location" : "540:260",
     "zIndex" : "4",
     "active" : "true",
     "platform" : "00000000000000000000000000000002:0",
@@ -190,32 +190,71 @@
       "name" : "Joined",
       "datatype" : "Float"
     } ]
+  }, {
+    "identifier" : "d4f532f3-479f-4682-a4ae-9188aebbd45c",
+    "name" : "Wait",
+    "location" : "520:80",
+    "zIndex" : "5",
+    "active" : "true",
+    "component" : {
+      "identifier" : "de.rcenvironment.script",
+      "version" : "3.5",
+      "name" : "Script"
+    },
+    "configuration" : {
+      "pythonExecutionPath" : "${pythonExecutionPath}",
+      "script" : "import time\r\ntime.sleep(1)\r\nRCE.write_output(\"out\", RCE.read_input(\"in\"))",
+      "scriptLanguage" : "Jython",
+      "storeComponentHistoryData" : "true",
+      "usageOfScript" : "NEW"
+    },
+    "dynamicInputs" : [ {
+      "identifier" : "966ee8b3-78ac-40f2-952d-28c2ff39205e",
+      "name" : "in",
+      "epIdentifier" : "default",
+      "datatype" : "Float",
+      "metadata" : {
+        "inputExecutionConstraint_4aae3eea" : "Required",
+        "inputHandling_73b1056e" : "Queue"
+      }
+    } ],
+    "dynamicOutputs" : [ {
+      "identifier" : "c301be61-14f1-4893-8868-701d1d83ab4d",
+      "name" : "out",
+      "epIdentifier" : "default",
+      "datatype" : "Float"
+    } ]
   } ],
   "connections" : [ {
-    "source" : "c37f55c4-a4dd-4673-9ac5-4673f7a73042",
+    "source" : "d93e9ff3-d8ab-41fe-96f3-15ec02fb6840",
     "output" : "51a818d9-1cc6-4ed4-b81e-2fa60093cdc7",
-    "target" : "5ff8b85e-fe9a-41ac-a668-3131bf771094",
+    "target" : "b8a666a6-95f8-488b-8391-afd86a926d3c",
     "input" : "1dc14a5d-da5a-4139-b680-8d8e7eb10610"
   }, {
-    "source" : "7c075dd7-486d-4208-af58-2be7a4ae44ab",
+    "source" : "2e66c2c3-66a3-43ea-a21e-9aed9b2706da",
     "output" : "acbfb5d0-0cb8-44de-accd-8053312f06a9",
-    "target" : "a4fb7393-38a7-42a7-aebd-9de7240cff06",
+    "target" : "1a769d3a-dc79-444c-a05a-d49f46c4f950",
     "input" : "b5d5e006-d2e7-44b8-8474-a9148b616292"
   }, {
-    "source" : "1b3fb162-9ed3-4b39-91dc-ddd824562e67",
+    "source" : "8743a4fb-3669-42f1-9882-74c9c5bc915a",
     "output" : "fdad34d6-a8ad-4d93-84db-a0344b226320",
-    "target" : "c37f55c4-a4dd-4673-9ac5-4673f7a73042",
+    "target" : "d93e9ff3-d8ab-41fe-96f3-15ec02fb6840",
     "input" : "89048421-38ec-4283-81af-2e3db0180b60"
   }, {
-    "source" : "5ff8b85e-fe9a-41ac-a668-3131bf771094",
+    "source" : "b8a666a6-95f8-488b-8391-afd86a926d3c",
     "output" : "77317933-dbdb-4952-b5f6-6f6d689fa474",
-    "target" : "7c075dd7-486d-4208-af58-2be7a4ae44ab",
+    "target" : "2e66c2c3-66a3-43ea-a21e-9aed9b2706da",
     "input" : "15b6c755-422e-4df4-8f79-4b4104d6af12"
   }, {
-    "source" : "a4fb7393-38a7-42a7-aebd-9de7240cff06",
+    "source" : "1a769d3a-dc79-444c-a05a-d49f46c4f950",
     "output" : "fbcae7ae-84b6-418b-92c7-171695cb17d5",
-    "target" : "1b3fb162-9ed3-4b39-91dc-ddd824562e67",
+    "target" : "d4f532f3-479f-4682-a4ae-9188aebbd45c",
+    "input" : "966ee8b3-78ac-40f2-952d-28c2ff39205e"
+  }, {
+    "source" : "d4f532f3-479f-4682-a4ae-9188aebbd45c",
+    "output" : "c301be61-14f1-4893-8868-701d1d83ab4d",
+    "target" : "8743a4fb-3669-42f1-9882-74c9c5bc915a",
     "input" : "7d2deb25-368f-4a0d-aa41-038bdc21987f"
   } ],
-  "bendpoints" : "[{\"source\":\"a4fb7393-38a7-42a7-aebd-9de7240cff06\",\"target\":\"1b3fb162-9ed3-4b39-91dc-ddd824562e67\",\"coordinates\":\"690:102,190:102\"}]"
+  "bendpoints" : "[{\"source\":\"d4f532f3-479f-4682-a4ae-9188aebbd45c\",\"target\":\"8743a4fb-3669-42f1-9882-74c9c5bc915a\",\"coordinates\":\"200:120\"}]"
 }

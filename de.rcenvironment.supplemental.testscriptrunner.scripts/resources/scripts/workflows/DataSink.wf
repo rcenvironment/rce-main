@@ -9,8 +9,8 @@
     "active" : "true",
     "component" : {
       "identifier" : "de.rcenvironment.script",
-      "version" : "3.4",
-      "name" : "Script"
+      "name" : "Script",
+      "version" : "3.5"
     },
     "configuration" : {
       "pythonExecutionPath" : "${pythonExecutionPath}",
