@@ -2,13 +2,12 @@ Feature: NetworkingTests
 
 @NetworkingTestsFeature
 @Network01
-@DefaultTestSuite
 @NoGUITestSuite
 Scenario: Basic multi-instance handling and command execution
 
   Given instances "NodeA, NodeB" using the default build
 
-  When  starting all instances
+  When  starting all instances concurrently
   And   the visible network of "NodeA" should consist of "NodeA"
   And   the visible network of "NodeB" should consist of "NodeB"
   
@@ -22,22 +21,23 @@ Scenario: Basic multi-instance handling and command execution
 Scenario: Basic networking between three instances (auto-start connections, no relay flag)
 
   Given instances "NodeA, NodeB, NodeC" using the default build
-  And   configured network connections "NodeA->NodeC [autoStart], NodeB->NodeC [autoStart]"
+  And   configured network connections "NodeA->NodeC [autoStart autoRetryInitialDelay=1 autoRetryDelayMultiplier=1], NodeB->NodeC [autoStart autoRetryInitialDelay=1 autoRetryDelayMultiplier=1]"
 
-  When  starting all instances
+  When  starting all instances concurrently
   Then  all auto-start network connections should be ready within 20 seconds 
   And   the visible network of "NodeA" should consist of "NodeA, NodeC"
   And   the visible network of "NodeB" should consist of "NodeB, NodeC"
 
 @NetworkingTestsFeature
 @Network03
+@DefaultTestSuite
 @NoGUITestSuite
 Scenario: Basic networking between three instances with relay
 	
   Given instances "NodeA,NodeB,NodeC" using the default build
-  And   configured network connections "NodeA->NodeC [autoStart relay], NodeB->NodeC [autoStart relay]"
+  And   configured network connections "NodeA->NodeC [autoStart autoRetryInitialDelay=1 autoRetryDelayMultiplier=1 relay], NodeB->NodeC [autoStart autoRetryInitialDelay=1 autoRetryDelayMultiplier=1 relay]"
   
-  When  starting all instances
+  When  starting all instances concurrently
   Then  all auto-start network connections should be ready within 20 seconds
   And   the visible network of "NodeA" should consist of "NodeA, NodeB, NodeC"
   And   the visible network of "NodeB" should consist of "NodeA, NodeB, NodeC"
