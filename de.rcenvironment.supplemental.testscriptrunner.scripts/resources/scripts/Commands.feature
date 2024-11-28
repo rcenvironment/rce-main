@@ -2,8 +2,7 @@ Feature: InstanceManagement
 
 
 @AllCommandsPresent
-@DefaultTestSuite
-@NoGUITestSuite
+@slow
 Scenario Outline: Verifying accessibility of console command <command> for role "developer"
 
   Given running instance "Node1" using the default build with im master role "developer"
@@ -70,10 +69,11 @@ Scenario Outline: Verifying accessibility of console command <command> for role 
     |wf verify|    
     
 
-# The following does the same tests, looks ugly, but is 6 times faster:
-@AltAllCommandsPresent
+# The following does the same tests, looks ugly, but is 35 times faster:
+@AllCommandsPresent
 @DefaultTestSuite
 @NoGUITestSuite
+@fast
 Scenario: Alternative approach for verifying accessibility of console commands for role "developer"
 
     Given running instance "Node3" using the default build with im master role "developer"
@@ -338,10 +338,10 @@ Scenario: Alternative approach for verifying accessibility of console commands f
     # Assert that no user-facing error message is shown
     And   the output should not contain "not executed. You either do not have the privileges to execute this command or it does not exist."
     
-# TODO "Alt" umbenennen
-@AltAllDevCommandsPresent
+@AllDevCommandsPresent
 @DefaultTestSuite
 @NoGUITestSuite
+@fast
 Scenario: Alternative approach for verifying accessibility of console commands for role "developer"
 
     Given running instance "Node4" using the default build with im master role "developer"
