@@ -11,9 +11,7 @@ Scenario: Single-instance component publishing and visibility control
   # TODO these steps are needed to reset potentially stored settings; a general "wipe profile data" feature would be better for this
   When  executing command "components set-auth rce/Switch local ; components set-auth rce/Joiner local ; components set-auth rce/Database local" on "NodeA"
     
-  # temporary workaround for the increased pre-publication time on instance startup; a specific wait command would be better
-  When  waiting for 5 seconds
-  Then  instance "NodeA" should see these components:
+  Then  instance "NodeA" should see these components within 5 seconds:
         | NodeA | rce/Switch   | local         |
         # verify that any component with legacy configuration as "public" is still "local"
         | NodeA | rce/Joiner   | local         |
@@ -30,7 +28,7 @@ Scenario: Single-instance component publishing and visibility control
   
   When  executing command "components set-auth rce/Joiner GroupA" on "NodeA"
   Then  the output should contain "Set access authorization"
-  And   instance "NodeA" should see these components:
+  And   instance "NodeA" should see these components within 5 seconds:
         | NodeA | rce/Switch   | shared:public                  |
         | NodeA | rce/Joiner   | shared:GroupA:0123456789abcdef |
         | NodeA | rce/Database | local-only                     |
@@ -38,19 +36,18 @@ Scenario: Single-instance component publishing and visibility control
   # check that local-only components remain "local-only", regardless of their authorization settings
   
   When  executing command "components set-auth rce/Database public" on "NodeA"
-  Then  instance "NodeA" should see these components:
+  Then  instance "NodeA" should see these components within 5 seconds:
         | NodeA | rce/Database | local-only               |
   When  executing command "components set-auth rce/Database GroupA" on "NodeA"
-  Then  instance "NodeA" should see these components:
+  Then  instance "NodeA" should see these components within 5 seconds:
         | NodeA | rce/Database | local-only               |
         
   # test persistence after a restart
   
   When  stopping all instances
   And   starting all instances
-  And   waiting for 5 seconds
   
-  Then  instance "NodeA" should see these components:
+  Then  instance "NodeA" should see these components within 5 seconds:
         | NodeA | rce/Switch   | shared:public                  |
         | NodeA | rce/Joiner   | shared:GroupA:0123456789abcdef |
         | NodeA | rce/Database | local-only                     |
@@ -73,9 +70,8 @@ Scenario: Multi-instance component publishing and visibility control
   And   executing command "auth import GroupA:0123456789abcdef:1:cVWfx4BDLnxXCsrRqO-9PzuNXOFIC09uoVCtaA4ThAU" on "NodeA"
   And   executing command "components set-auth rce/Switch local ; components set-auth rce/Joiner local ; components set-auth rce/Database local" on "NodeB"
   And   executing command "auth import GroupA:0123456789abcdef:1:cVWfx4BDLnxXCsrRqO-9PzuNXOFIC09uoVCtaA4ThAU" on "NodeB"
-  And   waiting for 1 second
     
-  Then  instance "NodeA" should see these components:
+  Then  instance "NodeA" should see these components within 5 seconds:
         | NodeA | rce/Joiner           | local         |
         | NodeA | rce/Switch           | local         |
         | NodeA | rce/Database         | local-only    |        
@@ -83,7 +79,7 @@ Scenario: Multi-instance component publishing and visibility control
         | NodeB | rce/Switch           | (absent)      |
         | NodeB | rce/Database         | (absent)      |        
         
-  Then  instance "NodeB" should see these components:
+  Then  instance "NodeB" should see these components within 5 seconds:
         | NodeA | rce/Joiner           | (absent)      |
         | NodeA | rce/Switch           | (absent)      |
         | NodeA | rce/Database         | (absent)      |     
@@ -96,15 +92,13 @@ Scenario: Multi-instance component publishing and visibility control
   When  executing command "components set-auth rce/Switch GroupA" on "NodeB"
   Then  the output should contain "GroupA"
 
-  When  waiting for 1 second
- 
-  Then  instance "NodeA" should see these components:
+  Then  instance "NodeA" should see these components within 5 seconds:
         | NodeA | rce/Joiner           | local                          |
         | NodeA | rce/Switch           | shared:public                  |
         | NodeB | rce/Joiner           | (absent)                       |
         | NodeB | rce/Switch           | remote:GroupA:0123456789abcdef |
         
-  Then  instance "NodeB" should see these components:
+  Then  instance "NodeB" should see these components within 5 seconds:
         | NodeA | rce/Joiner           | (absent)                       |
         | NodeA | rce/Switch           | remote:public                  |
         | NodeB | rce/Joiner           | local                          |
@@ -123,13 +117,13 @@ Scenario: Accessing Component through uplink with simultaneous start of instance
     Given instance "Uplink1, Client1, Client2" using the default build
     And configured network connections "Client1-[upl]->Uplink1 [autoStart autoRetry], Client2-[upl]->Uplink1 [autoStart autoRetry]"
     
-    When starting all instances
+    When starting instances "Uplink1"
+    And starting instances "Client1, Client2" concurrently
     And adding tool "common/TestTool" to "Client1"
     And executing command "components set-auth common/TestTool public" on "Client1"
-    And waiting for 15 seconds
     
-    Then instance "Client2" should see these components:
-        | Client1 (via userName/Client1_) | common/TestTool | local |
+    Then instance "Client2" should see these components within 5 seconds:
+        | Client1 (via Client1/default) | common/TestTool | local |
 
 @ComponentTestsFeature
 @Comp03 
@@ -147,8 +141,8 @@ Scenario: Accessing Component through uplink
     And starting instances "Uplink1, Client2" in the given order
     And waiting for 15 seconds
     
-    Then instance "Client2" should see these components:
-        | Client1 (via userName/Client1_) | common/TestTool | local |
+    Then instance "Client2" should see these components within 5 seconds:
+        | Client1 (via Client1/default) | common/TestTool | local |
     
 @ComponentTestsFeature
 @Comp04
@@ -159,11 +153,15 @@ Scenario: Component inaccessible after uplink shutdown
     Given instance "Uplink1, Client1, Client2" using the default build
     And configured network connections "Client1-[upl]->Uplink1 [autoStart autoRetry], Client2-[upl]->Uplink1 [autoStart autoRetry]"
     
-    When starting instances "Client1, Client2, Uplink1"
+    When starting instances "Uplink1"
+    And starting instances "Client1, Client2" concurrently
     And adding tool "common/TestTool" to "Client1"
     And executing command "components set-auth common/TestTool public" on "Client1"
-    And scheduling an instance shutdown of "Uplink1" after 1 second
-    And waiting for 2 second
     
-    Then instance "Client2" should see these components:
-        | Client1 (via userName/Client1_) | common/TestTool | (absent) |
+    Then instance "Client2" should see these components within 5 seconds:
+        | Client1 (via Client1/default) | common/TestTool | local |
+
+    When stopping instances "Client1"
+    
+    Then instance "Client2" should see these components within 5 seconds:
+        | Client1 (via Client1/default) | common/TestTool | (absent) |
