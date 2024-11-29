@@ -101,7 +101,7 @@ public final class ConnectionOptionConstants {
     /**
      * default auto retry delay multiplier value.
      */
-    public static final float AUTO_RETRY_DELAY_MULTIPLIER_DEFAULT = 1.5f;
+    public static final float AUTO_RETRY_DELAY_MULTIPLIER_DEFAULT = 1;
 
     /**
      * default auto retry init delay value.
@@ -111,7 +111,7 @@ public final class ConnectionOptionConstants {
     /**
      * default auto retry max delay value.
      */
-    public static final int AUTO_RETRY_MAX_DELAY_DEFAULT = 30;
+    public static final int AUTO_RETRY_MAX_DELAY_DEFAULT = 5;
     
     /**
      * default host value.

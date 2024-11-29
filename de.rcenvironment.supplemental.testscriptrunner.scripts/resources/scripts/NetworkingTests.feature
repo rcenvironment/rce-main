@@ -21,7 +21,7 @@ Scenario: Basic multi-instance handling and command execution
 Scenario: Basic networking between three instances (auto-start connections, no relay flag)
 
   Given instances "NodeA, NodeB, NodeC" using the default build
-  And   configured network connections "NodeA->NodeC [autoStart autoRetryInitialDelay=1 autoRetryDelayMultiplier=1], NodeB->NodeC [autoStart autoRetryInitialDelay=1 autoRetryDelayMultiplier=1]"
+  And   configured network connections "NodeA->NodeC [autoStart], NodeB->NodeC [autoStart]"
 
   When  starting all instances concurrently
   Then  all auto-start network connections should be ready within 20 seconds 
@@ -34,8 +34,8 @@ Scenario: Basic networking between three instances (auto-start connections, no r
 @NoGUITestSuite
 Scenario: Basic networking between three instances with relay
 	
-  Given instances "NodeA,NodeB,NodeC" using the default build
-  And   configured network connections "NodeA->NodeC [autoStart autoRetryInitialDelay=1 autoRetryDelayMultiplier=1 relay], NodeB->NodeC [autoStart autoRetryInitialDelay=1 autoRetryDelayMultiplier=1 relay]"
+  Given instances "NodeA, NodeB, NodeC" using the default build
+  And   configured network connections "NodeA->NodeC [autoStart relay], NodeB->NodeC [autoStart relay]"
   
   When  starting all instances concurrently
   Then  all auto-start network connections should be ready within 20 seconds
@@ -63,46 +63,41 @@ Scenario: Configuring standard uplink setup
         |yes|Warning|de.rcenvironment.core.communication.uplink.relay.internal.ServerSideUplinkSessionImpl|Non-protocol error in session SSH User "userName" (will be closed): java.io.EOFException|
          
         
-#TODO work out other method to test connection establishment than checking visibility of a tool    
 @NetworkingTestsFeature
 @Network05
-@SSHTestSuite
+@DefaultTestSuite
 @NoGUITestSuite
 Scenario: Connection established with autoRetry
 
-    Given instance "Uplink, Client1, Client2" using the default build
-    And configured network connections "Client1-[upl]->Uplink [autoStart autoRetry], Client2-[upl]->Uplink [autoStart autoRetry]"
-    
-    When starting instances "Client1, Client2, Uplink" in the given order 
-    #waiting to ensure they are connected by auto-retry
-    # TODO: find better solution than just waiting
-    And waiting for 15 seconds
-    And adding tool "common/TestTool" to "Client1"
-    And executing command "components set-auth common/TestTool public" on "Client1"
-    
-    Then instance "Client2" should see these components:
-        | Client1 (via userName/Client1_) | common/TestTool | local |
+  Given instances "NodeA, NodeB, NodeC" using the default build
+  And   configured network connections "NodeA->NodeC [autoStart], NodeB->NodeC [autoStart]"
+
+  When  starting instances "NodeA, NodeB" concurrently
+  And   starting instance "NodeC"
+  Then  all auto-start network connections should be ready within 20 seconds 
+  And   the visible network of "NodeA" should consist of "NodeA, NodeC"
+  And   the visible network of "NodeB" should consist of "NodeB, NodeC"
     
 
 @NetworkingTestsFeature
 @Network06
-@SSHTestSuite
+@DefaultTestSuite
 @NoGUITestSuite
 Scenario: Connection established after restart
 
-    Given instance "Uplink, Client1, Client2" using the default build
-    And configured network connections "Client1-[upl]->Uplink [autoStart autoRetry], Client2-[upl]->Uplink [autoStart autoRetry]"
-    
-    When starting all instances
-    And adding tool "common/TestTool" to "Client1"
-    And executing command "components set-auth common/TestTool public" on "Client1"
-    And scheduling an instance restart of "Uplink" after 1 seconds
-    #TODO replace with dynamic wait until restart has finished - has to be implemented
-    And waiting for 30 seconds
-    
-    Then instance "Client2" should see these components:
-        | Client1 (via userName/Client1_) | common/TestTool | local |
-    And waiting for 30 seconds
+	Given instances "NodeA, NodeB, NodeC" using the default build
+	And   configured network connections "NodeA->NodeC [autoStart], NodeB->NodeC [autoStart]"
+
+  	When  starting all instances concurrently
+  	Then  all auto-start network connections should be ready within 20 seconds 
+  	And   the visible network of "NodeA" should consist of "NodeA, NodeC"
+  	And   the visible network of "NodeB" should consist of "NodeB, NodeC"
+  
+    When  stopping instance "NodeC"
+    And   starting instance "NodeC"
+    Then  all auto-start network connections should be ready within 20 seconds 
+  	And   the visible network of "NodeA" should consist of "NodeA, NodeC"
+  	And   the visible network of "NodeB" should consist of "NodeB, NodeC"
 
 # TODO fix test failure @Matthias Wagner       
 #@NetworkingTestsFeature

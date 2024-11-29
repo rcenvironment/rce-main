@@ -63,7 +63,7 @@ Scenario: Execute a distributed workflow, testing the local fallback case first,
 Scenario: Network disruptions during distributed workflow with local controller
 
   Given instances "NodeA, NodeB [Id=00000000000000000000000000000002]" using the default build
-  And   configured network connections "NodeA->NodeB [autoStart autoRetryInitialDelay=1 autoRetryDelayMultiplier=1]"
+  And   configured network connections "NodeA->NodeB [autoStart]"
   When  starting all instances concurrently
   # set public access to the Joiner component on NodeB 
   And   executing command "components set-auth rce/Joiner public" on "NodeB"
@@ -93,7 +93,7 @@ Scenario: Network disruptions during distributed workflow with local controller
 Scenario: Network disruptions during distributed workflow with remote controller
 
   Given instances "NodeA, NodeB [WfHost;Id=00000000000000000000000000000002]" using the default build
-  And   configured network connections "NodeA->NodeB [autoStart autoRetryInitialDelay=1 autoRetryDelayMultiplier=1]"
+  And   configured network connections "NodeA->NodeB [autoStart]"
   When  starting all instances concurrently
   # set public access to the Joiner component on NodeB 
   When  executing command "components set-auth rce/Joiner public" on "NodeB"
@@ -214,7 +214,7 @@ Scenario Outline: Workflow Info via Network
 
   Given instance "NodeA [WorkflowHost]" using the <NodeA_build> build
   And   instance "NodeB" using the <NodeB_build> build
-  And   configured network connections "NodeA-[reg]->NodeB [autoStart autoRetryInitialDelay=2 autoRetryDelayMultiplier=1]"
+  And   configured network connections "NodeA-[reg]->NodeB [autoStart]"
     
   When  starting all instances concurrently
   And   adding tool "common/TestTool" to "NodeB"
