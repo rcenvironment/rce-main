@@ -161,8 +161,6 @@ Scenario: Remote node start during distributed workflow with local controller
 @NoGUITestSuite
 Scenario: Executing "wf self-test"
 
-  # note: this test frequently fails when testing 8.1.0 or 8.1.1 as the SSH timeout was accidentally set too low in these releases  
-
   Given the running instance "NodeA" using the default build
 
   When  executing the command "wf self-test" on "NodeA"
