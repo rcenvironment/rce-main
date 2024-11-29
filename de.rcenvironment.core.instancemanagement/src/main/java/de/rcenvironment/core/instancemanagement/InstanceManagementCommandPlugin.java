@@ -468,7 +468,7 @@ public class InstanceManagementCommandPlugin implements CommandPlugin {
                 ParsedIntegerParameter connectionPortParameter = (ParsedIntegerParameter) addConnectionParameter.getResult()[2];
                 ParsedBooleanParameter connectionAutoConnectParameter = (ParsedBooleanParameter) addConnectionParameter.getResult()[3];
                 changeSequence.addNetworkConnection(connectionNameParameter.getResult(), connectionHostParameter.getResult(),
-                        connectionPortParameter.getResult(), connectionAutoConnectParameter.getResult(), 5, 10 * 3, 3 / 2);
+                    connectionPortParameter.getResult(), connectionAutoConnectParameter.getResult(), true, 1, 1, 1);
                 break;
             case InstanceManagementConstants.SUBCOMMAND_REMOVE_CONNECTION:
                 ParsedStringParameter removeConnectionParameter = (ParsedStringParameter) modifiers.getCommandParameter(name);

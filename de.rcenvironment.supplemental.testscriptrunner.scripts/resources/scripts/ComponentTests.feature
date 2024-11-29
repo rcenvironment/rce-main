@@ -60,7 +60,7 @@ Scenario: Multi-instance component publishing and visibility control
 
   Given instance "NodeA" using the default build
   Given instance "NodeB" using the default build
-  And   configured network connections "NodeA->NodeB [autoStart]"
+  And   configured network connections "NodeA->NodeB [autoStart autoRetry]"
   
   When  starting all instances concurrently
   Then  all auto-start network connections should be ready within 20 seconds

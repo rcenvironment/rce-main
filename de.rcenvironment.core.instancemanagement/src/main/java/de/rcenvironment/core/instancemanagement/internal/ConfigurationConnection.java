@@ -13,6 +13,7 @@ package de.rcenvironment.core.instancemanagement.internal;
  * Encapsules a connection in the configuration.
  *
  * @author David Scholz
+ * @author Jan Flink
  */
 public class ConfigurationConnection {
 
@@ -24,18 +25,22 @@ public class ConfigurationConnection {
 
     private final boolean connectOnStartup;
 
+    private final boolean autoRetry;
+
     private final long autoRetryInitialDelay;
 
     private final long autoRetryMaximumDelay;
 
     private final float autoRetryDelayMultiplier;
 
-    public ConfigurationConnection(String connectionName, String host, int port, boolean connectOnStartup, long autoRetryInitialDelay,
+    public ConfigurationConnection(String connectionName, String host, int port, boolean connectOnStartup, boolean autoRetry,
+        long autoRetryInitialDelay,
         long autoRetryMaximumDelay, float autoRetryDelayMultiplier) {
         this.connectionName = connectionName;
         this.host = host;
         this.port = port;
         this.connectOnStartup = connectOnStartup;
+        this.autoRetry = autoRetry;
         this.autoRetryInitialDelay = autoRetryInitialDelay;
         this.autoRetryMaximumDelay = autoRetryMaximumDelay;
         this.autoRetryDelayMultiplier = autoRetryDelayMultiplier;
@@ -57,6 +62,9 @@ public class ConfigurationConnection {
         return connectOnStartup;
     }
 
+    public boolean getAutoRetry() {
+        return autoRetry;
+    }
     public long getAutoRetryInitialDelay() {
         return autoRetryInitialDelay;
     }

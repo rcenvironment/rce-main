@@ -30,6 +30,7 @@ import de.rcenvironment.core.utils.common.StringUtils;
  * 
  * @author David Scholz
  * @author Lukas Rosenbach
+ * @author Jan Flink
  */
 public class InstanceConfigurationImpl {
 
@@ -293,6 +294,7 @@ public class InstanceConfigurationImpl {
         segment.setString(connectionSegment.host().getConfigurationKey(), connection.getHost());
         segment.setInteger(connectionSegment.port().getConfigurationKey(), connection.getPort());
         segment.setBoolean(connectionSegment.connectOnStartup().getConfigurationKey(), connection.getConnectOnStartup());
+        segment.setBoolean(connectionSegment.autoRetry().getConfigurationKey(), connection.getAutoRetry());
         segment.setLong(connectionSegment.autoRetryInitialDelay().getConfigurationKey(), connection.getAutoRetryInitialDelay());
         segment.setLong(connectionSegment.autoRetryMaximumDelay().getConfigurationKey(), connection.getAutoRetryMaximumDelay());
         segment.setFloat(connectionSegment.autoRetryDelayMultiplier().getConfigurationKey(), connection.getAutoRetryDelayMultiplier());

@@ -127,10 +127,10 @@ class InstanceConfigurationOperationSequenceImpl implements InstanceConfiguratio
 
     @Override
     public InstanceConfigurationOperationSequence addNetworkConnection(String connectionName, String host, int port,
-        final boolean autoConnect, final int autoRetryInitialDelay, final int autoRetryMaximumDelay,
+        final boolean autoConnect, final boolean autoRetry, final int autoRetryInitialDelay, final int autoRetryMaximumDelay,
         final float autoRetryDelayMultiplier) {
         final ConfigurationConnection configConnection = new ConfigurationConnection(connectionName,
-            host, port, autoConnect, autoRetryInitialDelay, autoRetryMaximumDelay, autoRetryDelayMultiplier);
+            host, port, autoConnect, autoRetry, autoRetryInitialDelay, autoRetryMaximumDelay, autoRetryDelayMultiplier);
         appendStep(new InstanceConfigurationOperationDescriptor(InstanceManagementConstants.SUBCOMMAND_ADD_CONNECTION,
             configConnection));
         return this;
@@ -145,12 +145,13 @@ class InstanceConfigurationOperationSequenceImpl implements InstanceConfiguratio
         final String host = parameters.get(1);
         final int port = Integer.parseInt(parameters.get(2));
         final boolean autoConnect = Boolean.parseBoolean(parameters.get(3));
-        final int autoRetryInitialDelay = Integer.parseInt(parameters.get(4));
-        final int autoRetryMaximumDelay = Integer.parseInt(parameters.get(5));
-        final float autoRetryDelayMultiplier = Float.parseFloat(parameters.get(6));
+        final boolean autoRetry = Boolean.parseBoolean(parameters.get(4));
+        final int autoRetryInitialDelay = Integer.parseInt(parameters.get(5));
+        final int autoRetryMaximumDelay = Integer.parseInt(parameters.get(6));
+        final float autoRetryDelayMultiplier = Float.parseFloat(parameters.get(7));
 
         // delegate to main method
-        return this.addNetworkConnection(connectionName, host, port, autoConnect, autoRetryInitialDelay,
+        return this.addNetworkConnection(connectionName, host, port, autoConnect, autoRetry, autoRetryInitialDelay,
             autoRetryMaximumDelay, autoRetryDelayMultiplier);
     }
 

@@ -24,6 +24,8 @@ public class RegularConnectionParameters {
 
     private boolean autoStartFlag;
 
+    private boolean autoRetryFlag;
+
     private int autoRetryInitDelay;
     
     private int autoRetryMaxDelay; 
@@ -70,6 +72,15 @@ public class RegularConnectionParameters {
          */
         public RegularConnectionBuilder autoStartFlag(boolean autoStartFlagParam) {
             parameters.setAutoStartFlag(autoStartFlagParam);
+            return this;
+        }
+
+        /**
+         * @param autoRetryFlagParam autoRetryFlag parameter
+         * @return builder object to create a fluent interface
+         */
+        public RegularConnectionBuilder autoRetryFlag(boolean autoRetryFlagParam) {
+            parameters.setAutoRetryFlag(autoRetryFlagParam);
             return this;
         }
 
@@ -144,10 +155,17 @@ public class RegularConnectionParameters {
         return autoStartFlag;
     }
 
+    public boolean isAutoRetry() {
+        return autoRetryFlag;
+    }
+
     public void setAutoStartFlag(boolean autoStartFlag) {
         this.autoStartFlag = autoStartFlag;
     }
 
+    public void setAutoRetryFlag(boolean autoRetryFlag) {
+        this.autoRetryFlag = autoRetryFlag;
+    }
     public int getAutoRetryInitDelay() {
         return autoRetryInitDelay;
     }

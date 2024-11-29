@@ -21,7 +21,7 @@ Scenario: Basic multi-instance handling and command execution
 Scenario: Basic networking between three instances (auto-start connections, no relay flag)
 
   Given instances "NodeA, NodeB, NodeC" using the default build
-  And   configured network connections "NodeA->NodeC [autoStart], NodeB->NodeC [autoStart]"
+  And   configured network connections "NodeA->NodeC [autoStart autoRetry], NodeB->NodeC [autoStart autoRetry]"
 
   When  starting all instances concurrently
   Then  all auto-start network connections should be ready within 20 seconds 
@@ -35,7 +35,7 @@ Scenario: Basic networking between three instances (auto-start connections, no r
 Scenario: Basic networking between three instances with relay
 	
   Given instances "NodeA, NodeB, NodeC" using the default build
-  And   configured network connections "NodeA->NodeC [autoStart relay], NodeB->NodeC [autoStart relay]"
+  And   configured network connections "NodeA->NodeC [autoStart autoRetry relay], NodeB->NodeC [autoStart autoRetry relay]"
   
   When  starting all instances concurrently
   Then  all auto-start network connections should be ready within 20 seconds
@@ -70,7 +70,7 @@ Scenario: Configuring standard uplink setup
 Scenario: Connection established with autoRetry
 
   Given instances "NodeA, NodeB, NodeC" using the default build
-  And   configured network connections "NodeA->NodeC [autoStart], NodeB->NodeC [autoStart]"
+  And   configured network connections "NodeA->NodeC [autoStart autoRetry], NodeB->NodeC [autoStart autoRetry]"
 
   When  starting instances "NodeA, NodeB" concurrently
   And   starting instance "NodeC"
@@ -86,7 +86,7 @@ Scenario: Connection established with autoRetry
 Scenario: Connection established after restart
 
 	Given instances "NodeA, NodeB, NodeC" using the default build
-	And   configured network connections "NodeA->NodeC [autoStart], NodeB->NodeC [autoStart]"
+	And   configured network connections "NodeA->NodeC [autoStart autoRetry], NodeB->NodeC [autoStart autoRetry]"
 
   	When  starting all instances concurrently
   	Then  all auto-start network connections should be ready within 20 seconds 
@@ -158,8 +158,7 @@ Scenario: Connection of client instance to uplink instance established after mul
     """
     
         
-#@NetworkingTestsFeature
-# TODO fix test failure @Matthias Wagner
+@NetworkingTestsFeature
 @Network08
 @NoGUITestSuite
 @BasicIntegrationTestSuite
@@ -167,7 +166,7 @@ Scenario: Connection with other major version - regular connection
 
     Given instance "NodeA" using the default build
     And   instance "NodeB" using the legacy build
-    And   configured network connections "NodeA-[reg]->NodeB, NodeB-[reg]->NodeA"
+    And   configured network connections "NodeA-[reg]->NodeB [autoStart autoRetry]"
     
     When  starting all instances
     
@@ -212,9 +211,9 @@ Scenario: Connection with other minor version - regular connection
 
     Given instance "NodeA" using the default build
     And   instance "NodeB" using the base build
-    And   configured network connections "NodeA-[reg]->NodeB [autoStart], NodeB-[reg]->NodeA [autoStart]"
+    And   configured network connections "NodeA-[reg]->NodeB [autoStart autoRetry]"
     
-    When  starting all instances
+    When  starting all instances concurrently
     
     Then  the visible network of "NodeA" should consist of "NodeA, NodeB"
     And   the visible network of "NodeB" should consist of "NodeA, NodeB"

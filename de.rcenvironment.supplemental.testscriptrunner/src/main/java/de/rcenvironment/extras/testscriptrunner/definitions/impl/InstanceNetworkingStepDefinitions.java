@@ -528,6 +528,9 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
                 case (ConnectionOptionConstants.AUTO_START_FLAG):
                     builder.autoStart(true);
                     break;
+                case (ConnectionOptionConstants.AUTO_RETRY_FLAG):
+                    builder.autoRetry(true);
+                    break;
                 case (ConnectionOptionConstants.AUTO_RETRY_INITIAL_DELAY):
                     builder.autoRetryInitialDelay(Integer.parseInt(value.get()));
                     break;
@@ -671,6 +674,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
             .host(ConnectionOptionConstants.HOST_DEFAULT)
             .port(serverPort)
             .autoStartFlag(connectionOptions.getAutoStartFlag())
+            .autoRetryFlag(connectionOptions.getAutoRetryFlag())
             .autoRetryInitDelay(connectionOptions.getAutoRetryInitialDelay())
             .autoRetryMaxDelay(connectionOptions.getAutoRetryMaxDelay())
             .autoRetryDelayMultiplier(connectionOptions.getAutoRetryDelayMultiplier())
@@ -690,6 +694,7 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
                 .orElse(
                     getServerPort(serverInstance, connectionOptions.getServerNumber(), StepDefinitionConstants.CONNECTION_TYPE_REGULAR)))
             .autoStartFlag(connectionOptions.getAutoStartFlag())
+            .autoRetryFlag(connectionOptions.getAutoRetryFlag())
             .autoRetryInitDelay(connectionOptions.getAutoRetryInitialDelay())
             .autoRetryMaxDelay(connectionOptions.getAutoRetryMaxDelay())
             .autoRetryDelayMultiplier(connectionOptions.getAutoRetryDelayMultiplier())
@@ -824,7 +829,8 @@ public class InstanceNetworkingStepDefinitions extends InstanceManagementStepDef
             clientInstance.getId(),
             INSTANCE_MANAGEMENT_SERVICE.newConfigurationOperationSequence().addNetworkConnection(
                 parameters.getConnectionId(), parameters.getHost(), parameters.getPort(), parameters.isAutoStart(),
-                parameters.getAutoRetryInitDelay(), parameters.getAutoRetryMaxDelay(), parameters.getAutoRetryDelayMultiplier()),
+                parameters.isAutoRetry(), parameters.getAutoRetryInitDelay(), parameters.getAutoRetryMaxDelay(),
+                parameters.getAutoRetryDelayMultiplier()),
             getTextoutReceiverForIMOperations());
         if (parameters.isAutoStart()) {
             // note: as of release 8.1.0 and before, "cn list" does not output the connection id provided via IM configuration, but

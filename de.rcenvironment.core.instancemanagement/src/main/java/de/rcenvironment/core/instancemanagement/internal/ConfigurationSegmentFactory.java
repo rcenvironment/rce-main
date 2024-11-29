@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Provide configuration segments of the configuration.json file for easier configuration handling.
  *
  * @author David Scholz
+ * @author Jan Flink
  */
 public final class ConfigurationSegmentFactory {
 
@@ -608,6 +609,22 @@ public final class ConfigurationSegmentFactory {
                 @Override
                 public String getConfigurationKey() {
                     return "connectOnStartup";
+                }
+            };
+        }
+
+        /**
+         * 
+         * Get autoRetry {@link ConfigurationKey}.
+         * 
+         * @return autoRetry key.
+         */
+        public ConfigurationKey autoRetry() {
+            return new ConfigurationKey() {
+
+                @Override
+                public String getConfigurationKey() {
+                    return "autoRetry";
                 }
             };
         }
