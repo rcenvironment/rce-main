@@ -426,10 +426,11 @@ public class InstanceManagementServiceImplTest {
         final String host = "hostName";
         final int port = 42;
         final boolean connectOnStartup = false;
+        final boolean autoRetry = true;
         final int autoRetrylInitDelay = 42;
         final int autoRetryMax = 42;
         final float multiplier = 2.7f;
-        sequence.addNetworkConnection(name, host, port, connectOnStartup, autoRetrylInitDelay, autoRetryMax, multiplier);
+        sequence.addNetworkConnection(name, host, port, connectOnStartup, autoRetry, autoRetrylInitDelay, autoRetryMax, multiplier);
         imService.applyInstanceConfigurationOperations(configurationTestFile.getParentFile().getName(), sequence, userOutputReceiver);
 
         final double maxDoubleDelta = 0.0001;
@@ -439,6 +440,9 @@ public class InstanceManagementServiceImplTest {
             segment.getDouble(segmentBuilder.network().connections().getOrCreateConnection(name).autoRetryDelayMultiplier()
                 .getConfigurationKey()),
             multiplier, maxDoubleDelta));
+        assertEquals(
+            false, segment
+                .getBoolean(segmentBuilder.network().connections().getOrCreateConnection(name).autoRetry().getConfigurationKey()));
         assertEquals(
             Long.valueOf(autoRetrylInitDelay), segment
                 .getLong(segmentBuilder.network().connections().getOrCreateConnection(name).autoRetryInitialDelay().getConfigurationKey()));

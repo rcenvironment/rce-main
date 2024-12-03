@@ -64,7 +64,6 @@ Scenario: Execute example workflows of the group 02_Component Groups
     
     When  starting instance "NodeA2"
     And   executing workflows "Workflow Examples Project/02_Component Groups/02_01_Data_Flow.wf [02_01_Data_Flow.json], Workflow Examples Project/02_Component Groups/02_02_Evaluation_Drivers.wf, Workflow Examples Project/02_Component Groups/02_03_XML_Components.wf [02_03_XML_Components.json], Workflow Examples Project/02_Component Groups/02_04_EvaluationMemory.wf [02_04_EvaluationMemory.json]" on "NodeA2"
-    And   waiting for 60 seconds
     And   stopping instance "NodeA2"
 
     Then  the log output of "NodeA2" should indicate a clean shutdown with no warnings or errors

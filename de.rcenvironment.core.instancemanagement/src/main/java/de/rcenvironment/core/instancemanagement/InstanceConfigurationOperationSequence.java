@@ -11,10 +11,8 @@ package de.rcenvironment.core.instancemanagement;
 import java.io.File;
 import java.util.List;
 
-
-import de.rcenvironment.core.instancemanagement.internal.SSHAccountParameters;
-import de.rcenvironment.core.instancemanagement.internal.UplinkConnectionParameters;
 import de.rcenvironment.core.command.spi.ParsedMultiParameter;
+import de.rcenvironment.core.instancemanagement.internal.SSHAccountParameters;
 
 
 /**
@@ -121,13 +119,14 @@ public interface InstanceConfigurationOperationSequence {
      * @param host the host to connect to
      * @param port the port to connect to
      * @param autoConnect whether auto-connect on startup should be enabled
+     * @param autoRetry whether auto-retry should be enabled
      * @param autoRetryInitialDelay the initial auto-retry delay, in seconds
      * @param autoRetryMaximumDelay the maximum auto-retry delay, in seconds
      * @param autoRetryDelayMultiplier the multiplier for the auto-retry delay after each failure
      * @return the {@link InstanceConfigurationOperationSequence} instance itself (for command chaining)
      */
     InstanceConfigurationOperationSequence addNetworkConnection(String connectionName, String host, int port, boolean autoConnect,
-        int autoRetryInitialDelay, int autoRetryMaximumDelay, float autoRetryDelayMultiplier);
+        boolean autoRetry, int autoRetryInitialDelay, int autoRetryMaximumDelay, float autoRetryDelayMultiplier);
 
     /**
      * Adds an operation to add a network connection. The individual parameters are parsed from a list of 7 string parameters.

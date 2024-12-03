@@ -25,9 +25,12 @@ public class RegularConnectionOptions {
     
     private boolean isRelay;
 
+    private boolean autoRetry;
+
     private CommonConnectionOptions commonOptions = new CommonConnectionOptions();
 
     RegularConnectionOptions() {
+        setAutoRetry(false);
         setAutoRetryInitialDelay(ConnectionOptionConstants.AUTO_RETRY_INIT_DELAY_DEFAULT);
         setAutoRetryMaxDelay(ConnectionOptionConstants.AUTO_RETRY_MAX_DELAY_DEFAULT);
         setAutoRetryDelayMultiplier(ConnectionOptionConstants.AUTO_RETRY_DELAY_MULTIPLIER_DEFAULT);
@@ -53,6 +56,15 @@ public class RegularConnectionOptions {
          */
         public Builder autoStart(boolean autoStartValue) {
             options.setAutoStart(autoStartValue);
+            return this;
+        }
+
+        /**
+         * @param autoRetryValue auto start value
+         * @return builder object to create a fluent interface
+         */
+        public Builder autoRetry(boolean autoRetryValue) {
+            options.setAutoRetry(autoRetryValue);
             return this;
         }
 
@@ -148,6 +160,10 @@ public class RegularConnectionOptions {
         this.autoRetryMaxDelay = autoRetryMaxDelay;
     }
 
+    private void setAutoRetry(boolean autoRetry) {
+        this.autoRetry = autoRetry;
+    }
+
     private void setAutoStart(boolean autoStartFlag) {
         commonOptions.setAutoStart(autoStartFlag);
     }
@@ -173,6 +189,10 @@ public class RegularConnectionOptions {
      */
     public static Builder builder() {
         return new Builder();
+    }
+
+    public boolean getAutoRetryFlag() {
+        return autoRetry;
     }
 
     public int getAutoRetryInitialDelay() {

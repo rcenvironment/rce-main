@@ -21,7 +21,7 @@ Scenario: Execute a distributed workflow on a single node and expect fallback to
 Scenario: Execute a distributed workflow, testing the local fallback case first, and then proper remote component execution
 
   Given instances "NodeA, NodeB [Id=00000000000000000000000000000002]" using the default build
-  And   configured network connections "NodeA->NodeB [autoStart]"
+  And   configured network connections "NodeA->NodeB [autoStart autoRetry]"
   When  starting all instances concurrently
   
   # set local access to the Joiner component on NodeB (to make sure no permissions from previous tests exist) 
@@ -63,7 +63,7 @@ Scenario: Execute a distributed workflow, testing the local fallback case first,
 Scenario: Network disruptions during distributed workflow with local controller
 
   Given instances "NodeA, NodeB [Id=00000000000000000000000000000002]" using the default build
-  And   configured network connections "NodeA->NodeB [autoStart autoRetryInitialDelay=1 autoRetryDelayMultiplier=1]"
+  And   configured network connections "NodeA->NodeB [autoStart autoRetry]"
   When  starting all instances concurrently
   # set public access to the Joiner component on NodeB 
   And   executing command "components set-auth rce/Joiner public" on "NodeB"
@@ -93,7 +93,7 @@ Scenario: Network disruptions during distributed workflow with local controller
 Scenario: Network disruptions during distributed workflow with remote controller
 
   Given instances "NodeA, NodeB [WfHost;Id=00000000000000000000000000000002]" using the default build
-  And   configured network connections "NodeA->NodeB [autoStart autoRetryInitialDelay=1 autoRetryDelayMultiplier=1]"
+  And   configured network connections "NodeA->NodeB [autoStart autoRetry]"
   When  starting all instances concurrently
   # set public access to the Joiner component on NodeB 
   When  executing command "components set-auth rce/Joiner public" on "NodeB"
@@ -128,7 +128,7 @@ Scenario: Network disruptions during distributed workflow with remote controller
 Scenario: Remote node start during distributed workflow with local controller
 
   Given instances "NodeA, NodeB [Id=00000000000000000000000000000002]" using the default build
-  And   configured network connections "NodeA->NodeB [autoStart]"
+  And   configured network connections "NodeA->NodeB [autoStart autoRetry]"
   When  starting all instances concurrently
   # set public access to the Joiner component on NodeB 
   When  executing command "components set-auth rce/Joiner public" on "NodeB"
@@ -160,8 +160,6 @@ Scenario: Remote node start during distributed workflow with local controller
 @DefaultTestSuite
 @NoGUITestSuite
 Scenario: Executing "wf self-test"
-
-  # note: this test frequently fails when testing 8.1.0 or 8.1.1 as the SSH timeout was accidentally set too low in these releases  
 
   Given the running instance "NodeA" using the default build
 
@@ -216,7 +214,7 @@ Scenario Outline: Workflow Info via Network
 
   Given instance "NodeA [WorkflowHost]" using the <NodeA_build> build
   And   instance "NodeB" using the <NodeB_build> build
-  And   configured network connections "NodeA-[reg]->NodeB [autoStart autoRetryInitialDelay=2 autoRetryDelayMultiplier=1]"
+  And   configured network connections "NodeA-[reg]->NodeB [autoStart autoRetry]"
     
   When  starting all instances concurrently
   And   adding tool "common/TestTool" to "NodeB"
@@ -244,7 +242,7 @@ Scenario Outline: Workflow Data via Network
 
   Given instance "NodeA [WorkflowHost]" using the <NodeA_build> build
   And   instance "NodeB" using the <NodeB_build> build
-  And   configured network connections "NodeA-[reg]->NodeB [autoStart]"
+  And   configured network connections "NodeA-[reg]->NodeB [autoStart autoRetry]"
     
   When  starting all instances concurrently
   And   adding tool "common/TestTool" to "NodeB"

@@ -40,9 +40,9 @@ Scenario: Workflows containing integrated workflows can be executed locally
 @RemoteExecutionOfIntegratedWorkflows
 Scenario: Components backed by workflows can be executed remotely even if they contain components that are not accessible to the workflow controller
   Given instances "DataSource,Controller,ComputeInterface,ComputeWorker,DataSink" using the default build
-  And   configured network connections "DataSource->Controller [autoStart relay]"
-  And   configured network connections "ComputeInterface->Controller [autoStart relay],ComputeWorker->ComputeInterface [autoStart]"
-  And   configured network connections "DataSink->Controller [autoStart relay]"
+  And   configured network connections "DataSource->Controller [autoStart autoRetry relay]"
+  And   configured network connections "ComputeInterface->Controller [autoStart autoRetry relay],ComputeWorker->ComputeInterface [autoStart autoRetry]"
+  And   configured network connections "DataSink->Controller [autoStart autoRetry relay]"
   And   starting all instances
   # TODO find better solution than just waiting
   And   waiting for 5 second
