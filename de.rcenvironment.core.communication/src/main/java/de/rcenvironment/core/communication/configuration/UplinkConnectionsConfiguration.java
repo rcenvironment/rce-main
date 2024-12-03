@@ -67,9 +67,13 @@ public class UplinkConnectionsConfiguration {
         if (port == null) {
             throw new ConfigurationException("Missing required parameter \"port\"");
         }
+        String loginName = connectionPart.getString("loginName");
+        if (loginName == null) {
+            throw new ConfigurationException("Missing required parameter \"loginName\"");
+        }
         connection.setHost(host);
         connection.setPort(port);
-        connection.setUser(connectionPart.getString("loginName"));
+        connection.setUser(loginName);
         connection.setDisplayName(connectionPart.getString("displayName"));
         connection.setQualifier(connectionPart.getString("clientID", "default"));
         connection.setKeyFileLocation(connectionPart.getString("keyfileLocation"));
