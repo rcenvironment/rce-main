@@ -77,7 +77,7 @@
                             </listitem>
                         </itemizedlist><note>
                             <para>If you use relative paths for the Tool Directory, the root path
-                                used for this (".") is always the RCe installation folder.</para>
+                                used for this (".") is always the RCE installation folder.</para>
                         </note></para>
                 </listitem>
             </itemizedlist></para>
