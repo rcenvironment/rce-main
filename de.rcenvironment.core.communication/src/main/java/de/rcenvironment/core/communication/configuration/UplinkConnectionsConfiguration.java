@@ -13,13 +13,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.naming.ConfigurationException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import de.rcenvironment.core.communication.sshconnection.InitialUplinkConnectionConfig;
+import de.rcenvironment.core.configuration.ConfigurationException;
 import de.rcenvironment.core.configuration.ConfigurationSegment;
+import de.rcenvironment.core.utils.common.StringUtils;
 
 /**
  * Class providing the configuration for outgoing SSH connections.
@@ -50,7 +50,7 @@ public class UplinkConnectionsConfiguration {
                     connection.setId(id);
                     providedConnectionConfigs.add(connection);
                 } catch (ConfigurationException e) {
-                    log.error("Error in connection entry " + entry.getKey(), e);
+                    log.error(StringUtils.format("Error in connection entry \"%s\": %s", entry.getKey(), e.getMessage()));
                 }
             }
         }
@@ -59,8 +59,16 @@ public class UplinkConnectionsConfiguration {
 
     private InitialUplinkConnectionConfig parseConnectionEntry(ConfigurationSegment connectionPart) throws ConfigurationException {
         InitialUplinkConnectionConfig connection = new InitialUplinkConnectionConfig();
-        connection.setHost(connectionPart.getString("host"));
-        connection.setPort(connectionPart.getLong("port").intValue());
+        String host = connectionPart.getString("host");
+        if (host == null) {
+            throw new ConfigurationException("Missing required parameter \"host\"");
+        }
+        Integer port = connectionPart.getInteger("port");
+        if (port == null) {
+            throw new ConfigurationException("Missing required parameter \"port\"");
+        }
+        connection.setHost(host);
+        connection.setPort(port);
         connection.setUser(connectionPart.getString("loginName"));
         connection.setDisplayName(connectionPart.getString("displayName"));
         connection.setQualifier(connectionPart.getString("clientID", "default"));
