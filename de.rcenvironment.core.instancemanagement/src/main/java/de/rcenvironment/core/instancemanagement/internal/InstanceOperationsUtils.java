@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,6 +23,8 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.logging.LogFactory;
 
 import de.rcenvironment.core.configuration.bootstrap.profile.CommonProfile;
 
@@ -44,12 +47,12 @@ public final class InstanceOperationsUtils {
      */
     public static final String UNEXPECTED_ERROR_WHEN_TRYING_TO_ACQUIRE_A_FILE_LOCK_ON =
         "Unexpected error when trying to acquire a file lock on ";
-    
+
     /**
      * 
      */
     public static final String IM_LOCK_FILE_ACCESS_PERMISSIONS = "rw";
-    
+
     /**
      * Name of the file, which contains the installation id of a running profile.
      */
@@ -57,12 +60,11 @@ public final class InstanceOperationsUtils {
 
     private static final String IM_LOCK_FILE_NAME = "instancemanagement.lock";
 
-    
     /**
      * Name of the shutdown.dat file.
      */
     private static final String SHUTDOWN_FILE_NAME = "shutdown.dat";
-    
+
     private static final String SLASH = "/";
 
     private InstanceOperationsUtils() {
@@ -129,15 +131,35 @@ public final class InstanceOperationsUtils {
         if (!profileDir.isDirectory()) {
             throw new IOException("Profile directory " + profileDir.getAbsolutePath() + " can not be created or is not a directory");
         }
-
         File lockfile = new File(profileDir, CommonProfile.PROFILE_DIR_LOCK_FILE_NAME);
-        FileLock lock = null;
-        if (!lockfile.isFile()) {
-            return false;
+
+        final int maxAttempts = 5;
+        int attempt = 1;
+        while (true) {
+            try {
+                // check this on every attempt in case the file was deleted concurrently
+                if (!lockfile.isFile()) {
+                    return false;
+                }
+                return testProfileLockOnce(lockfile);
+            } catch (OverlappingFileLockException | IOException e) {
+                if (attempt >= maxAttempts) {
+                    throw new IOException("Failed to check the profile lock at " + lockfile.getAbsolutePath()
+                        + " for " + attempt + " times; giving up", e);
+                }
+                LogFactory.getLog(InstanceOperationsUtils.class).debug(
+                    "Failed to check the profile lock at " + lockfile.getAbsolutePath()
+                        + ", most likely due to another thread performing the same check concurrently ("
+                        + e.toString() + "); will retry");
+            }
+            attempt++;
         }
+    }
+
+    private static boolean testProfileLockOnce(File lockfile) throws IOException, OverlappingFileLockException {
         // try to get a lock on this file
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(lockfile, IM_LOCK_FILE_ACCESS_PERMISSIONS)) {
-            lock = randomAccessFile.getChannel().tryLock();
+            final FileLock lock = randomAccessFile.getChannel().tryLock(); // can throw OverlappingFileLockException
             if (lock != null) {
                 lock.release();
                 return false;
@@ -206,7 +228,7 @@ public final class InstanceOperationsUtils {
 
         return false;
     }
-    
+
     /**
      * 
      * Deletes the instance.lock file from the profile folder.
