@@ -1,6 +1,6 @@
 <!-- Copyright (C) 2013 DLR, Germany -->
 <!-- All rights reserved -->
-<!-- http://www.rcenvironment.de/ -->
+<!-- https://rcenvironment.de// -->
 
 <!-- A POM providing analyis features for "RCE Core". These include aggregating 
 	dependency information from MANIFEST.MF files, and creating a report of test 
