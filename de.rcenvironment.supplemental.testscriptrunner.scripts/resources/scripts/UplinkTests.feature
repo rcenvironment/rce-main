@@ -144,6 +144,7 @@ Scenario: Remote visibility of Uplink tool after graceful restarts of clients an
     And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     Failed to register channelClosed() event
+    session already closed
     """
 
 
@@ -273,6 +274,7 @@ Scenario: Uplink clients autoconnecting when they are started before the server 
     And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     Failed to register channelClosed() event
+    session already closed
     """
 
 
@@ -387,6 +389,7 @@ Scenario: Proper server-side handling of two Uplink clients using the same Clien
     And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     from using namespace sameUsersameCId- as it is already in use by
+    session already closed
     """
 
 
