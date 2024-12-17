@@ -34,6 +34,8 @@ import io.cucumber.java.en.Then;
  */
 public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitionBase {
 
+    private static final long EXTRA_WAIT_BEFORE_CHECKING_LOGS_AFTER_SHUTDOWN = 1000;
+
     public AssertOutputStepDefinitions(TestScenarioExecutionContext executionContext) {
         super(executionContext);
     }
@@ -236,6 +238,8 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
      */
     @Then("^the log output of( all)?(?: instance[s]?)?(?: \"([^\"]*)\")? should indicate a clean shutdown with no warnings or errors$")
     public void thenLogOutputCleanShutdownWithoutWarnings(String allFlag, String instanceIds) throws Exception {
+        performShortWaitBetweenShutdownAndChecking();
+
         AssertFileEmpty warningLogEmpty = new AssertFileEmpty(StepDefinitionConstants.WARNINGS_LOG_FILE_NAME);
         AssertFileContains debugLogContainsNoneUnfinished =
             new AssertFileContains(true, false, "Known unfinished operations on shutdown: <none>",
@@ -260,6 +264,8 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
      */
     @Then("^the log output of( all)?(?: instance[s]?)?(?: \"([^\"]*)\")? should indicate a clean shutdown with these allowed warnings or errors:$")
     public void thenLogOutputCleanShutdownWithAllowedWarnings(String allFlag, String instanceIds, String allowedWarnings) throws Exception {
+        performShortWaitBetweenShutdownAndChecking();
+
         AssertFileMayContainOnly warningLogContainOnly =
             new AssertFileMayContainOnly(StepDefinitionConstants.WARNINGS_LOG_FILE_NAME, allowedWarnings);
         AssertFileContains debugLogContainsNoneUnfinished =
@@ -283,8 +289,9 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
      *        does that depends on the value of {@code allFlag} and is defined in {@link #resolveInstanceList()}
      */
     @Then("^the log output of( all)?(?: instance[s]?)?(?: \"([^\"]*)\")? should indicate a clean shutdown without checking for further warnings or errors")
-
     public void thenLogOutputCleanShutdown(String allFlag, String instanceIds) throws Exception {
+        performShortWaitBetweenShutdownAndChecking();
+
         AssertFileContains debugLogContainsNoneUnfinished =
             new AssertFileContains(true, false, "Known unfinished operations on shutdown: <none>",
                 StepDefinitionConstants.DEBUG_LOG_FILE_NAME);
@@ -293,6 +300,13 @@ public class AssertOutputStepDefinitions extends InstanceManagementStepDefinitio
                 StepDefinitionConstants.DEBUG_LOG_FILE_NAME);
         iterateInstances(debugLogContainsNoneUnfinished, allFlag, instanceIds);
         iterateInstances(debugLogContainsExitCode0, allFlag, instanceIds);
+    }
+
+    private void performShortWaitBetweenShutdownAndChecking() throws InterruptedException {
+        // TODO (p3) this is a workaround for the problem that the debug.log of a test instance is not always
+        // fully flushed to disk after the shutdown method terminates; a more elegant solution would be wrapping
+        // these checks into a retry loop, but simply waiting is not semantically wrong either
+        Thread.sleep(EXTRA_WAIT_BEFORE_CHECKING_LOGS_AFTER_SHUTDOWN);
     }
 
     /**
