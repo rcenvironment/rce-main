@@ -10,6 +10,7 @@ package de.rcenvironment.core.gui.communication.views.contributors;
 
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 import de.rcenvironment.core.gui.communication.views.model.NetworkViewModel;
 import de.rcenvironment.core.gui.communication.views.spi.NetworkViewContributor;
@@ -24,19 +25,22 @@ public abstract class NetworkViewContributorBase implements NetworkViewContribut
     protected static final Object[] EMPTY_ARRAY = new Object[0];
 
     protected NetworkViewModel currentModel;
-    
+
     protected TreeViewer treeViewer;
-    
+
     protected Display display = Display.getCurrent();
+
+    protected Shell parentShellForDialogs;
 
     @Override
     public void setCurrentModel(NetworkViewModel currentModel) {
         this.currentModel = currentModel;
     }
-    
+
     @Override
     public void setTreeViewer(TreeViewer viewer) {
         this.treeViewer = viewer;
+        this.parentShellForDialogs = treeViewer.getTree().getShell();
     }
 
     protected RuntimeException newUnexpectedCallException() {

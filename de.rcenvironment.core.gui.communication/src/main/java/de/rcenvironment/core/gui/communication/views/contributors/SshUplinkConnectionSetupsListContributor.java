@@ -19,6 +19,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Shell;
 
 import de.rcenvironment.core.communication.sshconnection.SshConnectionContext;
 import de.rcenvironment.core.communication.uplink.client.session.api.SshUplinkConnectionListener;
@@ -32,6 +33,7 @@ import de.rcenvironment.core.gui.communication.views.spi.NetworkViewContributor;
 import de.rcenvironment.core.gui.communication.views.spi.SelfRenderingNetworkViewNode;
 import de.rcenvironment.core.gui.communication.views.spi.StandardUserNodeActionNode;
 import de.rcenvironment.core.gui.communication.views.spi.StandardUserNodeActionType;
+import de.rcenvironment.core.gui.utils.common.EventMessageManager;
 import de.rcenvironment.core.toolkitbridge.transitional.ConcurrencyUtils;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.incubator.ServiceRegistry;
@@ -264,6 +266,10 @@ public class SshUplinkConnectionSetupsListContributor extends NetworkViewContrib
 
     public SshUplinkConnectionSetupsListContributor(NetworkViewCallback callback) {
         super();
+
+        // this is kind of an odd place to do this for now, but there is also no harm in calling this multiple times
+        EventMessageManager.getInstance().registerGuiAvailable();
+
         connectedImage = ImageDescriptor.createFromURL(
             getClass().getResource("/resources/icons/connectUplink.png")).createImage(); //$NON-NLS-1$
         disconnectedImage = ImageDescriptor.createFromURL(
@@ -404,6 +410,7 @@ public class SshUplinkConnectionSetupsListContributor extends NetworkViewContrib
 
     @Override
     public void dispose() {
+        EventMessageManager.getInstance().registerGuiStopping();
         connectedImage.dispose();
         disconnectedImage.dispose();
         serviceRegistryAccess.dispose();
@@ -442,18 +449,13 @@ public class SshUplinkConnectionSetupsListContributor extends NetworkViewContrib
                 boolean firstConsecutiveFailure, boolean willAutoRetry) {
                 // Show popup message only for first consecutive failure, not for every retry.
                 if (firstConsecutiveFailure) {
-                    display.asyncExec(() -> {
-                        MessageBox dialog = new MessageBox(treeViewer.getTree().getShell(), SWT.ICON_ERROR | SWT.OK);
-                        String retryMessage = "\n\nWill not try to reconnect.";
-                        if (willAutoRetry) {
-                            retryMessage = "\n\nWill automatically try to reconnect.";
-                        }
-                        dialog
-                            .setMessage(StringUtils.format("Uplink connection attempt to host %s on port %s failed:\n%s%s",
-                                setup.getHost(),
-                                setup.getPort(), reason, retryMessage));
-                        dialog.open();
-                    });
+                    String retryMessage = "\n\nWill not try to reconnect.";
+                    if (willAutoRetry) {
+                        retryMessage = "\n\nWill automatically try to reconnect.";
+                    }
+                    String message = StringUtils.format("Uplink connection attempt to host %s on port %s failed:\n%s%s",
+                        setup.getHost(), setup.getPort(), reason, retryMessage);
+                    EventMessageManager.getInstance().submitEventMessageAsync(message, SWT.ERROR, parentShellForDialogs);
                 }
                 display.asyncExec(() -> {
                     if (treeViewer.getControl().isDisposed()) {
