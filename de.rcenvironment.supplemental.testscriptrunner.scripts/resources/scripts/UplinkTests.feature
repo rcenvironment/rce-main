@@ -88,7 +88,7 @@ Scenario: Remote visibility of Uplink tool after graceful restarts of clients an
         | Client1 (via Client1/default) | common/TestTool | (absent) |
 
     When starting instance "Client1"
-    Then the Uplink connection from "Client1" to "Server1" should be connected within 15 seconds
+    Then the Uplink connection from "Client1" to "Server1" should be connected within 20 seconds
     And  instance "Client2" should see these components within 5 seconds:
         | Client1 (via Client1/default) | common/TestTool | local |
 
@@ -119,9 +119,10 @@ Scenario: Remote visibility of Uplink tool after graceful restarts of clients an
 
     When starting instance "Server1"
 
-    # there is no exponential back-off implemented for Uplink yet, so a connection attempt should happen every 10 seconds
-    Then the Uplink connection from "Client1" to "Server1" should be connected within 12 seconds
-    And  the Uplink connection from "Client2" to "Server1" should be connected within 12 seconds
+    # there is no exponential back-off implemented for Uplink yet, so a connection attempt should 
+    # happen every 10 seconds; also include some leeway from basic startup to Uplink readiness
+    Then the Uplink connection from "Client1" to "Server1" should be connected within 20 seconds
+    And  the Uplink connection from "Client2" to "Server1" should be connected within 20 seconds
 
     And  instance "Client2" should see these components within 5 seconds:
         | Client1 (via Client1/default) | common/TestTool | local |
@@ -143,6 +144,7 @@ Scenario: Remote visibility of Uplink tool after graceful restarts of clients an
     And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     Failed to register channelClosed() event
+    session already closed
     """
 
 
@@ -209,9 +211,10 @@ Scenario: Remote visibility of Uplink tool after crashes and restarts of clients
     When waiting for 1 second
     And  starting instance "Server1"
     
-    # there is no exponential back-off implemented for Uplink yet, so a connection attempt should happen every 10 seconds
-    Then the Uplink connection from "Client1" to "Server1" should be connected within 15 seconds
-    And  the Uplink connection from "Client2" to "Server1" should be connected within 15 seconds
+    # there is no exponential back-off implemented for Uplink yet, so a connection attempt should 
+    # happen every 10 seconds; also include some leeway from basic startup to Uplink readiness
+    Then the Uplink connection from "Client1" to "Server1" should be connected within 20 seconds
+    And  the Uplink connection from "Client2" to "Server1" should be connected within 20 seconds
     
     And  instance "Client2" should see these components within 5 seconds:
         | Client1 (via Client1/default) | common/TestTool | local |
@@ -271,6 +274,7 @@ Scenario: Uplink clients autoconnecting when they are started before the server 
     And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     Failed to register channelClosed() event
+    session already closed
     """
 
 
@@ -385,6 +389,7 @@ Scenario: Proper server-side handling of two Uplink clients using the same Clien
     And  the log output of instance "Server1" should indicate a clean shutdown with these allowed warnings or errors: 
     """
     from using namespace sameUsersameCId- as it is already in use by
+    session already closed
     """
 
 

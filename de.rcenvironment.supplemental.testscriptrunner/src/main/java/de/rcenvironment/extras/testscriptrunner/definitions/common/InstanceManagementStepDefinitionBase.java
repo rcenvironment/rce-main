@@ -39,6 +39,8 @@ public abstract class InstanceManagementStepDefinitionBase extends AbstractStepD
 
     protected static final InstanceManagementService INSTANCE_MANAGEMENT_SERVICE = ExternalServiceHolder.getInstanceManagementService();
 
+    private static final int CONCURRENT_INSTANCE_STARTING_STAGGERED_DELAY_MSEC = 500;
+
     public InstanceManagementStepDefinitionBase(TestScenarioExecutionContext executionContext) {
         super(executionContext);
     }
@@ -143,19 +145,35 @@ public abstract class InstanceManagementStepDefinitionBase extends AbstractStepD
         switch (executionMode) {
         case CONCURRENT:
             final RunnablesGroup runnablesGroup = ConcurrencyUtils.getFactory().createRunnablesGroup();
+            int staggeredStartDelayCounter = 0;
             for (final ManagedInstance instance : instances) {
+                // make a final copy of the loop value
+                final int staggeredStartDelayForInstance = staggeredStartDelayCounter;
                 runnablesGroup.add(new Runnable() {
 
                     @Override
                     public void run() {
-                        try {
-                            // TODO does not work in parallel execution context. Make accessible to multiple threads at the same time.
-                            action.performActionOnInstance(instance, StepDefinitionConstants.IM_ACTION_TIMEOUT_IN_SECS * instances.size());
-                        } catch (IOException | OperationFailureException e) {
-                            throw new RuntimeException(e);
+                        if (action.getClass().getSimpleName().endsWith("StartInstanceAction")) {
+                            // a temporary workaround for an apparent Equinox framework issue that breaks concurrent starts
+                            // (#18228) and which we can not fix directly; this should be replaced as soon as feasible
+                            // as it makes the concurrent startup tests weaker / less aggressive (by design)
+                            try {
+                                Thread.sleep(staggeredStartDelayForInstance);
+                            } catch (InterruptedException e) {
+                                log.warn("Interrupted while waiting to initiate staggered start of instance " + instance.getId());
+                                return;
+                            }
+                            try {
+                                // TODO does not work in parallel execution context. Make accessible to multiple threads at the same time.
+                                action.performActionOnInstance(instance,
+                                    StepDefinitionConstants.IM_ACTION_TIMEOUT_IN_SECS * instances.size());
+                            } catch (IOException | OperationFailureException e) {
+                                throw new RuntimeException(e);
+                            }
                         }
                     }
                 });
+                staggeredStartDelayCounter += CONCURRENT_INSTANCE_STARTING_STAGGERED_DELAY_MSEC;
             }
             executeRunnablesGroupAndHandlePotentialErrors(runnablesGroup, "performing action on instance");
             break;
