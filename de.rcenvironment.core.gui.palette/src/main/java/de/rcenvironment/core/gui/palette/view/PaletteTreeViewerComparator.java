@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 DLR, Germany
+ * Copyright 2006-2024 DLR, Germany
  * 
  * SPDX-License-Identifier: EPL-1.0
  * 
@@ -15,7 +15,7 @@ import de.rcenvironment.core.gui.palette.toolidentification.ToolType;
 import de.rcenvironment.core.gui.palette.view.palettetreenodes.PaletteTreeNode;
 
 /**
- * Comparator for sorting nodes in the PaletteView´s TreeViewer.
+ * Comparator for sorting nodes in the PaletteViewï¿½s TreeViewer.
  *
  * @author Kathrin Schaffert
  * @author Jan Flink
