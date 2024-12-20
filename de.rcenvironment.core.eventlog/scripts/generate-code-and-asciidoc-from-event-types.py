@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2022 DLR, Germany
+# Copyright 2006-2024 DLR, Germany
 #
 # SPDX-License-Identifier: EPL-1.0
 #
@@ -184,7 +184,7 @@ def render_event_types_to_java_class(event_type_data, attribute_data, output):
 
     j2t = jinja2.Template("""\
 /*
- * Copyright 2022 DLR, Germany
+ * Copyright 2006-2024 DLR, Germany
  * 
  * SPDX-License-Identifier: EPL-1.0
  * 

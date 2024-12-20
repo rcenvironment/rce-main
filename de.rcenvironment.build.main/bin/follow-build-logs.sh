@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2024 DLR, Germany
+# Copyright 2006-2024 DLR, Germany
 #
 # SPDX-License-Identifier: EPL-1.0
 #
