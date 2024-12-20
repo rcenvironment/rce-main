@@ -3,7 +3,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ManifestVersion: 2
 Bundle-Name: RCE Database Component Execution
 Bundle-SymbolicName: de.rcenvironment.components.database.execution
-Bundle-Version: 10.5.0.qualifier
+Bundle-Version: 10.6.0.qualifier
 Bundle-Vendor: DLR
 Bundle-ClassPath: .
 Import-Package: com.fasterxml.jackson.core;version="2.14.0",

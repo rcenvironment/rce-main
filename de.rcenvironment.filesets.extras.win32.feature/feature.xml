@@ -2,7 +2,7 @@
 <feature
       id="de.rcenvironment.filesets.extras.win32.feature"
       label="RCE File Sets - Extra file sets for RCE on Windows OS"
-      version="10.5.0.qualifier"
+      version="10.6.0.qualifier"
       provider-name="DLR">
 
    <description url="https://rcenvironment.de/">

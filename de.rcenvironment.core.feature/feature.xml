@@ -2,7 +2,7 @@
 <feature
       id="de.rcenvironment.core.feature"
       label="RCE Core  Feature"
-      version="10.5.0.qualifier"
+      version="10.6.0.qualifier"
       provider-name="DLR">
 
    <description url="https://rcenvironment.de/">
