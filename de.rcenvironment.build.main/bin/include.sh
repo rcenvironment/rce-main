@@ -231,6 +231,7 @@ generateDocumentation() {
     set +e
     mvn $MAVEN_SETTINGS \
     -f ../de.rcenvironment.documentation.core/pom.xml \
+    -Drce.maven.buildType="snapshot" \
     clean generate-resources prepare-package \
     >"$BUILD_LOG_FILE" 2>&1
     EXIT_CODE=$?
