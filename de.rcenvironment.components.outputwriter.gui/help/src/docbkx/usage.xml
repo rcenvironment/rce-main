@@ -23,7 +23,7 @@
             "Inputs" tab. If you add a new input of type file or directory, you must define the
             desired target name and path (of the file or directory). Both of them can be created
             using placeholders:</para>
-        <para><inlinegraphic fileref="../../images/image001.png"/></para>
+        <para><inlinegraphic fileref="images/component_outputwriter_01.png" contentwidth="200"/></para>
         <para><emphasis role="bold">Target file/directory:</emphasis> The name the file will be
             given on the local file system. You can insert different placeholders by clicking the
             “Insert” button. The provided placeholders are:<itemizedlist>
@@ -75,7 +75,7 @@
                     exactly one value for each of the inputs arrives. </para>
             </note></para>
         <para> In the “Add target” dialog you have to specify the following:</para>
-        <para><inlinegraphic fileref="../../images/image002.png"/></para>
+        <para><inlinegraphic fileref="images/component_outputwriter_02.png" contentwidth="200"/></para>
         <para><emphasis role="bold">Target file:</emphasis> The name the file will be given on the
             local file system. You can insert different placeholders by clicking the “Insert”
             button. The provided placeholders are:<itemizedlist>

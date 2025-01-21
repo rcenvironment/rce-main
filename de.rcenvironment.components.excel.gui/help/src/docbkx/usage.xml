@@ -59,7 +59,7 @@
             <para>In the 'File' tab you can link an Excel file to the RCE component. Note that the
                 Excel file must be located within the workflow's project. Click "Link an Excel file
                 ..." and navigate to the Excel file of your choice.</para>
-            <para><inlinegraphic fileref="../../images/image001.png"/></para>
+            <para><inlinegraphic fileref="images/component_excel_01.png" contentwidth="400"/></para>
         </sect2>
         <sect2>
             <title>Inputs/Outputs</title>
@@ -69,9 +69,9 @@
                 “Autodiscover” discovers automatically all input and output channels which are
                 described as user-specific cell areas which start with “I_” for input-channels and
                 with “O_” for output channels respectively.</para>
-            <para><inlinegraphic fileref="../../images/image002.png"/></para>
-            <para><inlinegraphic fileref="../../images/image003.png"/>
-                <inlinegraphic fileref="../../images/image004.png"/></para>
+            <para><inlinegraphic fileref="images/component_excel_02.png" contentwidth="400"/></para>
+            <para><inlinegraphic fileref="images/component_excel_03.png" contentwidth="150"/>
+                <inlinegraphic fileref="images/component_excel_04.png" contentwidth="150"/></para>
             <para>The following list gives a short description of all channel configuration
                     parameters:<informaltable frame="none">
                     <tgroup cols="2">
@@ -127,7 +127,7 @@
             <title>Macros</title>
             <para>In the 'Macros' tab you can configure which VBA macros are to be run during
                 runtime. </para>
-            <para><inlinegraphic fileref="../../images/image005.png"/></para>
+            <para><inlinegraphic fileref="images/component_excel_05.png" contentwidth="400"/></para>
             <para>When in Microsoft Excel properties the access to the VBA-project object model is
                 granted the macros are available VBA macros are discovered automatrically. All
                 available macros can be chosen in the respective dropdown menu.</para>

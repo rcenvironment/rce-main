@@ -20,7 +20,7 @@
             by clicking the "Add..." button next to the outputs table. For each output you can
             decide whether to define the value directly or to define it at workflow start by
             (un-)checking the check box "Define at workflow start".</para>
-        <para><inlinegraphic fileref="../../images/image001.png"/></para>
+        <para><inlinegraphic fileref="images/component_inputprovider_01.png" contentwidth="150"/></para>
         <para>If it is defined directly it is stored in the workflow file. If you share the
             workflow with others the defined values will be shared as well.</para>
         <para>If it is defined at workflow start only a placeholder is stored in the workflow file.
@@ -33,7 +33,7 @@
                         selection in the workflow execution wizard). Choose this option if you like
                         to share the workflow (.wf file) with others and don't want to share the
                         file/directory (e.g. because it contains sensitive data).</para>
-                    <para><inlinegraphic fileref="../../images/image004.png"/></para>
+                    <para><inlinegraphic fileref="images/component_inputprovider_04.png" contentwidth="150"/></para>
                 </listitem>
                 <listitem>
                     <para>Select the file/directory from the project in the workspace where the
@@ -43,18 +43,18 @@
                         on the project and export it as an archive file). The other person needs to
                         import that project into the RCE workspace. The workflow will run out-of-box
                         using the file/directory of the shared project.</para>
-                    <para><inlinegraphic fileref="../../images/image002.png"/></para>
+                    <para><inlinegraphic fileref="images/component_inputprovider_02.png" contentwidth="150"/></para>
                 </listitem>
                 <listitem>
                     <para>Select the file/directory from file system. Choose that options if you
                         don't like to share the workflow with others at all and if the
                         file/directory needs to remain at a specified place in the local file
                         system.</para>
-                    <para><inlinegraphic fileref="../../images/image005.png"/></para>
+                    <para><inlinegraphic fileref="images/component_inputprovider_05.png" contentwidth="150"/></para>
                 </listitem>
             </orderedlist></para>
         <para>You will see your outputs in the table similar like this:</para>
-        <para><inlinegraphic fileref="../../images/image006.png"/></para>
+        <para><inlinegraphic fileref="images/component_inputprovider_06.png" contentwidth="400"/></para>
         <para>After that, you can connect the outputs from the Input Provider to any other
             compatible input from other components. The values (either defined directly or defined
             at workflow start) will be sent to the connected inputs of the other components

@@ -55,7 +55,7 @@
                         can optionally define the absolute paths to the required commands
                         explicitly. If you don’t know them, just type ‘which qsub’ etc. on a
                         cluster’s console and you will get them.</para>
-                    <para><inlinegraphic fileref="../../images/image001.png"/></para>
+                    <para><inlinegraphic fileref="images/component_cluster_01.png" contentwidth="400"/></para>
                 </sect2>
         <sect2>
             <title>Inputs/Outputs tab</title>
@@ -83,7 +83,7 @@
                     </listitem>
                 </orderedlist>
             </para>
-            <para><inlinegraphic fileref="../../images/image003.png"/></para>
+            <para><inlinegraphic fileref="images/component_cluster_03.png" contentwidth="400"/></para>
         </sect2>
                 <sect2>
                     <title>Job tab</title>
@@ -91,10 +91,10 @@
                         each input directory (/sandbox-[id]/iteration-[#]/cluster-job-[#]/input).
                         Select the check box accordingly. If it is provided within each input
                         directory, the name of the script must be: run_cluster_job.sh</para>
-                    <para><inlinegraphic fileref="../../images/image002.png"/></para>
+                    <para><inlinegraphic fileref="images/component_cluster_02.png" contentwidth="400"/></para>
             <para>To see the native standard out and error of the job submission see the Workflow
                 console.</para>
-        <para><inlinegraphic fileref="../../images/image004.png"/></para>
+        <para><inlinegraphic fileref="images/component_cluster_04.png" contentwidth="400"/></para>
                 </sect2>
     </sect1>
 </chapter>
