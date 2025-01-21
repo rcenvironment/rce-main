@@ -40,6 +40,9 @@ sys$command
 */help/generated/
 /de.rcenvironment.core.gui.help.*/doc.zip
 
+# generated docuementation content
+/de.rcenvironment.documentation.core/src/docbkx/components_guide.xml
+
 # development test profiles; ignore everything except certain files
 
 /de.rcenvironment/eclipse/launch/profiles/
