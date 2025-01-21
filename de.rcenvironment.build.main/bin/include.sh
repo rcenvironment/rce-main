@@ -240,5 +240,9 @@ generateDocumentation() {
 
     mv ../de.rcenvironment.documentation.core/target/docbkx/pdf \
        target/documentation
+       
+    # 6 lines for clean output in the BUILD SUCCESS case
+    tail -n 6 "$BUILD_LOG_FILE"
+    echo "  Documentation PDFs:             $(pwd)/target/documentation/pdf"
 
 }
