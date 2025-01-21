@@ -4,6 +4,7 @@
 <chapter>
     <title>SCP Output Collector Component Usage</title>
     <sect1>
+    	<title>Synopsis</title>
         <para>The SCP Output Collector Component Usage is a helper component for building workflows that will be published for remote access. This is the point where 
 the Remote Workflow Access feature and collects the final outputs from your workflow. You can change the data types or add/delete outputs 
 in the properties view of the output collector.</para>
