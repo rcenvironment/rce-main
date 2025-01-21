@@ -4,7 +4,7 @@
 #
 # https://rcenvironment.de/
 #
-# Author: Robert Mischke
+# Author: Robert Mischke, Jan Flink
 
 # This file is included from all main operation scripts, and provides most
 # of the actual functionality. The current working dir is expected to be the 
@@ -212,4 +212,33 @@ run_unit_tests() {
     tail -n 6 "$BUILD_LOG_FILE"
     echo "Generated artifacts:"
     echo "  JUnit test result XML files:   $(pwd)/target/unit-tests/reports/xml"
+}
+
+generateDocumentation() {
+	# Generated output:
+	# - target/documentation/pdf:		the generated PDF documentation
+    # - target/documentation/build.log: the output of the Maven build process
+    
+    # delete previous output
+    rm -rf target/documentation
+    mkdir target/documentation
+
+    echo "Rendering RCE Documentation"
+
+    BUILD_LOG_FILE="target/documentation/build.log"
+    echo "  Build Log File:                $(pwd)/$BUILD_LOG_FILE"
+
+    set +e
+    mvn $MAVEN_SETTINGS \
+    -f ../de.rcenvironment.documentation.core/pom.xml \
+    clean generate-resources prepare-package \
+    >"$BUILD_LOG_FILE" 2>&1
+    EXIT_CODE=$?
+    set -e
+    
+    fail_with_log_tail_if_non_zero $EXIT_CODE "$BUILD_LOG_FILE"
+
+    mv ../de.rcenvironment.documentation.core/target/docbkx/pdf \
+       target/documentation
+
 }
