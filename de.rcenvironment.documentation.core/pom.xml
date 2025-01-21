@@ -215,6 +215,7 @@
 										<copy todir="target/docbkx/html/images" flatten="true">
 											<fileset dir="src/docbkx/" includes="**/images/*" />
 											<fileset dir="target/docbkx/diagrams/img-gen" />
+											<fileset dir="${basedir}/.." includes="de.rcenvironment.components.*.gui/help/src/docbkx/images/*" />
 										</copy>
 									</postProcess>
 									<sectionLabelIncludesComponentLabel>true</sectionLabelIncludesComponentLabel>
