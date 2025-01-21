@@ -82,7 +82,7 @@
 			<title>Example RCE network</title>
 			<mediaobject>
 				<imageobject>
-					<imagedata fileref="../images/RCE-uplink-network.png" contentwidth="400"/>
+					<imagedata fileref="images/RCE-uplink-network.png" contentwidth="400"/>
 				</imageobject>
 			</mediaobject>
 		</figure>
