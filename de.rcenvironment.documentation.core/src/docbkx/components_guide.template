@@ -5,7 +5,10 @@
 		RCE Standard Workflow Components
 	</title>
 	<subtitle>
-		&buildId;<!-- Entity is filled in by Maven build -->
+		<inlinegraphic fileref="images/rce_logo_400.png" contentwidth="200"/>
+		<para>
+			&buildId;<!-- Entity is filled in by Maven build -->
+		</para>
 	</subtitle>
 
 @doc_references@
