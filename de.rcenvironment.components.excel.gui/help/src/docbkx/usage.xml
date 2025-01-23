@@ -2,7 +2,7 @@
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                          "http://docbook.org/xml/4.4/docbookx.dtd">
 <chapter>
-    <title>Excel Component Usage</title>
+    <title>Excel Component</title>
     <sect1>
         <title>Synopsis</title>
     <para>The Excel Component is designed to access Microsoft Excel files within RCE and to execute

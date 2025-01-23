@@ -2,7 +2,7 @@
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                          "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <chapter>
-    <title>Optimizer Component Usage</title>
+    <title>Optimizer Component</title>
     <sect1>
         <title>Synopsis</title>
         <para>The Optimizer component allows the optimization of design variables in a

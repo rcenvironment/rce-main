@@ -2,7 +2,7 @@
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                          "http://docbook.org/xml/4.4/docbookx.dtd">
 <chapter>
-    <title>SCP Input Loader Component Usage</title>
+    <title>SCP Input Loader Component</title>
     <sect1>
     	<title>Synopsis</title>
         <para>The SCP Input Loader is a helper component for building workflows that will be published for remote access. This is the point where 

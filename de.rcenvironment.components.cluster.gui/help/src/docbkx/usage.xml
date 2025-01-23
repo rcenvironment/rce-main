@@ -1,6 +1,6 @@
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <chapter>
-    <title>Cluster Component Usage</title>
+    <title>Cluster Component</title>
     <sect1>
         <title>Synopsis</title>
         <para>The Cluster component allows submission of jobs to a cluster.</para>

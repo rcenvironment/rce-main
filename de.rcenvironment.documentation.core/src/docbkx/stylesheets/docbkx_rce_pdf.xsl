@@ -136,31 +136,34 @@
 	
 	<xsl:attribute-set name="custom.revision">
 	  	<xsl:attribute name="text-align">center</xsl:attribute>
-	  	<xsl:attribute name="space-before.minimum">2em</xsl:attribute>
-		<xsl:attribute name="space-before.optimum">2em</xsl:attribute>
-		<xsl:attribute name="space-before.maximum">2em</xsl:attribute>
+	  	<xsl:attribute name="space-after.minimum">10em</xsl:attribute>
+		<xsl:attribute name="space-after.optimum">10em</xsl:attribute>
+		<xsl:attribute name="space-after.maximum">10em</xsl:attribute>
 		<xsl:attribute name="font-size">12pt</xsl:attribute>
 		<xsl:attribute name="font-family">monospace</xsl:attribute>
 	</xsl:attribute-set>
 
-	<!-- force use of title, subtitle and one revision (build id) on titlepage -->
+	<!-- layout title, subtitle and one revision (build id) on titlepage -->
     <xsl:template name="book.titlepage.recto">
         <xsl:choose>
-            <xsl:when test="db:title | title">
-               	<xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="db:title | title"/>
-            </xsl:when>
-        </xsl:choose>
-        <xsl:choose>
-            <xsl:when test="db:subtitle | subtitle">
-                <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="db:subtitle | subtitle"/>
-            </xsl:when>
-        </xsl:choose>
-        <xsl:choose>
+        	<!-- Build ID -->
             <xsl:when test="db:bookinfo/db:revhistory/db:revision[1] | bookinfo/revhistory/revision[1]">
                 <fo:block xsl:use-attribute-sets="custom.revision">
 	                <xsl:apply-templates mode="book.titlepage.recto.auto.mode" 
 	                	select="db:bookinfo/db:revhistory/db:revision[1] | bookinfo/revhistory/revision[1]"/>
                 </fo:block>
+            </xsl:when>
+        </xsl:choose>
+        <xsl:choose>
+        	<!-- RCE Logo -->
+            <xsl:when test="db:subtitle | subtitle">
+                <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="db:subtitle | subtitle"/>
+            </xsl:when>
+        </xsl:choose>
+        <xsl:choose>
+        	<!-- Title -->
+            <xsl:when test="db:title | title">
+               	<xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="db:title | title"/>
             </xsl:when>
         </xsl:choose>
     </xsl:template>

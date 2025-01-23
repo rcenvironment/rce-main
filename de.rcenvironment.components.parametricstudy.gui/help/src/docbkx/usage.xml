@@ -2,7 +2,7 @@
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                          "http://docbook.org/xml/4.4/docbookx.dtd">
 <chapter>
-    <title>Parametric Study Component Usage</title>
+    <title>Parametric Study Component</title>
     <sect1>
         <title>Synopsis</title>
         <para>The Parametric Study Component is for running a workflow through a set of values for
