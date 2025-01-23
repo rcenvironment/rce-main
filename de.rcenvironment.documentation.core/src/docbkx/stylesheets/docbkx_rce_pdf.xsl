@@ -45,6 +45,16 @@
 	<xsl:template name="book.titlepage.verso"/>
 	<xsl:template name="book.titlepage.before.verso"/>
 	
+	<!-- Remove the template generated word 'Chapter' from numbered chapter titles -->
+	<xsl:param name="local.l10n.xml" select="document('')"/>
+	<l:i18n xmlns:l="http://docbook.sourceforge.net/xmlns/l10n/1.0">
+	  <l:l10n language="en"> 
+	    <l:context name="title-numbered"> 
+	      <l:template name="chapter" text="%n.&#160;%t"/> 
+	    </l:context>    
+	  </l:l10n>
+	</l:i18n>
+	
 	<!-- enable auto numbering on sections -->
 	<xsl:param name="section.autolabel">1</xsl:param>
 	<xsl:param name="section.autolabel.max.depth">3</xsl:param>
