@@ -1,15 +1,22 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 
 <book id="rce_components_guide">
+
 	<title>
 		RCE Standard Workflow Components
 	</title>
+	
 	<subtitle>
 		<inlinegraphic fileref="images/rce_logo_400.png" contentwidth="200"/>
-		<para>
-			&buildId;<!-- Entity is filled in by Maven build -->
-		</para>
 	</subtitle>
+	
+	<bookinfo>
+		<revhistory>
+			<revision>
+				&buildId;<!-- Entity is filled in by Maven build -->
+			</revision>
+		</revhistory>
+	</bookinfo>
 
 @doc_references@
 

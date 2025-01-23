@@ -4,12 +4,18 @@
 	<title>
 		RCE Developer Guide
 	</title>
+	
 	<subtitle>
 		<inlinegraphic fileref="images/rce_logo_400.png" contentwidth="200"/>
-		<para>
-			&buildId;<!-- Entity is filled in by Maven build -->
-		</para>
 	</subtitle>
+	
+	<bookinfo>
+		<revhistory>
+			<revision>
+				&buildId;<!-- Entity is filled in by Maven build -->
+			</revision>
+		</revhistory>
+	</bookinfo>
 
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
 		href="developer_guide/sections/developer_preface.xml"/>
