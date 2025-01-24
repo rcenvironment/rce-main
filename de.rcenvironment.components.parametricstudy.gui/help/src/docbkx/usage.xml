@@ -2,7 +2,7 @@
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                          "http://docbook.org/xml/4.4/docbookx.dtd">
 <chapter>
-    <title>Parametric Study Component Usage</title>
+    <title>Parametric Study Component</title>
     <sect1>
         <title>Synopsis</title>
         <para>The Parametric Study Component is for running a workflow through a set of values for
@@ -47,7 +47,7 @@
             be defined from an input. For that, the "use input" checkbox must be checked. Then an
             input for the selected option will be created, which will receive the value for the
             option during the workflow execution. </para>
-        <para><inlinegraphic fileref="../../images/image001.png"/></para>
+        <para><inlinegraphic fileref="images/component_parametricstudy_01.png" contentwidth="400"/></para>
         <para>Having these values defined, there are two possible modes for running the
             component.</para>
         <para>If you define a new dynamic endpoint in the parameters tab and connect it to other
@@ -55,7 +55,7 @@
             receives a response at the newly defined endpoint (except for the first value, which gets sent without the need for a response).
             This makes it possible to plot a graph when the workflow is started, because for every sent out value there is a
             corresponding incoming value.</para>
-        <para><inlinegraphic fileref="../../images/image003.png"/></para>
+        <para><inlinegraphic fileref="images/component_parametricstudy_03.png" contentwidth="400"/></para>
         <para>The other mode is active, if no parameter was defined. In this case, all values in the
             study range are sent out in the first run of the component, so the next component will
             have all input at the same time. With this, a graph like in the first mode is not

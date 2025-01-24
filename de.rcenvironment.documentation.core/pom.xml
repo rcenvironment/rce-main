@@ -185,6 +185,30 @@
 									</target>
 								</configuration>
 							</execution>
+					        <execution>
+					            <id>generate-component-doc-xml-file</id>
+					            <goals>
+					                <goal>run</goal>
+					            </goals>
+					            <phase>generate-resources</phase>
+					            <configuration>
+					                <target>
+										<fileset dir="${basedir}/.." includes="/de.rcenvironment.components.*.gui/help/src/docbkx/usage.xml" id="help_files"/>
+										<pathconvert pathsep="${line.separator}" property="documentation.pathes" refid="help_files">
+											<chainedmapper>
+												<regexpmapper from="^(.*)de\.rcenvironment\.components\.(.*)" to="&lt;xi:include xmlns:xi=&quot;http://www.w3.org/2001/XInclude&quot; href=&quot;\.\./\.\./\.\./de\.rcenvironment\.components\.\2&quot; /&gt;" />
+												<filtermapper>
+													<replacestring from="\" to="/"/>
+												</filtermapper>
+											</chainedmapper>
+										</pathconvert>
+										<copy toFile="src/docbkx/components_guide.xml" file="src/docbkx/components_guide.template" overwrite="true"/>
+										<replace file="src/docbkx/components_guide.xml">
+  								      		<replacefilter token="@doc_references@" value="${documentation.pathes}"/>
+									    </replace>
+					                </target>
+					            </configuration>
+					        </execution>
 						</executions>
 					</plugin>
 					<!-- render src/docbkx/*.xml sources to various formats - misc_ro -->
@@ -215,6 +239,7 @@
 										<copy todir="target/docbkx/html/images" flatten="true">
 											<fileset dir="src/docbkx/" includes="**/images/*" />
 											<fileset dir="target/docbkx/diagrams/img-gen" />
+											<fileset dir="${basedir}/.." includes="de.rcenvironment.components.*.gui/help/src/docbkx/images/*" />
 										</copy>
 									</postProcess>
 									<sectionLabelIncludesComponentLabel>true</sectionLabelIncludesComponentLabel>

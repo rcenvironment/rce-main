@@ -45,6 +45,16 @@
 	<xsl:template name="book.titlepage.verso"/>
 	<xsl:template name="book.titlepage.before.verso"/>
 	
+	<!-- Remove the template generated word 'Chapter' from numbered chapter titles -->
+	<xsl:param name="local.l10n.xml" select="document('')"/>
+	<l:i18n xmlns:l="http://docbook.sourceforge.net/xmlns/l10n/1.0">
+	  <l:l10n language="en"> 
+	    <l:context name="title-numbered"> 
+	      <l:template name="chapter" text="%n.&#160;%t"/> 
+	    </l:context>    
+	  </l:l10n>
+	</l:i18n>
+	
 	<!-- enable auto numbering on sections -->
 	<xsl:param name="section.autolabel">1</xsl:param>
 	<xsl:param name="section.autolabel.max.depth">3</xsl:param>
@@ -123,5 +133,39 @@
     	<xsl:attribute name="wrap-option">wrap</xsl:attribute>
     	<xsl:attribute name="hyphenation-character">\</xsl:attribute>
 	</xsl:attribute-set>
+	
+	<xsl:attribute-set name="custom.revision">
+	  	<xsl:attribute name="text-align">center</xsl:attribute>
+	  	<xsl:attribute name="space-after.minimum">10em</xsl:attribute>
+		<xsl:attribute name="space-after.optimum">10em</xsl:attribute>
+		<xsl:attribute name="space-after.maximum">10em</xsl:attribute>
+		<xsl:attribute name="font-size">12pt</xsl:attribute>
+		<xsl:attribute name="font-family">monospace</xsl:attribute>
+	</xsl:attribute-set>
+
+	<!-- layout title, subtitle and one revision (build id) on titlepage -->
+    <xsl:template name="book.titlepage.recto">
+        <xsl:choose>
+        	<!-- Build ID -->
+            <xsl:when test="db:bookinfo/db:revhistory/db:revision[1] | bookinfo/revhistory/revision[1]">
+                <fo:block xsl:use-attribute-sets="custom.revision">
+	                <xsl:apply-templates mode="book.titlepage.recto.auto.mode" 
+	                	select="db:bookinfo/db:revhistory/db:revision[1] | bookinfo/revhistory/revision[1]"/>
+                </fo:block>
+            </xsl:when>
+        </xsl:choose>
+        <xsl:choose>
+        	<!-- RCE Logo -->
+            <xsl:when test="db:subtitle | subtitle">
+                <xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="db:subtitle | subtitle"/>
+            </xsl:when>
+        </xsl:choose>
+        <xsl:choose>
+        	<!-- Title -->
+            <xsl:when test="db:title | title">
+               	<xsl:apply-templates mode="book.titlepage.recto.auto.mode" select="db:title | title"/>
+            </xsl:when>
+        </xsl:choose>
+    </xsl:template>
 
 </xsl:stylesheet>

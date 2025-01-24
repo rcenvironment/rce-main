@@ -2,7 +2,7 @@
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                          "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <chapter>
-    <title>Optimizer Component Usage</title>
+    <title>Optimizer Component</title>
     <sect1>
         <title>Synopsis</title>
         <para>The Optimizer component allows the optimization of design variables in a
@@ -27,7 +27,7 @@
             <listitem>
                 <para>In the algorithm tab you can choose an optimization algorithm that fits your
                     problem. There are several algorithms from the Dakota package available.</para>
-                <para><inlinegraphic fileref="../../images/image001.png"/></para>
+                <para><inlinegraphic fileref="images/component_optimizer_01.png" contentwidth="400"/></para>
                 <para>There are properties for each algorithm. For editing, click on the 'Algorithm
                     Properties' button. The appearing dialog shows the properties of the chosen
                     algorithm. The properties differ from algorithm to algorithm. For more
@@ -130,7 +130,7 @@
             will get the values the optimizer produces and the possibility to export these values to
             an Excel file. You are also able to plot a graph with the given results in the diagram
             tab. </para>
-        <para><inlinegraphic fileref="../../images/image005.png"/></para>
+        <para><inlinegraphic fileref="images/component_optimizer_05.png" contentwidth="400"/></para>
         <para>For help concerning nested and fault-tolerant loop settings, see the section
             'Usage/Workflows' in the user guide.</para>
         </sect1>

@@ -2,7 +2,7 @@
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
 	"http://docbook.org/xml/4.4/docbookx.dtd">
 <chapter>
-	<title>Script Component Usage</title>
+	<title>Script Component</title>
 	<sect1>
 		<title>Synopsis</title>
 		<para> The Script component allows the execution of a self-written script. Currently, two script

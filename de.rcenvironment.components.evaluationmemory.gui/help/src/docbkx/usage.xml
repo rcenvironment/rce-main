@@ -2,7 +2,7 @@
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                          "http://docbook.org/xml/4.4/docbookx.dtd">
 <chapter>
-    <title>Evaluation Memory Component Usage</title>
+    <title>Evaluation Memory Component</title>
     <sect1>
         <title>Synopsis</title>
         <para>The Evaluation Memory component stores results of loop runs and re-uses them in future

@@ -85,6 +85,9 @@
 									<postProcess>
 										<!-- ensure directory exists -->
 										<mkdir dir="help/generated/html" />
+										<copy todir="help/generated/html/images" flatten="true">
+											<fileset dir="help/src/docbkx" includes="images/*" />
+										</copy>
 									</postProcess>
 									<sourceDirectory>${basedir}/help/src/docbkx</sourceDirectory>
 									<targetDirectory>${basedir}/help/generated/html</targetDirectory>

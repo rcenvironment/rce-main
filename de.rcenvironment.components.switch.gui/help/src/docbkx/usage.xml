@@ -2,7 +2,7 @@
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
                          "http://docbook.org/xml/4.4/docbookx.dtd">
 <chapter>
-    <title>Switch Component Usage</title>
+    <title>Switch Component</title>
     <sect1>
         <title>Synopsis</title>
         <para>The Switch component forwards input values to one or more outputs. Whether or not an input is forwarded to a specific output depends 
@@ -34,7 +34,7 @@
             They can only be used within the condition and will therefore not be forwarded.
             The permissible data types are integer, float or boolean.
             </para>
-        <para><inlinegraphic fileref="../../images/image001.png"/></para>
+        <para><inlinegraphic fileref="images/component_switch_01.png"  contentwidth="400"/></para>
         <para>Define your conditions on the 'Condition' tab. A condition may contain data inputs, condition inputs,
             numbers, relational operators and parentheses. You can insert inputs and
             valid operators by hand or you can select them from the drop down list on the right-hand side.
@@ -47,7 +47,7 @@
             the values will be written to all outputs related to conditions that evaluate to true. You can adjust the order 
             of the conditions via the arrow buttons on the left-hand side.    
              </para>
-        <para><inlinegraphic fileref="../../images/image002.png"/></para>
+        <para><inlinegraphic fileref="images/component_switch_02.png"  contentwidth="400"/></para>
         <para>There are three options available that define the behavior of the Switch component within loops.
         In the 'Loop Control' tab you can choose between:
         <itemizedlist>
