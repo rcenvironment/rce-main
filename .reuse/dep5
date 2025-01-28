@@ -97,7 +97,7 @@ Copyright: DLR
 License: CC0-1.0
 Comment: preliminary
 
-Files: de.rcenvironment.documentation.core/src/docbkx/*.xml
+Files: de.rcenvironment.documentation.core/src/docbkx/*.xml de.rcenvironment.documentation.core/src/docbkx/*.template
 Copyright: DLR
 License: CC-BY-4.0
 
