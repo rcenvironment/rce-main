@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2000, 2002 IBM Corp.  All rights reserved
- * Copyright 2006-2024 DLR, Germany (header adaptations only)
+ * Copyright 2006-2025 DLR, Germany (header adaptations only)
  * 
  * SPDX-License-Identifier: CPL-1.0
  *  
