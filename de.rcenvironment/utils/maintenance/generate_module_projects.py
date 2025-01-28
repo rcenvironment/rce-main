@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2006-2024 DLR, Germany
+# Copyright 2006-2025 DLR, Germany
 #
 # SPDX-License-Identifier: EPL-1.0
 #
@@ -94,7 +94,7 @@ def generate_feature_xml(module: ModuleConfiguration):
       provider-name="DLR">
 
    <copyright url="https://www.rcenvironment.de">
-      Copyright 2006-2024 DLR, Germany
+      Copyright 2006-2025 DLR, Germany
    </copyright>
 
    <license url="https://www.eclipse.org/legal/epl-v10.html">

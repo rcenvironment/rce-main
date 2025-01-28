@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2000, 2018 IBM Corporation and others.
- * Copyright 2016-2024 DLR, Germany
+ * Copyright 2016-2025 DLR, Germany
  *  
  * SPDX-License-Identifier: EPL-2.0
  * 
