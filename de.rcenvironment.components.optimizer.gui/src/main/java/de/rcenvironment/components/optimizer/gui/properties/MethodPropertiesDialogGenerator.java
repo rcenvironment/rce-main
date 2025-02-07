@@ -8,7 +8,6 @@
 
 package de.rcenvironment.components.optimizer.gui.properties;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,8 +24,6 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -76,9 +73,7 @@ public class MethodPropertiesDialogGenerator extends Dialog {
     protected void configureShell(Shell shell) {
         super.configureShell(shell);
         shell.setText(Messages.algorithmProperties + " - " + methodDescription.getMethodName());
-        InputStream path = getClass().getResourceAsStream("/resources/optimizer16.png");
-        Image icon = new Image(null, new ImageData(path));
-        shell.setImage(icon);
+        shell.setImage(ImageManager.getInstance().getSharedImage(StandardImages.RCE_LOGO_16));
     }
 
     @Override
