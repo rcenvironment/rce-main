@@ -30,9 +30,9 @@ public final class SshAccountRole {
     private String allowedCommandRegEx = null;
 
     private String disallowedCommandRegEx = null;
-    
+
     private boolean allowedToOpenShell = true;
-    
+
     private boolean allowedToUseUplink = false;
 
     public SshAccountRole(String roleName) {
@@ -108,11 +108,12 @@ public final class SshAccountRole {
             allowedToOpenShell = false;
             allowedToUseUplink = true;
             break;
+        case SshConstants.ROLE_NAME_HEALTH_CHECK: // same permissions as the default role; uses the "dummy" command for testing
         case SshConstants.ROLE_NAME_DEFAULT:
             break;
         default:
-            this.roleName = SshConstants.ROLE_NAME_DEFAULT;
-            LogFactory.getLog(getClass()).warn("Tried to create a role with a name that is not allowed: " + roleName);
+            // as long as no user-defined roles are supported, this is always an internal error
+            throw new IllegalArgumentException("Tried to create a role with an unhandled id: " + roleName);
         }
 
         // allow any user to execute the "dummy" command (e.g. for testing connectivity from scripts)
@@ -125,7 +126,6 @@ public final class SshAccountRole {
         }
     }
 
-    
     public boolean isAllowedToUseUplink() {
         return allowedToUseUplink;
     }
@@ -171,7 +171,7 @@ public final class SshAccountRole {
         }
         return disallowedCommandRegEx;
     }
-    
+
     public boolean isAllowedToOpenShell() {
         return allowedToOpenShell;
     }

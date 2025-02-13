@@ -12,11 +12,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import de.rcenvironment.core.embedded.ssh.api.SshAccount;
 import de.rcenvironment.core.eventlog.api.EventLog;
 import de.rcenvironment.core.eventlog.api.EventLogEntry;
 import de.rcenvironment.core.eventlog.api.EventType;
@@ -34,6 +36,11 @@ import de.rcenvironment.core.utils.common.exception.OperationFailureException;
  */
 public class IncomingSessionTracker<T> {
 
+    /**
+     * Provides methods for managing the life cycle of an incoming session.
+     * 
+     * @author Robert Mischke
+     */
     public interface SessionHandle {
 
         SessionHandle addLogData(Map<String, String> data);
@@ -45,7 +52,7 @@ public class IncomingSessionTracker<T> {
          */
         SessionHandle addLogData(String key, int value);
 
-        SessionHandle registerAuthenticationSuccess(String loginName, String method);
+        SessionHandle registerAuthenticationSuccess(String loginName, String method, Optional<SshAccount> optionalAccount);
 
         SessionHandle registerAuthenticationFailure(String loginName, String method, String refusalReason);
 
@@ -69,7 +76,7 @@ public class IncomingSessionTracker<T> {
      *
      * @author Robert Mischke
      */
-    private static class SessionStateHolder implements SessionHandle {
+    private static final class SessionStateHolder implements SessionHandle {
 
         private static final Log sharedLog = LogFactory.getLog(SessionStateHolder.class);
 
@@ -88,6 +95,8 @@ public class IncomingSessionTracker<T> {
         private String lastAuthFailureReason;
 
         private boolean hadAuthenticationSuccess;
+
+        private boolean isHealthCheckAccount; // true if the session has a valid associated role of SshConstants.ROLE_NAME_HEALTH_CHECK
 
         private boolean wasRegularlyClosed;
 
@@ -115,7 +124,7 @@ public class IncomingSessionTracker<T> {
         public synchronized void registerEndOfSession(boolean regularClose) {
             sharedLog.debug("Closing connection " + connectionId);
             this.wasRegularlyClosed = regularClose;
-            writeFinalLogEntry();
+            appendFinalEventLogEntry();
         }
 
         @Override
@@ -142,7 +151,11 @@ public class IncomingSessionTracker<T> {
         }
 
         @Override
-        public synchronized SessionHandle registerAuthenticationSuccess(String loginName, String method) {
+        public synchronized SessionHandle registerAuthenticationSuccess(String loginName, String method,
+            Optional<SshAccount> optionalAccount) {
+            isHealthCheckAccount = optionalAccount.isPresent()
+                && SshConstants.ROLE_NAME_HEALTH_CHECK.equals(optionalAccount.get().getRole());
+
             if (hadAuthenticationSuccess) {
                 // this seems to happen regularly on key auth; also, serves as a general consistency check
                 if (lastAuthLoginName.equals(loginName) && lastAuthMethod.equals(method)) {
@@ -157,7 +170,7 @@ public class IncomingSessionTracker<T> {
             hadAuthenticationSuccess = true;
             lastAuthLoginName = loginName;
             lastAuthMethod = method;
-            writeAuthenticationSuccessLogEntry();
+            appendEventLogEntryAuthenticationSuccess();
             return this;
         }
 
@@ -177,7 +190,7 @@ public class IncomingSessionTracker<T> {
             lastAuthFailureReason = failureReason; // TODO set proper reasons
             authenticationFailureCount++;
 
-            writeAuthenticationFailureLogEntry();
+            appendEventLogEntryAuthenticationFailure();
 
             return this;
         }
@@ -213,7 +226,14 @@ public class IncomingSessionTracker<T> {
             }
         }
 
-        private void writeAuthenticationSuccessLogEntry() {
+        private void appendEventLogEntryAuthenticationSuccess() {
+
+            // as a special property of the "health check" account role (introduced in 10.6.0), do not create event log entries
+            // after a successful login, as these are typically very frequent but do not provide any relevant information
+            if (isHealthCheckAccount) {
+                return;
+            }
+
             EventLogEntry logEntry = EventLog.newEntry(EventType.CONNECTION_INCOMING_ACCEPTED);
 
             // apply collected log data
@@ -229,7 +249,7 @@ public class IncomingSessionTracker<T> {
             EventLog.append(logEntry);
         }
 
-        private void writeAuthenticationFailureLogEntry() {
+        private void appendEventLogEntryAuthenticationFailure() {
             EventLogEntry logEntry = EventLog.newEntry(EventType.CONNECTION_INCOMING_AUTH_FAILED);
 
             // apply collected log data
@@ -244,7 +264,7 @@ public class IncomingSessionTracker<T> {
             EventLog.append(logEntry);
         }
 
-        private void writeFinalLogEntry() {
+        private void appendFinalEventLogEntry() {
             boolean hadAuthenticationFailure = authenticationFailureCount != 0;
 
             // "final" ensures that these are set exactly once
@@ -257,6 +277,11 @@ public class IncomingSessionTracker<T> {
                 closeReason = "fallback";
             } else {
                 if (hadAuthenticationSuccess) {
+                    // as a special property of the "health check" account role (introduced in 10.6.0), do not create event log entries
+                    // after a successful login, as these are typically very frequent but do not provide any relevant information
+                    if (isHealthCheckAccount) {
+                        return;
+                    }
                     mainEventType = EventType.CONNECTION_INCOMING_CLOSED;
                     if (hadIncomingEOF) {
                         // TODO >10.2.1 (p2) this commonly occurs at the normal end of Uplink sessions; could be improved

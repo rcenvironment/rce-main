@@ -163,6 +163,8 @@ public final class SshConstants {
      */
     public static final String TEMP_USER_PREFIX = "t_";
 
+    // TODO (p3) this list of predefined roles should probably be an Enum -- misc_ro
+
     /**
      * Names of predefined roles.
      */
@@ -216,6 +218,11 @@ public final class SshConstants {
     /**
      * Names of predefined roles.
      */
+    public static final String ROLE_NAME_HEALTH_CHECK = "health_check";
+
+    /**
+     * Names of predefined roles.
+     */
     public static final String ROLE_NAME_DEFAULT = "default";
 
     /**
@@ -223,8 +230,7 @@ public final class SshConstants {
      */
     public static final String[] PREDEFINED_ROLE_NAMES = { ROLE_NAME_REMOTE_ACCESS_USER, ROLE_NAME_REMOTE_ACCESS_USER_ALIAS,
         ROLE_NAME_REMOTE_ACCESS_ADMIN, ROLE_NAME_UPLINK_CLIENT, ROLE_NAME_WORKFLOW_OBSERVER, ROLE_NAME_WORKFLOW_ADMIN,
-        ROLE_NAME_LOCAL_ADMIN, ROLE_NAME_IM_ADMIN,
-        ROLE_NAME_IM_DELEGATE, ROLE_NAME_DEVELOPER, ROLE_NAME_DEFAULT };
+        ROLE_NAME_LOCAL_ADMIN, ROLE_NAME_IM_ADMIN, ROLE_NAME_IM_DELEGATE, ROLE_NAME_DEVELOPER, ROLE_NAME_HEALTH_CHECK, ROLE_NAME_DEFAULT };
 
     /**
      * Command patterns.
