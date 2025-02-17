@@ -193,8 +193,8 @@
 					            <phase>generate-resources</phase>
 					            <configuration>
 					                <target>
-										<fileset dir="${basedir}/.." includes="/de.rcenvironment.components.*.gui/help/src/docbkx/usage.xml" id="help_files"/>
-										<pathconvert pathsep="${line.separator}" property="documentation.pathes" refid="help_files">
+										<fileset dir="${basedir}/.." includes="de.rcenvironment.components.*.gui/help/src/docbkx/usage.xml" id="help_files"/>
+										<pathconvert pathsep="${line.separator}" property="documentation.paths" refid="help_files">
 											<chainedmapper>
 												<regexpmapper from="^(.*)de\.rcenvironment\.components\.(.*)" to="&lt;xi:include xmlns:xi=&quot;http://www.w3.org/2001/XInclude&quot; href=&quot;\.\./\.\./\.\./de\.rcenvironment\.components\.\2&quot; /&gt;" />
 												<filtermapper>
@@ -204,7 +204,7 @@
 										</pathconvert>
 										<copy toFile="src/docbkx/components_guide.xml" file="src/docbkx/components_guide.template" overwrite="true"/>
 										<replace file="src/docbkx/components_guide.xml">
-  								      		<replacefilter token="@doc_references@" value="${documentation.pathes}"/>
+  								      		<replacefilter token="@doc_references@" value="${documentation.paths}"/>
 									    </replace>
 					                </target>
 					            </configuration>
