@@ -214,14 +214,14 @@ run_unit_tests() {
     echo "  JUnit test result XML files:   $(pwd)/target/unit-tests/reports/xml"
 }
 
-generateDocumentation() {
-	# Generated output:
-	# - target/documentation/pdf:		the generated PDF documentation
+build_documentation_only() {
+    # Generated output:
+    # - target/documentation/pdf:       the generated PDF documentation
     # - target/documentation/build.log: the output of the Maven build process
     
     # delete previous output
     rm -rf target/documentation
-    mkdir target/documentation
+    mkdir -p target/documentation/pdf/{linux,windows}
 
     echo "Rendering RCE Documentation"
 
@@ -239,9 +239,11 @@ generateDocumentation() {
     
     fail_with_log_tail_if_non_zero $EXIT_CODE "$BUILD_LOG_FILE"
 
-    mv ../de.rcenvironment.documentation.core/target/docbkx/pdf \
-       target/documentation
-       
+    mv -t target/documentation/pdf/linux/ \
+      ../de.rcenvironment.documentation.core/target/docbkx/pdf/linux/*.pdf
+    mv -t target/documentation/pdf/windows/ \
+      ../de.rcenvironment.documentation.core/target/docbkx/pdf/windows/*.pdf
+
     # 6 lines for clean output in the BUILD SUCCESS case
     tail -n 6 "$BUILD_LOG_FILE"
     echo "  Documentation PDFs:             $(pwd)/target/documentation/pdf"

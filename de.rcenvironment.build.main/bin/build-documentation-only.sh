@@ -6,12 +6,10 @@
 #
 # https://rcenvironment.de/
 #
-# Author: Robert Mischke, Jan Flink
+# Author: Jan Flink, Robert Mischke
 
-# This script builds the executable RCE "products" (Eclipse terminology) 
-# from this repository's sources and the configured third-party p2 
-# repository in a single invocation.
-
+# During a regular build, the RCE documentation is generated and rendered as part of the product
+# build process. This script builds it in isolation instead to allow faster iteration and testing.
 
 # set working directory to the .build.meta project
 cd "$(dirname "$(readlink -f "$0")")/.."
@@ -19,4 +17,4 @@ cd "$(dirname "$(readlink -f "$0")")/.."
 # load settings and functions
 . bin/include.sh
 
-generateDocumentation
+build_documentation_only
