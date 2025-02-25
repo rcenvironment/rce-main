@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2006-2025 DLR, Germany
+# Copyright 2023-2025 DLR, Germany
 #
 # SPDX-License-Identifier: EPL-1.0
 #
@@ -12,10 +12,10 @@
 # loading required libraries from the configured third-party p2 repository.
 
 
-# set working directory to the .build.meta project
-cd "$(dirname "$(readlink -f "$0")")/.."
+# Set working directory to the containing "build" folder
+cd "$(dirname "$(readlink -f "$0")")"
 
-# load settings and functions
-. bin/include.sh
+# Load settings and functions
+. ../de.rcenvironment.build.main/bin/include.sh
 
 run_unit_tests
