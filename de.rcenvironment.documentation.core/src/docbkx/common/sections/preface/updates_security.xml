@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+                         "http://docbook.org/xml/4.4/docbookx.dtd">
+<section id="updates_security">
+	<title>Updates/Security Information</title>
+	<para>
+	As third-party software (e.g. libraries) included in RCE is constantly
+	updated, it is generally recommended to always upgrading RCE to the
+	latest available release. However, not every update might be strictly
+	necessary. To allow RCE users and administrators to make informed
+	decisions, the page
+	<ulink url="https://rcenvironment.de/pages/updatessecurity.html">"Update/Security Information for RCE Releases"</ulink>
+	provides an overview of the status of all public RCE releases. In
+	particular, this includes information about how important it is to
+	update from a certain RCE version.
+	</para>
+</section>
