@@ -446,6 +446,7 @@ public class LogView extends ViewPart {
 
         // platform listing combo box
         myPlatformCombo = new Combo(platformComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
+        myPlatformCombo.setBackground(platformComposite.getDisplay().getSystemColor(SWT.COLOR_WHITE));
         for (InstanceNodeSessionId nodeId : LogModel.getInstance().updateListOfLogSources()) {
             myPlatformCombo.add(nodeId.getAssociatedDisplayName());
             myPlatformCombo.setData(nodeId.getAssociatedDisplayName(), nodeId);

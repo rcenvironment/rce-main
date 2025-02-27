@@ -536,6 +536,7 @@ public class ConsoleView extends ViewPart {
 
         // workflow listing combo box
         workflowCombo = new Combo(workflowComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
+        workflowCombo.setBackground(parentComposite.getDisplay().getSystemColor(SWT.COLOR_WHITE));
         workflowCombo.select(INITIAL_SELECTION);
         GridData gd = new GridData();
         gd.widthHint = WORKFLOW_WIDTH;
@@ -555,6 +556,7 @@ public class ConsoleView extends ViewPart {
 
         // compoenent listing combo box
         componentCombo = new Combo(componentComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
+        componentCombo.setBackground(parentComposite.getDisplay().getSystemColor(SWT.COLOR_WHITE));
         componentCombo.select(INITIAL_SELECTION);
         GridData gd = new GridData();
         gd.widthHint = COMPONENT_WIDTH;
