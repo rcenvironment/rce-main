@@ -150,8 +150,8 @@ public class UnpackedFilesDirectoryResolver {
     private Bundle findMatchingBundle(String filesetId) throws ConfigurationException {
         Bundle bundleCandidate = null;
         for (Bundle bundle : bundleContext.getBundles()) {
-            if (bundle.getState() != Bundle.RESOLVED) {
-                // only check resolved bundles, as bundles not matching platform filters are still present as INSTALLED in Eclipse
+            if (bundle.getState() != Bundle.RESOLVED && bundle.getState() != Bundle.ACTIVE) {
+                // only accept RESOLVED and ACTIVE, as bundles not matching platform filters are still present as INSTALLED
                 continue;
             }
             Dictionary<String, String> headers = bundle.getHeaders();
