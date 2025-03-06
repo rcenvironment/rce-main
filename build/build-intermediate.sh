@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2006-2025 DLR, Germany
+# Copyright 2023-2025 DLR, Germany
 #
 # SPDX-License-Identifier: EPL-1.0
 #
@@ -16,11 +16,11 @@
 # this operation as well as artifacts fetched from the third-party repository.
 
 
-# Set working directory to the .build.meta project
-cd "$(dirname "$(readlink -f "$0")")/.."
+# Set working directory to the containing "build" folder
+cd "$(dirname "$(readlink -f "$0")")"
 
 # Load settings and functions
-. bin/include.sh
+. ../de.rcenvironment.build.main/bin/include.sh
 
 # Invoke imported functions
 build_intermediate_repo
