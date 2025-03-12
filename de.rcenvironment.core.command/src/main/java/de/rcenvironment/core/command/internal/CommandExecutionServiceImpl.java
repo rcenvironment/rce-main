@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import de.rcenvironment.core.command.api.CommandExecutionResult;
 import de.rcenvironment.core.command.api.CommandExecutionService;
+import de.rcenvironment.core.command.api.ICommandAuthorizer;
 import de.rcenvironment.core.command.internal.handlers.BuiltInCommandPlugin;
 import de.rcenvironment.core.command.spi.AbstractCommandParameter;
 import de.rcenvironment.core.command.spi.CommandFlag;
@@ -266,14 +267,13 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
     public void bindConfigurationService(ConfigurationService service) {
         configurationService = service;
     }
-
+    
     @Override
     public Future<CommandExecutionResult> asyncExecMultiCommand(List<String> tokens, TextOutputReceiver outputReceiver,
-        Object initiator) {
+        ICommandAuthorizer authorizer, Object initiator) {
 
         File profileOutput = configurationService.getConfigurablePath(ConfigurablePathId.PROFILE_OUTPUT);
-        MultiCommandHandler multiCommandHandler = new MultiCommandHandler(tokens, outputReceiver, parser,
-            profileOutput);
+        MultiCommandHandler multiCommandHandler = new MultiCommandHandler(tokens, outputReceiver, parser, authorizer, profileOutput);
         multiCommandHandler.setInitiatorInformation(initiator);
         return threadPool.submit(multiCommandHandler);
     }

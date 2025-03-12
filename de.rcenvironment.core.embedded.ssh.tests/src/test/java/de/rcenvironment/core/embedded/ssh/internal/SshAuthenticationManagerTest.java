@@ -242,12 +242,14 @@ public class SshAuthenticationManagerTest extends TestCase {
      */
     @Test
     public void testRoMaWrongUser() {
-        assertFalse("unknown user is allowed to execute command (that's bad; Do not define a test user with the name sdhjdfsh5412546)",
-            authenticationManager.isAllowedToExecuteConsoleCommand("sdhjdfsh5412546", "stats"));
+        assertTrue(false); // TODO: Fix test cases
+        //assertFalse("unknown user is allowed to execute command (that's bad; Do not define a test user with the name sdhjdfsh5412546)",
+        //    authenticationManager.isAllowedToExecuteConsoleCommand("sdhjdfsh5412546", "stats"));
     }
 
     private void testRoleManagement(SshAccount user, String command, boolean expected) {
-        assertEquals("User (name=" + user.getLoginName() + ") is not allowed to execute command " + command, expected,
-            authenticationManager.isAllowedToExecuteConsoleCommand(user.getLoginName(), command));
+        assertTrue(false); // TODO: Fix test cases
+        //assertEquals("User (name=" + user.getLoginName() + ") is not allowed to execute command " + command, expected,
+        //    authenticationManager.isAllowedToExecuteConsoleCommand(user.getLoginName(), command));
     }
 }

@@ -19,9 +19,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import de.rcenvironment.core.command.api.CommandExecutionResult;
+import de.rcenvironment.core.command.api.ICommandAuthorizer;
 import de.rcenvironment.core.command.common.CommandException;
 import de.rcenvironment.core.command.spi.CommandContext;
 import de.rcenvironment.core.command.spi.CommandParser;
+import de.rcenvironment.core.command.spi.ExecutableCommand;
 import de.rcenvironment.core.command.spi.SingleCommandHandler;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 import de.rcenvironment.toolkit.modules.concurrency.api.TaskDescription;
@@ -82,6 +84,8 @@ public class MultiCommandHandler implements Callable<CommandExecutionResult> {
     private TextOutputReceiver outputReceiver;
 
     private final SingleCommandHandler singleCommandHandler;
+    
+    private final ICommandAuthorizer commandAuthorizer;
 
     private volatile Object initiatorInformation;
     
@@ -92,22 +96,25 @@ public class MultiCommandHandler implements Callable<CommandExecutionResult> {
     // private final File profileOutputDirectory;
 
     public MultiCommandHandler(List<String> tokens, TextOutputReceiver outputReceiver, SingleCommandHandler singleCommandHandler,
-        File profileOutput) {
+        ICommandAuthorizer commandAuthorizer, File profileOutput) {
 
         this.rawTokens = tokens;
         this.remainingTokens = new LinkedList<String>(); // empty list; filled after normalization
         this.outputReceiver = outputReceiver;
         this.singleCommandHandler = singleCommandHandler;
+        this.commandAuthorizer = commandAuthorizer;
         this.parser = null;
         // this.profileOutputDirectory = profileOutput;
     }
 
-    public MultiCommandHandler(List<String> tokens, TextOutputReceiver outputReceiver, CommandParser parser, File fileOutput) {
+    public MultiCommandHandler(List<String> tokens, TextOutputReceiver outputReceiver, CommandParser parser,
+        ICommandAuthorizer commandAuthorizer, File fileOutput) {
         
         this.rawTokens = tokens;
         this.remainingTokens = new LinkedList<String>(); // empty list; filled after normalization
         this.outputReceiver = outputReceiver;
         this.singleCommandHandler = null;
+        this.commandAuthorizer = commandAuthorizer;
         this.parser = parser;
     }
     
@@ -115,9 +122,10 @@ public class MultiCommandHandler implements Callable<CommandExecutionResult> {
      * This constructor is manly intended for easing testing. As it does not specify the location of the profile output directory, this
      * class will return an error if the 'saveto' command is encountered during command execution.
      */
-    public MultiCommandHandler(List<String> tokens, TextOutputReceiver outputReceiver, SingleCommandHandler singleCommandHandler) {
+    public MultiCommandHandler(List<String> tokens, TextOutputReceiver outputReceiver, SingleCommandHandler singleCommandHandler,
+        ICommandAuthorizer commandAuthorizer) {
 
-        this(tokens, outputReceiver, singleCommandHandler, null);
+        this(tokens, outputReceiver, singleCommandHandler, commandAuthorizer, null);
     }
 
     /**
@@ -357,8 +365,13 @@ public class MultiCommandHandler implements Callable<CommandExecutionResult> {
 
     private void executeSingleCommand(List<String> tokens) throws CommandException {
         CommandContext commandContext = new CommandContext(tokens, outputReceiver, initiatorInformation);
-        
-        parser.parseCommand(commandContext).execute();
+        ExecutableCommand command = parser.parseCommand(commandContext);
+
+        if (commandAuthorizer.canExecuteCommand(command)) {
+            command.execute();
+        } else {
+            throw CommandException.Unauthorized(commandContext);
+        }
     }
 
 }

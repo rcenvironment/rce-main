@@ -22,6 +22,8 @@ import org.eclipse.equinox.app.IApplication;
 
 import de.rcenvironment.core.command.api.CommandExecutionResult;
 import de.rcenvironment.core.command.api.CommandExecutionService;
+import de.rcenvironment.core.command.api.DefaultCommandAuthorizer;
+import de.rcenvironment.core.command.api.ICommandAuthorizer;
 import de.rcenvironment.core.command.common.CommandException;
 import de.rcenvironment.core.start.common.validation.api.InstanceValidationResult;
 import de.rcenvironment.core.start.common.validation.api.InstanceValidationResult.InstanceValidationResultType;
@@ -274,7 +276,9 @@ public abstract class InstanceRunner {
                 log.debug("Finished " + taskDescriptionWithTokens);
             }
         };
-        return commandExecutionService.asyncExecMultiCommand(Arrays.asList(execCommandTokens), outputReceiver, taskDescription);
+        
+        ICommandAuthorizer authorizer = new DefaultCommandAuthorizer();
+        return commandExecutionService.asyncExecMultiCommand(Arrays.asList(execCommandTokens), outputReceiver, authorizer, taskDescription);
     }
 
 }

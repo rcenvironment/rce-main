@@ -36,11 +36,13 @@ public interface CommandExecutionService {
      * 
      * @param tokens the tokens of the multi-command to execute
      * @param outputReceiver the receiver of output and execution lifecycle events
+     * @param authorizer A command authorizer that is used to check whether the command is currently authorized to be executed. If not,
+     *        then the command is not executed.
      * @param initiator an arbitrary object providing information about the source that initiated this command; may be used to check account
      *        permissions
      * @return a {@link Future} for a {@link CommandExecutionResult} that can be waited for to detect the end of command execution
      */
-    Future<CommandExecutionResult> asyncExecMultiCommand(List<String> tokens, TextOutputReceiver outputReceiver, Object initiator);
+    Future<CommandExecutionResult> asyncExecMultiCommand(List<String> tokens, TextOutputReceiver outputReceiver, ICommandAuthorizer authorizer, Object initiator);
 
     void printHelpText(ParsedCommandModifiers modifiers, TextOutputReceiver outputReceiver);
         

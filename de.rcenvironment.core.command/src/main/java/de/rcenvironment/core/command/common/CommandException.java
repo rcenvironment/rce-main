@@ -48,7 +48,12 @@ public final class CommandException extends Exception {
         /**
          * Indicates that the command was syntactically correct, but has encountered an error.
          */
-        EXECUTION_ERROR
+        EXECUTION_ERROR,
+        
+        /**
+         * The current role was not authorized to execute the command.
+         */
+        UNAUTHORIZED
     }
 
     private static final long serialVersionUID = 405551760124111120L;
@@ -132,6 +137,16 @@ public final class CommandException extends Exception {
             text = command.getResult();
         }
         return new CommandException(Type.HELP_REQUESTED, text, context);
+    }
+    
+    /**
+     * Creates a {@link Type#UNAUTHORIZED} exception.
+     * 
+     * @param context the {@link CommandContext}
+     * @return the generated exception
+     */
+    public static CommandException Unauthorized(CommandContext context) {
+        return new CommandException(Type.UNAUTHORIZED, "Current role is not authorized to execute this command.", context);
     }
 
     public Type getType() {

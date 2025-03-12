@@ -15,6 +15,8 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 
 import de.rcenvironment.core.command.api.CommandExecutionService;
+import de.rcenvironment.core.command.api.DefaultCommandAuthorizer;
+import de.rcenvironment.core.command.api.ICommandAuthorizer;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 
 /**
@@ -35,7 +37,8 @@ public class RCECommandProvider implements CommandProvider {
     public Object _rce(final CommandInterpreter interpreter) {
         final List<String> tokens = getTokens(interpreter);
         final TextOutputReceiver outputReceiver = new OsgiConsoleOutputAdapter(interpreter, commandExecutionService);
-        commandExecutionService.asyncExecMultiCommand(tokens, outputReceiver, "osgi console");
+        ICommandAuthorizer authorizer = new DefaultCommandAuthorizer();
+        commandExecutionService.asyncExecMultiCommand(tokens, outputReceiver, authorizer, "osgi console");
         return null;
     }
 

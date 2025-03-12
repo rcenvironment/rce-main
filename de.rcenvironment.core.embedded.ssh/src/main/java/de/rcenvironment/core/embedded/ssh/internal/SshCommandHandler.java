@@ -29,6 +29,7 @@ import org.apache.sshd.server.session.ServerSessionAware;
 
 import de.rcenvironment.core.command.api.CommandExecutionResult;
 import de.rcenvironment.core.command.api.CommandExecutionService;
+import de.rcenvironment.core.command.api.ICommandAuthorizer;
 import de.rcenvironment.core.embedded.ssh.api.SshAccount;
 import de.rcenvironment.core.toolkitbridge.transitional.ConcurrencyUtils;
 import de.rcenvironment.core.utils.common.StringUtils;
@@ -192,20 +193,12 @@ public class SshCommandHandler implements Command, Runnable, ServerSessionAware 
 
     private CommandExecutionResult executeSingleCommand(String command) throws IOException {
         if (command != null && !command.isEmpty()) {
-            if (authenticationManager.isAllowedToExecuteConsoleCommand(loginName, command)) {
-                if (command.equalsIgnoreCase(SshConstants.EXIT_COMMAND)) {
-                    // stop interactive shell on exit command
-                    return CommandExecutionResult.EXIT_REQUESTED;
-                } else {
-                    // TODO pass invoker information for non-temporary accounts as well
-                    return sendToExecutionService(command, userAccount);
-                }
+            if (command.equalsIgnoreCase(SshConstants.EXIT_COMMAND)) {
+                // stop interactive shell on exit command
+                return CommandExecutionResult.EXIT_REQUESTED;
             } else {
-                logger.debug("User " + loginName + " tried to execute command " + command
-                    + ". Attempt was blocked because of missing role privileges.");
-                outputAdapter.addOutput("\r\nCommand " + command
-                    + " not executed. You either do not have the privileges to execute this command or it does not exist.", true, false);
-                return CommandExecutionResult.ERROR; // TODO add more specific result?
+                // TODO pass invoker information for non-temporary accounts as well
+                return sendToExecutionService(command, userAccount);
             }
         } else {
             return CommandExecutionResult.DEFAULT;
@@ -213,16 +206,18 @@ public class SshCommandHandler implements Command, Runnable, ServerSessionAware 
     }
 
     private CommandExecutionResult sendToExecutionService(String command, Object invokerInfo) {
-        List<String> tokens;
-
         // When using rce locally, users have to prefix the rce commands with "rce". This is not the case in a ssh connection. In order to
         // save users some frustration, we remove the (erroneously entered) prefix "rce" from ssh commands before executing
         final String rcePrefix = "rce";
         if (command.startsWith(rcePrefix)) {
             command = command.replaceFirst(rcePrefix, "");
         }
-        tokens = Arrays.asList(command.trim().split("\\s+"));
-        Future<CommandExecutionResult> resultFuture = commandExecutionService.asyncExecMultiCommand(tokens, outputAdapter, invokerInfo);
+
+        SshAccountRole currentRole = authenticationManager.getRoleForUser(loginName);
+        ICommandAuthorizer authorizer = new SshAccountRoleCommandAuthorizer(currentRole);
+        List<String> tokens = Arrays.asList(command.trim().split("\\s+"));
+        Future<CommandExecutionResult> resultFuture = commandExecutionService.asyncExecMultiCommand(tokens, outputAdapter,
+            authorizer, invokerInfo);
         try {
             // wait for termination
             return resultFuture.get();
