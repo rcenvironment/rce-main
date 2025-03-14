@@ -28,9 +28,11 @@ import org.junit.Test;
 import de.rcenvironment.core.authentication.Session;
 import de.rcenvironment.core.command.common.CommandException;
 import de.rcenvironment.core.command.internal.handlers.BuiltInCommandPlugin;
+import de.rcenvironment.core.command.spi.AbstractCommandDescription;
 import de.rcenvironment.core.command.spi.CommandContext;
 import de.rcenvironment.core.command.spi.CommandParser;
 import de.rcenvironment.core.command.spi.CommandPlugin;
+import de.rcenvironment.core.command.spi.ExecutableCommand;
 import de.rcenvironment.core.command.spi.MainCommandDescription;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 
@@ -247,7 +249,10 @@ public class MultiCommandHandlerIntegrationTest {
         final MockCommandPlugin wfIntegratePlugin = new MockCommandPlugin("wf integrate");
         parser.registerCommands(wfPlugin.getCommands());
 
-        parser.parseCommand(new CommandContext(Arrays.asList("wf"), null, null)).execute();
+        CommandContext context = new CommandContext(Arrays.asList("wf"), null, null);
+        AbstractCommandDescription commandDescription = parser.parseCommand(context);
+        ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), context);
+        command.execute();
         
         assertTrue(wfPlugin.wasExecuted());
         assertFalse(wfIntegratePlugin.wasExecuted());
@@ -255,7 +260,10 @@ public class MultiCommandHandlerIntegrationTest {
         wfPlugin.resetExecutionStatus();
         wfIntegratePlugin.resetExecutionStatus();
 
-        parser.parseCommand(new CommandContext(Arrays.asList("wf", "integrate"), null, null)).execute();
+        CommandContext secondContext = new CommandContext(Arrays.asList("wf", "integrate"), null, null);
+        AbstractCommandDescription secondCommandDescription = parser.parseCommand(secondContext);
+        ExecutableCommand secondCommand = new ExecutableCommand(secondCommandDescription.getHandler(), context);
+        secondCommand.execute();
         
         assertFalse(wfPlugin.wasExecuted());
         assertTrue(wfIntegratePlugin.wasExecuted());

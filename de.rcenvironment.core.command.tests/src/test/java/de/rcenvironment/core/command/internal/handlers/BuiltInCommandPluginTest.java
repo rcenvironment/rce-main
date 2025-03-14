@@ -17,8 +17,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import de.rcenvironment.core.command.common.CommandException;
+import de.rcenvironment.core.command.spi.AbstractCommandDescription;
 import de.rcenvironment.core.command.spi.CommandContext;
 import de.rcenvironment.core.command.spi.CommandParser;
+import de.rcenvironment.core.command.spi.ExecutableCommand;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 
 /**
@@ -55,7 +57,9 @@ public class BuiltInCommandPluginTest {
         commandException.expect(CommandException.class);
         commandException.expectMessage("Not enough positional parameters");
 
-        parser.parseCommand(context).execute();
+        AbstractCommandDescription commandDescription = parser.parseCommand(context);
+        ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), context);
+        command.execute();
     }
 
 
@@ -81,6 +85,8 @@ public class BuiltInCommandPluginTest {
         commandException.expect(CommandException.class);
         commandException.expectMessage("integer parameter could not be parsed");
 
-        parser.parseCommand(context).execute();
+        AbstractCommandDescription commandDescription = parser.parseCommand(context);
+        ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), context);
+        command.execute();
     }
 }

@@ -386,9 +386,9 @@ public class RemoteAccessCommandPlugin implements CommandPlugin {
     public MainCommandDescription[] getCommands() {
         final MainCommandDescription userCommands = new MainCommandDescription(RA_COMMAND, "Commands for remote-access",
             "Commands for remote-access", true,
-            new SubCommandDescription(SUBCOMMAND_PROTOCOL_VERSION,
+            new SubCommandDescription(RA_COMMAND, SUBCOMMAND_PROTOCOL_VERSION,
                 "prints the protocol version of this interface", this::performProtocolVersion, true),
-            new SubCommandDescription(SUBCOMMAND_LIST_TOOLS, // How does this work?
+            new SubCommandDescription(RA_COMMAND, SUBCOMMAND_LIST_TOOLS, // How does this work?
                 "lists all available tool ids and versions for the \"" + SUBCOMMAND_RUN_TOOL + "\"command",
                 this::performListTools, new CommandModifierInfo(
                     new NamedParameter[] {
@@ -396,7 +396,7 @@ public class RemoteAccessCommandPlugin implements CommandPlugin {
                         NAMED_WITH_LOAD_DATA_PARAMETER
                     }
                 ), true),
-            new SubCommandDescription(SUBCOMMAND_LIST_WORKFLOWS,
+            new SubCommandDescription(RA_COMMAND, SUBCOMMAND_LIST_WORKFLOWS,
                 "lists all available workflow ids and versions for the \"" + SUBCOMMAND_LIST_WORKFLOWS
                 + "\"command",
                 this::performListWfs, new CommandModifierInfo(
@@ -404,7 +404,7 @@ public class RemoteAccessCommandPlugin implements CommandPlugin {
                         NAMED_FORMAT_TOKEN_STREAM_PARAMETER
                     }
                 ), true),
-            new SubCommandDescription(SUBCOMMAND_INIT,
+            new SubCommandDescription(RA_COMMAND, SUBCOMMAND_INIT,
                 "initializes a remote access session, and returns a session token",
                 ((context) -> {
                 try {
@@ -421,7 +421,7 @@ public class RemoteAccessCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(SUBCOMMAND_RUN_TOOL, "invokes a tool by its id and version", //Needs work
+            new SubCommandDescription(RA_COMMAND, SUBCOMMAND_RUN_TOOL, "invokes a tool by its id and version", //Needs work
                 this::performRunTool,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
@@ -443,7 +443,7 @@ public class RemoteAccessCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(SUBCOMMAND_RUN_WF, "invokes a published workflow by its id", //Needs work
+            new SubCommandDescription(RA_COMMAND, SUBCOMMAND_RUN_WF, "invokes a published workflow by its id", //Needs work
                 this::performRunWf,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
@@ -459,7 +459,7 @@ public class RemoteAccessCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(SUBCOMMAND_DISPOSE,
+            new SubCommandDescription(RA_COMMAND, SUBCOMMAND_DISPOSE,
                 "releases resources used by a remote access session", this::performDispose,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
@@ -467,7 +467,7 @@ public class RemoteAccessCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(SUBCOMMAND_TOOL_DETAILS,
+            new SubCommandDescription(RA_COMMAND, SUBCOMMAND_TOOL_DETAILS,
                 "prints names and data types of the tool's or workflow's intputs and outputs",
                 this::performGetToolDetails,
                 new CommandModifierInfo(
@@ -483,7 +483,7 @@ public class RemoteAccessCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(SUBCOMMAND_WF_DETAILS,
+            new SubCommandDescription(RA_COMMAND, SUBCOMMAND_WF_DETAILS,
                 "prints names and data types of the tool's or workflow's intputs and outputs",
                 this::performGetWfDetails,
                 new CommandModifierInfo(
@@ -493,7 +493,7 @@ public class RemoteAccessCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(SUBCOMMAND_CANCEL, "cancels a session",
+            new SubCommandDescription(RA_COMMAND, SUBCOMMAND_CANCEL, "cancels a session",
                 this::performCancel,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
@@ -501,7 +501,7 @@ public class RemoteAccessCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(SUBCOMMAND_TOOL_DOCUMENTATION_LIST, "get tool documentation list",
+            new SubCommandDescription(RA_COMMAND, SUBCOMMAND_TOOL_DOCUMENTATION_LIST, "get tool documentation list",
                 this::performGetToolDocList,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
@@ -510,7 +510,7 @@ public class RemoteAccessCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(SUBCOMMAND_DOWNLOAD_DOCUMENTATION, "download documentation",
+            new SubCommandDescription(RA_COMMAND, SUBCOMMAND_DOWNLOAD_DOCUMENTATION, "download documentation",
                 this::performDownloadDocumentation,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
@@ -526,7 +526,7 @@ public class RemoteAccessCommandPlugin implements CommandPlugin {
         
         final MainCommandDescription adminCommands = new MainCommandDescription(RA_ADMIN_COMMAND, "administrate remote access",
             "administrate remote access",
-            new SubCommandDescription(SUBCOMMAND_ADMIN_PUBLISH_WF,
+            new SubCommandDescription(RA_ADMIN_COMMAND, SUBCOMMAND_ADMIN_PUBLISH_WF,
                 "publishes a workflow file for remote execution via \"" + RA_COMMAND + " " + SUBCOMMAND_RUN_WF
                 + "\" using <id>.", this::performAdminPublishWf,
                 new CommandModifierInfo(
@@ -544,7 +544,7 @@ public class RemoteAccessCommandPlugin implements CommandPlugin {
                     }
                 )
             ),
-            new SubCommandDescription(SUBCOMMAND_ADMIN_UNPUBLISH_WF,
+            new SubCommandDescription(RA_ADMIN_COMMAND, SUBCOMMAND_ADMIN_UNPUBLISH_WF,
                 "unpublishes (removes) the workflow file with id <id> from remote execution.",
                 this::performAdminUnpublishWf,
                 new CommandModifierInfo(
@@ -553,7 +553,7 @@ public class RemoteAccessCommandPlugin implements CommandPlugin {
                     }
                 )
             ),
-            new SubCommandDescription((String) SUBCOMMAND_ADMIN_LIST_WFS, "lists the ids of all published workflows.",
+            new SubCommandDescription(RA_ADMIN_COMMAND, (String) SUBCOMMAND_ADMIN_LIST_WFS, "lists the ids of all published workflows.",
                 this::performAdminListWfs));
         
         return new MainCommandDescription[] { userCommands, adminCommands };

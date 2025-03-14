@@ -30,8 +30,10 @@ import org.easymock.EasyMock;
 
 import de.rcenvironment.core.command.common.CommandException;
 import de.rcenvironment.core.command.common.CommandException.Type;
+import de.rcenvironment.core.command.spi.AbstractCommandDescription;
 import de.rcenvironment.core.command.spi.CommandContext;
 import de.rcenvironment.core.command.spi.CommandParser;
+import de.rcenvironment.core.command.spi.ExecutableCommand;
 import de.rcenvironment.core.command.spi.MainCommandDescription;
 import de.rcenvironment.core.component.integration.workflow.WorkflowIntegrationService;
 import de.rcenvironment.core.component.model.configuration.api.ConfigurationDescription;
@@ -319,7 +321,9 @@ class WfIntegrateCommandPluginTestHarness {
             thrownException = Capture.newInstance();
               
             try {
-                commandParser.parseCommand(context).execute();
+                AbstractCommandDescription commandDescription = commandParser.parseCommand(context);
+                ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), context);
+                command.execute();
             } catch (CommandException e) {
                 thrownException.setValue(e);
             }

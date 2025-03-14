@@ -15,22 +15,36 @@ package de.rcenvironment.core.command.spi;
  *
  */
 public class SubCommandDescription extends AbstractCommandDescription {
+    
+    private final String commandGroup;
 
-    public SubCommandDescription(String command, String description, SingleCommandHandler handler, CommandModifierInfo modifiers) {
+    public SubCommandDescription(String commandGroup, String command, String description,
+        SingleCommandHandler handler, CommandModifierInfo modifiers) {
+
         super(command, description, handler, modifiers);
+        this.commandGroup = commandGroup;
     }
     
-    public SubCommandDescription(String command, String description,
+    public SubCommandDescription(String commandGroup, String command, String description,
             SingleCommandHandler handler, CommandModifierInfo modifiers, boolean isDevCommand) {
         super(command, description, handler, modifiers, isDevCommand);
+        this.commandGroup = commandGroup;
     }
     
-    public SubCommandDescription(String command, String description, SingleCommandHandler handler) {
+    public SubCommandDescription(String commandGroup, String command, String description, SingleCommandHandler handler) {
         super(command, description, handler);
+        this.commandGroup = commandGroup;
     }
     
-    public SubCommandDescription(String command, String description, SingleCommandHandler handler, boolean isDevcommand) {
+    public SubCommandDescription(String commandGroup, String command, String description, 
+        SingleCommandHandler handler, boolean isDevcommand) {
+
         super(command, description, handler, isDevcommand);
+        this.commandGroup = commandGroup;
     }
-    
+
+    @Override
+    public String getFullyQualifiedCommand() {
+        return String.format("%s %s", commandGroup, super.getCommand());
+    }
 }

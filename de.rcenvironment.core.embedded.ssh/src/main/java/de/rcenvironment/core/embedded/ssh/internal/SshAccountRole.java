@@ -9,7 +9,9 @@
 package de.rcenvironment.core.embedded.ssh.internal;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.logging.LogFactory;
 
@@ -27,9 +29,13 @@ public final class SshAccountRole {
     private boolean allowedToOpenShell = true;
 
     private boolean allowedToUseUplink = false;
+    
+    private final HashSet<String> allowedCommands = new HashSet<>();
 
-    public SshAccountRole(String roleName) {
+    public SshAccountRole(String roleName, Set<String> allowedCommands) {
         this.roleName = roleName;
+        
+        this.allowedCommands.addAll(allowedCommands);
 
         // Set allowed command patterns for role name
         switch (roleName) {
@@ -56,16 +62,25 @@ public final class SshAccountRole {
             throw new IllegalArgumentException("Tried to create a role with an unhandled id: " + roleName);
         }
     }
-    public boolean isAllowedToUseUplink() {
-        return allowedToUseUplink;
-    }
 
     public String getRoleName() {
         return roleName;
     }
+    
+    public boolean isAllowedToUseUplink() {
+        return allowedToUseUplink;
+    }
 
     public boolean isAllowedToOpenShell() {
         return allowedToOpenShell;
+    }
+    
+    /**
+     * Returns the set of allowed commands for this role. The returned set is unmodifiable.
+     * @return An unmodifiable set of allowed commands for the account role instance.
+     */
+    public Set<String> getAllowedCommands() {
+        return Collections.unmodifiableSet(allowedCommands);
     }
 
     @Override

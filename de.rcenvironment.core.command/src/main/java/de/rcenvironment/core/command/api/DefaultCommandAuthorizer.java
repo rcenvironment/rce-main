@@ -2,7 +2,8 @@ package de.rcenvironment.core.command.api;
 
 import java.util.Set;
 
-import de.rcenvironment.core.command.spi.ExecutableCommand;
+import de.rcenvironment.core.command.spi.AbstractCommandDescription;
+import de.rcenvironment.core.command.spi.MainCommandDescription;
 
 
 /**
@@ -14,12 +15,12 @@ import de.rcenvironment.core.command.spi.ExecutableCommand;
 public class DefaultCommandAuthorizer implements ICommandAuthorizer {
 
     @Override
-    public boolean canExecuteCommand(ExecutableCommand command) {
+    public boolean canExecuteCommand(AbstractCommandDescription command) {
         return true;
     }
 
     @Override
-    public Set<ExecutableCommand> getAuthorizedCommands() {
+    public Set<MainCommandDescription> getAuthorizedCommands() {
         // TODO: Implement. 
         return null;
     }

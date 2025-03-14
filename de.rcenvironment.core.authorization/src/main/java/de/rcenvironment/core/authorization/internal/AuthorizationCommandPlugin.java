@@ -52,30 +52,33 @@ public class AuthorizationCommandPlugin implements CommandPlugin {
     public MainCommandDescription[] getCommands() {
         final MainCommandDescription commands = new MainCommandDescription(ROOT_COMMAND, "manage authorization groups",
             "alias for \"auth list\"", this::performList,
-            new SubCommandDescription("create", "creates a new authorization group", this::performCreate,
+            new SubCommandDescription(ROOT_COMMAND, "create", "creates a new authorization group", this::performCreate,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         GROUP_ID_PARAMETER
                     }
                 )
             ),
-            new SubCommandDescription("list", "lists the authorization groups that the local node belongs too", this::performList),
-            new SubCommandDescription("delete", "deletes a local authorization group", this::performDelete,
+            new SubCommandDescription(ROOT_COMMAND, "list", "lists the authorization groups that the local node belongs too", 
+                this::performList),
+            new SubCommandDescription(ROOT_COMMAND, "delete", "deletes a local authorization group", this::performDelete,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         GROUP_ID_PARAMETER
                     }
                 )
             ),
-            new SubCommandDescription("export", "exports a group as an invitation string that can be imported by another node, "
-                + "allowing that other node to join this group", this::performExport,
+            new SubCommandDescription(ROOT_COMMAND, "export", 
+                "exports a group as an invitation string that can be imported by another node, "
+                + "allowing that other node to join this group", 
+                this::performExport,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         GROUP_ID_PARAMETER
                     }
                 )
             ),
-            new SubCommandDescription("import",
+            new SubCommandDescription(ROOT_COMMAND, "import",
                 "imports a group from an invitation string that was previously exported on another node", this::performImport,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {

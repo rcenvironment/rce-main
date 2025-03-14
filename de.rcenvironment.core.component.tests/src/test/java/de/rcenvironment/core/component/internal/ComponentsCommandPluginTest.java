@@ -19,8 +19,10 @@ import de.rcenvironment.core.authorization.api.AuthorizationPermissionSet;
 import de.rcenvironment.core.authorization.api.AuthorizationService;
 import de.rcenvironment.core.authorization.api.DefaultAuthorizationObjects;
 import de.rcenvironment.core.command.common.CommandException;
+import de.rcenvironment.core.command.spi.AbstractCommandDescription;
 import de.rcenvironment.core.command.spi.CommandContext;
 import de.rcenvironment.core.command.spi.CommandParser;
+import de.rcenvironment.core.command.spi.ExecutableCommand;
 import de.rcenvironment.core.component.api.DistributedComponentKnowledge;
 import de.rcenvironment.core.component.api.DistributedComponentKnowledgeService;
 import de.rcenvironment.core.component.api.UserComponentIdMappingService;
@@ -163,7 +165,9 @@ public class ComponentsCommandPluginTest {
 
         final CommandContext context = new CommandContext(originalTokens, outputReceiver, new Object());
         
-        parser.parseCommand(context).execute();
+        AbstractCommandDescription commandDescription = parser.parseCommand(context);
+        ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), context);
+        command.execute();
 
         EasyMock.verify(outputReceiver);
     }
@@ -203,7 +207,9 @@ public class ComponentsCommandPluginTest {
 
         final CommandContext context = new CommandContext(originalTokens, outputReceiver, new Object());
         
-        parser.parseCommand(context).execute();
+        AbstractCommandDescription commandDescription = parser.parseCommand(context);
+        ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), context);
+        command.execute();
 
         EasyMock.verify(outputReceiver);
     }
@@ -254,7 +260,9 @@ public class ComponentsCommandPluginTest {
 
         final CommandContext context = new CommandContext(originalTokens, outputReceiver, new Object());
         
-        parser.parseCommand(context).execute();
+        AbstractCommandDescription commandDescription = parser.parseCommand(context);
+        ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), context);
+        command.execute();
 
         EasyMock.verify(outputReceiver);
     }
@@ -308,7 +316,9 @@ public class ComponentsCommandPluginTest {
 
         final CommandContext context = new CommandContext(originalTokens, outputReceiver, new Object());
 
-        parser.parseCommand(context).execute();
+        AbstractCommandDescription commandDescription = parser.parseCommand(context);
+        ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), context);
+        command.execute();
 
         EasyMock.verify(outputReceiver);
     }

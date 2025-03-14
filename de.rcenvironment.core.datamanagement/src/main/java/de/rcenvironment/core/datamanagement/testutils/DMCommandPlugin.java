@@ -274,7 +274,7 @@ public class DMCommandPlugin implements CommandPlugin {
     @Override
     public MainCommandDescription[] getCommands() {
         final MainCommandDescription commands = new MainCommandDescription("dm", "Commands for databases", "Commands for databases", true,
-            new SubCommandDescription("create-test-data", "creates test data in the database.",
+            new SubCommandDescription("dm", "create-test-data", "creates test data in the database.",
                 this::performDmCreateTestData,
                 new CommandModifierInfo(
                     new CommandFlag[] {

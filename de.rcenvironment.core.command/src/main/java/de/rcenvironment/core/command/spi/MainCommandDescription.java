@@ -105,5 +105,9 @@ public class MainCommandDescription extends AbstractCommandDescription {
     private void putSubCommandsInMap() {
         Arrays.stream(subCommands).forEach(subCommnad -> nSubCommands.put(subCommnad.getCommand(), subCommnad));
     }
-    
+
+    @Override
+    public String getFullyQualifiedCommand() {
+        return getCommand();
+    }
 }

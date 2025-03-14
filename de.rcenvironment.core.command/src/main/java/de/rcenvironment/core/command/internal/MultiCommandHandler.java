@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import de.rcenvironment.core.command.api.CommandExecutionResult;
 import de.rcenvironment.core.command.api.ICommandAuthorizer;
 import de.rcenvironment.core.command.common.CommandException;
+import de.rcenvironment.core.command.spi.AbstractCommandDescription;
 import de.rcenvironment.core.command.spi.CommandContext;
 import de.rcenvironment.core.command.spi.CommandParser;
 import de.rcenvironment.core.command.spi.ExecutableCommand;
@@ -365,9 +366,10 @@ public class MultiCommandHandler implements Callable<CommandExecutionResult> {
 
     private void executeSingleCommand(List<String> tokens) throws CommandException {
         CommandContext commandContext = new CommandContext(tokens, outputReceiver, initiatorInformation);
-        ExecutableCommand command = parser.parseCommand(commandContext);
+        AbstractCommandDescription commandDescription = parser.parseCommand(commandContext);
 
-        if (commandAuthorizer.canExecuteCommand(command)) {
+        if (commandAuthorizer.canExecuteCommand(commandDescription)) {
+            ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), commandContext);
             command.execute();
         } else {
             throw CommandException.Unauthorized(commandContext);
