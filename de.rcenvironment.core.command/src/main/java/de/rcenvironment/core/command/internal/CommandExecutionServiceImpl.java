@@ -279,7 +279,7 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
     }
 
     @Override
-    public void printHelpText(ParsedCommandModifiers modifiers, TextOutputReceiver outputReceiver) {
+    public void printHelpText(ParsedCommandModifiers modifiers, TextOutputReceiver outputReceiver, ICommandAuthorizer commandAuthorizer) {
         synchronized (cmdDesc) {
             ParsedStringParameter command = (ParsedStringParameter) modifiers.getPositionalCommandParameter(0);
 
@@ -293,21 +293,23 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
             }
 
             if (command == null) {
-                printGeneralHelp(showDevCommands, outputReceiver);
+                printGeneralHelp(showDevCommands, outputReceiver, commandAuthorizer);
             } else {
                 printSpecificHelp(command, showDevCommands, showCommandModifiers, outputReceiver);
             }
         }
     }
 
-    private void printGeneralHelp(boolean showDevCommands, TextOutputReceiver outputReceiver) {
+    private void printGeneralHelp(boolean showDevCommands, TextOutputReceiver outputReceiver, ICommandAuthorizer commandAuthorizer) {
         if (showDevCommands) {
             outputReceiver.addOutput("RCE Console Dev Commands:");
         } else {
             outputReceiver.addOutput("RCE Console Commands:");
         }
 
-        cmdDesc.stream().filter(desc -> commandGroupShouldBeShown(desc, showDevCommands))
+        cmdDesc.stream()
+            .filter(desc -> commandGroupShouldBeShown(desc, showDevCommands))
+            .filter(desc -> commandAuthorizer.isAuthorized(desc.getFullyQualifiedCommand()))
             .sorted((desc0, desc1) -> desc0.getCommand().compareTo(desc1.getCommand()))
             .forEach(desc -> outputReceiver
                 .addOutput(INDENT + desc.getCommand() + ": " + desc.getCommandGroupDescription()));
@@ -617,10 +619,10 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
     }
 
     @Override
-    public String getHelpText(boolean addCommonPrefix, boolean showDevCommands) {
+    public String getHelpText(boolean addCommonPrefix, boolean showDevCommands, ICommandAuthorizer commandAuthorizer) {
         CapturingTextOutReceiver capturingReceiver = new CapturingTextOutReceiver();
         ParsedCommandModifiers modifiers = new ParsedCommandModifiers();
-        printHelpText(modifiers, capturingReceiver);
+        printHelpText(modifiers, capturingReceiver, commandAuthorizer);
 
         return capturingReceiver.getBufferedOutput();
     }
@@ -629,5 +631,4 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
     public CommandParser getParser() {
         return parser;
     }
-
 }

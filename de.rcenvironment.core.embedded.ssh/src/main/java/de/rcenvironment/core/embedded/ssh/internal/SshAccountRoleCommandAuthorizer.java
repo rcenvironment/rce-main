@@ -7,12 +7,9 @@
  */
 package de.rcenvironment.core.embedded.ssh.internal;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import de.rcenvironment.core.command.api.ICommandAuthorizer;
-import de.rcenvironment.core.command.spi.AbstractCommandDescription;
-import de.rcenvironment.core.command.spi.MainCommandDescription;
 
 /**
  * Authorizes a command based on the currently set SSH account role.
@@ -23,7 +20,6 @@ public class SshAccountRoleCommandAuthorizer implements ICommandAuthorizer {
     private final SshAccountRole role;
     
     public SshAccountRoleCommandAuthorizer(SshAccountRole role) {
-        super();
         this.role = role;
     }
 
@@ -31,19 +27,11 @@ public class SshAccountRoleCommandAuthorizer implements ICommandAuthorizer {
      * @inheritDoc
      */
     @Override
-    public boolean canExecuteCommand(AbstractCommandDescription commandDescription) {
+    public boolean isAuthorized(String fullyQualifiedCommandName) {
         if (role.getRoleName().equals(SshConstants.ROLE_NAME_DEVELOPER)) {
             return true;
         } else {
-            return role.getAllowedCommands().contains(commandDescription.getFullyQualifiedCommand());
+            return role.getAllowedCommands().contains(fullyQualifiedCommandName);
         }
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<MainCommandDescription> getAuthorizedCommands() {
-        return new HashSet<>(); //TODO: Implement
     }
 }

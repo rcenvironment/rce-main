@@ -153,7 +153,8 @@ public class MultiCommandHandler implements Callable<CommandExecutionResult> {
 
         if (remainingTokens.isEmpty()) {
             // empty command string -> trigger help output
-            CommandContext context = new CommandContext(new ArrayList<>(remainingTokens), outputReceiver, initiatorInformation);
+            CommandContext context = new CommandContext(new ArrayList<>(remainingTokens), outputReceiver,
+                commandAuthorizer, initiatorInformation);
             outputReceiver.onFatalError(CommandException.requestHelp(context));
             return CommandExecutionResult.DEFAULT; // TODO add result key for this?
         }
@@ -365,14 +366,15 @@ public class MultiCommandHandler implements Callable<CommandExecutionResult> {
     }
 
     private void executeSingleCommand(List<String> tokens) throws CommandException {
-        CommandContext commandContext = new CommandContext(tokens, outputReceiver, initiatorInformation);
+        CommandContext commandContext = new CommandContext(tokens, outputReceiver, commandAuthorizer, initiatorInformation);
         AbstractCommandDescription commandDescription = parser.parseCommand(commandContext);
 
-        if (commandAuthorizer.canExecuteCommand(commandDescription)) {
+        boolean commandIsAuthorized = commandAuthorizer.isAuthorized(commandDescription.getFullyQualifiedCommand());
+        if (commandIsAuthorized) {
             ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), commandContext);
             command.execute();
         } else {
-            throw CommandException.Unauthorized(commandContext);
+            throw CommandException.unauthorized(commandContext);
         }
     }
 

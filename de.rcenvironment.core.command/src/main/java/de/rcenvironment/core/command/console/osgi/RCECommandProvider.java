@@ -27,6 +27,7 @@ import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 public class RCECommandProvider implements CommandProvider {
 
     private CommandExecutionService commandExecutionService;
+    private final ICommandAuthorizer authorizer = new DefaultCommandAuthorizer();
 
     /**
      * Handler for the RCE top-level command. Delegates to the {@link CommandExecutionService}.
@@ -37,7 +38,6 @@ public class RCECommandProvider implements CommandProvider {
     public Object _rce(final CommandInterpreter interpreter) {
         final List<String> tokens = getTokens(interpreter);
         final TextOutputReceiver outputReceiver = new OsgiConsoleOutputAdapter(interpreter, commandExecutionService);
-        ICommandAuthorizer authorizer = new DefaultCommandAuthorizer();
         commandExecutionService.asyncExecMultiCommand(tokens, outputReceiver, authorizer, "osgi console");
         return null;
     }
@@ -57,7 +57,7 @@ public class RCECommandProvider implements CommandProvider {
 
     @Override
     public String getHelp() {
-        return commandExecutionService.getHelpText(true, false); // with prefix, no developer commands
+        return commandExecutionService.getHelpText(true, false, authorizer); // with prefix, no developer commands
     }
 
 }

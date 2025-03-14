@@ -1,10 +1,11 @@
+/*
+ * Copyright 2006-2025 DLR, Germany
+ * 
+ * SPDX-License-Identifier: EPL-1.0
+ * 
+ * https://rcenvironment.de/
+ */
 package de.rcenvironment.core.command.api;
-
-import java.util.Set;
-
-import de.rcenvironment.core.command.spi.AbstractCommandDescription;
-import de.rcenvironment.core.command.spi.MainCommandDescription;
-
 
 /**
  * A default command authorizer implementation. It does not implement any authorization logic, 
@@ -15,14 +16,7 @@ import de.rcenvironment.core.command.spi.MainCommandDescription;
 public class DefaultCommandAuthorizer implements ICommandAuthorizer {
 
     @Override
-    public boolean canExecuteCommand(AbstractCommandDescription command) {
+    public boolean isAuthorized(String command) {
         return true;
     }
-
-    @Override
-    public Set<MainCommandDescription> getAuthorizedCommands() {
-        // TODO: Implement. 
-        return null;
-    }
-
 }

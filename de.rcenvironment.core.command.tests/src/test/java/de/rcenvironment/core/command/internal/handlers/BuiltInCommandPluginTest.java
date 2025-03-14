@@ -16,6 +16,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import de.rcenvironment.core.command.api.DefaultCommandAuthorizer;
 import de.rcenvironment.core.command.common.CommandException;
 import de.rcenvironment.core.command.spi.AbstractCommandDescription;
 import de.rcenvironment.core.command.spi.CommandContext;
@@ -52,7 +53,7 @@ public class BuiltInCommandPluginTest {
         List<String> tokens = new LinkedList<String>();
         tokens.add("force-crash");
 
-        CommandContext context = new CommandContext(tokens, receiver, "invoker");
+        CommandContext context = new CommandContext(tokens, receiver, new DefaultCommandAuthorizer(), "invoker");
 
         commandException.expect(CommandException.class);
         commandException.expectMessage("Not enough positional parameters");
@@ -80,7 +81,7 @@ public class BuiltInCommandPluginTest {
         tokens.add("force-crash");
         tokens.add("string");
 
-        CommandContext context = new CommandContext(tokens, receiver, "invoker");
+        CommandContext context = new CommandContext(tokens, receiver, new DefaultCommandAuthorizer(), "invoker");
 
         commandException.expect(CommandException.class);
         commandException.expectMessage("integer parameter could not be parsed");

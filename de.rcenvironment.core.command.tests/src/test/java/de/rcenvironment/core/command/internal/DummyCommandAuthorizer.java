@@ -10,7 +10,6 @@ package de.rcenvironment.core.command.internal;
 import java.util.Set;
 
 import de.rcenvironment.core.command.api.ICommandAuthorizer;
-import de.rcenvironment.core.command.spi.AbstractCommandDescription;
 import de.rcenvironment.core.command.spi.MainCommandDescription;
 
 
@@ -22,13 +21,7 @@ import de.rcenvironment.core.command.spi.MainCommandDescription;
 public class DummyCommandAuthorizer implements ICommandAuthorizer {
 
     @Override
-    public boolean canExecuteCommand(AbstractCommandDescription command) {
+    public boolean isAuthorized(String command) {
         return true;
     }
-
-    @Override
-    public Set<MainCommandDescription> getAuthorizedCommands() {
-        return null;
-    }
-
 }

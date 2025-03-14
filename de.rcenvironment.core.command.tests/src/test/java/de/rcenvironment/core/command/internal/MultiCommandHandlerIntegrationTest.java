@@ -26,6 +26,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import de.rcenvironment.core.authentication.Session;
+import de.rcenvironment.core.command.api.DefaultCommandAuthorizer;
 import de.rcenvironment.core.command.common.CommandException;
 import de.rcenvironment.core.command.internal.handlers.BuiltInCommandPlugin;
 import de.rcenvironment.core.command.spi.AbstractCommandDescription;
@@ -249,7 +250,7 @@ public class MultiCommandHandlerIntegrationTest {
         final MockCommandPlugin wfIntegratePlugin = new MockCommandPlugin("wf integrate");
         parser.registerCommands(wfPlugin.getCommands());
 
-        CommandContext context = new CommandContext(Arrays.asList("wf"), null, null);
+        CommandContext context = new CommandContext(Arrays.asList("wf"), null, new DefaultCommandAuthorizer(), null);
         AbstractCommandDescription commandDescription = parser.parseCommand(context);
         ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), context);
         command.execute();
@@ -260,7 +261,7 @@ public class MultiCommandHandlerIntegrationTest {
         wfPlugin.resetExecutionStatus();
         wfIntegratePlugin.resetExecutionStatus();
 
-        CommandContext secondContext = new CommandContext(Arrays.asList("wf", "integrate"), null, null);
+        CommandContext secondContext = new CommandContext(Arrays.asList("wf", "integrate"), null, new DefaultCommandAuthorizer(), null);
         AbstractCommandDescription secondCommandDescription = parser.parseCommand(secondContext);
         ExecutableCommand secondCommand = new ExecutableCommand(secondCommandDescription.getHandler(), context);
         secondCommand.execute();

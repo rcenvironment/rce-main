@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import de.rcenvironment.core.command.api.ICommandAuthorizer;
 import de.rcenvironment.core.command.spi.CommandContext;
 import de.rcenvironment.core.command.spi.ParsedCommandModifiers;
 import de.rcenvironment.core.command.spi.ParsedStringParameter;
@@ -68,6 +69,8 @@ public final class CommandException extends Exception {
 
     // store the output receiver of the provided context to support output redirection via "saveto"
     private final TextOutputReceiver outputReceiver;
+    
+    private final ICommandAuthorizer authorizer;
 
     private CommandException(Type type, String message, CommandContext context) {
         super(message);
@@ -76,6 +79,7 @@ public final class CommandException extends Exception {
         this.showDeveloperHelp = context.isDeveloperCommandSetEnabled(); // TODO move to getter?
         this.modifiers = context.getParsedModifiers();
         this.outputReceiver = context.getOutputReceiver();
+        this.authorizer = context.getAuthorizer();
     }
 
     public static CommandException missingFilename(CommandContext context) {
@@ -145,7 +149,7 @@ public final class CommandException extends Exception {
      * @param context the {@link CommandContext}
      * @return the generated exception
      */
-    public static CommandException Unauthorized(CommandContext context) {
+    public static CommandException unauthorized(CommandContext context) {
         return new CommandException(Type.UNAUTHORIZED, "Current role is not authorized to execute this command.", context);
     }
 
@@ -176,6 +180,10 @@ public final class CommandException extends Exception {
     public String toString() {
         return de.rcenvironment.core.utils.common.StringUtils.format("Type=%s, Tokens=%s, ShowDevHelp=%s, Message=%s", type, commandTokens,
             showDeveloperHelp, getMessage());
+    }
+
+    public ICommandAuthorizer getAuthorizer() {
+        return authorizer;
     }
 
 }

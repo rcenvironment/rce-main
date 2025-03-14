@@ -243,6 +243,7 @@ public abstract class InstanceRunner {
         final String taskDescriptionWithTokens = taskDescription + " (\""
             + org.apache.commons.lang3.StringUtils.join(execCommandTokens, " ") + "\")";
 
+        ICommandAuthorizer authorizer = new DefaultCommandAuthorizer();
         final PrintStream stdout = System.out;
         TextOutputReceiver outputReceiver = new TextOutputReceiver() {
 
@@ -265,7 +266,7 @@ public abstract class InstanceRunner {
             public void onFatalError(Exception e) {
                 CommandException ce = (CommandException) e;
                 if (ce.getType().equals(CommandException.Type.HELP_REQUESTED)) {
-                    stdout.println(commandExecutionService.getHelpText(false, ce.shouldPrintDeveloperHelp()));
+                    stdout.println(commandExecutionService.getHelpText(false, ce.shouldPrintDeveloperHelp(), authorizer));
                 } else {
                     log.error("Error during " + taskDescription, e);
                 }
@@ -277,7 +278,6 @@ public abstract class InstanceRunner {
             }
         };
         
-        ICommandAuthorizer authorizer = new DefaultCommandAuthorizer();
         return commandExecutionService.asyncExecMultiCommand(Arrays.asList(execCommandTokens), outputReceiver, authorizer, taskDescription);
     }
 

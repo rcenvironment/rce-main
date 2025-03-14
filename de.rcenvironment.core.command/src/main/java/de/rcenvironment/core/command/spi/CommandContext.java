@@ -14,6 +14,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.rcenvironment.core.command.api.ICommandAuthorizer;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 
 /**
@@ -28,6 +29,8 @@ public final class CommandContext {
     private final Deque<String> remainingTokens;
 
     private final TextOutputReceiver outputReceiver;
+    
+    private final ICommandAuthorizer authorizer;
 
     private Object invokerInformation;
 
@@ -35,11 +38,14 @@ public final class CommandContext {
 
     private ParsedCommandModifiers parsedModifiers = new ParsedCommandModifiers();
     
-    public CommandContext(List<String> originalTokens, TextOutputReceiver outputReceiver, Object invokerInformation) {
+    public CommandContext(List<String> originalTokens, TextOutputReceiver outputReceiver, 
+        ICommandAuthorizer authorizer, Object invokerInformation) {
+
         this.originalTokens = originalTokens;
         this.remainingTokens = new LinkedList<>(originalTokens);
         this.outputReceiver = outputReceiver;
         this.invokerInformation = invokerInformation;
+        this.authorizer = authorizer;
     }
 
     /**
@@ -63,7 +69,6 @@ public final class CommandContext {
             return remainingTokens.peekFirst();
         }
     }
-    
 
     /**
      * Removes and returns the first token from the token queue.
@@ -111,6 +116,10 @@ public final class CommandContext {
 
     public TextOutputReceiver getOutputReceiver() {
         return outputReceiver;
+    }
+    
+    public ICommandAuthorizer getAuthorizer() {
+        return authorizer;
     }
 
     /**

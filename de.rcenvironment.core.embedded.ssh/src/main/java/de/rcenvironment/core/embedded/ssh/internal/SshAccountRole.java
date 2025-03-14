@@ -30,7 +30,7 @@ public final class SshAccountRole {
 
     private boolean allowedToUseUplink = false;
     
-    private final HashSet<String> allowedCommands = new HashSet<>();
+    private final Set<String> allowedCommands = new HashSet<>();
 
     public SshAccountRole(String roleName, Set<String> allowedCommands) {
         this.roleName = roleName;

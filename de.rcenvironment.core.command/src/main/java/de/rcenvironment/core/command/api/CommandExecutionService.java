@@ -44,7 +44,7 @@ public interface CommandExecutionService {
      */
     Future<CommandExecutionResult> asyncExecMultiCommand(List<String> tokens, TextOutputReceiver outputReceiver, ICommandAuthorizer authorizer, Object initiator);
 
-    void printHelpText(ParsedCommandModifiers modifiers, TextOutputReceiver outputReceiver);
+    void printHelpText(ParsedCommandModifiers modifiers, TextOutputReceiver outputReceiver, ICommandAuthorizer commandAuthorizer);
         
     /**
      * Prints the same output as {@link #printHelpText(boolean, TextOutputReceiver)}, but collects the output and returns it as a
@@ -54,7 +54,7 @@ public interface CommandExecutionService {
      * @param showDevCommands whether developer commands should be included
      * @return the collected output
      */
-    String getHelpText(boolean addCommonPrefix, boolean showDevCommands);
+    String getHelpText(boolean addCommonPrefix, boolean showDevCommands, ICommandAuthorizer commandAuthorizer);
 
     CommandParser getParser();
 
