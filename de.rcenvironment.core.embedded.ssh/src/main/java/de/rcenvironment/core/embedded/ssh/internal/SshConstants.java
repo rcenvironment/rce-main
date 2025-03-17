@@ -28,21 +28,16 @@ public final class SshConstants {
      * Template for the interactive shell prompt.
      */
     public static final String CONSOLE_PROMPT_TEMPLATE = "\r\n%s@RCE: ";
-
+    
     /**
      * Constant for exit command.
      */
     public static final String EXIT_COMMAND = "exit";
-
+    
     /**
-     * Constant for exit command.
+     * Default command group.
      */
-    public static final String DEFAULT_COMMANDS = "help|exit|(version.*)";
-
-    /**
-     * Constant for help command.
-     */
-    public static final String HELP_COMMAND = "help";
+    public static final List<String> DEFAULT_COMMAND_GROUP = Arrays.asList("help", EXIT_COMMAND, "version", "dev", "dummy");
 
     /**
      * sysmon command group.
@@ -97,10 +92,25 @@ public final class SshConstants {
      */
     public static final String SCP_COMMAND = "scp";
 
+
     /**
-     * Constant for ra command.
+     * ra command group.
      */
-    public static final String RA_COMMAND = "ra";
+    public static final List<String> RA_COMMAND_GROUP = Arrays.asList(
+        "ra",
+        "ra cancel",
+        "ra describe-tool",
+        "ra describe-wf",
+        "ra dispose",
+        "ra get-doc-list",
+        "ra get-tool-doc",
+        "ra init",
+        "ra list-tools",
+        "ra list-wfs",
+        "ra protocol-version",
+        "ra run-tool",
+        "ra run-wf"
+    );
 
     /**
      * ra-admin command group.
@@ -117,7 +127,7 @@ public final class SshConstants {
     public static final List<String> REDUCED_WF_COMMAND_GROUP = Arrays.asList("wf", "wf list", "wf details");
 
     /**
-     * wf command group.
+     * wf command group. Does not contain wf open, as this is only allowed for developers because it may influence the remote user's GUI.
      */
     public static final List<String> WF_COMMAND_GROUP = Arrays.asList(
         "wf",
@@ -126,7 +136,6 @@ public final class SshConstants {
         "wf delete",
         "wf details",
         "wf dispose",
-        "wf open",
         "wf pause",
         "wf resume",
         "wf run",

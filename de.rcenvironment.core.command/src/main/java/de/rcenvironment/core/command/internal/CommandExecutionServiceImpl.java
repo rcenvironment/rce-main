@@ -295,7 +295,7 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
             if (command == null) {
                 printGeneralHelp(showDevCommands, outputReceiver, commandAuthorizer);
             } else {
-                printSpecificHelp(command, showDevCommands, showCommandModifiers, outputReceiver);
+                printSpecificHelp(command, showDevCommands, showCommandModifiers, commandAuthorizer, outputReceiver);
             }
         }
     }
@@ -322,7 +322,7 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
     }
 
     private void printSpecificHelp(ParsedStringParameter command, boolean showDevCommands, boolean showCommandModifiers,
-        TextOutputReceiver outputReceiver) {
+        ICommandAuthorizer commandAuthorizer, TextOutputReceiver outputReceiver) {
         MainCommandDescription foundCommand = null;
 
         for (MainCommandDescription desc : cmdDesc) {
@@ -333,57 +333,64 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
         }
 
         if (foundCommand == null) {
-            outputReceiver.addOutput("Specified command was not found");
-
+            outputReceiver.addOutput("Specified command was not found.");
+            return;
+        } 
+        
+        SubCommandDescription[] fittigSubCommands = null;
+        if (showDevCommands) {
+            fittigSubCommands = Arrays.stream(foundCommand.getSubCommands())
+                .filter(sc -> commandAuthorizer.isAuthorized(sc.getFullyQualifiedCommand()))
+                .toArray(size -> new SubCommandDescription[size]);
         } else {
+            fittigSubCommands = Arrays.stream(foundCommand.getSubCommands())
+                .filter(sc -> !sc.getIsDevelopercommand())
+                .filter(sc -> commandAuthorizer.isAuthorized(sc.getFullyQualifiedCommand()))
+                .toArray(size -> new SubCommandDescription[size]);
+        }
+        
+        boolean mainCommandIsAuthorized = commandAuthorizer.isAuthorized(foundCommand.getFullyQualifiedCommand());
+        if (mainCommandIsAuthorized) {
             printMaincommandHelp(foundCommand, showCommandModifiers, outputReceiver);
-
-            SubCommandDescription[] fittigSubCommands = null;
-
-            if (showDevCommands) {
-                fittigSubCommands = Arrays.stream(foundCommand.getSubCommands())
-                    .toArray(size -> new SubCommandDescription[size]);
-
-            } else {
-                fittigSubCommands = Arrays.stream(foundCommand.getSubCommands())
-                    .filter(subcommand -> !subcommand.getIsDevelopercommand())
-                    .toArray(size -> new SubCommandDescription[size]);
-
-            }
-
-            if (fittigSubCommands.length != 0) {
-                outputReceiver.addOutput(foundCommand.getCommand() + " subcommands:");
-
-                final String commandName = foundCommand.getCommand();
-
-                Arrays.stream(fittigSubCommands)
-                    .sorted((desc0, desc1) -> desc0.getCommand().compareTo(desc1.getCommand()))
-                    .forEachOrdered(subCommand -> printSubcommandHelp(commandName, subCommand, showCommandModifiers,
-                        outputReceiver));
-            }
+        }
+        
+        boolean fittingSubcommandsExist = fittigSubCommands.length > 0;
+        if (fittingSubcommandsExist) {
+            printSubcommandHelp(foundCommand, fittigSubCommands, outputReceiver, showCommandModifiers);
+        }
+        
+        if (!mainCommandIsAuthorized && !fittingSubcommandsExist) {
+            outputReceiver.addOutput("Current user is not authorized for the specified command or any of its subcommands.");
         }
     }
 
     private void printMaincommandHelp(MainCommandDescription command, boolean showModifiers,
         TextOutputReceiver outputReceiver) {
-
         if (!command.isExecutable()) {
             return;
         }
 
         StringBuilder lineBuilder = new StringBuilder(command.getCommand());
-
         CommandModifierInfo modifiers = command.getModifiers();
-
         lineBuilder.append(getSyntaxParameters(modifiers));
-
         lineBuilder.append(NEWLINE_INDENT).append(command.getDescription());
-
         if (showModifiers) {
             lineBuilder.append(getDetailedDescription(modifiers));
         }
 
         outputReceiver.addOutput(lineBuilder.toString());
+    }
+
+    private void printSubcommandHelp(MainCommandDescription foundCommand, SubCommandDescription[] subcommands, 
+        TextOutputReceiver outputReceiver, boolean showCommandModifiers) {
+        if (subcommands.length != 0) {
+            outputReceiver.addOutput(foundCommand.getCommand() + " subcommands:");
+            final String commandName = foundCommand.getCommand();
+            Arrays.stream(subcommands)
+                .sorted((desc0, desc1) -> desc0.getCommand().compareTo(desc1.getCommand()))
+                .forEachOrdered(subCommand -> printSubcommandHelp(commandName, subCommand, showCommandModifiers,
+                    outputReceiver));
+        }
     }
 
     private void printSubcommandHelp(String mainCommand, SubCommandDescription command, boolean showModifiers,

@@ -7,8 +7,6 @@
  */
 package de.rcenvironment.core.embedded.ssh.internal;
 
-import java.util.Set;
-
 import de.rcenvironment.core.command.api.ICommandAuthorizer;
 
 /**
@@ -28,7 +26,9 @@ public class SshAccountRoleCommandAuthorizer implements ICommandAuthorizer {
      */
     @Override
     public boolean isAuthorized(String fullyQualifiedCommandName) {
-        if (role.getRoleName().equals(SshConstants.ROLE_NAME_DEVELOPER)) {
+        if (role == null) {
+            return false;
+        } else if (role.getRoleName().equals(SshConstants.ROLE_NAME_DEVELOPER)) {
             return true;
         } else {
             return role.getAllowedCommands().contains(fullyQualifiedCommandName);

@@ -136,16 +136,16 @@ public class SshConfiguration {
 
     private List<SshAccountRole> createPredefinedRoles() {
         Set<String> remoteAccessUserAllowedCommands = new HashSet<String>();
-        remoteAccessUserAllowedCommands.add(SshConstants.HELP_COMMAND);
-        remoteAccessUserAllowedCommands.add(SshConstants.RA_COMMAND);
+        remoteAccessUserAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
+        remoteAccessUserAllowedCommands.addAll(SshConstants.RA_COMMAND_GROUP);
         remoteAccessUserAllowedCommands.addAll(SshConstants.SYSMON_COMMAND_GROUP);
         SshAccountRole remoteAccessUser = new SshAccountRole(SshConstants.ROLE_NAME_REMOTE_ACCESS_USER, remoteAccessUserAllowedCommands);
         SshAccountRole remoteAccessUserAlias = new SshAccountRole(SshConstants.ROLE_NAME_REMOTE_ACCESS_USER_ALIAS, 
             remoteAccessUserAllowedCommands);
 
         Set<String> remoteAccessUserAdminAllowedCommands = new HashSet<String>();
-        remoteAccessUserAdminAllowedCommands.add(SshConstants.HELP_COMMAND);
-        remoteAccessUserAdminAllowedCommands.add(SshConstants.RA_COMMAND);
+        remoteAccessUserAdminAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
+        remoteAccessUserAdminAllowedCommands.addAll(SshConstants.RA_COMMAND_GROUP);
         remoteAccessUserAdminAllowedCommands.addAll(SshConstants.RA_ADMIN_COMMAND_GROUP);
         remoteAccessUserAdminAllowedCommands.addAll(SshConstants.SYSMON_COMMAND_GROUP);
         remoteAccessUserAdminAllowedCommands.addAll(SshConstants.COMPONENTS_COMMAND_GROUP);
@@ -156,7 +156,7 @@ public class SshConfiguration {
         SshAccountRole uplinkClient = new SshAccountRole(SshConstants.ROLE_NAME_UPLINK_CLIENT, new HashSet<String>());
 
         Set<String> workflowObserverAllowedCommands = new HashSet<String>();
-        workflowObserverAllowedCommands.add(SshConstants.HELP_COMMAND);
+        workflowObserverAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
         workflowObserverAllowedCommands.addAll(SshConstants.COMPONENTS_COMMAND_GROUP);
         workflowObserverAllowedCommands.addAll(SshConstants.REDUCED_NET_COMMAND_GROUP);
         workflowObserverAllowedCommands.addAll(SshConstants.SYSMON_COMMAND_GROUP);
@@ -164,7 +164,7 @@ public class SshConfiguration {
         SshAccountRole workflowObserver = new SshAccountRole(SshConstants.ROLE_NAME_WORKFLOW_OBSERVER, workflowObserverAllowedCommands);
 
         Set<String> workflowAdminAllowedCommands = new HashSet<String>();
-        workflowAdminAllowedCommands.add(SshConstants.HELP_COMMAND);
+        workflowAdminAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
         workflowAdminAllowedCommands.addAll(SshConstants.COMPONENTS_COMMAND_GROUP);
         workflowAdminAllowedCommands.addAll(SshConstants.REDUCED_NET_COMMAND_GROUP);
         workflowAdminAllowedCommands.addAll(SshConstants.SYSMON_COMMAND_GROUP);
@@ -172,7 +172,7 @@ public class SshConfiguration {
         SshAccountRole workflowAdmin = new SshAccountRole(SshConstants.ROLE_NAME_WORKFLOW_ADMIN, workflowAdminAllowedCommands);
 
         Set<String> localAdminAllowedCommands = new HashSet<String>();
-        localAdminAllowedCommands.add(SshConstants.HELP_COMMAND);
+        localAdminAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
         localAdminAllowedCommands.addAll(SshConstants.CN_COMMAND_GROUP);
         localAdminAllowedCommands.addAll(SshConstants.COMPONENTS_COMMAND_GROUP);
         localAdminAllowedCommands.add(SshConstants.MAIL_COMMAND);
@@ -186,14 +186,14 @@ public class SshConfiguration {
         SshAccountRole localAdmin = new SshAccountRole(SshConstants.ROLE_NAME_LOCAL_ADMIN, localAdminAllowedCommands);
 
         Set<String> imAdminAllowedCommands = new HashSet<String>();
-        imAdminAllowedCommands.add(SshConstants.HELP_COMMAND);
+        imAdminAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
         imAdminAllowedCommands.addAll(SshConstants.IM_COMMAND_GROUP);
         imAdminAllowedCommands.addAll(SshConstants.REDUCED_NET_COMMAND_GROUP);
         imAdminAllowedCommands.addAll(SshConstants.AUTH_COMMAND_GROUP);
         SshAccountRole imAdmin = new SshAccountRole(SshConstants.ROLE_NAME_IM_ADMIN, imAdminAllowedCommands);
 
         Set<String> imDelegateAllowedCommands = new HashSet<String>();
-        imDelegateAllowedCommands.add(SshConstants.HELP_COMMAND);
+        imDelegateAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
         imDelegateAllowedCommands.addAll(SshConstants.CN_COMMAND_GROUP);
         imDelegateAllowedCommands.addAll(SshConstants.COMPONENTS_COMMAND_GROUP);
         imDelegateAllowedCommands.addAll(SshConstants.NET_COMMAND_GROUP);

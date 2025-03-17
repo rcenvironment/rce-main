@@ -90,6 +90,9 @@ public abstract class AbstractInteractiveCommandConsole implements TextOutputRec
                 TextOutputReceiver outputReceiver = ce.getOutputReceiver();
                 commandExecutionService.printHelpText(ce.getParsedModifiers(), outputReceiver, ce.getAuthorizer());
                 break;
+            case UNAUTHORIZED:
+                addOutput("Error executing command. User is not authorized.");
+                break;
             default:
                 // should never happen
                 log.error("Unhandled CommandException sub-type", e);

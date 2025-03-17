@@ -123,7 +123,7 @@ public class MultiCommandHandlerIntegrationTest {
         EasyMock.replay(outputReceiver);
 
         // invoke
-        new MultiCommandHandler(tokens, outputReceiver, commandParser, new DummyCommandAuthorizer(), null).call();
+        new MultiCommandHandler(tokens, outputReceiver, commandParser, new DefaultCommandAuthorizer(), null).call();
         // test callback parameter(s)
         assertEquals("Unexpected CommandException sub-type", CommandException.Type.HELP_REQUESTED, capture.getValue().getType());
 
@@ -151,7 +151,7 @@ public class MultiCommandHandlerIntegrationTest {
         EasyMock.replay(outputReceiver);
 
         // invoke
-        new MultiCommandHandler(tokens, outputReceiver, commandParser, new DummyCommandAuthorizer(), null).call();
+        new MultiCommandHandler(tokens, outputReceiver, commandParser, new DefaultCommandAuthorizer(), null).call();
         // test callback parameter(s)
         String capturedText = capture.getValue();
         assertTrue("Unexpected reponse text (should contain 'dummy')", capturedText.toLowerCase().contains("dummy"));
@@ -228,7 +228,7 @@ public class MultiCommandHandlerIntegrationTest {
         EasyMock.replay(outputReceiver);
 
         // invoke
-        new MultiCommandHandler(tokens, outputReceiver, commandParser, new DummyCommandAuthorizer(), null).call();
+        new MultiCommandHandler(tokens, outputReceiver, commandParser, new DefaultCommandAuthorizer(), null).call();
         // test callback parameter(s)
         String capturedText = capture.getValue();
         EasyMock.verify(outputReceiver);
