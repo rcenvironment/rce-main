@@ -84,7 +84,9 @@ public final class SshConstants {
         "net",
         "net info",
         "net filter",
-        "net reload-filter"
+        "net reload-filter",
+        "net bench",
+        "net np"
     );
 
     /**

@@ -105,9 +105,9 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
             this.outputReceiver = outputReceiver;
         }
 
-        public void generateCommandDocumentation(Set<MainCommandDescription> mainCommands, boolean showDevCommands) {
+        private void generateCommandDocumentation(Set<MainCommandDescription> mainCommands, ICommandAuthorizer authorizer, boolean showDevCommands) {
             mainCommands.stream().sorted((desc0, desc1) -> desc0.getCommand().compareTo(desc1.getCommand()))
-                .filter(desc -> service.commandGroupShouldBeShown(desc, showDevCommands))
+                .filter(desc -> service.commandGroupShouldBeShown(desc, authorizer, showDevCommands))
                 .forEach(desc -> renderMainCommandSection(desc, showDevCommands));
         }
 
@@ -288,7 +288,7 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
             boolean asciidocFormat = modifiers.hasCommandFlag("--asciidoc");
 
             if (asciidocFormat) {
-                new AsciiDocHelpFormatter(this, outputReceiver).generateCommandDocumentation(cmdDesc, showDevCommands);
+                new AsciiDocHelpFormatter(this, outputReceiver).generateCommandDocumentation(cmdDesc, commandAuthorizer, showDevCommands);
                 return;
             }
 
@@ -308,8 +308,7 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
         }
 
         cmdDesc.stream()
-            .filter(desc -> commandGroupShouldBeShown(desc, showDevCommands))
-            .filter(desc -> commandAuthorizer.isAuthorized(desc.getFullyQualifiedCommand()))
+            .filter(desc -> commandGroupShouldBeShown(desc, commandAuthorizer, showDevCommands))
             .sorted((desc0, desc1) -> desc0.getCommand().compareTo(desc1.getCommand()))
             .forEach(desc -> outputReceiver
                 .addOutput(INDENT + desc.getCommand() + ": " + desc.getCommandGroupDescription()));
@@ -620,9 +619,12 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
         return builder.toString();
     }
 
-    private boolean commandGroupShouldBeShown(MainCommandDescription mainCommand, boolean showDevCommands) {
-        return mainCommand.getIsDevelopercommand() == showDevCommands || Arrays.stream(mainCommand.getSubCommands())
-            .anyMatch(sub -> sub.getIsDevelopercommand() == showDevCommands);
+    private boolean commandGroupShouldBeShown(MainCommandDescription mainCommand, ICommandAuthorizer authorizer, boolean showDevCommands) {
+        boolean showMainCommand = (mainCommand.getIsDevelopercommand() == showDevCommands) && authorizer.isAuthorized(mainCommand.getFullyQualifiedCommand());
+        boolean showSubCommand = Arrays.stream(mainCommand.getSubCommands()).anyMatch(sub -> 
+            (sub.getIsDevelopercommand() == showDevCommands) && (authorizer.isAuthorized(sub.getFullyQualifiedCommand()))
+        );
+        return (showMainCommand || showSubCommand);
     }
 
     @Override
