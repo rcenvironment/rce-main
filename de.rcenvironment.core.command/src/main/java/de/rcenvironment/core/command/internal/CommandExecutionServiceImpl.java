@@ -359,7 +359,7 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
         }
         
         if (!mainCommandIsAuthorized && !fittingSubcommandsExist) {
-            outputReceiver.addOutput("Current user is not authorized for the specified command or any of its subcommands.");
+            outputReceiver.addOutput("No authorized main- or subcommand found.");
         }
     }
 
