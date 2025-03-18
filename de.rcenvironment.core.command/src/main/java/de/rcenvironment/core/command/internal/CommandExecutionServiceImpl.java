@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.StringJoiner;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -105,7 +106,8 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
             this.outputReceiver = outputReceiver;
         }
 
-        private void generateCommandDocumentation(Set<MainCommandDescription> mainCommands, ICommandAuthorizer authorizer, boolean showDevCommands) {
+        private void generateCommandDocumentation(Set<MainCommandDescription> mainCommands, ICommandAuthorizer authorizer,
+            boolean showDevCommands) {
             mainCommands.stream().sorted((desc0, desc1) -> desc0.getCommand().compareTo(desc1.getCommand()))
                 .filter(desc -> service.commandGroupShouldBeShown(desc, authorizer, showDevCommands))
                 .forEach(desc -> renderMainCommandSection(desc, showDevCommands));
@@ -336,29 +338,18 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
             return;
         } 
         
-        SubCommandDescription[] fittigSubCommands = null;
-        if (showDevCommands) {
-            fittigSubCommands = Arrays.stream(foundCommand.getSubCommands())
-                .filter(sc -> commandAuthorizer.isAuthorized(sc.getFullyQualifiedCommand()))
-                .toArray(size -> new SubCommandDescription[size]);
-        } else {
-            fittigSubCommands = Arrays.stream(foundCommand.getSubCommands())
-                .filter(sc -> !sc.getIsDevelopercommand())
-                .filter(sc -> commandAuthorizer.isAuthorized(sc.getFullyQualifiedCommand()))
-                .toArray(size -> new SubCommandDescription[size]);
-        }
-        
-        boolean mainCommandIsAuthorized = commandAuthorizer.isAuthorized(foundCommand.getFullyQualifiedCommand());
-        if (mainCommandIsAuthorized) {
+        boolean showMainCommand = mainCommandShouldBeShown(foundCommand, commandAuthorizer, showDevCommands);
+        if (showMainCommand) {
             printMaincommandHelp(foundCommand, showCommandModifiers, outputReceiver);
         }
         
-        boolean fittingSubcommandsExist = fittigSubCommands.length > 0;
-        if (fittingSubcommandsExist) {
-            printSubcommandHelp(foundCommand, fittigSubCommands, outputReceiver, showCommandModifiers);
+        List<SubCommandDescription> suitableSubcommands = getSuitableSubCommands(foundCommand, commandAuthorizer, showDevCommands);
+        boolean showSubcommands = suitableSubcommands.size() > 0;
+        if (showSubcommands) {
+            printSubcommandHelp(foundCommand, suitableSubcommands, outputReceiver, showCommandModifiers);
         }
         
-        if (!mainCommandIsAuthorized && !fittingSubcommandsExist) {
+        if (!showMainCommand && !showSubcommands) {
             outputReceiver.addOutput("No authorized main- or subcommand found.");
         }
     }
@@ -380,12 +371,12 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
         outputReceiver.addOutput(lineBuilder.toString());
     }
 
-    private void printSubcommandHelp(MainCommandDescription foundCommand, SubCommandDescription[] subcommands, 
+    private void printSubcommandHelp(MainCommandDescription foundCommand, List<SubCommandDescription> subcommands, 
         TextOutputReceiver outputReceiver, boolean showCommandModifiers) {
-        if (subcommands.length != 0) {
+        if (subcommands.size() != 0) {
             outputReceiver.addOutput(foundCommand.getCommand() + " subcommands:");
             final String commandName = foundCommand.getCommand();
-            Arrays.stream(subcommands)
+            subcommands.stream()
                 .sorted((desc0, desc1) -> desc0.getCommand().compareTo(desc1.getCommand()))
                 .forEachOrdered(subCommand -> printSubcommandHelp(commandName, subCommand, showCommandModifiers,
                     outputReceiver));
@@ -620,11 +611,21 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
     }
 
     private boolean commandGroupShouldBeShown(MainCommandDescription mainCommand, ICommandAuthorizer authorizer, boolean showDevCommands) {
-        boolean showMainCommand = (mainCommand.getIsDevelopercommand() == showDevCommands) && authorizer.isAuthorized(mainCommand.getFullyQualifiedCommand());
-        boolean showSubCommand = Arrays.stream(mainCommand.getSubCommands()).anyMatch(sub -> 
-            (sub.getIsDevelopercommand() == showDevCommands) && (authorizer.isAuthorized(sub.getFullyQualifiedCommand()))
-        );
+        boolean showMainCommand = mainCommandShouldBeShown(mainCommand, authorizer, showDevCommands);
+        boolean showSubCommand = getSuitableSubCommands(mainCommand, authorizer, showDevCommands).size() > 0;
         return (showMainCommand || showSubCommand);
+    }
+
+    private boolean mainCommandShouldBeShown(MainCommandDescription mainCommand, ICommandAuthorizer authorizer, boolean showDevCommands) {
+        return mainCommand.getIsDevelopercommand() == showDevCommands && authorizer.isAuthorized(mainCommand.getFullyQualifiedCommand());
+    }
+    
+    private List<SubCommandDescription> getSuitableSubCommands(MainCommandDescription mainCommand, 
+        ICommandAuthorizer authorizer, boolean showDevCommands) {
+
+        return Arrays.stream(mainCommand.getSubCommands()).filter(sub -> 
+            (sub.getIsDevelopercommand() == showDevCommands) && (authorizer.isAuthorized(sub.getFullyQualifiedCommand()))
+        ).collect(Collectors.toList());
     }
 
     @Override
