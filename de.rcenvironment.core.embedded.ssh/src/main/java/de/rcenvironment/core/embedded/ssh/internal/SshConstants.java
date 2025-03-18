@@ -37,12 +37,22 @@ public final class SshConstants {
     /**
      * Default command group.
      */
-    public static final List<String> DEFAULT_COMMAND_GROUP = Arrays.asList("help", EXIT_COMMAND, "version", "dev", "dummy");
+    public static final List<String> DEFAULT_COMMAND_GROUP = Arrays.asList(
+        "help",
+        EXIT_COMMAND,
+        "version",
+        "dev",
+        "dummy"
+    );
 
     /**
      * sysmon command group.
      */
-    public static final List<String> SYSMON_COMMAND_GROUP = Arrays.asList("sysmon", "sysmon api", "sysmon remote");
+    public static final List<String> SYSMON_COMMAND_GROUP = Arrays.asList(
+        "sysmon",
+        "sysmon api",
+        "sysmon remote"
+    );
 
     /**
      * auth command group.
@@ -75,7 +85,10 @@ public final class SshConstants {
     /**
      * Reduced net command group.
      */
-    public static final List<String> REDUCED_NET_COMMAND_GROUP = Arrays.asList("net", "net info");
+    public static final List<String> REDUCED_NET_COMMAND_GROUP = Arrays.asList(
+        "net",
+        "net info"
+    );
 
     /**
      * net command group.
@@ -83,6 +96,7 @@ public final class SshConstants {
     public static final List<String> NET_COMMAND_GROUP = Arrays.asList(
         "net",
         "net info",
+        "net graph",
         "net filter",
         "net reload-filter",
         "net bench",
@@ -99,7 +113,6 @@ public final class SshConstants {
      * ra command group.
      */
     public static final List<String> RA_COMMAND_GROUP = Arrays.asList(
-        "ra",
         "ra cancel",
         "ra describe-tool",
         "ra describe-wf",
@@ -126,12 +139,17 @@ public final class SshConstants {
     /**
      * Reduced wf command group.
      */
-    public static final List<String> REDUCED_WF_COMMAND_GROUP = Arrays.asList("wf", "wf list", "wf details");
+    public static final List<String> REDUCED_WF_COMMAND_GROUP = Arrays.asList(
+        "wf",
+        "wf list",
+        "wf details"
+    );
 
     /**
-     * wf command group. Does not contain wf open, as this is only allowed for developers because it may influence the remote user's GUI.
+     * wf command group. 
      */
     public static final List<String> WF_COMMAND_GROUP = Arrays.asList(
+        //Does not contain wf open, as this is only allowed for developers because it may influence the remote user's GUI.
         "wf",
         "wf list",
         "wf cancel",
@@ -143,7 +161,11 @@ public final class SshConstants {
         "wf run",
         "wf start",
         "wf verify",
-        "wf-integrate"
+        "wf-integrate",
+        "wf check-self-test-cases",
+        "wf graph",
+        "wf list-self-test-cases",
+        "wf self-test"
     );
 
     /**
