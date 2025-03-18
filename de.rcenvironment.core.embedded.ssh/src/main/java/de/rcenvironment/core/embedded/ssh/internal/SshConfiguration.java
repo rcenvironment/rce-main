@@ -135,14 +135,17 @@ public class SshConfiguration {
     }
 
     private List<SshAccountRole> createPredefinedRoles() {
+        // Remote access user and Remote access user alias
         Set<String> remoteAccessUserAllowedCommands = new HashSet<String>();
         remoteAccessUserAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
         remoteAccessUserAllowedCommands.addAll(SshConstants.RA_COMMAND_GROUP);
         remoteAccessUserAllowedCommands.addAll(SshConstants.SYSMON_COMMAND_GROUP);
-        SshAccountRole remoteAccessUser = new SshAccountRole(SshConstants.ROLE_NAME_REMOTE_ACCESS_USER, remoteAccessUserAllowedCommands);
-        SshAccountRole remoteAccessUserAlias = new SshAccountRole(SshConstants.ROLE_NAME_REMOTE_ACCESS_USER_ALIAS, 
-            remoteAccessUserAllowedCommands);
+        SshAccountRole remoteAccessUser = new SshAccountRole(SshConstants.ROLE_NAME_REMOTE_ACCESS_USER, 
+            true, true, remoteAccessUserAllowedCommands);
+        SshAccountRole remoteAccessUserAlias = new SshAccountRole(SshConstants.ROLE_NAME_REMOTE_ACCESS_USER_ALIAS,
+            true, true, remoteAccessUserAllowedCommands);
 
+        //Remote access admin
         Set<String> remoteAccessUserAdminAllowedCommands = new HashSet<String>();
         remoteAccessUserAdminAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
         remoteAccessUserAdminAllowedCommands.addAll(SshConstants.RA_COMMAND_GROUP);
@@ -150,27 +153,28 @@ public class SshConfiguration {
         remoteAccessUserAdminAllowedCommands.addAll(SshConstants.SYSMON_COMMAND_GROUP);
         remoteAccessUserAdminAllowedCommands.addAll(SshConstants.COMPONENTS_COMMAND_GROUP);
         SshAccountRole remoteAccessUserAdmin = new SshAccountRole(SshConstants.ROLE_NAME_REMOTE_ACCESS_ADMIN,
-            remoteAccessUserAdminAllowedCommands);
+            true, false, remoteAccessUserAdminAllowedCommands);
 
-        // has no authorized commands.
-        SshAccountRole uplinkClient = new SshAccountRole(SshConstants.ROLE_NAME_UPLINK_CLIENT, new HashSet<String>());
-
+        //Workflow observer
         Set<String> workflowObserverAllowedCommands = new HashSet<String>();
         workflowObserverAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
         workflowObserverAllowedCommands.addAll(SshConstants.COMPONENTS_COMMAND_GROUP);
         workflowObserverAllowedCommands.addAll(SshConstants.REDUCED_NET_COMMAND_GROUP);
         workflowObserverAllowedCommands.addAll(SshConstants.SYSMON_COMMAND_GROUP);
         workflowObserverAllowedCommands.addAll(SshConstants.REDUCED_WF_COMMAND_GROUP);
-        SshAccountRole workflowObserver = new SshAccountRole(SshConstants.ROLE_NAME_WORKFLOW_OBSERVER, workflowObserverAllowedCommands);
+        SshAccountRole workflowObserver = new SshAccountRole(SshConstants.ROLE_NAME_WORKFLOW_OBSERVER,
+            true, false, workflowObserverAllowedCommands);
 
+        //Workflow admin
         Set<String> workflowAdminAllowedCommands = new HashSet<String>();
         workflowAdminAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
         workflowAdminAllowedCommands.addAll(SshConstants.COMPONENTS_COMMAND_GROUP);
         workflowAdminAllowedCommands.addAll(SshConstants.REDUCED_NET_COMMAND_GROUP);
         workflowAdminAllowedCommands.addAll(SshConstants.SYSMON_COMMAND_GROUP);
         workflowAdminAllowedCommands.addAll(SshConstants.WF_COMMAND_GROUP);
-        SshAccountRole workflowAdmin = new SshAccountRole(SshConstants.ROLE_NAME_WORKFLOW_ADMIN, workflowAdminAllowedCommands);
+        SshAccountRole workflowAdmin = new SshAccountRole(SshConstants.ROLE_NAME_WORKFLOW_ADMIN, true, false, workflowAdminAllowedCommands);
 
+        //Local admin
         Set<String> localAdminAllowedCommands = new HashSet<String>();
         localAdminAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
         localAdminAllowedCommands.addAll(SshConstants.CN_COMMAND_GROUP);
@@ -183,15 +187,17 @@ public class SshConfiguration {
         localAdminAllowedCommands.add(SshConstants.STATS_COMMAND);
         localAdminAllowedCommands.add(SshConstants.TASKS_COMMAND);
         localAdminAllowedCommands.addAll(SshConstants.AUTH_COMMAND_GROUP);
-        SshAccountRole localAdmin = new SshAccountRole(SshConstants.ROLE_NAME_LOCAL_ADMIN, localAdminAllowedCommands);
+        SshAccountRole localAdmin = new SshAccountRole(SshConstants.ROLE_NAME_LOCAL_ADMIN, true, false, localAdminAllowedCommands);
 
+        //Instance management admin
         Set<String> imAdminAllowedCommands = new HashSet<String>();
         imAdminAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
         imAdminAllowedCommands.addAll(SshConstants.IM_COMMAND_GROUP);
         imAdminAllowedCommands.addAll(SshConstants.REDUCED_NET_COMMAND_GROUP);
         imAdminAllowedCommands.addAll(SshConstants.AUTH_COMMAND_GROUP);
-        SshAccountRole imAdmin = new SshAccountRole(SshConstants.ROLE_NAME_IM_ADMIN, imAdminAllowedCommands);
+        SshAccountRole imAdmin = new SshAccountRole(SshConstants.ROLE_NAME_IM_ADMIN, true, false, imAdminAllowedCommands);
 
+        //Instance management delegate
         Set<String> imDelegateAllowedCommands = new HashSet<String>();
         imDelegateAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
         imDelegateAllowedCommands.addAll(SshConstants.CN_COMMAND_GROUP);
@@ -209,24 +215,31 @@ public class SshConfiguration {
         imDelegateAllowedCommands.addAll(SshConstants.AUTH_COMMAND_GROUP);
         imDelegateAllowedCommands.addAll(SshConstants.UPLINK_COMMAND_GROUP);
         imDelegateAllowedCommands.add(SshConstants.FORCE_CRASH_COMMAND);
-        SshAccountRole imDelegate = new SshAccountRole(SshConstants.ROLE_NAME_IM_DELEGATE, imDelegateAllowedCommands);
+        SshAccountRole imDelegate = new SshAccountRole(SshConstants.ROLE_NAME_IM_DELEGATE, true, false, imDelegateAllowedCommands);
 
-        // no explicitly allowed commands here because developer role is handled as special case.
-        SshAccountRole developer = new SshAccountRole(SshConstants.ROLE_NAME_DEVELOPER, new HashSet<String>());
+        //Uplink client. Has no authorized commands, but is allowed to use uplink (note different boolean flags in constructor).
+        Set<String> uplinkClientAllowedCommands = new HashSet<String>();
+        uplinkClientAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
+        SshAccountRole uplinkClient = new SshAccountRole(SshConstants.ROLE_NAME_UPLINK_CLIENT, false, true, uplinkClientAllowedCommands);
 
-        // has no authorized commands.
-        SshAccountRole defaultRole = new SshAccountRole(SshConstants.ROLE_NAME_DEFAULT, new HashSet<String>());
+        // Developer. Has no allowed commands here because this role is handled as a special case. See SshAccountRoleCommandAuthorizer.java
+        SshAccountRole developer = new SshAccountRole(SshConstants.ROLE_NAME_DEVELOPER, true, false, new HashSet<String>());
+
+        //Default
+        Set<String> defaultAllowedCommands = new HashSet<String>();
+        defaultAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
+        SshAccountRole defaultRole = new SshAccountRole(SshConstants.ROLE_NAME_DEFAULT, true, false, defaultAllowedCommands);
 
         return Arrays.asList(
             remoteAccessUser,
             remoteAccessUserAlias,
             remoteAccessUserAdmin,
-            uplinkClient,
             workflowObserver,
             workflowAdmin,
             localAdmin,
             imAdmin,
             imDelegate,
+            uplinkClient,
             developer,
             defaultRole
         );

@@ -8,12 +8,9 @@
 
 package de.rcenvironment.core.embedded.ssh.internal;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Class to describe the different roles and their privileges.
@@ -26,41 +23,18 @@ public final class SshAccountRole {
 
     private String roleName;
 
-    private boolean allowedToOpenShell = true;
+    private boolean allowedToOpenShell;
 
-    private boolean allowedToUseUplink = false;
+    private boolean allowedToUseUplink;
     
     private final Set<String> allowedCommands = new HashSet<>();
 
-    public SshAccountRole(String roleName, Set<String> allowedCommands) {
+    public SshAccountRole(String roleName, boolean allowedToOpenShell, boolean allowedToUseUplink, Set<String> allowedCommands) {
         this.roleName = roleName;
         
         this.allowedCommands.addAll(allowedCommands);
-
-        // Set allowed command patterns for role name
-        switch (roleName) {
-        case SshConstants.ROLE_NAME_REMOTE_ACCESS_USER:
-        case SshConstants.ROLE_NAME_REMOTE_ACCESS_USER_ALIAS:
-            allowedToUseUplink = true;
-            break;
-        case SshConstants.ROLE_NAME_UPLINK_CLIENT:
-            allowedToOpenShell = false;
-            allowedToUseUplink = true;
-            break;
-        case SshConstants.ROLE_NAME_REMOTE_ACCESS_ADMIN:
-        case SshConstants.ROLE_NAME_WORKFLOW_OBSERVER:
-        case SshConstants.ROLE_NAME_WORKFLOW_ADMIN:
-        case SshConstants.ROLE_NAME_LOCAL_ADMIN:
-        case SshConstants.ROLE_NAME_IM_ADMIN:
-        case SshConstants.ROLE_NAME_IM_DELEGATE:
-        case SshConstants.ROLE_NAME_DEVELOPER:
-        case SshConstants.ROLE_NAME_HEALTH_CHECK: // same permissions as the default role; uses the "dummy" command for testing
-        case SshConstants.ROLE_NAME_DEFAULT:
-            break;
-        default:
-            // as long as no user-defined roles are supported, this is always an internal error
-            throw new IllegalArgumentException("Tried to create a role with an unhandled id: " + roleName);
-        }
+        this.allowedToOpenShell = allowedToOpenShell;
+        this.allowedToUseUplink = allowedToUseUplink;
     }
 
     public String getRoleName() {
