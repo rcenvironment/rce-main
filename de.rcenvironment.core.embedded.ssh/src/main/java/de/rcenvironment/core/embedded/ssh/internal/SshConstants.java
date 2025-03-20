@@ -132,8 +132,8 @@ public final class SshConstants {
      */
     public static final List<String> RA_ADMIN_COMMAND_GROUP = Arrays.asList(
         "ra-admin list-wfs", 
-        "ra-admin publish-wfs",
-        "ra-admin unpublish-wfs"
+        "ra-admin publish-wf",
+        "ra-admin unpublish-wf"
     );
 
     /**
