@@ -150,7 +150,7 @@ public final class CommandException extends Exception {
      * @return the generated exception
      */
     public static CommandException unauthorized(CommandContext context) {
-        return new CommandException(Type.UNAUTHORIZED, "Current role is not authorized to execute this command.", context);
+        return new CommandException(Type.UNAUTHORIZED, "User is unauthorized to execute this command.", context);
     }
 
     public Type getType() {
