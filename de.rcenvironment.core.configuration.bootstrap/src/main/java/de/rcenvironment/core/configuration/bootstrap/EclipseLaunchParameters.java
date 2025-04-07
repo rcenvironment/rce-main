@@ -34,12 +34,13 @@ public final class EclipseLaunchParameters {
      */
     private static final String[] PARAMETER_TOKENS_TO_IGNORE = new String[] { "-launcher", "-name", "-application", "-data",
         "-configuration", "-dev", "-os", "-ws", "-arch", "-nl", "-startup", "-vm", "-exitdata", "-showsplash", "--launcher.XXMaxPermSize",
-        "--launcher.library", "--launcher.overrideVmargs" };
+        "--launcher.library" };
 
     /**
      * Standard flags (without a value) that this class should ignore.
      */
-    private static final String[] FLAG_TOKENS_TO_IGNORE = new String[] { "-consoleLog", "-console", "-clean", "-nosplash", "-noSplash" };
+    private static final String[] FLAG_TOKENS_TO_IGNORE = new String[] { "-consoleLog", "-console", "-clean", 
+        "-nosplash", "-noSplash", "--launcher.overrideVmargs", "--launcher.appendVmargs" };
 
     /**
      * The singleton instance.
