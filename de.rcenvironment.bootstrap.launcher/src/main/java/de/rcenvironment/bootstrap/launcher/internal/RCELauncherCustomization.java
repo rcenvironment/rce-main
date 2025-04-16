@@ -8,7 +8,12 @@
 
 package de.rcenvironment.bootstrap.launcher.internal;
 
+import static java.lang.System.setErr;
+import static java.util.prefs.Preferences.systemRoot;
+
 import java.io.File;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +22,8 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 import de.rcenvironment.bootstrap.launcher.api.RCELauncherConstants;
 
@@ -26,6 +33,7 @@ import de.rcenvironment.bootstrap.launcher.api.RCELauncherConstants;
  *
  * @author Tobias Rodehutskors
  * @author Robert Mischke
+ * @author David Wichter (added privilege check)
  */
 public final class RCELauncherCustomization {
 
@@ -64,6 +72,8 @@ public final class RCELauncherCustomization {
     // non-static state fields below
 
     private boolean verboseOutputEnabled = false;
+    
+    private boolean privilegedModeAllowed = false;
 
     private final String instanceRunId;
 
@@ -74,9 +84,11 @@ public final class RCELauncherCustomization {
         for (String arg : args) {
             if ("--rce.debug.launcher".equals(arg)) {
                 verboseOutputEnabled = true;
-                continue;
+            } else if ("--allow-privileged".equals(arg)) {
+                privilegedModeAllowed = true;
             }
         }
+
         instanceRunId = Long.toString(System.currentTimeMillis())
             + "-" + Long.toString(new Random().nextLong() & Long.MAX_VALUE);
     }
@@ -111,9 +123,57 @@ public final class RCELauncherCustomization {
             System.err.println("Failed to resolve configuration location; logging will not be configured properly");
         }
 
+        abortStartupIfPrivileged();
+
         if (verboseOutputEnabled()) {
             // dump the final system properties after all modifications
             dumpFinalSystemProperties();
+        }
+    }
+
+    /**
+     * For security reasons we don't allow starting RCE in privileged mode, i.e. as admin (Windows) or as root (Linux).
+     * However it can be allowed for specific circumstances if a respective flag is set.
+     */
+    private static void abortStartupIfPrivileged() {
+        boolean isPrivileged = checkPrivileged();
+        boolean privilegedIsNotAllowed = !RCE_LAUNCHER_CONTEXT.privilegedModeAllowed;
+        if (isPrivileged && privilegedIsNotAllowed) {
+            String privilegeError = "RCE was started with admin privileges without setting the --allow-privileged flag";
+            System.err.println(privilegeError);
+            throw new IllegalStateException(privilegeError);
+        }
+    }
+
+    /**
+     * Checks if we are currently in a privileged mode, i.e. whether the program was started as admin in case of windows
+     * or as root in case of Linux. This was implemented based on https://stackoverflow.com/a/23538961
+     * @return true if we are currently privileged, false otherwise.
+     */
+    private static boolean checkPrivileged() {
+        // Set err temporarily to dummy stream to avoid printing errors from running the below test in non-privileged mode, 
+        // which will be the default. Single-threaded execution is assumed here, otherwise synchronize on err.
+        // Also see SO thread linked above.
+        PrintStream err = System.err;
+        setErr(new PrintStream(new OutputStream() {
+            @Override
+            public void write(int b) {
+            }
+        }));
+
+        // Below we try to set (and immediately remove) system preferences, which is only allowed for privileged processes.
+        // If this fails with an exception it means we are not privileged.
+        try {
+            Preferences preferences = systemRoot();
+            String dummyKey = "rce_dummy";
+            preferences.put(dummyKey, "dummy"); // SecurityException on Windows
+            preferences.remove(dummyKey);
+            preferences.flush(); // BackingStoreException on Linux
+            return true;
+        } catch (SecurityException | BackingStoreException exception) {
+            return false;
+        } finally {
+            setErr(err);
         }
     }
 
