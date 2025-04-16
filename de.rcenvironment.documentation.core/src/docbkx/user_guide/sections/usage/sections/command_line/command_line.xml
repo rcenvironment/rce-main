@@ -46,6 +46,16 @@
 							OSGi console and waits for user input. </entry>
 					</row>
 					<row>
+						<entry>allow-privileged</entry>
+						<entry>RCE</entry>
+						<entry>Allows running RCE in a privileged process, i.e. as administrator (on Windows) or
+							root (on Linux). Usually this is forbidden and the prohibition is enforced at application 
+							startup. However in certain circumstances it might be required to run RCE with such 
+							privileges and for these cases this flag can be used to disable the check at startup. 
+							However this is only to be used with absolute caution and in accordance with the system 
+							administrator!</entry>
+					</row>
+					<row>
 						<entry>exec "&lt;command string>"</entry>
 						<entry>RCE</entry>
 						<entry>
