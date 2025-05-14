@@ -12,6 +12,7 @@ import static java.lang.System.setErr;
 import static java.util.prefs.Preferences.systemRoot;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -161,13 +162,13 @@ public final class RCELauncherCustomization {
             }
         }));
 
-        // Below we try to set (and immediately remove) system preferences, which is only allowed for privileged processes.
+        // Below we try to set (and immediately remove) some dummy system preferences, which is only allowed for privileged processes.
         // If this fails with an exception it means we are not privileged.
         try {
             Preferences preferences = systemRoot();
-            String dummyKey = "rce_dummy";
-            preferences.put(dummyKey, "dummy"); // SecurityException on Windows
-            preferences.remove(dummyKey);
+            String privilegeCheckKey = "rce_privilege_check";
+            preferences.put(privilegeCheckKey, "check"); // SecurityException on Windows
+            preferences.remove(privilegeCheckKey);
             preferences.flush(); // BackingStoreException on Linux
             return true;
         } catch (SecurityException | BackingStoreException exception) {
