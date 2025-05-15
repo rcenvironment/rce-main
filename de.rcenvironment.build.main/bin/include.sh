@@ -48,6 +48,9 @@ if [ ! -z "$MAVEN_REPOSITORY_LOCATION" ]; then
     MAVEN_SETTINGS="$MAVEN_SETTINGS -Dmaven.repo.local=$MAVEN_REPOSITORY_LOCATION"
 fi
 
+# TODO TEMP
+echo "Using Maven settings \"$MAVEN_SETTINGS\""
+
 # TODO determine git branch/status/commit and pass it to the build process?
 
 # after this point, fail on undefined variables, too
@@ -151,11 +154,20 @@ build_products_from_repo() {
     
     fail_with_log_tail_if_non_zero $EXIT_CODE "$BUILD_LOG_FILE"
     
+    # move the zip files and the unpacked update site to the output location
     mkdir target/products/zip
     mv ../de.rcenvironment/target/de.rcenvironment.modules.repository.mainProduct/products/*.zip \
        target/products/zip
     mv ../de.rcenvironment/target/de.rcenvironment.modules.repository.mainProduct/repository \
        target/products/
+
+    # also create a zip file of the update site; both variants will be present in the final result
+    cd target/products/
+    zip -rq zip/updatesite.zip repository
+    cd - >/dev/null
+    
+    # also copy a VERSION file to a canonical location (from the updatesite simply because it is already unpacked)
+    cp target/products/repository/VERSION target/products/VERSION
 
     # 6 lines for clean output in the BUILD SUCCESS case
     tail -n 6 "$BUILD_LOG_FILE"
