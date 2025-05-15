@@ -29,7 +29,10 @@
                         replaced with “1.0” if that value was received). File and Directory will not
                         be replaced with the content, but with the absolute path of the
                         corresponding file or folder. Strings and the inserted paths need (single)
-                        quotation marks in the scripts to be used (e.g. “ ‘${in:file}’ ”).</para>
+                        quotation marks in the scripts to be used (e.g. “ ‘${in:file}’ ”). Please
+                        note that placeholders for inputs that do not have any input data in the
+                        current run (e.g. input constraint "Required if connected" and no output
+                        currently connected) will not be replaced at runtime.</para>
                     <para>Inputs are available for every script.</para>
                     <para><emphasis role="italic">Vector/Matrix: If you have an input of the type
                             vector/matrix, the placeholder can be used in the pre and post script
