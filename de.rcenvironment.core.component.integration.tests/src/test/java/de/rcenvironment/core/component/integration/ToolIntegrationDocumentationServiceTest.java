@@ -8,14 +8,18 @@
 
 package de.rcenvironment.core.component.integration;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.LogFactory;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Assert;
@@ -28,6 +32,7 @@ import de.rcenvironment.core.communication.common.NodeIdentifierTestUtils;
 import de.rcenvironment.core.component.api.DistributedComponentKnowledge;
 import de.rcenvironment.core.component.api.DistributedComponentKnowledgeService;
 import de.rcenvironment.core.component.integration.documentation.RemoteToolIntegrationDocumentationService;
+import de.rcenvironment.core.component.integration.documentation.ToolIntegrationDocumentationService;
 import de.rcenvironment.core.component.integration.documentation.internal.ToolIntegrationDocumentationServiceImpl;
 import de.rcenvironment.core.component.management.api.DistributedComponentEntry;
 import de.rcenvironment.core.component.model.api.ComponentInstallation;
@@ -36,6 +41,9 @@ import de.rcenvironment.core.component.model.api.ComponentRevision;
 import de.rcenvironment.core.component.testutils.ComponentTestUtils;
 import de.rcenvironment.core.configuration.ConfigurationService;
 import de.rcenvironment.core.configuration.ConfigurationService.ConfigurablePathId;
+import de.rcenvironment.core.utils.common.FileCompressionFormat;
+import de.rcenvironment.core.utils.common.FileCompressionService;
+import de.rcenvironment.core.utils.common.TempFileService;
 import de.rcenvironment.core.utils.common.TempFileServiceAccess;
 import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
 
@@ -44,10 +52,13 @@ import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
  * 
  * @author Sascha Zur
  * @author Robert Mischke (8.0.0 id adaptations)
+ * @author Jan Flink
  */
 public class ToolIntegrationDocumentationServiceTest {
 
     private static final LogicalNodeId LOCAL_NODE_ID = NodeIdentifierTestUtils.createTestDefaultLogicalNodeId();
+
+    private static final String FILE_NAME_TEST = "test.txt";
 
     private static final String TOOL_IDENTIFIER_1 = "identifier1";
 
@@ -57,7 +68,13 @@ public class ToolIntegrationDocumentationServiceTest {
 
     private static final String HASH_2 = "hash2";
 
-    private File cachedir = null;
+    private File cachedir;
+
+    private File docDir;
+
+    private TempFileService tempFileService;
+
+    private final List<File> managedTempDirsToDispose = new ArrayList<>();
 
     /**
      * Set up the environment.
@@ -66,17 +83,21 @@ public class ToolIntegrationDocumentationServiceTest {
     public void setup() {
         TempFileServiceAccess.setupUnitTestEnvironment();
         try {
-            cachedir = TempFileServiceAccess.getInstance().createManagedTempDir();
+            tempFileService = TempFileServiceAccess.getInstance();
+            cachedir = tempFileService.createManagedTempDir();
+            docDir = createTempDir();
+            createAndVerifyFile(docDir, FILE_NAME_TEST);
         } catch (IOException e) {
             Assert.fail("Could not set up test directory");
         }
     }
 
+
     /**
      * Test if cache is used correctly.
      */
     @Test
-    public void testDocumentationServiceCache() {
+    public void testDocumentationServiceCache() throws IOException {
 
         ToolIntegrationDocumentationServiceImpl service = new ToolIntegrationDocumentationServiceImpl();
 
@@ -90,12 +111,13 @@ public class ToolIntegrationDocumentationServiceTest {
         ConfigurationService configService = createConfigService(cachedir);
         service.bindConfigurationService(configService);
 
-        byte[] returnArray = new byte[] { 1, 1, 1, 0, 0, 0 };
+        byte[] compressedDirArray = FileCompressionService.compressDirectoryToByteArray(docDir, FileCompressionFormat.ZIP, false);
+
         Map<String, String> toolIDsAndHashes = new HashMap<>();
         toolIDsAndHashes.put(TOOL_IDENTIFIER_1, HASH_1);
         toolIDsAndHashes.put(TOOL_IDENTIFIER_2, HASH_2);
 
-        RemoteToolIntegrationDocumentationService rtis = createRemoteServiceMock(returnArray, toolIDsAndHashes);
+        RemoteToolIntegrationDocumentationService rtis = createRemoteServiceMock(compressedDirArray, toolIDsAndHashes);
 
         CommunicationService commService = createRemoteServiceWithReturningByteArray(LOCAL_NODE_ID, rtis);
         service.bindCommunicationService(commService);
@@ -114,12 +136,27 @@ public class ToolIntegrationDocumentationServiceTest {
                 service.getToolDocumentation(TOOL_IDENTIFIER_2,
                     service.getComponentDocumentationList(TOOL_IDENTIFIER_2).get(HASH_2), HASH_2);
             Assert.assertEquals(false, directory3.equals(directory1));
-        } catch (RemoteOperationException | IOException e) {
-            Assert.fail();
+        } catch (RemoteOperationException e) {
+            Assert.fail(e.getMessage());
         }
 
         EasyMock.verify(rtis);
 
+    }
+
+    private File createTempDir() throws IOException {
+        final File tempDir = tempFileService.createManagedTempDir();
+        managedTempDirsToDispose.add(tempDir);
+        return tempDir;
+    }
+
+    private File createAndVerifyFile(final File parentDir, final String name) throws IOException {
+        final File file = new File(parentDir, name);
+        file.getParentFile().mkdirs();
+        file.createNewFile();
+
+        assertTrue("Create temporary file for unit test was not successful.", file.isFile() && file.canRead());
+        return file;
     }
 
     private RemoteToolIntegrationDocumentationService createRemoteServiceMock(byte[] returnArray, Map<String, String> toolIDsAndHashes) {
@@ -142,8 +179,13 @@ public class ToolIntegrationDocumentationServiceTest {
     @After
     public void tearDown() {
         try {
+            for (File tempDir : managedTempDirsToDispose) {
+                tempFileService.disposeManagedTempDirOrFile(tempDir);
+            }
+            managedTempDirsToDispose.clear(); // should be redundant, but doesn't hurt and helps for clarity
             TempFileServiceAccess.getInstance().disposeManagedTempDirOrFile(cachedir);
         } catch (IOException e) {
+            LogFactory.getLog(getClass()).warn("Failed to clean up managed test directory. " + e.getMessage());
             Assert.fail();
         }
     }
