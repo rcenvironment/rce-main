@@ -25,6 +25,7 @@ import de.rcenvironment.core.communication.common.impl.NodeIdentifierServiceImpl
 import de.rcenvironment.core.communication.configuration.internal.NodeConfigurationServiceImpl;
 import de.rcenvironment.core.configuration.ConfigurationSegment;
 import de.rcenvironment.core.configuration.ConfigurationService;
+import de.rcenvironment.core.configuration.bootstrap.RuntimeDetection;
 import de.rcenvironment.core.configuration.testutils.ConfigurationSegmentUtils;
 import de.rcenvironment.core.configuration.testutils.MockConfigurationService;
 import de.rcenvironment.core.configuration.testutils.PersistentSettingsServiceDefaultStub;
@@ -60,6 +61,8 @@ public class PlatformServiceImplTest {
         EasyMock.replay(bundleMock);
         EasyMock.expect(contextMock.getBundle()).andReturn(bundleMock).anyTimes();
         EasyMock.replay(contextMock);
+        
+        RuntimeDetection.allowSimulatedServiceActivation();
 
         NodeConfigurationServiceImpl nodeConfigurationService = new NodeConfigurationServiceImpl();
         nodeConfigurationService.bindConfigurationService(new DummyConfigurationService());
