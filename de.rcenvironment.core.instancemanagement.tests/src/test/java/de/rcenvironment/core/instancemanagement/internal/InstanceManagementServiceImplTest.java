@@ -441,7 +441,7 @@ public class InstanceManagementServiceImplTest {
                 .getConfigurationKey()),
             multiplier, maxDoubleDelta));
         assertEquals(
-            false, segment
+            true, segment
                 .getBoolean(segmentBuilder.network().connections().getOrCreateConnection(name).autoRetry().getConfigurationKey()));
         assertEquals(
             Long.valueOf(autoRetrylInitDelay), segment
