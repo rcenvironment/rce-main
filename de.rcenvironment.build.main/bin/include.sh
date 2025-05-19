@@ -28,28 +28,24 @@ if [ -f "$CONFIG_PATH/overrides.conf" ]; then
   . "$CONFIG_PATH/overrides.conf"
 fi
 
-# set derived properties
-
-case "$RCE_THIRD_PARTY_REPOSITORY_SOURCE" in
-    "remote")
-        RCE_THIRD_PARTY_REPOSITORY_URL="$RCE_THIRD_PARTY_REPOSITORY_REMOTE_SOURCE_ROOT_URL/$RCE_THIRD_PARTY_REPOSITORY_REFERENCE"
-        ;;
-    "local")
-        # this URI pattern for relative paths is not generally valid but accepted by Tycho
-        RCE_THIRD_PARTY_REPOSITORY_URL="file:$RCE_THIRD_PARTY_REPOSITORY_LOCAL_SOURCE_RELATIVE_PATH"
-        ;;
-    *)
-        echo "Invalid RCE_THIRD_PARTY_REPOSITORY_SOURCE setting: $RCE_THIRD_PARTY_REPOSITORY_SOURCE"
-        exit 1
+# validate that RCE_BUILD_TYPE contains a known value
+case "$RCE_BUILD_TYPE" in
+  snapshot|rc|release)
+    ;;
+  *)
+    echo "Invalid value \"$RCE_BUILD_TYPE\" for RCE_BUILD_TYPE"
+    exit 1
+    ;;
 esac
 
+# set derived properties
 MAVEN_SETTINGS="--batch-mode --show-version --errors --fail-at-end"
 if [ ! -z "$MAVEN_REPOSITORY_LOCATION" ]; then
     MAVEN_SETTINGS="$MAVEN_SETTINGS -Dmaven.repo.local=$MAVEN_REPOSITORY_LOCATION"
 fi
 
-# TODO TEMP
-echo "Using Maven settings \"$MAVEN_SETTINGS\""
+# note that this URI pattern for relative paths is not generally valid, but accepted by Tycho
+RCE_THIRD_PARTY_REPOSITORY_URL="file:$RCE_THIRD_PARTY_REPOSITORY_LOCAL_SOURCE_RELATIVE_PATH"
 
 # TODO determine git branch/status/commit and pass it to the build process?
 
@@ -154,20 +150,28 @@ build_products_from_repo() {
     
     fail_with_log_tail_if_non_zero $EXIT_CODE "$BUILD_LOG_FILE"
     
-    # move the zip files and the unpacked update site to the output location
-    mkdir target/products/zip
-    mv ../de.rcenvironment/target/de.rcenvironment.modules.repository.mainProduct/products/*.zip \
-       target/products/zip
-    mv ../de.rcenvironment/target/de.rcenvironment.modules.repository.mainProduct/repository \
-       target/products/
+    OUTPUT_DIR="$(pwd)/target/products"
 
-    # also create a zip file of the update site; both variants will be present in the final result
-    cd target/products/
-    zip -rq zip/updatesite.zip repository
-    cd - >/dev/null
+    # enter the Tycho product output directory
+    cd ../de.rcenvironment/target/de.rcenvironment.modules.repository.mainProduct/
     
-    # also copy a VERSION file to a canonical location (from the updatesite simply because it is already unpacked)
-    cp target/products/repository/VERSION target/products/VERSION
+    # copy one of the VERSION files to the top level of the output directory
+    cp repository/VERSION "${OUTPUT_DIR}/VERSION"
+    # using the VERSION file's content, define the zip file names
+    ZIP_FILES_BASENAME="rce-$(<repository/VERSION)"
+
+    # move and rename product zips
+    mv products/de.rcenvironment.products.rce.default-linux.gtk.x86_64.zip \
+      "${OUTPUT_DIR}/${ZIP_FILES_BASENAME}-standard-linux.x86_64.zip"
+    mv products/de.rcenvironment.products.rce.default-win32.win32.x86_64.zip \
+      "${OUTPUT_DIR}/${ZIP_FILES_BASENAME}-standard-win32.x86_64.zip"
+
+    # create a zip file of the repository in the output directory
+    zip -rq "${OUTPUT_DIR}/${ZIP_FILES_BASENAME}-updatesite.zip" repository
+    # move (but at least for now, don't rename) the unpacked update site repository
+    mv repository "${OUTPUT_DIR}/"
+
+    cd - >/dev/null
 
     # 6 lines for clean output in the BUILD SUCCESS case
     tail -n 6 "$BUILD_LOG_FILE"
@@ -199,7 +203,7 @@ run_unit_tests() {
     mvn $MAVEN_SETTINGS \
     -f ../de.rcenvironment/maven/secondStage/pom.xml \
     -Drce.maven.buildScope="$RCE_UNIT_TESTS_BUILD_SCOPE" \
-    -Drce.maven.buildType="snapshot" \
+    -Drce.maven.buildType="$RCE_BUILD_TYPE" \
     -Drce.maven.repositories.foundation.url="$RCE_THIRD_PARTY_REPOSITORY_URL" \
     -Drce.maven.skipDocumentation \
     -P !generateHelpFromDocbook \
@@ -243,7 +247,7 @@ build_documentation_only() {
     set +e
     mvn $MAVEN_SETTINGS \
     -f ../de.rcenvironment.documentation.core/pom.xml \
-    -Drce.maven.buildType="snapshot" \
+    -Drce.maven.buildType="$RCE_BUILD_TYPE" \
     clean generate-resources prepare-package \
     >"$BUILD_LOG_FILE" 2>&1
     EXIT_CODE=$?
