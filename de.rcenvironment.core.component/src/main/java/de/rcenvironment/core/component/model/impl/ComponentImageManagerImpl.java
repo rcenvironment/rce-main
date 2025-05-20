@@ -12,6 +12,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Image;
@@ -354,8 +355,7 @@ public final class ComponentImageManagerImpl implements ComponentImageManagerSer
             if (componentId == null || !componentId.contains(INTEGRATION)) {
                 image = StandardImages.RCE_LOGO_24;
             } else {
-                // since we have no 24x24 tool image available, we return the 16x16 image
-                image = StandardImages.INTEGRATED_TOOL_DEFAULT_16;
+                image = StandardImages.INTEGRATED_TOOL_DEFAULT_24;
             }
             break;
         case ICON32:
