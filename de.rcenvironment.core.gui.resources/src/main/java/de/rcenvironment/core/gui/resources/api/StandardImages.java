@@ -435,6 +435,11 @@ public enum StandardImages implements ImageSource {
     INTEGRATED_TOOL_DEFAULT_16(fromLocalBundle("tool16.png")),
 
     /**
+     * Default 24px icon for integrated tools.
+     */
+    INTEGRATED_TOOL_DEFAULT_24(fromLocalBundle("tool24.png")),
+
+    /**
      * Default 32px icon for integrated tools.
      */
     INTEGRATED_TOOL_DEFAULT_32(fromLocalBundle("tool32.png")),
