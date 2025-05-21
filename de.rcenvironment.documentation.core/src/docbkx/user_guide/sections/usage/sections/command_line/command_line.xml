@@ -114,8 +114,9 @@
 						<entry>VM</entry>
 						<entry><para>Standard JVM arguments. This argument needs to be listed before any 
 						arguments intended to be passed to the JVM (i.e. arguments prefixed with -D),
-						otherwise they will not be passed correctly. Also note that any JVM arguments 
-						will be appended to the arguments already specified in the rce.ini file.</para>
+						otherwise they will not be passed correctly. Also note that the JVM will receive
+						these arguments appended to the ones specified in the rce.ini file (the file itself
+						will not be modified).</para>
 						<para>Example:<?linebreak?>
 						"rce.exe -vmargs -D&lt;some-arg>=&lt;some-value>"</para>
 						</entry>
