@@ -2,7 +2,7 @@
 <section id="command_line">
 	<title>Command Line Parameters</title>
 	<para>General syntax </para>
-	<programlisting>&gt;  rce --[RCE arguments] -[RCP arguments] -[VM arguments]</programlisting>
+	<programlisting>&gt;  rce --[RCE arguments] -[RCP arguments] -[vmargs -[VM arguments]]</programlisting>
 	<para>
 		<table frame="all">
 			<title>Command line arguments for RCE</title>
@@ -112,7 +112,13 @@
 					<row>
 						<entry>vmargs</entry>
 						<entry>VM</entry>
-						<entry>Standard JVM arguments</entry>
+						<entry><para>Standard JVM arguments. This argument needs to be listed before any 
+						arguments intended to be passed to the JVM (i.e. arguments prefixed with -D),
+						otherwise they will not be passed correctly. Also note that any JVM arguments 
+						will be appended to the arguments already specified in the rce.ini file.</para>
+						<para>Example:<?linebreak?>
+						"rce.exe -vmargs -D&lt;some-arg>=&lt;some-value>"</para>
+						</entry>
 					</row>
 					<row>
 						<entry>Dde.rcenvironment.rce.<?linebreak?>configuration.dir=<?linebreak?>&lt;insert-config-path></entry>
