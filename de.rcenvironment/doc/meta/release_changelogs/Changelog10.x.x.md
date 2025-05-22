@@ -1,3 +1,67 @@
+RCE 10.6.0 (May 23, 2025)
+
+# Components
+
+- Fully removed the VampZero Initializer component
+- Enhanced the configuration validation of the Output Writer component in the GUI
+- Improved the handling of long XPathes in the configuration dialogs of XML-related components
+
+# Scripting
+
+- Fixed a bug that led to errors with Python 3.12 and higher by upgrading a referenced external 
+  library
+
+# GUI
+
+- Prevented multiple "connection failed" dialogs from piling up when an Uplink connected is 
+  interrupted repeatedly
+- Enhanced/replaced some icons
+- Fixed an transparency issue with combo boxes on Ubuntu
+
+# Documentation
+
+- A "Components Guide" PDF document has been added which describes all components shipped with 
+  RCE; While this documentation was always available, it was only accessible via the embedded "F1 
+  Help", and therefore often missed
+- Script placeholder documentation has been improved regarding "required-if-connected" inputs
+- Added a link to the Update/Security website page in the User Guide
+- Clarified the documentation on how to provide JVM options on the command-line (only needed in 
+  very special cases)
+
+# Technical Changes
+
+- Major rework of the build and automated QA infrastructure, including an easier way to build 
+  RCE locally; note that a large part of this rework is not reflected in the public repositories
+- Raised the Eclipse platform to version 2023-03; note that this version was selected to still 
+  maintain Java 11 compatibility
+
+# Third-party Library Upgrades
+
+- Upgraded various libraries as part of the Eclipse platform 2023-03 upgrade
+- Upgraded BouncyCastle to 1.78.1, overriding the the version used by the Eclipse platform
+- Upgraded Jetty to 10.0.24, overriding the the version used by the Eclipse platform
+- Upgraded Commons-Compress to 1.26
+- Upgraded Jung to 2.1.1
+- Upgraded ActiveMQ to 5.16.8
+
+# QA
+
+- Made the entire "rce-main" software repository compliant with the REUSE 3.0 specification, 
+  which provides a clarified copyright and licensing status
+- Improved the automated product (BDD) testing scenarios
+- Fixes and improvements in the automated product (BDD) testing system
+- Fixed and improved some Unit Tests
+- Minor QA fixes/improvements
+
+# Bugfixes
+
+- Fixed a NPE that occurs in the Network View with broken Uplink configuration segments
+- Fixed a bug that prevented the Connection Manager dialog from opening by double-clicking a 
+  connection in the Workflow Editor when the zoom level was not set to 100%
+- Fixed the behavior that specifying JVM options on the command-line replaced all JVM options 
+  set in the rce.ini file. Instead they are now passed to the JVM as an appended list.
+
+
 RCE 10.5.0 (November 21, 2023)
 
 # Tool/Workflow Integration
