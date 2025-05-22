@@ -2,7 +2,7 @@ Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: Remote Component Environment (RCE)
 Source: https://rcenvironment.de/
 
-Files: *.gitignore .git/* .svn/* */.svn/*
+Files: *.gitignore *.gitattributes .git/* .svn/* */.svn/*
 Copyright: None
 License: CC0-1.0
 Comment: Exclusion of version control files; note that some of these patterns are for files that may only exist in a checkout
@@ -47,7 +47,7 @@ Copyright: DLR
 License: EPL-1.0
 Comment: preliminary
 
-Files: de.rcenvironment*/.project
+Files: de.rcenvironment*/.project build/.project
 Copyright: DLR
 License: EPL-1.0
 Comment: preliminary
