@@ -39,7 +39,7 @@ public abstract class InstanceManagementStepDefinitionBase extends AbstractStepD
 
     protected static final InstanceManagementService INSTANCE_MANAGEMENT_SERVICE = ExternalServiceHolder.getInstanceManagementService();
 
-    private static final int CONCURRENT_INSTANCE_STARTING_STAGGERED_DELAY_MSEC = 500;
+    private static final int CONCURRENT_INSTANCE_STARTING_STAGGERED_DELAY_MSEC = 1000;
 
     public InstanceManagementStepDefinitionBase(TestScenarioExecutionContext executionContext) {
         super(executionContext);
@@ -163,13 +163,13 @@ public abstract class InstanceManagementStepDefinitionBase extends AbstractStepD
                                 log.warn("Interrupted while waiting to initiate staggered start of instance " + instance.getId());
                                 return;
                             }
-                            try {
-                                // TODO does not work in parallel execution context. Make accessible to multiple threads at the same time.
-                                action.performActionOnInstance(instance,
-                                    StepDefinitionConstants.IM_ACTION_TIMEOUT_IN_SECS * instances.size());
-                            } catch (IOException | OperationFailureException e) {
-                                throw new RuntimeException(e);
-                            }
+                        }
+                        try {
+                            // TODO does not work in parallel execution context. Make accessible to multiple threads at the same time.
+                            action.performActionOnInstance(instance,
+                                StepDefinitionConstants.IM_ACTION_TIMEOUT_IN_SECS * instances.size());
+                        } catch (IOException | OperationFailureException e) {
+                            throw new RuntimeException(e);
                         }
                     }
                 });
