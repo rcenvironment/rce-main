@@ -74,8 +74,6 @@ public class EmbeddedSshServerImpl implements EmbeddedSshServerControl {
 
     private static final String HOST_KEY_STORAGE_FILE_NAME = "ssh_host_key.dat";
 
-    private static final String EVENT_LOG_KEY_CONNECTION_TYPE = "type";
-
     private static final String EVENT_LOG_VALUE_CONNECTION_TYPE = "ssh/uplink";
 
     private static final int NUM_ALLOWED_AUTH_ATTEMPTS = 3; // TODO hardcoded for now; make configurable?

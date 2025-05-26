@@ -252,12 +252,14 @@ public class SshConfiguration {
      */
     public SshAccountRole getRoleByName(String roleName) {
         SshAccountRole curRole = null;
+        // TODO (p2) this should be reworked to a map lookup -- misc_ro
         for (SshAccountRole role : roles) {
             if (role.getRoleName().equals(roleName)) {
                 curRole = role;
                 break;
             }
         }
+        // TODO (p2) add a parameter whether this fallback should be silently used?
         if (curRole == null) {
             curRole = getRoleByName(SshConstants.ROLE_NAME_DEFAULT);
         }

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -81,6 +82,7 @@ public class SshAuthenticationManager implements PasswordAuthenticator, Temporar
     // implementation of MINA PasswordAuthenticator
     public boolean authenticate(String loginName, String passwordParam, ServerSession session) {
         boolean success = false;
+        Optional<SshAccount> optionalAccount = Optional.empty();
         String refusalReason = REFUSAL_REASON_UNDEFINED;
 
         if (passwordParam == null || passwordParam.isEmpty()) {
@@ -94,6 +96,7 @@ public class SshAuthenticationManager implements PasswordAuthenticator, Temporar
             // normal login check
             SshAccount account = configuration.getAccountByName(loginName, false);
             if (account != null) {
+                optionalAccount = Optional.of(account);
                 if (checkPassword(account, passwordParam)) {
                     success = true;
                 } else {
@@ -105,7 +108,7 @@ public class SshAuthenticationManager implements PasswordAuthenticator, Temporar
             }
         }
 
-        registerAuthResult(session, loginName, EVENT_LOG_VALUE_AUTH_METHOD_PASSWORD, success, refusalReason);
+        registerAuthResult(session, loginName, EVENT_LOG_VALUE_AUTH_METHOD_PASSWORD, success, refusalReason, optionalAccount);
 
         if (!success && session != null && sessionTracker != null) {
             closeConnectionIfAuthAttemptsExceeded(session);
@@ -124,6 +127,7 @@ public class SshAuthenticationManager implements PasswordAuthenticator, Temporar
     @Override
     public boolean authenticate(String loginName, PublicKey key, ServerSession session) {
         boolean success = false;
+        Optional<SshAccount> optionalAccount = Optional.empty();
         String refusalReason = REFUSAL_REASON_UNDEFINED;
 
         if (loginName == null || loginName.isEmpty()) {
@@ -131,6 +135,7 @@ public class SshAuthenticationManager implements PasswordAuthenticator, Temporar
         } else {
             SshAccount account = configuration.getAccountByName(loginName, false);
             if (account != null) {
+                optionalAccount = Optional.of(account);
                 PublicKey knownKey = account.getPublicKeyObj();
                 if (knownKey != null) {
                     success = Arrays.equals(key.getEncoded(), knownKey.getEncoded());
@@ -146,7 +151,7 @@ public class SshAuthenticationManager implements PasswordAuthenticator, Temporar
 
         if (session != null) {
             // ignores duplicate calls; see method comment
-            registerAuthResult(session, loginName, EVENT_LOG_VALUE_AUTH_METHOD_PUBLIC_KEY, success, refusalReason);
+            registerAuthResult(session, loginName, EVENT_LOG_VALUE_AUTH_METHOD_PUBLIC_KEY, success, refusalReason, optionalAccount);
         } else {
             // consistency check
             if (!RuntimeDetection.isTestEnvironment()) {
@@ -161,7 +166,8 @@ public class SshAuthenticationManager implements PasswordAuthenticator, Temporar
         return success;
     }
 
-    private void registerAuthResult(ServerSession session, String loginName, String method, boolean success, String refusalReason) {
+    private void registerAuthResult(ServerSession session, String loginName, String method, boolean success,
+        String refusalReason, Optional<SshAccount> optionalAccount) {
 
         if (session == null || sessionTracker == null) {
             // consistency check - both are only allowed during unit tests
@@ -175,7 +181,7 @@ public class SshAuthenticationManager implements PasswordAuthenticator, Temporar
 
         try {
             if (success) {
-                sessionTracker.forSession(session).registerAuthenticationSuccess(loginName, method);
+                sessionTracker.forSession(session).registerAuthenticationSuccess(loginName, method, optionalAccount);
             } else {
                 sessionTracker.forSession(session).registerAuthenticationFailure(loginName, method,
                     refusalReason);
