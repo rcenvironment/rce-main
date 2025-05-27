@@ -1,0 +1,56 @@
+To set up your Eclipse for local RCE development, you need a compiled build
+of the "rce-thirdparty" project, which contains most external resources,
+including the Eclipse platform and various third-party libraries.
+This build contains an Eclipse p2 repository (often referred to as an 
+"update site"), which must then be configured as an entry in the active Eclipse
+"target platform".
+This makes its content accessible for compiling the "rce-main" code against.
+Typically, this third-party repository is the only entry in the local target platform.
+
+The recommended approach for most developers is to download a build of the 
+third-party repository as a zip file from the RCE website.
+The build matching the latest RCE release will be linked on the RCE download page.
+For other releases, navigate through the download server's file hierarchy and 
+look for files matching the pattern `rce-thirdparty-*.zip`.
+
+To make this downloaded file accessible for Eclipse, you need to set up a 
+local folder hierarchy as a sibling ("next to") of your local "rce-main" 
+checkout folder:
+
+```
+rce-main/<...>
+rce-thirdparty/build/target/thirdparty/repository/
+```
+
+[NOTE]
+====
+This path represents the path where local builds of the rce-thirdparty 
+repository would also be generated, so you can seamlessly switch between downloaded 
+and local builds during development.
+====
+
+Unpack the downloaded zip file into the created "repository" folder.
+
+[NOTE]
+====
+Make sure to unpack the files without creating an extra folder level.
+The resulting folder structure should look like this:
+
+```
+rce-thirdparty/build/target/thirdparty/repository/binary/
+rce-thirdparty/build/target/thirdparty/repository/features/
+rce-thirdparty/build/target/thirdparty/repository/plugins/
+```
+====
+
+After that, double-click the `local_or_unpacked_thirdparty_build.target`
+file in Eclipse, update/refresh it if necessary, and set it as the "target 
+platform" to use.
+
+[NOTE]
+====
+As an alternative approach, you can also create a target platform definition where
+you directly register the downloaded zip file as an archived target platform.
+As this might have a slight performance impact, the unpacking approach described 
+above is recommended by default.  
+====
