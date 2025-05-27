@@ -12,7 +12,8 @@ Scenario: Concurrent headless instance starting and stopping
   Then  instances "Node1, Node2, Node3, Node4, Node5" should be running
   
   When  stopping all instances concurrently
-  Then  the log output of all instances should indicate a clean shutdown with no warnings or errors
+  Then  all instances should be stopped 
+  And   the log output of all instances should indicate a clean shutdown with no warnings or errors
 
 
 @InstanceManagementFeature
