@@ -32,7 +32,7 @@ public class HttpDownloadUrlsManualTest {
     // TODO (p2) also check HTTPS and more specific download URLs - misc_ro
 
     // note: we are explicitly testing the HTTP URL here to ensure backwards compatibility after switching to HTTPS by default - misc_ro
-    private static final String URL_ADDRESS = "http://software.dlr.de/updates/rce/8.x/";
+    private static final String URL_ADDRESS = "http://download.rcenvironment.de/rce/10.x/";
 
     private static final int HTTP_PERMANENT_REDIRECT = 301;
 
