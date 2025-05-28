@@ -86,7 +86,7 @@
         <title id="installation_details"> Installation</title>
         <para os="windows">On Windows, we provide a single .zip-file to set up both client and
             server installations. This file is available
-            at<programlisting><uri>https://software.dlr.de/updates/rce/10.x/products/standard/releases/latest/zip/</uri></programlisting>Installing
+            at<programlisting><uri>https://download.rcenvironment.de/rce/10.x/products/standard/releases/latest/zip/</uri></programlisting>Installing
             RCE amounts to simply extracting the zip file to a location on your file system.<note>
                 <para>Due to restrictions of the standard Windows file system (NTFS), you should
                     choose a destination path that is as short as possible. Long paths are known to
@@ -187,12 +187,12 @@
                 this.</para>
             <para>Once you have imported the signing key into your package manager, please add the
                 following repository to its list of repositories:</para>
-            <programlisting>deb https://software.dlr.de/updates/rce/10.x/products/standard/releases/latest/deb/ /</programlisting>
+            <programlisting>deb https://download.rcenvironment.de/rce/10.x/products/standard/releases/latest/deb/ /</programlisting>
             <para>When using Synaptic, you can add this repository by
                 opening<programlisting>Settings -> Repositories -> Additional Repositories / Other Sources (or similar) -> Add New...</programlisting></para>
             <para>When using apt as your package manager, you can add the repository by executing
                 the following command in a
-                terminal:<programlisting>echo "deb https://software.dlr.de/updates/rce/10.x/products/standard/releases/latest/deb/ /"
+                terminal:<programlisting>echo "deb https://download.rcenvironment.de/rce/10.x/products/standard/releases/latest/deb/ /"
   >/etc/apt/sources.list.d/dlr_rce_10_releases.list</programlisting></para>
             <para>Although this command is split across multiple lines in this guide, it must be
                 executed as a single line. Further, this command requires superuser-rights and will
@@ -215,9 +215,9 @@
             <title>Installation of the .deb/.rpm Package (recommended for CentOS/Red Hat/SUSE,
                 alternative for Debian/Ubuntu/Mint)</title>
             <para>To install the .deb/.rpm file manually, download the latest version from either
-                <programlisting><uri>https://software.dlr.de/updates/rce/10.x/products/standard/releases/latest/deb/</uri></programlisting></para>
+                <programlisting><uri>https://download.rcenvironment.de/rce/10.x/products/standard/releases/latest/deb/</uri></programlisting></para>
             <para>or
-                from<programlisting><uri>https://software.dlr.de/updates/rce/10.x/products/standard/releases/latest/rpm/</uri></programlisting></para>
+                from<programlisting><uri>https://download.rcenvironment.de/rce/10.x/products/standard/releases/latest/rpm/</uri></programlisting></para>
             <para>Use the former package on .deb-based systems such as Debian, Ubuntu, or Mint and
                 use the latter package on .rpm-based systems such as Red Hat or CentOS.</para>
             <para>You can install the package using the graphical package management tools of your
@@ -232,7 +232,7 @@
             <title>Installation from the .zip File (alternative for all distributions)</title>
             <para>If none of the previous installation options fits your needs, you can also extract
                 RCE from a zip file downloaded
-                from<programlisting><uri>https://software.dlr.de/updates/rce/10.x/products/standard/releases/latest/zip/</uri></programlisting></para>
+                from<programlisting><uri>https://download.rcenvironment.de/rce/10.x/products/standard/releases/latest/zip/</uri></programlisting></para>
             <itemizedlist>
                 <listitem>
                     <para>If you prefer graphical tools, double-click the .zip file to open it with
