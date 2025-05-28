@@ -11,8 +11,9 @@
             </question>
             <answer>
                 <para>The generated distribution ("product") zip files are located in
-                        <code>build/target/products/zip</code> , with a matching Eclipse "update
-                    site" provided in <code>build/target/products/repository</code>.</para>
+                        <code>build/target/products</code> , with a matching Eclipse "update site"
+                    provided in <code>build/target/products/updatesite</code>. A zipped version of
+                    the update site is also available in <code>build/target/products</code>.</para>
             </answer>
         </qandaentry>
         <qandaentry>
