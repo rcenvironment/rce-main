@@ -25,7 +25,7 @@ The changes and new features in recent releases (10.4.0+) are listed on [this pa
 Changelogs for older releases (up to 10.4.0) are listed in [this repository](https://github.com/rcenvironment/rce/releases).
 Similar information for very old releases (up to 8.3.0) is available [here](https://github.com/rcenvironment/rce/wiki/Changelog-Overview).
 
-##### Get RCE (as a ready-to-run software)
+##### Get RCE as ready-to-run software
 
 For Windows, a simple .zip file is provided to set up both client and server installations.
 
@@ -33,6 +33,11 @@ On Linux, .deb/.rpm packages as well as a simple .zip file are provided to set u
 
 [Installation packages for the latest release](https://download.rcenvironment.de/rce/10.x/products/standard/releases/latest/) | 
 [Update site for the latest release](https://download.rcenvironment.de/rce/10.x/repositories/standard/releases/latest/)
+
+##### Building RCE from source
+
+This repository, together with a provided "third-party" resources zip file, contains everything to compile RCE from source.
+Please refer to `build/README.ad` for instructions.
 
 ##### License
 
