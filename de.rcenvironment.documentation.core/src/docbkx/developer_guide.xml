@@ -31,10 +31,14 @@
 
 	<chapter>
 		<title>Build and Infrastructure</title>
-		<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
-			href="developer_guide/sections/build_process_and_dependencies.xml"/>
-		<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
-			href="developer_guide/sections/releasing_and_versioning.xml" />
+		<para>
+			<note>
+				<para>The chapter previously present here was both highly outdated and incomplete,
+					both regarding RCE's release process as well as the technical steps involved. To
+					avoid confusion, we have removed it for the time being. We aim to review this in
+					a future release and decide on which updated information to add back.</para>
+			</note>
+		</para>
 		<xi:include href="developer_guide/sections/build_process_faq_and_tips.xml"
 			xmlns:xi="http://www.w3.org/2001/XInclude"/>
 	</chapter>

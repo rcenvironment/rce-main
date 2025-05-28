@@ -1,0 +1,60 @@
+== Building RCE
+
+This section describes how to build the main RCE artifacts and its documentation from source.
+These steps generate complete RCE builds for Windows and Linux in the form of zip files, 
+which are equivalent to the official RCE release zip files.
+User, administrator and developer documentation is also generated as part of this process, 
+and included in the output.
+
+Two build environments are officially tested and supported:
+
+* Ubuntu 22.04 LTS as the reference baseline for Linux.
+  (Generally, any reasonably recent distribution should work just as well, but this is not actively tested.)
+  Recent versions of OpenJDK 11 and Maven must be installed.
+* Windows 10 or 11, where these scripts must be run in a "git bash" environment using an up-to-date 
+  "Git for Windows" installation.
+  Recent versions of OpenJDK 11 and Maven must be installed in Windows and callable from inside "git bash".  
+
+To build RCE, you must first set up a build of the `rce-thirdparty` repository.
+For most developers, downloading an existing build is recommended.
+Refer to `de.rcenvironment/eclipse/tp/README.ad` on how to locate and unpack such a build,
+in particular into which location is must be unpacked.
+The Eclipse-specific "target platform" steps in that guide can be omitted -- Eclipse is not necessary to build RCE.
+
+[NOTE]
+====
+Alternatively, you can also locally build the third-party repository.  
+For this, both the `rce-main` and `rce-thirdparty` git repositories must be cloned into folders next to each other.
+In particular, it is important that the `rce-thirdparty` repository is cloned into a folder of the same name.
+Then, execute `rce-thirdparty/build/bin/build-thirdparty.sh`.
+This should result in a third-party repository in `rce-thirdparty/build/target/thirdparty/repository/`.
+====
+
+For building a particular release of `rce-main`, check out the matching release tag of it.
+For building a development snapshot, check out the `integration-10` branches (for the 10.x development line).
+
+[NOTE]
+====
+If you are building the third-party repository locally, the default branches or tags to check out
+should match those checked out for the `rce-main` repository.
+====
+
+With the `rce-main` sources and a build of the third-party repository in place, 
+the whole build can be performed by running the `rce-thirdparty/build/build-products.sh` script.
+After it has completed, the generated zip artifacts can be found in `rce-main/build/target/products/`.
+A matching update site is generated at `rce-main/build/target/products/updatesite/`.
+
+// TODO: describe purpose and usage of the other script files
+
+=== Unpublished Build Operations
+
+The build scripts documented above allow you to build a fully functional RCE installation 
+from published sources and artifacts.
+To avoid confusion, it should be pointed out that there are several build/CI operations that are also
+used as part of RCE releases, but which are currently not part of the public repositories, including
+
+* .deb and .rpm packaging,
+* SHASUM generation and signing,
+* container images for standardized build environments,
+* security vulnerability scanning,
+* and REUSE compliance testing.

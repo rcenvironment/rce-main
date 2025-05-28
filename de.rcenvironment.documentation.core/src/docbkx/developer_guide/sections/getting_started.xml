@@ -416,83 +416,24 @@
         </para>
     </section>
     <section>
-        <title>Building a standalone RCE version from Eclipse</title>
-        <para>You can also build a standalone version of RCE from Eclipse using Maven 3.5.3. </para>
-        <itemizedlist>
-            <listitem>
-                <para>There are several pre-defined build configurations for RCE. To find them,
-                    navigate to <code>de.rcenvironment/eclipse/build</code> in the "Project
-                    Explorer" on the left.</para>
-            </listitem>
-            <listitem>
-                <para>To run a .launch file, right-click on it and choose the single entry in the
-                    "Run As" submenu of the context menu that appears.<note>
-                        <para>Be aware to configure the recommended Maven Runtime Environment in
-                            version 3.5.3. In Eclipse you can select for each .launch file a
-                            locally installed Maven Runtime via "Run > Run Configurations ...".
-                        </para>
-                    </note></para>
-            </listitem>
-            <listitem>
-                <para>Building a standalone RCE installation (which is called a "product" in Eclipse
-                    RCP terms) generally consists of two steps: Providing a so-called "platform
-                    repository", and then building the actual product on top of it. There are two
-                    possible approaches for this:<itemizedlist>
-                        <listitem>
-                            <para>Using the .launch files in the "<code>using default remote
-                                    repository builds</code>" sub-folder, it is possible to avoid
-                                building your own platform repository, and fetch a pre-built one
-                                from the main repository servers (currently hosted at DLR) instead.
-                                One reason for this can be be to ensure that you are building
-                                against the exact same platform repository as a certain RCE release.
-                                Another reason is to simplify your local development setup if you
-                                have no reason to customize the target platform setup (e.g. by
-                                adding libraries).</para>
-                        </listitem>
-                        <listitem>
-                            <para>The most flexible way to build RCE from source is to compile a
-                                local platform repository yourself. This is simply done by
-                                navigating to the "<code>de.rcenvironment.platform/eclipse</code>
-                                folder (from the root of your workspace) and executing the single
-                                .launch file that is located there. On the first run, the build
-                                process may download quite a few resources from Maven Central;
-                                subsequent runs should be fairly quick. Once the build has finished
-                                (there should be a "SUCCESS" message near the bottom of the console
-                                output), you can build the main product using the .launch files in
-                                the "<code>using local repository builds</code>" sub-folder of the
-                                previously mentioned location.</para>
-                        </listitem>
-                    </itemizedlist></para>
-            </listitem>
-            <listitem>
-                <para>Regardless of whether you use a pre-build platform repository or compile one
-                    locally, running the "<code>RCE - build default product (snapshot, using
-                        &lt;...>)</code> .launch file is the best way to produce a standard local
-                    product build. The other .launch files are intended for more specific use
-                    cases.</para>
-            </listitem>
-            <listitem>
-                <para>The main product build takes several minutes to complete. Once it has
-                    finished, you will find the .zip files containing the final product in the
-                    folder
-                        <code>de.rcenvironment/target/de.rcenvironment.modules.repository.mainProduct/products</code>
-                    (You may have to refresh the de.rcenvironment project in the Project Explorer to
-                    see it.)</para>
-            </listitem>
-        </itemizedlist>
-    </section>
-    <section>
-        <title>Building from the command line</title>
-        <para>Building RCE completely from the command line is somewhat complicated as it is a
-            multi-step process in which later steps must reference the output artifacts of previous
-            steps. To simplify this, the command-line build will be further encapsulated by
-            front-end scripts, which will then be documented here. In the meantime, please use the
-            steps described above to trigger the build process from Eclipse.</para>
-        <para>Note that both the Eclipse-based and the command-line build trigger the same Maven
-            steps in the background. Because of this, the build triggered from Eclipse produces the
-            exact same artifacts as a command-line build (which is used in Continuous Integration
-            and for releases).<note>
-                <para>TODO document the new command-line build when ready</para>
-            </note></para>
+        <title>Building RCE</title>
+        <para>RCE's build system has undergone significant changes for the 10.6.0 release. Starting
+            with that release, builds are always performed by using Bash scripts located in the
+            "build" folder in the root of the repository. Building on Windows is still fully
+            supported by calling these scripts within a "git bash" shell provided by the commonly
+            used "Git for Windows" software package. Using these build scripts always generates
+            builds for both Linux and Windows, regardless of the platform the scripts are run
+            on.</para>
+        <para>For an introduction on how to execute the default ("product") build, refer to the
+                <code>build/README.ad</code> file in the <code>rce-main</code> repository. Note that
+            you will need to provide a matching build of the <code>rce-thirdparty</code> repository
+            to build against. You typically do not need to build that repository locally, as builds
+            matching each RCE release are conveniently available from the RCE download page. See the
+                <code>de.rcenvironment/eclipse/tp/README.ad</code> file for more information.</para>
+        <para>Note that the transition to the new build system is not fully complete yet, so you may
+            still find traces of the old setup in the repository and in the documentation. Also,
+            while this documentation enables you to build fully functional distribution packages of
+            RCE, equivalent to the official zip release files, its is currently not describing all
+            features of the new build system.</para>
     </section>
 </section>
