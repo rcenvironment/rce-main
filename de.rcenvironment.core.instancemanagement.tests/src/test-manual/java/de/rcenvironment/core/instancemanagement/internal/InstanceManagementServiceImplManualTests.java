@@ -63,7 +63,7 @@ public class InstanceManagementServiceImplManualTests {
         ConfigurationSegment configuration =
             ConfigurationSegmentUtils
                 .readTestConfigurationFromString("{"
-                    + "\"downloadSourceFolderUrlPattern\":\"https://software.dlr.de/updates/rce/6.x/products/standard/*/zip/\","
+                    + "\"downloadSourceFolderUrlPattern\":\"https://download.rcenvironment.de/rce/6.x/products/standard/*/zip/\","
                     + "\"downloadFilenamePattern\":\"dummy-*.zip\"}");
         TestConfigurationProvider configurationProvider = new TestConfigurationProvider();
         configurationProvider.setConfigurationSegment("instanceManagement", configuration);
@@ -94,7 +94,7 @@ public class InstanceManagementServiceImplManualTests {
                 .readTestConfigurationFromString("{"
                     + "\"dataRootDirectory\":\"" + dataRootDir.getAbsolutePath().replace("\\", "\\\\\\\\") + "\","
                     + "\"installationsRootDirectory\":\"" + installationsRootDir.getAbsolutePath().replace("\\", "\\\\\\\\") + "\","
-                    + "\"downloadSourceFolderUrlPattern\":\"https://software.dlr.de/updates/rce/6.x/products/standard/*/zip/\","
+                    + "\"downloadSourceFolderUrlPattern\":\"https://download.rcenvironment.de/rce/10.x/products/standard/*/zip/\","
                     + "\"downloadFilenamePattern\":\"rce-*-standard-win32.x86_64.zip\"}");
         TestConfigurationProvider configurationProvider = new TestConfigurationProvider();
         configurationProvider.setConfigurationSegment("instanceManagement", configuration);

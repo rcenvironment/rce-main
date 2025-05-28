@@ -31,7 +31,7 @@ class RCEBuildPreprocessor {
         ]
     ]
 
-    final DEFAULT_REPOSITORIES_ROOT_URL = 'https://software.dlr.de/updates/rce/10.x/repositories/'
+    final DEFAULT_REPOSITORIES_ROOT_URL = 'https://download.rcenvironment.de/rce/10.x/repositories/'
 
     private envAdapter
     private buildType     // snapshot, rc, release

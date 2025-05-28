@@ -29,7 +29,7 @@ public final class StepDefinitionConstants {
      * TODO hardcoding the build identifier should not be necessary; this should be investigated and changed - misc_ro
      */
     public static final String LEGACY_URL =
-        "https://software.dlr.de/updates/rce/9.x/products/standard/releases/latest/zip/"
+        "https://download.rcenvironment.de/rce/9.x/products/standard/releases/9.1.1/zip/"
         + "rce-9.1.1.201907260521-standard-*.x86_64.zip";
 
     /**
@@ -43,7 +43,7 @@ public final class StepDefinitionConstants {
      * TODO hardcoding the build identifier should not be necessary; this should be investigated and changed - misc_ro
      */
     public static final String BASE_URL =
-        "https://software.dlr.de/updates/rce/10.x/products/standard/releases/10.0.0/zip/"
+        "https://download.rcenvironment.de/rce/10.x/products/standard/releases/10.0.0/zip/"
         + "rce-10.0.0.201911221509-standard-*.x86_64.zip";
 
     /**

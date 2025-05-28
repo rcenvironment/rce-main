@@ -101,7 +101,7 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
 
     private static final String COMMAND_ARGUMENTS_FILE_NAME = File.separator + "commandArguments";
 
-    private static final String DEFAULT_DOWNLOAD_URL_PATTERN = "https://software.dlr.de/updates/rce/10.x/products/standard/*/zip/";
+    private static final String DEFAULT_DOWNLOAD_URL_PATTERN = "https://download.rcenvironment.de/rce/10.x/products/standard/*/zip/";
 
     private static final String DEFAULT_DOWNLOAD_FILENAME_PATTERN_WINDOWS = "rce-*-standard-win32.x86_64.zip";
 

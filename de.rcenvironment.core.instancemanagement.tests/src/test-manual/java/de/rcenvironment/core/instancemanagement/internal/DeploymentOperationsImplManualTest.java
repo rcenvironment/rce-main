@@ -69,7 +69,7 @@ public class DeploymentOperationsImplManualTest {
     public void testDownload() throws IOException {
         File tempFile = tfs.createTempFileFromPattern("download-*.tmp");
         assertEquals("", FileUtils.readFileToString(tempFile));
-        operations.downloadFile("https://software.dlr.de/updates/rce/9.x/products/standard/releases/latest/zip/VERSION",
+        operations.downloadFile("https://download.rcenvironment.de/rce/10.x/products/standard/releases/latest/zip/VERSION",
             tempFile, true, false, ONE_MINUTE_IN_MILLISECONDS);
         String content = FileUtils.readFileToString(tempFile);
         assertTrue(content.startsWith("9."));
