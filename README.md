@@ -30,8 +30,8 @@ For Windows, a simple .zip file is provided to set up both client and server ins
 
 On Linux, .deb/.rpm packages as well as a simple .zip file are provided to set up both client and server installations.
 
-[Installation packages for the latest release](https://software.dlr.de/updates/rce/10.x/products/standard/releases/latest/) | 
-[Update site for the latest release](https://software.dlr.de/updates/rce/10.x/repositories/standard/releases/latest/)
+[Installation packages for the latest release](https://download.rcenvironment.de/rce/10.x/products/standard/releases/latest/) | 
+[Update site for the latest release](https://download.rcenvironment.de/rce/10.x/repositories/standard/releases/latest/)
 
 ##### License
 
