@@ -465,7 +465,7 @@ Files: de.rcenvironment.filesets.licensing.thirdparty.default.feature/root_files
 Copyright: DLR
 License: CC0-1.0
 
-Files: README.md
+Files: README.md build/README.ad
 Copyright: DLR
 License: CC-BY-4.0
 Comment: preliminary
