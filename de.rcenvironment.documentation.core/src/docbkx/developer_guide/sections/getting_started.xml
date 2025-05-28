@@ -173,22 +173,15 @@
                         <itemizedlist>
                             <listitem>
                                 <para>In the Project Explorer, navigate to the
-                                        <code>de.rcenvironment/eclipse/tp/remote</code>
+                                        <code>de.rcenvironment/eclipse/tp</code>
                                     folder.</para>
                             </listitem>
                             <listitem>
-                                <para>Open the <code>default_release_or_snapshot.target</code> file
+                                <para>Open the <code>local_or_unpacked_thirdparty_build.target</code> file
                                     by double-clicking it.</para>
                             </listitem>
                             <listitem>
-                                <para>Select the "Locations" list entry starting with
-                                    "<code>https://download.rcenvironment.de/</code>" and click "Update".
-                                    After a while, the list entry's description should end with
-                                    something similar to "242 plugins available" (the exact number
-                                    may vary). Save the file if necessary.</para>
-                            </listitem>
-                            <listitem>
-                                <para>Click "Set as target platform" in the top right corner. You
+                                <para>Click "Set as active target platform" in the top right corner. You
                                     can close the .target file after this.</para>
                             </listitem>
                         </itemizedlist>
