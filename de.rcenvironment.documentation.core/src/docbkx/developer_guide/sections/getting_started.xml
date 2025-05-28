@@ -147,7 +147,7 @@
                             <listitem>
                                 <para>Browse to the "source" sub-folder of a release's download
                                     location, for example
-                                    <uri>https://updates-external.sc.dlr.de/rce/10.x/products/standard/releases/10.1.0/source/</uri>
+                                    <uri>https://download.rcenvironment.de/rce/10.x/products/standard/releases/10.6.0/source/</uri>
                                     for the 10.1.0 release. Download both zip files, "source" and
                                     "additions"; the latter contains binary artifacts like the
                                     Dakota and TiGLViewer executables.</para>
@@ -225,7 +225,7 @@
                             </listitem>
                             <listitem>
                                 <para>Select the "Locations" list entry starting with
-                                    "<code>https://updates-external.sc.dlr.de/</code>" and click "Update".
+                                    "<code>https://download.rcenvironment.de/</code>" and click "Update".
                                     After a while, the list entry's description should end with
                                     something similar to "242 plugins available" (the exact number
                                     may vary). Save the file if necessary.</para>
