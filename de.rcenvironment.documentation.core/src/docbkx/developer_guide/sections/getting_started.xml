@@ -103,58 +103,15 @@
                         updated on release.</para>
                 </listitem>
                 <listitem>
-                    <para>Option 1 - Importing from the RCE SVN repository, if you have access to it
-                        (as the repository is currently hosted internally at DLR):</para>
-                    <para>
-                        <itemizedlist>
-                            <listitem>
-                                <para>Install <ulink url="https://marketplace.eclipse.org/content/subclipse"
-                                    >Subclipse</ulink> (or alternatively <ulink 
-                                    url="https://polarion.plm.automation.siemens.com/products/svn/subversive"
-                                    >Subversive</ulink>) if you don't already have an Eclipse
-                                    SVN plugin installed. Note that when using Subclipse, you may
-                                    have to switch to the "SvnKit" SVN interface in the "Team > SVN"
-                                    preferences; this is normal.</para>
-                            </listitem>
-                            <listitem>
-                                <para>Open the "SVN Repositories" view (Window > Show View > Other >
-                                    SVN). </para>
-                            </listitem>
-                            <listitem>
-                                <para>Add <code><ulink url="https://svn.dlr.de/rce/new/rce/trunk"
-                                    >https://svn.dlr.de/rce/new/rce/trunk</ulink></code> as
-                                    a new SVN repository location.</para>
-                            </listitem>
-                            <listitem>
-                                <para>Expand the location entry and select all projects (the entries
-                                    starting with "de.rcenvironment") inside of it. </para>
-                            </listitem>
-                            <listitem>
-                                <para>Right-click the selected projects, select "Checkout" and
-                                    confirm if necessary. You should now see a long list of projects
-                                    in the "Package Explorer" on the left.<note>
-                                        <para>If the checkout was performed correctly, there should
-                                            be a small "M" (for "Maven") on most projects' icons,
-                                            and also a small "J" (for "Java") on most of
-                                            them.</para>
-                                    </note></para>
-                            </listitem>
-                        </itemizedlist>
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>Option 2 - Importing from the zip files provided with each release:<itemizedlist>
+                    <para>Option 1 - Importing from the zip files provided with each release:<itemizedlist>
                             <listitem>
                                 <para>Browse to the "source" sub-folder of a release's download
                                     location, for example
                                     <uri>https://download.rcenvironment.de/rce/10.x/products/standard/releases/10.6.0/source/</uri>
-                                    for the 10.1.0 release. Download both zip files, "source" and
-                                    "additions"; the latter contains binary artifacts like the
-                                    Dakota and TiGLViewer executables.</para>
+                                    for the 10.6.0 release. Download the "source" zip file.</para>
                             </listitem>
                             <listitem>
-                                <para>Extract both archives into the <emphasis>same</emphasis>
-                                    target directory. You should see a list of more than 200
+                                <para>Extract the archive. You should see a list of more than 200
                                     sub-folders, all except one beginning with
                                     "de.rcenvironment".</para>
                             </listitem>
@@ -172,14 +129,14 @@
                         </itemizedlist></para>
                 </listitem>
                 <listitem>
-                    <para>Option 3 - Importing from GitHub:</para>
+                    <para>Option 2 - Importing from GitHub:</para>
                     <itemizedlist>
                         <listitem>
                             <para>For successfully importing the RCE project, you need a Git client
                                 with LFS support.</para>
                         </listitem>
                         <listitem>
-                            <para>Clone <code>https://github.com/rcenvironment/rce</code> into a
+                            <para>Clone <code>https://github.com/rcenvironment/rce-main</code> into a
                                 directory of your choice.<note>
                                     <para>The clone settings of certain Git clients (e.g.
                                         TortoiseGit), have an "LFS" option. Make sure that this
@@ -187,7 +144,7 @@
                                 </note></para>
                         </listitem>
                         <listitem>
-                            <para>Check out the <code>master</code> branch; by default, this points
+                            <para>Check out an appropriate branch (e.g. <code>main</code> or <code>integration10</code>) or tag; by default, the <code>main</code> branch points
                                 to the source code of the latest release.</para>
                         </listitem>
                         <listitem>
