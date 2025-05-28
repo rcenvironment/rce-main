@@ -16,7 +16,8 @@ for historical completeness, but should not be used for new issues anymore.
 
 ##### Contributing
 
-Code contributions in this repository are welcome; a contributor's license agreement (CLA) is being prepared.
+There is currently no standard process for external code contributions.
+If you are interested in contributing to RCE, please contact us at rce@dlr.de.
 
 ##### Changelog
 
