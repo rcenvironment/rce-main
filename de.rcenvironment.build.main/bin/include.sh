@@ -80,6 +80,8 @@ build_intermediate_repo() {
     # delete previous output
     rm -rf target/intermediate
     mkdir -p target/intermediate
+    
+    # TODO validate presence of third-party repository build
 
     echo "Building RCE Bundles and Features (Intermediate Repository)"
     echo "  Build type:                    $RCE_BUILD_TYPE"
@@ -116,13 +118,15 @@ build_intermediate_repo() {
 
 build_products_from_repo() {
     # Generated output:
-    # - target/products/zip:        the zipped executable product builds
-    # - target/products/repository: the product p2 repository ("update site")
+    # - target/products/zip:        the zipped product builds and the update site
+    # - target/products/updatesite: the unpacked product p2 repository ("update site")
     # - target/products/build.log:  the output of the Maven build process
 
     # delete previous output
     rm -rf target/products
     mkdir -p target/products
+
+    # TODO validate presence of intermediate repository build
 
     echo "Assembling RCE (Executable Product)"
     echo "  Build type:                    $RCE_BUILD_TYPE"
@@ -165,19 +169,20 @@ build_products_from_repo() {
       "${OUTPUT_DIR}/${ZIP_FILES_BASENAME}-standard-linux.x86_64.zip"
     mv products/de.rcenvironment.products.rce.default-win32.win32.x86_64.zip \
       "${OUTPUT_DIR}/${ZIP_FILES_BASENAME}-standard-win32.x86_64.zip"
+    # move and rename the unpacked update site repository
+    mv repository "${OUTPUT_DIR}/updatesite"
+    cd - >/dev/null
 
     # create a zip file of the repository in the output directory
-    zip -rq "${OUTPUT_DIR}/${ZIP_FILES_BASENAME}-updatesite.zip" repository
-    # move (but at least for now, don't rename) the unpacked update site repository
-    mv repository "${OUTPUT_DIR}/"
-
+    cd "${OUTPUT_DIR}/updatesite"
+    zip -rq "${OUTPUT_DIR}/${ZIP_FILES_BASENAME}-updatesite.zip" *
     cd - >/dev/null
 
     # 6 lines for clean output in the BUILD SUCCESS case
     tail -n 6 "$BUILD_LOG_FILE"
     echo "Generated artifacts:"
-    echo "  Product zip files:             $(pwd)/target/products/zip"
-    echo "  Product update p2 repository:  $(pwd)/target/products/repository"
+    echo "  Product and update site zip files:   $(pwd)/target/products/*.zip"
+    echo "  Product update p2 repository:        $(pwd)/target/products/updatesite"
 }
 
 run_unit_tests() {

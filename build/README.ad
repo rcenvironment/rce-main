@@ -41,8 +41,8 @@ should match those checked out for the `rce-main` repository.
 
 With the `rce-main` sources and a build of the third-party repository in place, 
 the whole build can be performed by running the `rce-thirdparty/build/build-products.sh` script.
-After it has completed, the generated zip artifacts can be found in `rce-main/build/target/products/zip`.
-A matching update site is generated at `rce-main/build/target/products/repository`.
+After it has completed, the generated zip artifacts can be found in `rce-main/build/target/products/`.
+A matching update site is generated at `rce-main/build/target/products/updatesite/`.
 
 // TODO: describe purpose and usage of the other script files
 
