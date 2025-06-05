@@ -166,7 +166,8 @@ public final class RCELauncherCustomization {
         // If this fails with an exception it means we are not privileged.
         try {
             Preferences preferences = systemRoot();
-            String privilegeCheckKey = "rce_privilege_check";
+            // Key name below is more or less irrelevant, the UUID prevents collisions with other applications in fringe scenarios.
+            String privilegeCheckKey = "rce_d47c7287-4e4d-4970-840a-b65b69c2a4e7";
             preferences.put(privilegeCheckKey, "check"); // SecurityException on Windows
             preferences.remove(privilegeCheckKey);
             preferences.flush(); // BackingStoreException on Linux
