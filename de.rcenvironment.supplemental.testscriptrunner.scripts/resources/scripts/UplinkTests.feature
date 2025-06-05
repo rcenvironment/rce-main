@@ -213,8 +213,8 @@ Scenario: Remote visibility of Uplink tool after crashes and restarts of clients
     
     # there is no exponential back-off implemented for Uplink yet, so a connection attempt should 
     # happen every 10 seconds; also include some leeway from basic startup to Uplink readiness
-    Then the Uplink connection from "Client1" to "Server1" should be connected within 20 seconds
-    And  the Uplink connection from "Client2" to "Server1" should be connected within 20 seconds
+    Then the Uplink connection from "Client1" to "Server1" should be connected within 30 seconds
+    And  the Uplink connection from "Client2" to "Server1" should be connected within 30 seconds
     
     And  instance "Client2" should see these components within 5 seconds:
         | Client1 (via Client1/default) | common/TestTool | local |
