@@ -70,5 +70,9 @@ public interface DistributedComponentKnowledge {
      *         {@link ComponentInstallation}s on the local node
      */
     Collection<DistributedComponentEntry> getAllInstallations(); // TODO rename to "all available"
-
+    
+    /**
+     * @return all {@link ComponentInstallation}s published on reachable remote nodes.
+     */
+    Collection<DistributedComponentEntry> getRemoteInstallations();
 }

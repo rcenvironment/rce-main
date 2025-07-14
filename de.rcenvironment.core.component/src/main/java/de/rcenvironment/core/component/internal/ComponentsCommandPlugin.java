@@ -190,7 +190,7 @@ public class ComponentsCommandPlugin implements CommandPlugin {
         if (localOnly) {
             installationSet = compKnowledge.getAllLocalInstallations();
         } else if (remoteOnly) {
-            installationSet = compKnowledge.getAllInstallations(); // TODO add actual option once available
+            installationSet = compKnowledge.getRemoteInstallations();
         } else {
             installationSet = compKnowledge.getAllInstallations();
         }
