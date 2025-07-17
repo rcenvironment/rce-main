@@ -171,14 +171,6 @@ public class ComponentsCommandPlugin implements CommandPlugin {
 
     private void performComponentsList(CommandContext context) throws CommandException {
         ParsedCommandModifiers modifiers = context.getParsedModifiers();
-        
-        // TreeMap for components ordered alphabetically by platform first, then alphabetically by components
-        Map<String, TreeMap<String, DistributedComponentEntry>> components = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-
-        DistributedComponentKnowledge compKnowledge = componentKnowledgeService.getCurrentSnapshot();
-        final Collection<DistributedComponentEntry> installationSet;
-
-        //final List<String> options = context.consumeRemainingTokens();
         boolean localOnly = modifiers.hasCommandFlag("-l");
         boolean remoteOnly = modifiers.hasCommandFlag("-r");
         if (localOnly && remoteOnly) {
@@ -187,6 +179,8 @@ public class ComponentsCommandPlugin implements CommandPlugin {
         boolean includeAuthInformation = true; // always on for now; option removed
         boolean asTable = modifiers.hasCommandFlag("-t"); // for easier parsing by scripted calls
 
+        DistributedComponentKnowledge compKnowledge = componentKnowledgeService.getCurrentSnapshot();
+        final Collection<DistributedComponentEntry> installationSet;
         if (localOnly) {
             installationSet = compKnowledge.getAllLocalInstallations();
         } else if (remoteOnly) {
@@ -194,7 +188,14 @@ public class ComponentsCommandPlugin implements CommandPlugin {
         } else {
             installationSet = compKnowledge.getAllInstallations();
         }
+        
+        if (installationSet.isEmpty()) {
+            context.println("No components available.");
+            return;
+        }
 
+        // TreeMap for components ordered alphabetically by platform first, then alphabetically by components
+        Map<String, TreeMap<String, DistributedComponentEntry>> components = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         for (DistributedComponentEntry entry : installationSet) {
             ComponentInstallation ci = entry.getComponentInstallation();
             if (components.get(ci.getNodeId()) == null) {
