@@ -234,6 +234,11 @@ public class DistributedComponentKnowledgeServiceImpl
         public Collection<DistributedComponentEntry> getSharedAccessInstallations() {
             return sharedAccessEntries;
         }
+        
+        @Override
+        public Collection<DistributedComponentEntry> getRemoteInstallations() {
+            return remoteEntries;
+        }
 
         @Override
         public Collection<DistributedComponentEntry> getAllInstallations() {

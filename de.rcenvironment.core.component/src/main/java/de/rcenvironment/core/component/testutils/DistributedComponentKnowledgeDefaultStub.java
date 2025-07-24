@@ -53,4 +53,8 @@ public class DistributedComponentKnowledgeDefaultStub implements DistributedComp
         return new HashSet<>();
     }
 
+    @Override
+    public Collection<DistributedComponentEntry> getRemoteInstallations() {
+        return new HashSet<>();
+    }
 }
