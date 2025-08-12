@@ -7,12 +7,12 @@
 # Author: Robert Mischke, Jan Flink
 
 # This file is included from all main operation scripts, and provides most
-# of the actual functionality. The current working dir is expected to be the 
+# of the actual functionality. The current working dir is expected to be the
 # .build.main project, which is also the reference point for relative paths.
 
 
 #------------------------
-# Common Initialization 
+# Common Initialization
 #------------------------
 
 # abort on non-zero return values
@@ -57,12 +57,21 @@ set -u
 # Function Definitions
 #-----------------------
 
+create_zip_file() {
+    FILENAME="$1"
+    shift
+    # we are using the JDK "jar" command here as it is known to be available, unlike the "zip"
+    # command, which is, for example, not present by default in a git bash;
+    # "-M" is short for "--no-manifest"
+    jar -cMf "${FILENAME}" $@
+}
+
 fail_with_log_tail_if_non_zero() {
     EXIT_CODE="$1"
     LOG_FILE="$2"
     # log tail lines to print; arbitrary, can be adjusted or made a parameter
     TAIL_COUNT=80
-    
+
     if [ $EXIT_CODE != 0 ]; then
         echo "Operation failed with exit code $EXIT_CODE; last lines of log file:"
         echo
@@ -73,14 +82,14 @@ fail_with_log_tail_if_non_zero() {
 
 build_intermediate_repo() {
     # Generated output:
-    # - target/intermediate/repository: the "intermediate" p2 repository 
+    # - target/intermediate/repository: the "intermediate" p2 repository
     #                                   to build products from
     # - target/intermediate/build.log:  the output of the Maven build process
-    
+
     # delete previous output
     rm -rf target/intermediate
     mkdir -p target/intermediate
-    
+
     # TODO validate presence of third-party repository build
 
     echo "Building RCE Bundles and Features (Intermediate Repository)"
@@ -103,9 +112,9 @@ build_intermediate_repo() {
     >"$BUILD_LOG_FILE" 2>&1
     EXIT_CODE=$?
     set -e
-    
+
     fail_with_log_tail_if_non_zero $EXIT_CODE "$BUILD_LOG_FILE"
-    
+
     mv ../de.rcenvironment/target/de.rcenvironment.modules.repository.intermediate/repository \
        target/intermediate/
 
@@ -151,14 +160,14 @@ build_products_from_repo() {
     >"$BUILD_LOG_FILE" 2>&1
     EXIT_CODE=$?
     set -e
-    
+
     fail_with_log_tail_if_non_zero $EXIT_CODE "$BUILD_LOG_FILE"
-    
+
     OUTPUT_DIR="$(pwd)/target/products"
 
     # enter the Tycho product output directory
     cd ../de.rcenvironment/target/de.rcenvironment.modules.repository.mainProduct/
-    
+
     # copy one of the VERSION files to the top level of the output directory
     cp repository/VERSION "${OUTPUT_DIR}/VERSION"
     # using the VERSION file's content, define the zip file names
@@ -175,7 +184,9 @@ build_products_from_repo() {
 
     # create a zip file of the repository in the output directory
     cd "${OUTPUT_DIR}/updatesite"
-    zip -rq "${OUTPUT_DIR}/${ZIP_FILES_BASENAME}-updatesite.zip" *
+    # we are using the JDK "jar" command here as it is known to be available, unlike the "zip"
+    # command, which is, for example, not present by default in a git bash; -M = "--no-manifest"
+    create_zip_file "${OUTPUT_DIR}/${ZIP_FILES_BASENAME}-updatesite.zip" *
     cd - >/dev/null
 
     # 6 lines for clean output in the BUILD SUCCESS case
@@ -216,12 +227,12 @@ run_unit_tests() {
     >"$BUILD_LOG_FILE" 2>&1
     EXIT_CODE=$?
     set -e
-    
+
     # collect individual XML report files
     mkdir -p target/unit-tests/reports/xml
     find .. -name '*.xml' -path '*/target/surefire-reports/*' \
       -exec cp {} target/unit-tests/reports/xml/ \;
-      
+
     # a first quick-and-dirty check for test errors, but better than nothing
     # TODO generate a proper overview/report from these files
     echo "Checking for test errors (preliminary approach)"
@@ -239,7 +250,7 @@ build_documentation_only() {
     # Generated output:
     # - target/documentation/pdf:       the generated PDF documentation
     # - target/documentation/build.log: the output of the Maven build process
-    
+
     # delete previous output
     rm -rf target/documentation
     mkdir -p target/documentation/pdf/{linux,windows}
@@ -257,7 +268,7 @@ build_documentation_only() {
     >"$BUILD_LOG_FILE" 2>&1
     EXIT_CODE=$?
     set -e
-    
+
     fail_with_log_tail_if_non_zero $EXIT_CODE "$BUILD_LOG_FILE"
 
     mv -t target/documentation/pdf/linux/ \
