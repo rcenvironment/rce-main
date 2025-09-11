@@ -314,7 +314,7 @@ SPDX-FileCopyrightText = "DLR"
 SPDX-License-Identifier = "CC0-1.0"
 
 [[annotations]]
-path = ["de.rcenvironment.core.gui.wizards.exampleproject/templates/**.json", "de.rcenvironment.core.gui.wizards.exampleproject/templates/**.txt", "de.rcenvironment.core.gui.wizards.exampleproject/templates/**.xsl", "de.rcenvironment.core.gui.wizards.exampleproject/templates/workflows_examples/02_Component?Groups/**.xml", "de.rcenvironment.core.component.xml.tests/src/test/resources/CPACS.xml"]
+path = ["de.rcenvironment.core.gui.wizards.exampleproject/templates/**.json", "de.rcenvironment.core.gui.wizards.exampleproject/templates/**.txt", "de.rcenvironment.core.gui.wizards.exampleproject/templates/**.xsl", "de.rcenvironment.core.gui.wizards.exampleproject/templates/workflows_examples/02_Component Groups/**.xml", "de.rcenvironment.core.component.xml.tests/src/test/resources/CPACS.xml"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "DLR"
 SPDX-License-Identifier = "CC0-1.0"
@@ -410,7 +410,7 @@ SPDX-FileCopyrightText = "DLR"
 SPDX-License-Identifier = "CC0-1.0"
 
 [[annotations]]
-path = ["de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/**.json", "de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/**.json", "de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/workflows/Workflow", "Examples", "Project/**.xml", "de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/workflows/Workflow", "Examples", "Project/**.xsl", "de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/tools/**/docs/**.txt"]
+path = ["de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/**.json", "de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/**.json", "de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/workflows/Workflow Examples Project/**.xml", "de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/workflows/Workflow Examples Project/**.xsl", "de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/tools/**/docs/**.txt"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "DLR"
 SPDX-License-Identifier = "CC0-1.0"
@@ -617,7 +617,7 @@ SPDX-FileCopyrightText = "DLR"
 SPDX-License-Identifier = "CC0-1.0"
 
 [[annotations]]
-path = ["de.rcenvironment/eclipse/tp/README", "-", "using", "local", "platform", "builds.txt"]
+path = ["de.rcenvironment/eclipse/tp/README.ad"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "DLR"
 SPDX-License-Identifier = "CC0-1.0"
