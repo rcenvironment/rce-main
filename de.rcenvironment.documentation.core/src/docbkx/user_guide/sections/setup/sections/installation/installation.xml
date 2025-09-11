@@ -7,8 +7,8 @@
         <para>To run RCE on a system, the only prerequisite is an installed Java Runtime Environment
             (JRE), version 11 or above. If you do not already have one on your machine, <phrase
                 os="linux">use your system's package manager to install it; the most common choice
-                is the OpenJDK JRE.</phrase><phrase os="windows">you can download it from
-                <programlisting><uri>https://www.java.com/de/download/</uri></programlisting>and
+                is the OpenJDK JRE.</phrase><phrase os="windows">you can download it from e.g. 
+                <programlisting><uri>https://adoptium.net/temurin/releases</uri></programlisting>and
                 install it. Starting with RCE 8.x we only publish 64 bit packages of RCE. Therefore,
                 please make sure to install the 64 bit version of the JRE.</phrase><note>
                 <para>Some pre-installed components of RCE have additional dependencies. Please
