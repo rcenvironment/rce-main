@@ -154,16 +154,16 @@ public class ConnectionSetupsListContributor extends NetworkViewContributorBase 
                 new EditNetworkConnectionDialog(treeViewer.getTree().getShell(), connectionName, networkContactString);
             if (dialog.open() == Window.OK) {
                 String newConnectionName = dialog.getConnectionName();
-                boolean newConnectImmediately = dialog.getConnectImmediately();
+                boolean connectImmediately = dialog.getConnectImmediately();
                 NetworkContactPoint ncp = dialog.getParsedNetworkContactPoint();
 
                 connectionSetupService.disposeConnectionSetup(connectionSetup);
 
                 if (ncp != null) {
                     ConnectionSetup newNetworkConnection = connectionSetupService.createConnectionSetup(
-                        ncp, newConnectionName, true);
+                        ncp, newConnectionName, connectImmediately);
                     if (newNetworkConnection != null) {
-                        if (newConnectImmediately) {
+                        if (connectImmediately) {
                             newNetworkConnection.signalStartIntent();
                         }
                     } else {
