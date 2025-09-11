@@ -1,0 +1,691 @@
+version = 1
+SPDX-PackageName = "Remote Component Environment (RCE)"
+SPDX-PackageDownloadLocation = "https://rcenvironment.de/"
+
+[[annotations]]
+path = ["**.gitignore", "**.gitattributes", ".git/**", ".svn/**", "**/.svn/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "None"
+SPDX-License-Identifier = "CC0-1.0"
+SPDX-FileComment = "Exclusion of version control files; note that some of these patterns are for files that may only exist in a checkout"
+
+[[annotations]]
+path = "de.rcenvironment**/**/MANIFEST.MF"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = "de.rcenvironment**/feature.xml"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = "de.rcenvironment**/fragment.xml"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = "de.rcenvironment.**/OSGI-INF/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = ["de.rcenvironment.**/**/p2.inf", "de.rcenvironment.**/**.p2.inf"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = "de.rcenvironment**/pom.xml"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = "de.rcenvironment.core/maven/coreParent.pom"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = "de.rcenvironment**/.classpath"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = ["de.rcenvironment**/.project", "build/.project"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = "de.rcenvironment**/build.properties"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = "de.rcenvironment.core/maven/utils/**.bat"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = "de.rcenvironment.platform/**/autoCopy.flag"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "preliminary (use CC0 instead?)"
+
+[[annotations]]
+path = "de.rcenvironment.**/**.wf"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "preliminary (use CC0 instead?)"
+
+[[annotations]]
+path = "de.rcenvironment/eclipse/launch/profiles/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = "de.rcenvironment/eclipse/launch/**/configuration.**.sample"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "preliminary (use CC0 instead?)"
+
+[[annotations]]
+path = "de.rcenvironment**/**.launch"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = "de.rcenvironment**/**.target"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = "de.rcenvironment.documentation.core/**.adoc"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = ["de.rcenvironment.documentation.core/src/docbkx/**.xml", "de.rcenvironment.documentation.core/src/docbkx/**.template"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+[[annotations]]
+path = ["de.rcenvironment.documentation.core/src/docbkx/**.xpr", "de.rcenvironment.documentation.core/src/docbkx/stylesheets/**.xsl"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.documentation.core/src/asciidoc/**.ad"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+[[annotations]]
+path = ["de.rcenvironment.**.gui/help/**.xml", "de.rcenvironment.**.gui.**/help/**.xml"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = "de.rcenvironment.**.gui.**/help/src/docbkx/**.xml"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = ["de.rcenvironment.**.gui.help/help/**.xml", "de.rcenvironment.**.gui.help/help/**.xsl", "de.rcenvironment.**.gui.help/help/**.html", "de.rcenvironment.**.gui.help/help/**.css"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = ["de.rcenvironment.core.gui.help/resources/docbkx/**.xsl", "de.rcenvironment.core.gui.help/resources/docbkx/**.xml", "de.rcenvironment.core.gui.help/resources/docbkx/**.scenarios"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = "de.rcenvironment/doc/meta/release_changelogs/**.md"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.components.**.execution/src/main/resources/resources/**.json", "de.rcenvironment.components.**.execution/resources/**.json"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.**/messages.properties", "de.rcenvironment.**/images.properties"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.**/plugin.**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.supplemental.testscriptrunner/src/main/assembly/**", "de.rcenvironment.supplemental.testscriptrunner/META-INF/services/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/**.feature", "de.rcenvironment.supplemental.testscriptrunner.tests/src/test/resources/scripts/**.feature"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.filesets.configuration.samples.feature/root_files/examples/configuration/**.sample"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.scripting/src/main/resources/resources/**.py"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.filesets.extras.win32.feature/root_files/extras/**.bat", "de.rcenvironment.filesets.extras.linux.feature/root_files/extras/**.sh"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.filesets.integration.tools.templates.cpacs.feature/root_files/integration/tools/templates/**.json", "de.rcenvironment/eclipse/launch/installation_data/integration/tools/templates/**.json"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.component.integration.cpacs/resources/**.xslt"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.gui.integration.toolintegration.cpacs/resources/**.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.component.integration/src/main/resources/**.txt"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.components.script.common/src/main/resources/resources/defaultScript.py"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.core.datamanagement/src/main/resources/**.xml", "de.rcenvironment.core.datamanagement/src/main/resources/**.txt"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.core.gui.introduction/content/**.html", "de.rcenvironment.core.gui.introduction/content/**.css", "de.rcenvironment.core.gui.introduction/content/**.json", "de.rcenvironment.core.gui.introduction/**.xml"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.monitoring/resources/**.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.components.optimizer.dakota.common/resources/doe/dakota/**.json", "de.rcenvironment.components.optimizer.dakota.common/resources/optimizer/dakota/**.json", "de.rcenvironment.components.optimizer.dakota.execution/resources/**.json", "de.rcenvironment.components.optimizer.dakota.execution/resources/**.sample", "de.rcenvironment.components.optimizer.common/resources/de.rcenvironment.components.optimizer.simulator.jar"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.components.optimizer.generic.execution/resources/RCE_Optimizer_API.zip"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.core.component.workflow.tests/src/test/resources/workflows_manual/files/CPACSToolIntegration/**.xml", "de.rcenvironment.core.component.workflow.tests/src/test/resources/workflows_manual/files/ToolIntegration/**.py", "de.rcenvironment.core.component.workflow.tests/src/test/resources/workflows_manual/files/**/configuration.json"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.components.excel.common.tests/externalFiles/**.xls", "de.rcenvironment.components.excel.common.tests/externalFiles/**.txt"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.components.xml.merger.execution.tests/src/test/resources/**.xml", "de.rcenvironment.components.xml.merger.execution.tests/src/test/resources/**.xsl", "de.rcenvironment.core.component.xml.tests/src/test/resources/.xml"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.core.gui.wizards.exampleproject/templates/**.json", "de.rcenvironment.core.gui.wizards.exampleproject/templates/**.txt", "de.rcenvironment.core.gui.wizards.exampleproject/templates/**.xsl", "de.rcenvironment.core.gui.wizards.exampleproject/templates/workflows_examples/02_Component?Groups/**.xml", "de.rcenvironment.core.component.xml.tests/src/test/resources/CPACS.xml"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.core.utils.common.tests/src/test/resources/**.xml", "de.rcenvironment.core.utils.common.tests/src/test/resources/**.xsl", "de.rcenvironment.core.utils.common.tests/src/test/resources/**.zip"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.core.utils.incubator.tests/src/test/resources/**.xml", "de.rcenvironment.core.utils.incubator.tests/src/test/resources/**.xsd", "de.rcenvironment.core.utils.incubator.tests/src/test/resources/**.xsl"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.component.integration.tests/src/test/resources/TestTools.zip"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.filesets.extras.feature/root_files/examples/optimization_algorithm_api/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.components.cluster.execution/src/main/resources/resources/job.pbs"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.components.evaluationmemory.execution.tests/src/test/resources/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.components.script.execution.python.fragment/src/main/java/empty_dir.txt", "de.rcenvironment.components.optimizer.generic.execution/resources/example_profile/optimizer/example/source/generic_optimizer.py"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.utils.incubator/src/main/resources/empty_dir.txt"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.communication.file.service.tests/src/test/resources/**.txt"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.communication.tests/src/test/resources/config-tests/**.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.component.integration.workflow/src/main/resources/configuration.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.component.tests/src/test/resources/**.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.component.workflow.tests/src/test/resources/**readme"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.component.workflow.tests/src/test/resources/**.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.core.component.workflow.testworkflows/src/main/resources/cases/**", "de.rcenvironment.core.component.workflow.testworkflows/src/main/resources/**.json", "de.rcenvironment.core.component.workflow.testworkflows/src/main/resources/workflows/**.expected"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/**.json", "de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/**.json", "de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/workflows/Workflow", "Examples", "Project/**.xml", "de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/workflows/Workflow", "Examples", "Project/**.xsl", "de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/tools/**/docs/**.txt"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.supplemental.testscriptrunner/README.txt", "de.rcenvironment.supplemental.testscriptrunner.scripts/resources/scripts/README.txt"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.supplemental.testscriptrunner/src/main/resources/**.properties", "de.rcenvironment.supplemental.testscriptrunner/src/main/resources/**.json"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.mail.tests/src/test/resources/**.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.core.login.tests/src/test/resources/**.pem", "de.rcenvironment.core.datamanagement/src/test/resources/**.pem", "de.rcenvironment.core.authentication.tests/src/test/resources/**.pem"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.core.gui.workflow/resources/**.exsd", "de.rcenvironment.core.gui.datamanagement/schema/**.exsd"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.gui.palette.tests/src/test/resources/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.filesets.sql.connectors.mysql.feature/root_files/extras/database_connectors/README.txt", "de.rcenvironment/eclipse/launch/installation_data/extras/database_connectors/README.txt"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.filesets.logging.default.feature/root_files/configuration/logging.xml"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment.filesets.extras.feature/root_files/extras/mail/filter.json", "de.rcenvironment/eclipse/launch/installation_data/extras/mail/filter.json"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.utils.cluster.tests/src/test/resources/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.utils.common/src/main/resources/**.xslt"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.utils.ssh.tests/src/test-manual/java/**.properties.template"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.utils.executor.tests/src/test/resources/**.test.properties"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.components.script.execution.python.fragment/src/main/resources/resources/configuration_python.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.components.inputprovider.gui.tests/src/main/resources/sampleFile"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.components.optimizer.common/resources/optimizer/algorithms.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.configuration.tests/src/test/resources/configurationStore/minimal.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["org.eclipse.equinox.launcher/.project", "org.eclipse.equinox.launcher/pom.xml", "org.eclipse.equinox.launcher/META-INF/MANIFEST.MF", "de.rcenvironment.bootstrap.launcher/README-RCE.ad", "org.eclipse.equinox.launcher/bin/.**", "org.eclipse.equinox.launcher/bin/pom.xml", "org.eclipse.equinox.launcher/bin/target/**.html", "de.rcenvironment.bootstrap.launcher/**.html"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = ["org.eclipse.equinox.launcher/build.properties", "org.eclipse.equinox.launcher/src/main/java/**/package.html", "org.eclipse.equinox.launcher/about.html"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "IBM Corporation and others"
+SPDX-License-Identifier = "EPL-1.0"
+SPDX-FileComment = "Non-code files imported as part of the Eclipse native launcher"
+
+[[annotations]]
+path = "de.rcenvironment.filesets.extras.win32.feature/root_files/extras/windows_service/prunsrv.exe"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "The Apache Software Foundation"
+SPDX-License-Identifier = "Apache-2.0"
+SPDX-FileComment = "Non-code file"
+
+[[annotations]]
+path = ["de.rcenvironment/checkstyle/checks.xml", "de.rcenvironment/checkstyle/suppressions.xml"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment/eclipse/eclipse-cleanup.xml", "de.rcenvironment/eclipse/eclipse-formatter.xml"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment/maven/modules/jqassistant.report/jqassistant/rce-rules.xml"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment/maven/modules/repository.mainProduct/category.xml", "de.rcenvironment/maven/modules/repository.mainProduct/rce_default.p2.inf", "de.rcenvironment/maven/modules/repository.mainProduct/rce_default.product", "de.rcenvironment/maven/modules/repository.intermediate/category.xml"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.embedded.ssh.tests/src/test/resources/**.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.eventlog/scripts/requirements.txt"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.extensions.testscriptrunner/maven/repository/category.xml"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.documentation.core/maven/genGraphvizSVG.pom"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.documentation.core/src/legacy/release.txt"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = ["de.rcenvironment.core.start.gui/src/main/java/de/rcenvironment/core/start/gui/internal/unwanted.properties", "de.rcenvironment.core.gui.utils.incubator/src/main/java/de/rcenvironment/core/gui/utils/incubator/unwanted.properties"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment/utils/repocheck/test_check_repository.py", "de.rcenvironment/utils/repocheck/validation_examples/bundle_with_assorted_issues/expected_result.txt"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment/utils/release/additions-filter.conf"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment/utils/release/readme.txt"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["de.rcenvironment/eclipse/tp/README", "-", "using", "local", "platform", "builds.txt"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment/doc/meta/release_shasums.txt"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = ["de.rcenvironment/eclipse/launch/installation_data/dev_config.ini", "de.rcenvironment/eclipse/launch/installation_data/logging.xml"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.gui.xpathchooser/resources/XPathChooserPropertyView.properties"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.instancemanagement.tests/src/test/resources/instanceManagementTest/configuration.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.instancemanagement.tests/src/test-manual/java/de/rcenvironment/core/instancemanagement/internal/InstanceOperationsImplManualTests.properties.template"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.remoteaccess.tests/src/test-manual/resources/RemoteAccessStandaloneClientParametrizedTests.properties.template"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.gui.introduction/content/script/intro.js"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.gui.tiglviewer/contexts.xml"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "de.rcenvironment.core.scripting/src/main/resources/resources/simplejson.zip"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Bob Ippolito"
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "de.rcenvironment.filesets.licensing.thirdparty.default.feature/root_files/THIRD_PARTY"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["README.md", "build/README.ad"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "preliminary"
