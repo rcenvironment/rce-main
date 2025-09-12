@@ -1,0 +1,51 @@
+version = 1
+SPDX-PackageName = "Remote Component Environment (RCE)"
+SPDX-PackageDownloadLocation = "https://rcenvironment.de/"
+
+[[annotations]]
+path = "eclipse/launch/profiles/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = ["eclipse/launch/**/configuration.**.sample", "doc/meta/release_shasums.txt"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "preliminary (use CC0 instead?)"
+
+[[annotations]]
+path = [
+	"doc/meta/release_changelogs/**.md",
+	"eclipse/launch/installation_data/integration/tools/templates/*.json",
+	"eclipse/tp/README.ad",
+	"eclipse/launch/installation_data/extras/mail/filter.json",
+	"eclipse/launch/installation_data/extras/database_connectors/README.txt"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = [
+	"checkstyle/checks.xml",
+	"checkstyle/suppressions.xml",
+	"eclipse/eclipse-cleanup.xml",
+	"eclipse/eclipse-formatter.xml",
+	"maven/modules/jqassistant.report/jqassistant/rce-rules.xml",
+	"maven/modules/repository.mainProduct/category.xml",
+	"maven/modules/repository.mainProduct/rce_default.p2.inf",
+	"maven/modules/repository.mainProduct/rce_default.product",
+	"maven/modules/repository.intermediate/category.xml",
+	"utils/repocheck/test_check_repository.py",
+	"utils/repocheck/validation_examples/bundle_with_assorted_issues/expected_result.txt",
+	"utils/release/additions-filter.conf",
+	"utils/release/readme.txt",
+	"eclipse/launch/installation_data/dev_config.ini",
+	"eclipse/launch/installation_data/logging.xml"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
