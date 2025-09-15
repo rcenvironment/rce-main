@@ -10,7 +10,10 @@ SPDX-License-Identifier = "CC0-1.0"
 SPDX-FileComment = "preliminary"
 
 [[annotations]]
-path = ["eclipse/launch/**/configuration.**.sample", "doc/meta/release_shasums.txt"]
+path = [
+	"eclipse/launch/**/configuration.**.sample",
+	"doc/meta/release_shasums.txt"
+]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "DLR"
 SPDX-License-Identifier = "CC-BY-4.0"

@@ -10,13 +10,20 @@ SPDX-License-Identifier = "CC0-1.0"
 SPDX-FileComment = "preliminary"
 
 [[annotations]]
-path = ["src/docbkx/**.xml", "src/docbkx/**.template", "src/asciidoc/**.ad"]
+path = [
+	"src/docbkx/**.xml",
+	"src/docbkx/**.template",
+	"src/asciidoc/**.ad"
+]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "DLR"
 SPDX-License-Identifier = "CC-BY-4.0"
 
 [[annotations]]
-path = ["src/docbkx/**.xpr", "src/docbkx/stylesheets/**.xsl"]
+path = [
+	"src/docbkx/**.xpr",
+	"src/docbkx/stylesheets/**.xsl"
+]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "DLR"
 SPDX-License-Identifier = "CC0-1.0"

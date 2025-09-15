@@ -3,7 +3,7 @@ SPDX-PackageName = "Remote Component Environment (RCE)"
 SPDX-PackageDownloadLocation = "https://rcenvironment.de/"
 
 [[annotations]]
-path = ["**.feature"]
+path = "**.feature"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "DLR"
 SPDX-License-Identifier = "EPL-1.0"

@@ -3,7 +3,10 @@ SPDX-PackageName = "Remote Component Environment (RCE)"
 SPDX-PackageDownloadLocation = "https://rcenvironment.de/"
 
 [[annotations]]
-path = ["resources/de.rcenvironment.components.optimizer.simulator.jar", "resources/optimizer/algorithms.json"]
+path = [
+	"resources/de.rcenvironment.components.optimizer.simulator.jar",
+	"resources/optimizer/algorithms.json"
+]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "DLR"
 SPDX-License-Identifier = "EPL-1.0"

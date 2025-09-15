@@ -3,7 +3,10 @@ SPDX-PackageName = "Remote Component Environment (RCE)"
 SPDX-PackageDownloadLocation = "https://rcenvironment.de/"
 
 [[annotations]]
-path = ["resources/doe/dakota/*.json", "resources/optimizer/dakota/*.json"]
+path = [
+	"resources/doe/dakota/*.json",
+	"resources/optimizer/dakota/*.json"
+]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "DLR"
 SPDX-License-Identifier = "EPL-1.0"

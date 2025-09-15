@@ -3,7 +3,10 @@ SPDX-PackageName = "Remote Component Environment (RCE)"
 SPDX-PackageDownloadLocation = "https://rcenvironment.de/"
 
 [[annotations]]
-path = ["root_files/examples/optimization_algorithm_api/**", "root_files/extras/mail/filter.json"]
+path = [
+	"root_files/examples/optimization_algorithm_api/**",
+	"root_files/extras/mail/filter.json"
+]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "DLR"
 SPDX-License-Identifier = "CC0-1.0"
