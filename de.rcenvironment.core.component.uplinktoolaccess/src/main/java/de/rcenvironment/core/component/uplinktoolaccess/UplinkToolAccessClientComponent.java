@@ -342,6 +342,15 @@ public class UplinkToolAccessClientComponent extends DefaultComponent {
 
     @Override
     public synchronized void onProcessInputsInterrupted(ThreadHandler executingThreadHandler) {
+        cancelTool();
+    }
+
+    @Override
+    public synchronized void onStartInterrupted(ThreadHandler executingThreadHandler) {
+        cancelTool();
+    }
+
+    private void cancelTool() {
         componentLog.componentInfo("Cancelling tool...");
         componentCancelled = true;
         toolExecutionHandle.requestCancel();
