@@ -102,6 +102,15 @@ public class HeadlessWorkflowExecutionServiceImpl implements HeadlessWorkflowExe
         ExtendedHeadlessWorkflowExecutionContext headlessWfExeCtx = (ExtendedHeadlessWorkflowExecutionContext) wfExeContext;
         return startHeadlessWorkflowExecutionInternal1(headlessWfExeCtx);
     }
+    
+    public void waitForWorkflowRunning(HeadlessWorkflowExecutionContext wfExeContext) throws WorkflowExecutionException {
+        try {
+            ExtendedHeadlessWorkflowExecutionContext headlessWfExeCtx = (ExtendedHeadlessWorkflowExecutionContext) wfExeContext;
+            headlessWfExeCtx.waitForRunning();
+        } catch (InterruptedException e) {
+            throw new WorkflowExecutionException("Received interruption signal while waiting for workflow to prepare.");
+        }
+    }
 
     @Override
     public FinalWorkflowState waitForWorkflowTerminationAndCleanup(HeadlessWorkflowExecutionContext wfExeContext)
@@ -398,6 +407,9 @@ public class HeadlessWorkflowExecutionServiceImpl implements HeadlessWorkflowExe
                         wfHeadlessExeCtx.getWorkflowExecutionContext().getInstanceName(),
                         wfExecutionId, newState.getDisplayName()));
                     switch (newState) {
+                    case RUNNING:
+                        wfHeadlessExeCtx.reportWorkflowRunning();
+                        break;
                     case CANCELLED:
                     case FAILED:
                     case RESULTS_REJECTED:

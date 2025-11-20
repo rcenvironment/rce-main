@@ -93,6 +93,14 @@ public interface HeadlessWorkflowExecutionService extends WorkflowExecutionServi
      */
     FinalWorkflowState waitForWorkflowTerminationAndCleanup(HeadlessWorkflowExecutionContext headlessWfExeContext)
         throws WorkflowExecutionException;
+    
+    /**
+     * Waits for workflow to enter running state. Workflow has to be started first by method startWorkflowExecution.
+     * @param headlessWfExeContext {@link HeadlessWorkflowExecutionContext} with data used for headless workflow execution
+     * @throws WorkflowExecutionException on execution failure
+     */
+    void waitForWorkflowRunning(HeadlessWorkflowExecutionContext headlessWfExeContext)
+        throws WorkflowExecutionException;
 
     /**
      * @param headlessWfExeContexts {@link HeadlessWorkflowExecutionContext}s with data used for headless workflow execution

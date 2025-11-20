@@ -112,6 +112,8 @@ public class ToolExecutionProviderImpl implements ToolExecutionProvider {
     private final TempFileService tempFileService = TempFileServiceAccess.getInstance();
 
     private final Log log = LogFactory.getLog(getClass());
+    
+    private boolean cancellationRequested = false;
 
     public ToolExecutionProviderImpl(ToolExecutionRequest request) {
         this.request = request;
@@ -154,16 +156,29 @@ public class ToolExecutionProviderImpl implements ToolExecutionProvider {
     }
 
     @Override
-    public void requestCancel() {
-        if (wfExecInf != null) {
-            try {
-                workflowExecutionService.cancel(wfExecInf.getWorkflowExecutionHandle());
-            } catch (ExecutionControllerException | RemoteOperationException e) {
-                log.warn(StringUtils.format("Failed to cancel workflow '%s'; cause: %s",
-                    wfExecInf.getExecutionIdentifier(), e.getMessage()));
-            }
-        } else {
-            log.debug("Failed to cancel workflow; it was not running or already finished.");
+    public synchronized void requestCancel() {
+        cancellationRequested = true;
+
+        if (wfExecInf == null) {
+            log.debug("Failed to cancel workflow upon request; it was not running or already finished. Will try again later.");
+            return;
+        }
+
+        performCancel();
+    }
+
+    // Should be called in synchronized fashion on this-instance
+    private void performCancel() {
+        if (wfExecInf == null) {
+            // Should never happen at time of writing, guards against future maintenance errors.
+            throw new IllegalStateException();
+        }
+
+        try {
+            workflowExecutionService.cancel(wfExecInf.getWorkflowExecutionHandle());
+            log.debug(StringUtils.format("Cancelled workflow '%s'", wfExecInf.getExecutionIdentifier()));
+        } catch (ExecutionControllerException | RemoteOperationException e) {
+            log.warn(StringUtils.format("Could to cancel workflow '%s'; cause: %s", wfExecInf.getExecutionIdentifier(), e.getMessage()));
         }
     }
 
@@ -359,7 +374,18 @@ public class ToolExecutionProviderImpl implements ToolExecutionProvider {
         FinalWorkflowState finalState = FinalWorkflowState.FAILED;
         try {
             HeadlessWorkflowExecutionContext context = exeContextBuilder.buildExtended();
-            wfExecInf = workflowExecutionService.startHeadlessWorkflowExecution(context);
+            synchronized (ToolExecutionProviderImpl.this) {
+                wfExecInf = workflowExecutionService.startHeadlessWorkflowExecution(context);
+
+                // We have to wait until the workflow is running before (possibly) cancelling,
+                // otherwise we cancel before all components started up, which leads to exceptions.
+                workflowExecutionService.waitForWorkflowRunning(context); 
+                if (cancellationRequested) {
+                    // Happens if cancellation requests arrived in the meantime.
+                    performCancel();
+                }
+            }
+
             finalState = workflowExecutionService.waitForWorkflowTerminationAndCleanup(context);
         } catch (WorkflowExecutionException e) {
             executionException = e;

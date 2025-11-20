@@ -42,6 +42,8 @@ public class ExtendedHeadlessWorkflowExecutionContext extends HeadlessWorkflowEx
     private final CountDownLatch consoleOutputFinishedLatch;
 
     private final CountDownLatch workflowDisposedLatch;
+    
+    private final CountDownLatch workflowRunningLatch;
 
     private final List<Closeable> resourcesToCloseOnFinish = new ArrayList<>();
 
@@ -64,6 +66,8 @@ public class ExtendedHeadlessWorkflowExecutionContext extends HeadlessWorkflowEx
         consoleOutputFinishedLatch = new CountDownLatch(1);
 
         workflowDisposedLatch = new CountDownLatch(1);
+        
+        workflowRunningLatch = new CountDownLatch(1);
 
         // to keep is simple the actual time the workflow is started is expected to be very close to the instantiation of this class, if a
         // more precise workflow execution time is needed, the time should be set from the workflow execution code right before the actual
@@ -104,6 +108,13 @@ public class ExtendedHeadlessWorkflowExecutionContext extends HeadlessWorkflowEx
         if (this.getSingleConsoleRowReceiver() != null) {
             this.getSingleConsoleRowReceiver().onConsoleRow(consoleRow);
         }
+    }
+
+    /**
+     * Called once the workflow has entered the RUNNING state.
+     */
+    protected synchronized void reportWorkflowRunning() {
+        workflowRunningLatch.countDown();
     }
 
     protected synchronized void reportWorkflowNotAliveAnymore(String errorMessage) {
@@ -151,6 +162,14 @@ public class ExtendedHeadlessWorkflowExecutionContext extends HeadlessWorkflowEx
             getWorkflowExecutionContext().getInstanceName(), wfExeContext.getExecutionIdentifier(),
             newState == WorkflowState.DISPOSED, getWorkflowFile()));
         workflowDisposedLatch.countDown();
+    }
+    
+    /**
+     * Waits until the workflow has entered the running state.
+     * @throws InterruptedException
+     */
+    public void waitForRunning() throws InterruptedException {
+        workflowRunningLatch.await();
     }
 
     /**
