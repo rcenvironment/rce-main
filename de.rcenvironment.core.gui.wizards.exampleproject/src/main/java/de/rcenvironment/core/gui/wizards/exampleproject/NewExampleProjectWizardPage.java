@@ -31,12 +31,16 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.osgi.framework.Bundle;
 
+import de.rcenvironment.core.component.integration.ToolIntegrationService;
 import de.rcenvironment.core.configuration.ConfigurationService;
 import de.rcenvironment.core.configuration.ConfigurationService.ConfigurablePathId;
+import de.rcenvironment.core.gui.resources.api.ImageManager;
+import de.rcenvironment.core.gui.resources.api.StandardImages;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.incubator.ServiceRegistry;
 import de.rcenvironment.core.utils.incubator.ServiceRegistryAccess;
@@ -72,6 +76,8 @@ public class NewExampleProjectWizardPage extends WizardPage {
 
     private static final int MINUS_ONE = -1;
 
+    private static final String EXAMPLE_TOOL_NAME = "Example";
+
     private Text textFieldProjectName;
 
     private NewExampleProjectWizard newExampleProjectWizard;
@@ -79,6 +85,10 @@ public class NewExampleProjectWizardPage extends WizardPage {
     private Button createExampleIntegratedToolButton;
 
     private final Log log = LogFactory.getLog(getClass());
+
+    private ServiceRegistryAccess serviceRegistryAccess;
+
+    private Group toolIntegrationGroup;
 
     /**
      * Constructor for SampleNewWizardPage.
@@ -90,8 +100,9 @@ public class NewExampleProjectWizardPage extends WizardPage {
     public NewExampleProjectWizardPage(ISelection selection, NewExampleProjectWizard newExampleProjectWizard) {
         super("wizardPage");
         setTitle("Create Workflow Examples Project");
-        setDescription("This wizard generates an example project containing a workflow template.");
+        setDescription("This wizard generates an example project containing example workflows.");
         this.newExampleProjectWizard = newExampleProjectWizard;
+        serviceRegistryAccess = ServiceRegistry.createAccessFor(this);
     }
 
     /**
@@ -118,11 +129,35 @@ public class NewExampleProjectWizardPage extends WizardPage {
                 dialogChanged();
             }
         });
-        createExampleIntegratedToolButton = new Button(container, SWT.CHECK);
+
+        toolIntegrationGroup = new Group(container, SWT.NULL);
+        GridData gridDataHorizontalSpan2 = new GridData(GridData.FILL_HORIZONTAL);
+        gridDataHorizontalSpan2.horizontalSpan = 2;
+        toolIntegrationGroup.setLayoutData(gridDataHorizontalSpan2);
+        toolIntegrationGroup.setLayout(new GridLayout(2, false));
+        toolIntegrationGroup.setText("Tool Integration Example");
+
+        createExampleIntegratedToolButton = new Button(toolIntegrationGroup, SWT.CHECK);
         createExampleIntegratedToolButton.setText("Integrate example tool");
-        GridData gd2 = new GridData(GridData.FILL_HORIZONTAL);
-        gd2.horizontalSpan = 2;
-        createExampleIntegratedToolButton.setLayoutData(gd2);
+        createExampleIntegratedToolButton.setLayoutData(gridDataHorizontalSpan2);
+
+        if (integratedComponentIdExists(".+(?<!common)\\." + EXAMPLE_TOOL_NAME)) {
+            GridData gridDataVerticalTop = new GridData(GridData.VERTICAL_ALIGN_BEGINNING);
+            Label warningIcon = new Label(toolIntegrationGroup, SWT.NULL);
+            warningIcon.setImage(ImageManager.getInstance().getSharedImage(StandardImages.WARNING_16));
+            warningIcon.setLayoutData(gridDataVerticalTop);
+            GridData gridDataText = new GridData(GridData.FILL_HORIZONTAL);
+            gridDataText.widthHint = MINIMUM_WIDTH;
+            Text componentExistsInformationText = new Text(toolIntegrationGroup, SWT.MULTI | SWT.WRAP | SWT.TRANSPARENT);
+            componentExistsInformationText
+                .setText(StringUtils.format("A workflow component with the name '%1$s' already exists in your profile.\n"
+                + "Since dublicate names are not allowed and this component is not integrated as a common tool, "
+                + "the example tool cannot be integrated.\n"
+                + "Please rename the existing '%1$s' component and try again.", EXAMPLE_TOOL_NAME));
+            componentExistsInformationText.setLayoutData(gridDataText);
+            componentExistsInformationText.setEditable(false);
+            createExampleIntegratedToolButton.setEnabled(false);
+        }
 
         initialize();
         dialogChanged();
@@ -166,6 +201,11 @@ public class NewExampleProjectWizardPage extends WizardPage {
         return textFieldProjectName.getText();
     }
 
+    private boolean integratedComponentIdExists(String regex) {
+        ToolIntegrationService integrationService = serviceRegistryAccess.getService(ToolIntegrationService.class);
+        return integrationService.getIntegratedComponentIds().stream().anyMatch(toolID -> toolID.matches(regex));
+    }
+
     /**
      * 
      * Checks if the example tool should be integrated and if it already exists.
@@ -174,21 +214,22 @@ public class NewExampleProjectWizardPage extends WizardPage {
      * @throws IOException
      */
     public int getCreateTIExample() {
-
         boolean isSelected = createExampleIntegratedToolButton.getSelection();
 
         try {
-            if (isSelected && checkOrDeleteExampleTool(false)) {
+            if (isSelected
+                && (integratedComponentIdExists(".+(common)\\." + EXAMPLE_TOOL_NAME)
+                    || checkOrDeleteExampleToolConfigOnDisk(false))) {
                 // returns 1 for keep and 0 for replace
                 MessageDialog dialog = new MessageDialog(this.getShell(), "Overwrite Example Tool Confirmation", null,
                     "An integrated tool named 'Example' already exists.\n"
                         + "Replace or keep it?",
                     MessageDialog.WARNING, new String[] { "Replace", "Keep" }, 1);
                 int overwrite = dialog.open();
-                if (overwrite == 0) {
-                    checkOrDeleteExampleTool(true);
+                if (overwrite == MessageDialog.OK) {
+                    checkOrDeleteExampleToolConfigOnDisk(true);
                     return COPY_EXAMPLE_TOOL;
-                } else if (overwrite == 1) {
+                } else if (overwrite == MessageDialog.CANCEL) {
                     return DONT_COPY_EXAMPLE_TOOL;
                 } else {
                     return RED_X_CANCELD;
@@ -205,11 +246,10 @@ public class NewExampleProjectWizardPage extends WizardPage {
         }
     }
 
-    private boolean checkOrDeleteExampleTool(boolean delete) throws IOException {
+    private boolean checkOrDeleteExampleToolConfigOnDisk(boolean delete) throws IOException {
 
         Bundle bundle = Platform.getBundle(newExampleProjectWizard.getPluginID());
 
-        ServiceRegistryAccess serviceRegistryAccess = ServiceRegistry.createAccessFor(this);
         ConfigurationService configurationService = serviceRegistryAccess.getService(ConfigurationService.class);
         File integrationFolder = configurationService.getConfigurablePath(ConfigurablePathId.PROFILE_INTEGRATION_DATA);
         File commonsFolder = new File(new File(integrationFolder, "tools"), "common");
@@ -217,7 +257,7 @@ public class NewExampleProjectWizardPage extends WizardPage {
         boolean exampleToolExists = false;
 
         if (!commonsFolder.exists()) {
-            return exampleToolExists;
+            return false;
         }
         @SuppressWarnings("rawtypes") final Enumeration toolFiles =
             bundle.findEntries("templates/" + "integration_example", ASTERISK, true);
