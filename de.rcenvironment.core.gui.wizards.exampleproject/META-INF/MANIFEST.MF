@@ -10,7 +10,9 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: DLR
-Import-Package: de.rcenvironment.core.configuration,
+Import-Package: de.rcenvironment.core.component.integration,
+ de.rcenvironment.core.configuration,
+ de.rcenvironment.core.gui.resources.api,
  de.rcenvironment.core.utils.common,
  de.rcenvironment.core.utils.incubator,
  org.apache.commons.io;version="2.0.1",
