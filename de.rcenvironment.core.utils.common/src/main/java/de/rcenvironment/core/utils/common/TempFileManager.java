@@ -221,6 +221,13 @@ public class TempFileManager {
             if (instanceRootDir == null) {
                 throw new IOException("disposeManagedTempDirOrFile() was called with no instanceRootDir set");
             }
+			if (!tempFileOrDir.exists()) {
+				log.debug(StringUtils.format(
+						"Skipping deletion of managed temporary file or directory '%s' since it does not exist (anymore).",
+						tempFileOrDir.getCanonicalPath()));
+				return;
+			}
+
             String givenPath = tempFileOrDir.getCanonicalPath();
             String rootPath = instanceRootDir.getCanonicalPath();
             if (!givenPath.startsWith(rootPath)) {
@@ -230,12 +237,7 @@ public class TempFileManager {
             }
 
             try {
-                if (tempFileOrDir.isDirectory()) {
-                    FileUtils.deleteDirectory(tempFileOrDir);
-                } else {
-                    // TODO react if return value is false?
-                    tempFileOrDir.delete();
-                }
+				FileUtils.forceDelete(tempFileOrDir);
             } catch (IOException e) {
                 throw new IOException("Error deleting temporary file or directory " + givenPath, e);
             }
