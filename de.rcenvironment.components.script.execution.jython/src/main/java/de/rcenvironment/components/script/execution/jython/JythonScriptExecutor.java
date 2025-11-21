@@ -187,9 +187,6 @@ public class JythonScriptExecutor extends DefaultScriptExecutor {
         } catch (IOException e) {
             LOGGER.error("Failed to close stdout or stderr writer", e);
         }
-
-        this.deleteTempFiles();
-
         return true;
     }
 
