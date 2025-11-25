@@ -3,7 +3,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ManifestVersion: 2
 Bundle-Name: RCE XML Values Component Execution
 Bundle-SymbolicName: de.rcenvironment.components.xml.values.execution
-Bundle-Version: 10.6.0.qualifier
+Bundle-Version: 10.7.0.qualifier
 Import-Package: de.rcenvironment.core.communication.common,
  de.rcenvironment.components.xml.values.common,
  de.rcenvironment.core.component.api,
