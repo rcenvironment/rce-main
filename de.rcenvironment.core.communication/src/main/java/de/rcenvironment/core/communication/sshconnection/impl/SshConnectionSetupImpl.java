@@ -187,12 +187,12 @@ public class SshConnectionSetupImpl implements SshConnectionSetup {
                 reason = "The remote instance could not be reached. Probably the hostname or port is wrong.";
             } else if (cause != null && cause instanceof UnknownHostException) {
                 reason = "No host with this name could be found.";
-            } else if (reason.equals("Auth fail")) {
+            } else if (reason.startsWith("Auth fail")) {
                 reason =
                     "Authentication failed. Probably the username or passphrase is wrong, the wrong key file was used or the account is "
                         + "not enabled on the remote host.";
                 shouldTryToReconnect = false;
-            } else if (reason.equals("USERAUTH fail")) {
+            } else if (reason.startsWith("USERAUTH fail")) {
                 reason = "Authentication failed. The wrong passphrase for the key file " + config.getSshKeyFileLocation() + " was used.";
                 shouldTryToReconnect = false;
             } else if (reason.startsWith("invalid privatekey")) {
