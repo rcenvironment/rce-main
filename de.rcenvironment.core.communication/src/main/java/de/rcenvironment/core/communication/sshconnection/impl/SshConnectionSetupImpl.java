@@ -196,15 +196,22 @@ public class SshConnectionSetupImpl implements SshConnectionSetup {
                 reason = "Authentication failed. The wrong passphrase for the key file " + config.getSshKeyFileLocation() + " was used.";
                 shouldTryToReconnect = false;
             } else if (reason.startsWith("invalid privatekey")) {
+                // happens when the key file is corrupted. Only happens for keys without passphrase, otherwise a "USERAUTH" failure is thrown instead.
                 reason = "Authentication failed. An invalid private key was used.";
                 shouldTryToReconnect = false;
             } else if (reason.equals("The authentication phrase cannot be empty")) {
                 reason = "The authentication phrase cannot be empty.";
                 shouldTryToReconnect = false;
+            } else {
+                log.warn("Unexpected reason for SSH connection failure. Will not try to reconnect."); // reason is already logged above.
+                reason = "Please refer to the logs for technical details.";
+                shouldTryToReconnect = false;
             }
+
             if (shouldTryToReconnect) {
                 consecutiveConnectionFailures++;
             }
+
             listener.onConnectionAttemptFailed(this, reason, (consecutiveConnectionFailures <= 1), shouldTryToReconnect);
 
             return null;
