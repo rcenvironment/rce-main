@@ -187,24 +187,31 @@ public class SshConnectionSetupImpl implements SshConnectionSetup {
                 reason = "The remote instance could not be reached. Probably the hostname or port is wrong.";
             } else if (cause != null && cause instanceof UnknownHostException) {
                 reason = "No host with this name could be found.";
-            } else if (reason.equals("Auth fail")) {
+            } else if (reason.startsWith("Auth fail")) {
                 reason =
                     "Authentication failed. Probably the username or passphrase is wrong, the wrong key file was used or the account is "
                         + "not enabled on the remote host.";
                 shouldTryToReconnect = false;
-            } else if (reason.equals("USERAUTH fail")) {
+            } else if (reason.startsWith("USERAUTH fail")) {
                 reason = "Authentication failed. The wrong passphrase for the key file " + config.getSshKeyFileLocation() + " was used.";
                 shouldTryToReconnect = false;
             } else if (reason.startsWith("invalid privatekey")) {
+                // happens when the key file is corrupted. Only happens for keys without passphrase, otherwise a "USERAUTH" failure is thrown instead.
                 reason = "Authentication failed. An invalid private key was used.";
                 shouldTryToReconnect = false;
             } else if (reason.equals("The authentication phrase cannot be empty")) {
                 reason = "The authentication phrase cannot be empty.";
                 shouldTryToReconnect = false;
+            } else {
+                log.warn("Unexpected reason for SSH connection failure. Will not try to reconnect."); // reason is already logged above.
+                reason = "Please refer to the logs for technical details.";
+                shouldTryToReconnect = false;
             }
+
             if (shouldTryToReconnect) {
                 consecutiveConnectionFailures++;
             }
+
             listener.onConnectionAttemptFailed(this, reason, (consecutiveConnectionFailures <= 1), shouldTryToReconnect);
 
             return null;

@@ -707,23 +707,30 @@ public class SshUplinkConnectionServiceImpl implements SshUplinkConnectionServic
                     reason = "The remote instance could not be reached. Probably the hostname or port is wrong.";
                 } else if (cause != null && cause instanceof UnknownHostException) {
                     reason = "No host with this name could be found.";
-                } else if (reason.equals("Auth fail")) {
+                } else if (reason.startsWith("Auth fail")) {
                     reason = "Authentication failed. Either the user name or passphrase is wrong, "
                         + "or the wrong key file was used, or the account is not enabled on the server.";
                     shouldTryToReconnect = false;
-                } else if (reason.equals("USERAUTH fail")) {
+                } else if (reason.startsWith("USERAUTH fail")) {
                     reason = "Authentication failed. The wrong passphrase for the key file " + setup.getKeyfileLocation() + " was used.";
                     shouldTryToReconnect = false;
                 } else if (reason.startsWith("invalid privatekey")) {
+                    // happens when the key file is corrupted. Only happens for keys without passphrase, otherwise a "USERAUTH" failure is thrown instead.
                     reason = "Authentication failed. An invalid private key was used.";
                     shouldTryToReconnect = false;
                 } else if (reason.equals("The authentication phrase cannot be empty")) {
                     reason = "The authentication phrase cannot be empty.";
                     shouldTryToReconnect = false;
+                } else {
+                    log.warn("Unexpected reason for SSH connection failure. Will not try to reconnect."); // reason is already logged above.
+                    reason = "Please refer to the logs for technical details.";
+                    shouldTryToReconnect = false;
                 }
+
                 if (shouldTryToReconnect) {
                     setup.raiseConsecutiveConnectionFailures();
                 }
+
                 uplinkConnectionlistener.onConnectionAttemptFailed(setup, reason, (setup.getConsecutiveConnectionFailures() <= 1),
                     shouldTryToReconnect);
 
