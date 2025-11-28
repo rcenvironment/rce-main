@@ -178,7 +178,7 @@ public class ToolExecutionProviderImpl implements ToolExecutionProvider {
             workflowExecutionService.cancel(wfExecInf.getWorkflowExecutionHandle());
             log.debug(StringUtils.format("Cancelled workflow '%s'", wfExecInf.getExecutionIdentifier()));
         } catch (ExecutionControllerException | RemoteOperationException e) {
-            log.warn(StringUtils.format("Could to cancel workflow '%s'; cause: %s", wfExecInf.getExecutionIdentifier(), e.getMessage()));
+            log.warn(StringUtils.format("Could not cancel workflow '%s'; cause: %s", wfExecInf.getExecutionIdentifier(), e.getMessage()));
         }
     }
 
