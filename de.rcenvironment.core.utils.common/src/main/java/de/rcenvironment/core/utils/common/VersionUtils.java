@@ -88,7 +88,34 @@ public final class VersionUtils {
 
     private static final BundleAccessor BUNDLE_ACCESSOR = new BundleAccessor(OWN_CLASS);
 
-    private VersionUtils() {}
+    // new approach; to be continued (see #18191)
+    private static VersionUtils sharedInstance;
+
+    private final String versionForSshClients;
+
+    private VersionUtils() {
+
+        Version productVersion = VersionUtils.getProductVersion();
+
+        if (productVersion != null) {
+            versionForSshClients = productVersion.toString().replace("qualifier", "dev");
+        } else {
+            // note that versions before 10.7.0 sent "-" in this case
+            versionForSshClients = "0.0.0";
+        }
+
+    }
+
+    private static synchronized VersionUtils getInstance() {
+        if (sharedInstance == null) {
+            sharedInstance = new VersionUtils();
+        }
+        return sharedInstance;
+    }
+
+    public static String getVersionForSshClients() {
+        return getInstance().versionForSshClients;
+    }
 
     /**
      * @return the OSGi version of the RCE "core" bundles, or <code>null</code> if it could not be determined
