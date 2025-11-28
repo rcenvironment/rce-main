@@ -32,6 +32,8 @@ import de.rcenvironment.core.configuration.bootstrap.RuntimeDetection;
 import de.rcenvironment.core.embedded.ssh.api.SshAccount;
 import de.rcenvironment.core.embedded.ssh.api.TemporarySshAccount;
 import de.rcenvironment.core.embedded.ssh.api.TemporarySshAccountControl;
+import de.rcenvironment.core.embedded.ssh.internal.IncomingSessionTracker.SessionHandle;
+import de.rcenvironment.core.eventlog.api.EventType;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.common.TempFileServiceAccess;
 import de.rcenvironment.core.utils.common.exception.OperationFailureException;
@@ -81,6 +83,22 @@ public class SshAuthenticationManager implements PasswordAuthenticator, Temporar
     @Override
     // implementation of MINA PasswordAuthenticator
     public boolean authenticate(String loginName, String passwordParam, ServerSession session) {
+        if (session != null && sessionTracker != null) {
+            try {
+                SessionHandle handle = sessionTracker.forSession(session);
+                String clientVersion = session.getClientVersion();
+                if (clientVersion != null) {
+                    int index = clientVersion.indexOf(" rce/");
+                    if (index >= 0) { // RCE 10.7.0+?
+                        clientVersion = clientVersion.substring(index + 1); // +1 = remove space
+                    }
+                    handle.addLogData(EventType.Attributes.CLIENT_VERSION, clientVersion);
+                }
+            } catch (OperationFailureException e) {
+                log.warn("No SSH session handle to attach client version information to: " + e.toString());
+            }
+        }
+
         boolean success = false;
         Optional<SshAccount> optionalAccount = Optional.empty();
         String refusalReason = REFUSAL_REASON_UNDEFINED;
