@@ -36,6 +36,19 @@ VERBOSE_OUTPUT = False
 # relative path from this script file's directory to the base directory for the POM paths below
 RELATIVE_PATH_TO_REPOSITORY_ROOT = '../../..'
 
+# project folders that are not supposed to match the layout of an installable unit (bundle/feature)
+NON_BUNDLE_NON_FEATURE_PROJECTS = [
+    'build',
+    'de.rcenvironment',
+    'de.rcenvironment.build.common',
+    'de.rcenvironment.build.main',
+    'de.rcenvironment.components.parent',
+    'de.rcenvironment.core',
+    'de.rcenvironment.documentation.core',
+    'de.rcenvironment.extensions',
+    'de.rcenvironment.extensions.testscriptrunner'
+]
+
 
 class JavaManifestParser:
     """
@@ -110,7 +123,7 @@ class OutputCollector:
     def get_default_report(self):
         output = ''
         for line in self.__info:
-            output += "[INFO]   %s\n" % line
+            output += "[NOTE]   %s\n" % line
         if len(self.__warnings) > 0:
             output += "\nFound %d Warning(s):\n" % len(self.__warnings)
             for line in self.__warnings:
@@ -275,9 +288,9 @@ class ProjectRulesValidator:
         else:
             # any other import is considered "external", i.e., to a third-party library
             if not attribs:
-                self.add_project_warning(
-                    'External package import to %r should be versioned, but has no attributes' %
-                    package)
+                self.output.add_global_info_message(
+                    'Consider adding a version constraint to package import %r of project %r' %
+                    (package, self.project_name))
             # TODO validate that the attributes actually are a version constraint
 
     def __check_manifest_require_bundle_clauses(self, bundle_imports):
@@ -362,11 +375,8 @@ def determine_list_of_projects(_output: OutputCollector, _verbose=False):
             # ignore/skip these silently
             continue
 
-        # TODO check again after reworking/renaming the launcher bundles
-        if subdir == 'de.rcenvironment' \
-                or subdir == 'de.rcenvironment.platform' \
-                or subdir.startswith('de.rcenvironment.core.launcher'):
-            _output.add_global_info_message('Skipping special project ' + subdir)
+        if subdir in NON_BUNDLE_NON_FEATURE_PROJECTS:
+            _output.add_global_info_message('Skipping special project %r' % subdir)
             continue
 
         filtered_subdirs.append(subdir)
