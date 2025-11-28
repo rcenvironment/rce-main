@@ -1,0 +1,14 @@
+version = 1
+SPDX-PackageName = "Remote Component Environment (RCE)"
+SPDX-PackageDownloadLocation = "https://rcenvironment.de/"
+
+[[annotations]]
+path = [
+	"resources/docbkx/**.xsl",
+	"resources/docbkx/**.xml",
+	"resources/docbkx/**.scenarios"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "preliminary"

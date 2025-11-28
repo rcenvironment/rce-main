@@ -1,0 +1,15 @@
+version = 1
+SPDX-PackageName = "Remote Component Environment (RCE)"
+SPDX-PackageDownloadLocation = "https://rcenvironment.de/"
+
+[[annotations]]
+path = "src/main/resources/resources/*.py"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "src/main/resources/resources/simplejson.zip"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Bob Ippolito"
+SPDX-License-Identifier = "MIT"

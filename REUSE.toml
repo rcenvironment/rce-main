@@ -1,0 +1,81 @@
+version = 1
+SPDX-PackageName = "Remote Component Environment (RCE)"
+SPDX-PackageDownloadLocation = "https://rcenvironment.de/"
+
+[[annotations]]
+path = [
+	"**.gitignore",
+	"**.gitattributes",
+	".git/**",
+	".svn/**",
+	"**/.svn/**"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "None"
+SPDX-License-Identifier = "CC0-1.0"
+SPDX-FileComment = "Exclusion of version control files; note that some of these patterns are for files that may only exist in a checkout"
+
+[[annotations]]
+path = [
+	"de.rcenvironment**.launch",
+	"de.rcenvironment**.target",
+	"de.rcenvironment.**.gui/help/**.xml",
+	"de.rcenvironment.**.gui.**/help/**.xml"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = [
+	"de.rcenvironment**/.classpath",
+	"de.rcenvironment**/.project",
+	"de.rcenvironment**/build.properties",
+	"de.rcenvironment**/feature.xml",
+	"de.rcenvironment**/fragment.xml",
+	"de.rcenvironment**/MANIFEST.MF",
+	"de.rcenvironment**/OSGI-INF/**",
+	"de.rcenvironment**/pom.xml",
+	"de.rcenvironment**/p2.inf",
+	"de.rcenvironment**.p2.inf",
+	"build/.project"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = "de.rcenvironment.**.wf"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "preliminary (use CC0 instead?)"
+
+[[annotations]]
+path = [
+	"README.md",
+	"build/README.ad",
+	"de.rcenvironment.**.gui.help/help/**.xml",
+	"de.rcenvironment.**.gui.help/help/**.xsl",
+	"de.rcenvironment.**.gui.help/help/**.html",
+	"de.rcenvironment.**.gui.help/help/**.css",
+	"de.rcenvironment.**.gui.**/help/src/docbkx/**.xml"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = [
+	"de.rcenvironment.**/messages.properties",
+	"de.rcenvironment.**/images.properties",
+	"de.rcenvironment.**/plugin.**",
+	"de.rcenvironment.components.**.execution/src/main/resources/resources/**.json",
+	"de.rcenvironment.components.**.execution/resources/**.json"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"

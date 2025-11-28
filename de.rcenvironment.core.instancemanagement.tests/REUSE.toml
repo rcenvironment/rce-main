@@ -1,0 +1,15 @@
+version = 1
+SPDX-PackageName = "Remote Component Environment (RCE)"
+SPDX-PackageDownloadLocation = "https://rcenvironment.de/"
+
+[[annotations]]
+path = "src/test/resources/instanceManagementTest/configuration.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "src/test-manual/java/de/rcenvironment/core/instancemanagement/internal/InstanceOperationsImplManualTests.properties.template"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"

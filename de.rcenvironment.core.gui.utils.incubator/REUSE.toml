@@ -1,0 +1,9 @@
+version = 1
+SPDX-PackageName = "Remote Component Environment (RCE)"
+SPDX-PackageDownloadLocation = "https://rcenvironment.de/"
+
+[[annotations]]
+path = "src/main/java/de/rcenvironment/core/gui/utils/incubator/unwanted.properties"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"

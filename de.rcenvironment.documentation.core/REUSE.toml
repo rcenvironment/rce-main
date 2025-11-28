@@ -1,0 +1,42 @@
+version = 1
+SPDX-PackageName = "Remote Component Environment (RCE)"
+SPDX-PackageDownloadLocation = "https://rcenvironment.de/"
+
+[[annotations]]
+path = "*.adoc"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+SPDX-FileComment = "preliminary"
+
+[[annotations]]
+path = [
+	"src/docbkx/**.xml",
+	"src/docbkx/**.template",
+	"src/asciidoc/**.ad"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+[[annotations]]
+path = [
+	"src/docbkx/**.xpr",
+	"src/docbkx/stylesheets/**.xsl"
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "maven/genGraphvizSVG.pom"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "EPL-1.0"
+
+[[annotations]]
+path = "src/legacy/release.txt"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "DLR"
+SPDX-License-Identifier = "CC-BY-4.0"
+SPDX-FileComment = "preliminary"
