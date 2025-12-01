@@ -124,6 +124,9 @@ event_types:
     desc: An association id for this connection.
           The only assumptions that should be made about its content is that it is a string of "reasonable" 
           length, not empty, suitable for log output, and unique within the application's session.
+  - id: client_version
+    title: Client software id
+    desc: The software version of the connecting client, if available (e.g., "rce/..."). 
   - id: remote_node_id
     title: Remote node id
     desc: The id of the remote RCE node, if available from the protocol type's connection process.
@@ -166,6 +169,9 @@ event_types:
   - id: connection_id
     title: copy-from:(connection.incoming.accepted)
     desc: copy-from:(connection.incoming.accepted)
+  - id: client_version
+    title: copy-from:(connection.incoming.accepted)
+    desc: copy-from:(connection.incoming.accepted)
   - id: login_name
     title: copy-from:(connection.incoming.accepted)
     desc: The user/login/account identifier used for the failed authentication/authorization attempt. 
@@ -201,6 +207,9 @@ event_types:
     desc: copy-from:(connection.incoming.accepted)
     values: copy-from:(connection.incoming.accepted)
   - id: connection_id
+    title: copy-from:(connection.incoming.accepted)
+    desc: copy-from:(connection.incoming.accepted)
+  - id: client_version
     title: copy-from:(connection.incoming.accepted)
     desc: copy-from:(connection.incoming.accepted)
   - id: close_reason
@@ -248,6 +257,9 @@ event_types:
     desc: copy-from:(connection.incoming.accepted)
     values: copy-from:(connection.incoming.accepted)
   - id: connection_id
+    title: copy-from:(connection.incoming.accepted)
+    desc: copy-from:(connection.incoming.accepted)
+  - id: client_version
     title: copy-from:(connection.incoming.accepted)
     desc: copy-from:(connection.incoming.accepted)
   - id: remote_node_id

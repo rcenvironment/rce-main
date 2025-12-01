@@ -124,6 +124,7 @@ public enum EventType {
      * <li><b>type</b>: The technical type and/or protocol of the connection. Usually equal to the server port's type.
      * <li><b>connection_id</b>: An association id for this connection. The only assumptions that should be made about its content is that
      * it is a string of "reasonable" length, not empty, suitable for log output, and unique within the application's session.
+     * <li><b>client_version</b>: The software version of the connecting client, if available (e.g., "rce/...").
      * <li><b>remote_node_id</b> <i>(optional)</i>: The id of the remote RCE node, if available from the protocol type's connection process.
      * This id can by any of the four supported id types, but will typically be an "instance session id".
      * <li><b>login_name</b> <i>(optional)</i>: The user/login/account identifier successfully used for authentication/authorization, if
@@ -138,11 +139,12 @@ public enum EventType {
      * </ul>
      */
     CONNECTION_INCOMING_ACCEPTED("connection.incoming.accepted", "Incoming Connection Accepted", new String[] { Attributes.TYPE,
-        Attributes.CONNECTION_ID, Attributes.REMOTE_NODE_ID, Attributes.LOGIN_NAME, Attributes.AUTH_METHOD, Attributes.AUTH_FAILURE_COUNT,
-        Attributes.REMOTE_IP, Attributes.REMOTE_PORT, Attributes.SERVER_PORT
+        Attributes.CONNECTION_ID, Attributes.CLIENT_VERSION, Attributes.REMOTE_NODE_ID, Attributes.LOGIN_NAME, Attributes.AUTH_METHOD,
+        Attributes.AUTH_FAILURE_COUNT, Attributes.REMOTE_IP, Attributes.REMOTE_PORT, Attributes.SERVER_PORT
     }, new String[] {
         "Connection type",
         "Connection id",
+        "Client software id",
         "Remote node id",
         "Login/user name",
         "Authentication method",
@@ -164,6 +166,7 @@ public enum EventType {
      * <li><b>type</b>: The technical type and/or protocol of the connection. Usually equal to the server port's type.
      * <li><b>connection_id</b>: An association id for this connection. The only assumptions that should be made about its content is that
      * it is a string of "reasonable" length, not empty, suitable for log output, and unique within the application's session.
+     * <li><b>client_version</b>: The software version of the connecting client, if available (e.g., "rce/...").
      * <li><b>login_name</b>: The user/login/account identifier used for the failed authentication/authorization attempt.
      * <li><b>auth_method</b>: The kind of authentication/authorization (e.g. passphrase or private key) that was attempted.
      * <li><b>auth_failure_reason</b>: The reason why authentication/authorization failed (e.g., wrong password or unknown user).
@@ -174,11 +177,12 @@ public enum EventType {
      * </ul>
      */
     CONNECTION_INCOMING_AUTH_FAILED("connection.incoming.auth.failed", "Incoming Connection Failed To Authenticate", new String[] {
-        Attributes.TYPE, Attributes.CONNECTION_ID, Attributes.LOGIN_NAME, Attributes.AUTH_METHOD, Attributes.AUTH_FAILURE_REASON,
-        Attributes.AUTH_FAILURE_COUNT, Attributes.REMOTE_IP, Attributes.REMOTE_PORT, Attributes.SERVER_PORT
+        Attributes.TYPE, Attributes.CONNECTION_ID, Attributes.CLIENT_VERSION, Attributes.LOGIN_NAME, Attributes.AUTH_METHOD,
+        Attributes.AUTH_FAILURE_REASON, Attributes.AUTH_FAILURE_COUNT, Attributes.REMOTE_IP, Attributes.REMOTE_PORT, Attributes.SERVER_PORT
     }, new String[] {
         "Connection type",
         "Connection id",
+        "Client software id",
         "Login/user name",
         "Authentication method",
         "Failure reason",
@@ -200,6 +204,7 @@ public enum EventType {
      * <li><b>type</b>: The technical type and/or protocol of the connection. Usually equal to the server port's type.
      * <li><b>connection_id</b>: An association id for this connection. The only assumptions that should be made about its content is that
      * it is a string of "reasonable" length, not empty, suitable for log output, and unique within the application's session.
+     * <li><b>client_version</b>: The software version of the connecting client, if available (e.g., "rce/...").
      * <li><b>close_reason</b>: The human-readable reason why this connection was refused.
      * <li><b>last_login_name</b> <i>(optional)</i>: The user/login/account identifier used for the last failed authentication/authorization
      * attempt, if applicable.
@@ -217,12 +222,13 @@ public enum EventType {
      * </ul>
      */
     CONNECTION_INCOMING_REFUSED("connection.incoming.refused", "Incoming Connection Refused", new String[] { Attributes.TYPE,
-        Attributes.CONNECTION_ID, Attributes.CLOSE_REASON, Attributes.LAST_LOGIN_NAME, Attributes.LAST_AUTH_FAILURE_REASON,
-        Attributes.LAST_AUTH_METHOD, Attributes.AUTH_FAILURE_COUNT, Attributes.REMOTE_IP, Attributes.REMOTE_PORT, Attributes.SERVER_PORT,
-        Attributes.DURATION
+        Attributes.CONNECTION_ID, Attributes.CLIENT_VERSION, Attributes.CLOSE_REASON, Attributes.LAST_LOGIN_NAME,
+        Attributes.LAST_AUTH_FAILURE_REASON, Attributes.LAST_AUTH_METHOD, Attributes.AUTH_FAILURE_COUNT, Attributes.REMOTE_IP,
+        Attributes.REMOTE_PORT, Attributes.SERVER_PORT, Attributes.DURATION
     }, new String[] {
         "Connection type",
         "Connection id",
+        "Client software id",
         "Reason",
         "Last login/user name",
         "Last auth. failure",
@@ -244,6 +250,7 @@ public enum EventType {
      * <li><b>type</b>: The technical type and/or protocol of the connection. Usually equal to the server port's type.
      * <li><b>connection_id</b>: An association id for this connection. The only assumptions that should be made about its content is that
      * it is a string of "reasonable" length, not empty, suitable for log output, and unique within the application's session.
+     * <li><b>client_version</b>: The software version of the connecting client, if available (e.g., "rce/...").
      * <li><b>remote_node_id</b> <i>(optional)</i>: The id of the remote RCE node, if available from the protocol type's connection process.
      * This id can by any of the four supported id types, but will typically be an "instance session id".
      * <li><b>close_reason</b>: The human-readable reason why this connection was closed.
@@ -255,11 +262,12 @@ public enum EventType {
      * </ul>
      */
     CONNECTION_INCOMING_CLOSED("connection.incoming.closed", "Incoming Connection Closed", new String[] { Attributes.TYPE,
-        Attributes.CONNECTION_ID, Attributes.REMOTE_NODE_ID, Attributes.CLOSE_REASON, Attributes.REMOTE_IP, Attributes.REMOTE_PORT,
-        Attributes.SERVER_PORT, Attributes.DURATION
+        Attributes.CONNECTION_ID, Attributes.CLIENT_VERSION, Attributes.REMOTE_NODE_ID, Attributes.CLOSE_REASON, Attributes.REMOTE_IP,
+        Attributes.REMOTE_PORT, Attributes.SERVER_PORT, Attributes.DURATION
     }, new String[] {
         "Connection type",
         "Connection id",
+        "Client software id",
         "Remote node id",
         "Reason",
         "Remote IP address",
@@ -762,6 +770,12 @@ public enum EventType {
         public static final String CONNECTION_ID = "connection_id";
 
         /**
+         * Used by CONNECTION_INCOMING_ACCEPTED, CONNECTION_INCOMING_AUTH_FAILED, CONNECTION_INCOMING_CLOSED, CONNECTION_INCOMING_REFUSED,
+         * UPLINK_INCOMING_ACCEPTED, UPLINK_INCOMING_REFUSED.
+         */
+        public static final String CLIENT_VERSION = "client_version";
+
+        /**
          * Used by CONNECTION_INCOMING_ACCEPTED, CONNECTION_INCOMING_CLOSED.
          */
         public static final String REMOTE_NODE_ID = "remote_node_id";
@@ -831,11 +845,6 @@ public enum EventType {
          * Used by NETWORK_NODE_NAMED, UPLINK_INCOMING_ACCEPTED, UPLINK_INCOMING_CLOSED, UPLINK_INCOMING_REFUSED.
          */
         public static final String SESSION_ID = "session_id";
-
-        /**
-         * Used by UPLINK_INCOMING_ACCEPTED, UPLINK_INCOMING_REFUSED.
-         */
-        public static final String CLIENT_VERSION = "client_version";
 
         /**
          * Used by UPLINK_INCOMING_ACCEPTED, UPLINK_INCOMING_REFUSED.

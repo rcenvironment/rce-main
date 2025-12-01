@@ -38,12 +38,13 @@ Possible values: __localnet__, __ssh/uplink__
 |IP port number{nbsp} [small]#__(port)__# |The IP port number. +
 Possible values: __Integer (1-65535)__
 |IP bind address{nbsp} [small]#__(bind_ip)__# |The IP address the port was bound to.
-.9+|*Incoming Connection Accepted* +
+.10+|*Incoming Connection Accepted* +
 [small]#__(connection.incoming.accepted)__#
 
 An incoming connection has been successfully established. This should be logged as late as reasonably possible to avoid "accepted" events where the connection is immediately closed again due to a validation or version mismatch error. Mutually exclusive with the "connection.incoming.refused" event, but may be reached after one or more "connection.incoming.auth.failed" events if the server allows multiple login attempts. |Connection type{nbsp} [small]#__(type)__# |The technical type and/or protocol of the connection. Usually equal to the server port's type. +
 Possible values: __localnet__, __ssh/uplink__
 |Connection id{nbsp} [small]#__(connection_id)__# |An association id for this connection. The only assumptions that should be made about its content is that it is a string of "reasonable" length, not empty, suitable for log output, and unique within the application's session.
+|Client software id{nbsp} [small]#__(client_version)__# |The software version of the connecting client, if available (e.g., "rce/...").
 |Remote node id{nbsp} [small]#__(remote_node_id)__# |The id of the remote RCE node, if available from the protocol type's connection process. This id can by any of the four supported id types, but will typically be an "instance session id". +
 [small]#__(optional)__#
 |Login/user name{nbsp} [small]#__(login_name)__# |The user/login/account identifier successfully used for authentication/authorization, if applicable. +
@@ -55,12 +56,13 @@ Possible values: __localnet__, __ssh/uplink__
 |Remote IP address{nbsp} [small]#__(remote_ip)__# |The remote IP address of the incoming connection.
 |Remote IP port{nbsp} [small]#__(remote_port)__# |The remote IP port number of the incoming connection.
 |Server IP port{nbsp} [small]#__(server_port)__# |The local server IP port number that the incoming connection is connected to.
-.9+|*Incoming Connection Failed To Authenticate* +
+.10+|*Incoming Connection Failed To Authenticate* +
 [small]#__(connection.incoming.auth.failed)__#
 
 As part of establishing an incoming connection, an authentication/authorization attempt was made but failed. Whether this failure is fatal for the overall connection attempt or not is implementation-specific. If this is ultimately followed up by a successful authentication/authorization attempt (in case another attempt was allowed in the first place), this event should be succeeded by a "connection.incoming.accepted" event. Otherwise, this should always be succeeded by a "connection.incoming.refused" event. |Connection type{nbsp} [small]#__(type)__# |The technical type and/or protocol of the connection. Usually equal to the server port's type. +
 Possible values: __localnet__, __ssh/uplink__
 |Connection id{nbsp} [small]#__(connection_id)__# |An association id for this connection. The only assumptions that should be made about its content is that it is a string of "reasonable" length, not empty, suitable for log output, and unique within the application's session.
+|Client software id{nbsp} [small]#__(client_version)__# |The software version of the connecting client, if available (e.g., "rce/...").
 |Login/user name{nbsp} [small]#__(login_name)__# |The user/login/account identifier used for the failed authentication/authorization attempt.
 |Authentication method{nbsp} [small]#__(auth_method)__# |The kind of authentication/authorization (e.g. passphrase or private key) that was attempted.
 |Failure reason{nbsp} [small]#__(auth_failure_reason)__# |The reason why authentication/authorization failed (e.g., wrong password or unknown user).
@@ -68,12 +70,13 @@ Possible values: __localnet__, __ssh/uplink__
 |Remote IP address{nbsp} [small]#__(remote_ip)__# |The remote IP address of the incoming connection.
 |Remote IP port{nbsp} [small]#__(remote_port)__# |The remote IP port number of the incoming connection.
 |Server IP port{nbsp} [small]#__(server_port)__# |The local server IP port number that the incoming connection is connected to.
-.11+|*Incoming Connection Refused* +
+.12+|*Incoming Connection Refused* +
 [small]#__(connection.incoming.refused)__#
 
 An incoming connection has failed to complete its login process or has been refused for some other reason. Mutually exclusive with the "connection.incoming.accepted" and "connection.incoming.closed" events. Both incorrect authentication attempts as well as authentication timeouts (e.g. when an SSH client makes no authentication attempt at all) are both represented by this event. These sub-types can be distinguished by the "last_auth_failure_reason" attribute. |Connection type{nbsp} [small]#__(type)__# |The technical type and/or protocol of the connection. Usually equal to the server port's type. +
 Possible values: __localnet__, __ssh/uplink__
 |Connection id{nbsp} [small]#__(connection_id)__# |An association id for this connection. The only assumptions that should be made about its content is that it is a string of "reasonable" length, not empty, suitable for log output, and unique within the application's session.
+|Client software id{nbsp} [small]#__(client_version)__# |The software version of the connecting client, if available (e.g., "rce/...").
 |Reason{nbsp} [small]#__(close_reason)__# |The human-readable reason why this connection was refused.
 |Last login/user name{nbsp} [small]#__(last_login_name)__# |The user/login/account identifier used for the last failed authentication/authorization attempt, if applicable. +
 [small]#__(optional)__#
@@ -87,12 +90,13 @@ Possible values: __localnet__, __ssh/uplink__
 |Remote IP port{nbsp} [small]#__(remote_port)__# |The remote IP port number of the incoming connection.
 |Server IP port{nbsp} [small]#__(server_port)__# |The local server IP port number that the incoming connection is connected to.
 |Duration{nbsp} [small]#__(duration)__# |The duration (in msec) that this connection was open/established for. The precise start and end times for this calculation are implementation- and type-dependent.
-.8+|*Incoming Connection Closed* +
+.9+|*Incoming Connection Closed* +
 [small]#__(connection.incoming.closed)__#
 
 An incoming connection has been closed, either by the client, the server, or a network event. This event is always preceded by a "connection.incoming.accepted" event. Mutually exclusive with the "connection.incoming.refused" event. |Connection type{nbsp} [small]#__(type)__# |The technical type and/or protocol of the connection. Usually equal to the server port's type. +
 Possible values: __localnet__, __ssh/uplink__
 |Connection id{nbsp} [small]#__(connection_id)__# |An association id for this connection. The only assumptions that should be made about its content is that it is a string of "reasonable" length, not empty, suitable for log output, and unique within the application's session.
+|Client software id{nbsp} [small]#__(client_version)__# |The software version of the connecting client, if available (e.g., "rce/...").
 |Remote node id{nbsp} [small]#__(remote_node_id)__# |The id of the remote RCE node, if available from the protocol type's connection process. This id can by any of the four supported id types, but will typically be an "instance session id". +
 [small]#__(optional)__#
 |Reason{nbsp} [small]#__(close_reason)__# |The human-readable reason why this connection was closed.

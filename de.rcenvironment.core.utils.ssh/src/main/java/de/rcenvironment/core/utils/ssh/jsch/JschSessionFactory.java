@@ -21,6 +21,7 @@ import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
 import de.rcenvironment.core.utils.common.StringUtils;
+import de.rcenvironment.core.utils.common.VersionUtils;
 
 /**
  * A factory for configuration-based creation of JSch {@link Session}s. Supported authentication methods are password and SSH keyfile (with
@@ -36,6 +37,9 @@ public final class JschSessionFactory {
     private static final String MAX_AUTH_TRIES_CONFIG_KEY = "MaxAuthTries";
 
     private static final String MAX_AUTH_TRIES = "1";
+
+    // define the version string to appended to the default JSch/SSH client info
+    private static final String RCE_VERSION_INFO_SUFFIX = " rce/" + VersionUtils.getVersionForSshClients();
 
     private static Log log = LogFactory.getLog(JschSessionFactory.class);
 
@@ -254,6 +258,7 @@ public final class JschSessionFactory {
         JSch jsch = new JSch();
         Session jschSession = jsch.getSession(user, host, port);
         jschSession.setConfig("StrictHostKeyChecking", "no");
+        jschSession.setClientVersion(jschSession.getClientVersion() + RCE_VERSION_INFO_SUFFIX);
 
         // sanitize & trim keyfile location
         keyfileLocation = normalizeKeyfilePath(keyfileLocation);
