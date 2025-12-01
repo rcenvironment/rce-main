@@ -3,7 +3,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ManifestVersion: 2
 Bundle-Name: RCE Workflow Component GUI
 Bundle-SymbolicName: de.rcenvironment.core.component.integration.workflow.gui;singleton:=true
-Bundle-Version: 10.6.0.qualifier
+Bundle-Version: 10.7.0.qualifier
 Bundle-Vendor: DLR
 Bundle-ClassPath: .
 Export-Package: de.rcenvironment.core.component.integration.workflow.gui

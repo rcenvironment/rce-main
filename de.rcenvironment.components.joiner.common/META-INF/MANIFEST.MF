@@ -3,7 +3,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ManifestVersion: 2
 Bundle-Name: RCE Joiner Component Common
 Bundle-SymbolicName: de.rcenvironment.components.joiner.common
-Bundle-Version: 10.6.0.qualifier
+Bundle-Version: 10.7.0.qualifier
 Bundle-Vendor: DLR
 Bundle-ClassPath: .
 Export-Package: de.rcenvironment.components.joiner.common

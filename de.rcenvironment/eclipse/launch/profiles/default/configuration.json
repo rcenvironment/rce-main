@@ -1,1 +1,12 @@
-{}
+{
+"python": {
+		"installations": {
+			"python3": {
+		 		"type": "system",
+		 		"interpreter_path": "C:/ProgramData/mambaforge_24.3.0.0/python.exe",
+		 		"max_agents": 200,
+		 		"max_startup_time": 60
+		 	}
+		}
+	}
+}
