@@ -12,6 +12,8 @@ import static java.lang.System.setErr;
 import static java.util.prefs.Preferences.systemRoot;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -75,6 +77,8 @@ public final class RCELauncherCustomization {
 
     // non-static state fields below
 
+    private File commonProfileDir;
+
     private boolean verboseOutputEnabled = false;
 
     private boolean privilegedModeAllowed = false;
@@ -95,6 +99,8 @@ public final class RCELauncherCustomization {
 
         instanceRunId = Long.toString(System.currentTimeMillis())
             + "-" + Long.toString(new Random().nextLong() & Long.MAX_VALUE);
+
+        commonProfileDir = new File(System.getProperty("user.home"), ".rce/common");
     }
 
     /**
@@ -106,9 +112,11 @@ public final class RCELauncherCustomization {
         }
         sharedRceLauncherContext = new RCELauncherCustomization(args);
 
+        // TODO (p3) consider making more methods non-static for clarity
         setRceLauncherMarkerSystemProperty();
         setLauncherVersionAsSystemProperty();
         setInstanceRunIdAsSystemProperty(sharedRceLauncherContext.instanceRunId);
+        sharedRceLauncherContext.createCommonProfileIfAbsent();
     }
 
     public static void hookAfterInitialConfigurationProcessing() {
@@ -312,6 +320,32 @@ public final class RCELauncherCustomization {
         System.getProperties().put(SYSTEM_PROPERTY_KEY_RCE_INSTANCE_RUN_ID, instanceRunId);
     }
 
+    private static void createAndValidateWritableDir(File dir) {
+        dir.mkdirs();
+        if (!dir.isDirectory()) {
+            throw new IllegalStateException("Failed to create directory " + dir.getAbsolutePath());
+        }
+        if (!dir.canWrite()) {
+            throw new IllegalStateException("Directory " + dir.getAbsolutePath() + " exists, but is not writable");
+        }
+    }
+
+    private void createCommonProfileIfAbsent() {
+        if (!commonProfileDir.exists()) {
+            createAndValidateWritableDir(commonProfileDir);
+            // create the expected version information to prevent auto-upgrade attempts later
+            File commonInternalDir = new File(commonProfileDir, "internal");
+            createAndValidateWritableDir(commonInternalDir);
+            try {
+                try (FileOutputStream stream = new FileOutputStream(new File(commonInternalDir, "profile.version"))) {
+                    stream.write((int) '2');
+                }
+            } catch (IOException e) {
+                throw new IllegalStateException("Failed to create common profile version information");
+            }
+        }
+    }
+
     /**
      * As stated on https://ops4j1.jira.com/browse/CONFMAN-12, the bundles.configuration.location path is relative to the execution
      * directory, or absolute. There is no support for it being in relation to one of the osgi locations. This is problematic if RCE was not
@@ -375,10 +409,7 @@ public final class RCELauncherCustomization {
 
         // define the location in the "common" folder to place temporary startup log files
         File startupLogsDir = new File(System.getProperty("user.home"), ".rce/common/startup_logs");
-        startupLogsDir.mkdirs();
-        if (!startupLogsDir.isDirectory() && startupLogsDir.canWrite()) {
-            throw new IllegalStateException("Startup log directory is not writable: " + startupLogsDir.getAbsolutePath());
-        }
+        createAndValidateWritableDir(startupLogsDir);
         // store this location as a property to be used in the log4j config
         System.setProperty("rce.startupLogsPath", startupLogsDir.getAbsolutePath());
 
