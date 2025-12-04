@@ -67,6 +67,8 @@ public final class RCELauncherCustomization {
      */
     private static final String ERROR_MESSAGE_OSGI_INSTALL_AREA_MISCONFIGURED = "osgi.install.area is not configured correctly: ";
 
+    private static final String CLI_FLAG_ALLOW_PRIVILEGED = "--allow-privileged";
+
     // note: assuming all launcher execution is single-threaded, so no synchronization; the
     // potentially misleading "shared" name is just the common Checkstyle rule for static fields
     private static RCELauncherCustomization sharedRceLauncherContext;
@@ -86,7 +88,7 @@ public final class RCELauncherCustomization {
         for (String arg : args) {
             if ("--rce.debug.launcher".equals(arg)) {
                 verboseOutputEnabled = true;
-            } else if ("--allow-privileged".equals(arg)) {
+            } else if (CLI_FLAG_ALLOW_PRIVILEGED.equals(arg)) {
                 privilegedModeAllowed = true;
             }
         }
@@ -141,7 +143,8 @@ public final class RCELauncherCustomization {
         boolean isPrivileged = checkPrivileged();
         boolean privilegedIsNotAllowed = !sharedRceLauncherContext.privilegedModeAllowed;
         if (isPrivileged && privilegedIsNotAllowed) {
-            String privilegeError = "RCE was started with admin privileges without setting the --allow-privileged flag";
+            String privilegeError = "RCE was started with admin privileges without setting the "
+                + CLI_FLAG_ALLOW_PRIVILEGED + " option";
             System.err.println(privilegeError);
             throw new IllegalStateException(privilegeError);
         }
@@ -222,6 +225,11 @@ public final class RCELauncherCustomization {
                 // Add the Equinox "-nosplash" flag but do NOT exit the flow to preserve the triggering argument.
                 // Note: This may result in multiple "-nosplash" arguments, from the launcher code, this should be fine.
                 rewrittenArgs.add("-nosplash");
+            }
+
+            if (CLI_FLAG_ALLOW_PRIVILEGED.equals(arg)) {
+                // already processed, so drop this from the forwarded arguments
+                continue;
             }
 
             // no rewrite rule matched -> transfer unmodified
