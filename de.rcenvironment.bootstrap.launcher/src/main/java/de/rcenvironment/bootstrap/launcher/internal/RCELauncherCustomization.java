@@ -12,7 +12,6 @@ import static java.lang.System.setErr;
 import static java.util.prefs.Preferences.systemRoot;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -22,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -38,18 +38,18 @@ import de.rcenvironment.bootstrap.launcher.api.RCELauncherConstants;
  */
 public final class RCELauncherCustomization {
 
+    // non-private for unit test access
+    static final String SYSTEM_PROPERTY_KEY_BUNDLE_CONFIGURATION_LOCATION = "bundles.configuration.location";
+
+    // non-private for unit test access
+    static final String SYSTEM_PROPERTY_KEY_OSGI_INSTALL_AREA = "osgi.install.area";
+
     private static final String CONFIGURATION_FILE_NAME = "logging.xml";
 
     /**
      * Feature flag: Configure all log4j2 loggers to be asynchronous.
      */
     private static final boolean CONFIGURE_ALL_LOG4J2_LOGGERS_AS_ASYNCHRONOUS = true;
-
-    // non-private for unit test access
-    static final String SYSTEM_PROPERTY_KEY_BUNDLE_CONFIGURATION_LOCATION = "bundles.configuration.location";
-
-    // non-private for unit test access
-    static final String SYSTEM_PROPERTY_KEY_OSGI_INSTALL_AREA = "osgi.install.area";
 
     private static final String SYSTEM_PROPERTY_KEY_RCE_INSTANCE_RUN_ID = "rce.instanceRunId";
 
@@ -67,13 +67,14 @@ public final class RCELauncherCustomization {
      */
     private static final String ERROR_MESSAGE_OSGI_INSTALL_AREA_MISCONFIGURED = "osgi.install.area is not configured correctly: ";
 
-    // note: assuming all launcher execution is single-threaded, so no synchronization
-    private static RCELauncherCustomization RCE_LAUNCHER_CONTEXT;
+    // note: assuming all launcher execution is single-threaded, so no synchronization; the
+    // potentially misleading "shared" name is just the common Checkstyle rule for static fields
+    private static RCELauncherCustomization sharedRceLauncherContext;
 
     // non-static state fields below
 
     private boolean verboseOutputEnabled = false;
-    
+
     private boolean privilegedModeAllowed = false;
 
     private final String instanceRunId;
@@ -98,14 +99,14 @@ public final class RCELauncherCustomization {
      * @param args the command-line arguments as provided to the main method
      */
     public static void initialize(String[] args) {
-        if (RCE_LAUNCHER_CONTEXT != null) {
+        if (sharedRceLauncherContext != null) {
             throw new IllegalArgumentException(); // prevent double initialization
         }
-        RCE_LAUNCHER_CONTEXT = new RCELauncherCustomization(args);
+        sharedRceLauncherContext = new RCELauncherCustomization(args);
 
         setRceLauncherMarkerSystemProperty();
         setLauncherVersionAsSystemProperty();
-        setInstanceRunIdAsSystemProperty(RCE_LAUNCHER_CONTEXT.instanceRunId);
+        setInstanceRunIdAsSystemProperty(sharedRceLauncherContext.instanceRunId);
     }
 
     public static void hookAfterInitialConfigurationProcessing() {
@@ -133,12 +134,12 @@ public final class RCELauncherCustomization {
     }
 
     /**
-     * For security reasons we don't allow starting RCE in privileged mode, i.e. as admin (Windows) or as root (Linux).
-     * However it can be allowed for specific circumstances if a respective flag is set.
+     * For security reasons we don't allow starting RCE in privileged mode, i.e. as admin (Windows) or as root (Linux). However it can be
+     * allowed for specific circumstances if a respective flag is set.
      */
     private static void abortStartupIfPrivileged() {
         boolean isPrivileged = checkPrivileged();
-        boolean privilegedIsNotAllowed = !RCE_LAUNCHER_CONTEXT.privilegedModeAllowed;
+        boolean privilegedIsNotAllowed = !sharedRceLauncherContext.privilegedModeAllowed;
         if (isPrivileged && privilegedIsNotAllowed) {
             String privilegeError = "RCE was started with admin privileges without setting the --allow-privileged flag";
             System.err.println(privilegeError);
@@ -147,19 +148,20 @@ public final class RCELauncherCustomization {
     }
 
     /**
-     * Checks if we are currently in a privileged mode, i.e. whether the program was started as admin in case of windows
-     * or as root in case of Linux. This was implemented based on https://stackoverflow.com/a/23538961
+     * Checks if we are currently in a privileged mode, i.e. whether the program was started as admin in case of windows or as root in case
+     * of Linux. This was implemented based on https://stackoverflow.com/a/23538961
+     * 
      * @return true if we are currently privileged, false otherwise.
      */
     private static boolean checkPrivileged() {
-        // Set err temporarily to dummy stream to avoid printing errors from running the below test in non-privileged mode, 
+        // Set err temporarily to dummy stream to avoid printing errors from running the below test in non-privileged mode,
         // which will be the default. Single-threaded execution is assumed here, otherwise synchronize on err.
         // Also see SO thread linked above.
         PrintStream err = System.err;
         setErr(new PrintStream(new OutputStream() {
+
             @Override
-            public void write(int b) {
-            }
+            public void write(int b) {}
         }));
 
         // Below we try to set (and immediately remove) some dummy system preferences, which is only allowed for privileged processes.
@@ -266,7 +268,7 @@ public final class RCELauncherCustomization {
 
     private static void dumpFinalSystemProperties() {
         // convert properties to a sorted map
-        @SuppressWarnings({ "unchecked", "rawtypes" }) TreeMap<String, String> sortedMap =
+        @SuppressWarnings({ "unchecked", "rawtypes" }) SortedMap<String, String> sortedMap =
             new TreeMap<>((Map) System.getProperties());
         System.err.println("Final System Properties:");
         sortedMap.forEach((key, value) -> {
@@ -389,6 +391,6 @@ public final class RCELauncherCustomization {
     }
 
     private static boolean verboseOutputEnabled() {
-        return RCE_LAUNCHER_CONTEXT.verboseOutputEnabled;
+        return sharedRceLauncherContext.verboseOutputEnabled;
     }
 }
