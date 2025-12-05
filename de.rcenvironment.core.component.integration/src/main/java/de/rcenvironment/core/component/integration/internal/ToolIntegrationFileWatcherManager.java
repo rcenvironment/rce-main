@@ -137,7 +137,12 @@ public class ToolIntegrationFileWatcherManager {
             watchers.put(context, integrationWatcher);
             log.debug("Created new watcher for context " + context.getContextTypeString());
         } catch (IOException e) {
-            log.warn(COULD_NOT_CREATE_A_WATCH_SERVICE_FOR_THE_FILE + integrationRootFolder.getAbsolutePath(), e);
+            final String baseMessage = COULD_NOT_CREATE_A_WATCH_SERVICE_FOR_THE_FILE + integrationRootFolder.getAbsolutePath();
+            if (e.getClass() == IOException.class && e.getMessage().contains("inotify")) {
+                log.debug("[Log level temporarily lowered from WARN, see #18266] " + baseMessage, e);
+            } else {
+                log.warn(baseMessage, e);
+            }
         }
     }
 
