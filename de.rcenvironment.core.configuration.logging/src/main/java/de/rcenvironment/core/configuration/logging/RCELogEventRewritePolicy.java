@@ -92,16 +92,6 @@ public class RCELogEventRewritePolicy implements RewritePolicy {
             return reduceLogLevelWithMessagePrefix(event, Level.DEBUG);
         }
 
-        // Workaround for #18270, which is about a warning that started appearing in certain BDD environments
-        // without a known change on our end, and which we have not been able to pin down yet:
-        // "java.util.prefs - Couldn't flush system prefs: java.util.prefs.BackingStoreException:
-        // Couldn't get file lock.". This should still be properly investigated to find the cause, but in the
-        // meantime, there is no benefit in letting this randomly break our BDD "no warnings on shutdown"
-        // checks. (Workaround added for 10.7.0.)
-        if (originalLevel == Level.WARN && messageTemplate.startsWith("Couldn't flush system prefs")) {
-            return reduceLogLevelWithMessagePrefix(event, Level.DEBUG);
-        }
-
         // return the unmodified event if no filter matched
         return event;
     }
