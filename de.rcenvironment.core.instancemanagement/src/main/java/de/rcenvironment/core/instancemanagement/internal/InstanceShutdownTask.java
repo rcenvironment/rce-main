@@ -73,11 +73,12 @@ public class InstanceShutdownTask implements Runnable {
             return;
         }
 
+        final int maxWaitForShutdownFile = 30000;  // there was no limit before, so set this high
         final int maxWaitIterations = 50;
         final int singleWaitIteration = 500;
 
         try {
-            if (!InstanceOperationsUtils.detectShutdownFile(profile.getAbsolutePath())) {
+            if (!InstanceOperationsUtils.awaitShutdownFile(profile.toPath(), maxWaitForShutdownFile)) {
                 releaseLockIfErrorOccurs();
             }
         } catch (IOException e) {
