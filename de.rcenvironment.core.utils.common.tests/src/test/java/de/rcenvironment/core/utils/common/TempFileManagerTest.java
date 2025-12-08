@@ -49,7 +49,7 @@ public class TempFileManagerTest {
      */
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
-    
+
     private TempFileServiceImpl defaultInstance;
 
     /**
@@ -185,18 +185,30 @@ public class TempFileManagerTest {
         File dir2 = defaultInstance.createManagedTempDir("123asd()_-");
         File file1 = defaultInstance.createTempFileFromPattern("dummy*file.txt");
 
+        assertTrue(dir1.exists());
+        assertTrue(dir2.exists());
+        assertTrue(file1.exists());
+
         // should succeed
         defaultInstance.disposeManagedTempDirOrFile(dir1);
 
         // test deleting some other temp file or directory; should fail
+        File testFile = File.createTempFile("rce-unittest-disposetempfile-", ".tmp");
+        testFile.deleteOnExit();
+        // this gets created in the system temp dir, and therefore outside the managed dir
+        assertTrue(testFile.exists());
         try {
-            String tempDir = System.getProperty("java.io.tmpdir");
-            Assert.assertNotNull(tempDir);
-            defaultInstance.disposeManagedTempDirOrFile(new File(tempDir, "deleteme.txt"));
+            // request deletion of the non-managed file, which should be rejected
+            defaultInstance.disposeManagedTempDirOrFile(testFile);
             Assert.fail("Exception expected");
         } catch (IOException e) {
             // expected: an exception text about the root directory mismatch
             Assert.assertTrue(e.getMessage().contains("root"));
+            // the file should not have been touched
+            assertTrue("Test file was deleted when it shouldn't have been", testFile.exists());
+        } finally {
+            // best-effort cleanup; ignoring the return value as the file will be removed on exit either way
+            testFile.delete();
         }
 
         // should succeed
@@ -204,6 +216,10 @@ public class TempFileManagerTest {
 
         // test deleting a file (instead of a directory)
         defaultInstance.disposeManagedTempDirOrFile(file1);
+
+        assertFalse(dir1.exists());
+        assertFalse(dir2.exists());
+        assertFalse(file1.exists());
     }
 
     /**
