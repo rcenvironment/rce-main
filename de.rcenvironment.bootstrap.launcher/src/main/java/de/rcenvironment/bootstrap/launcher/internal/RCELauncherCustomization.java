@@ -196,8 +196,9 @@ public final class RCELauncherCustomization {
             String privilegeCheckKey = "rce_d47c7287-4e4d-4970-840a-b65b69c2a4e7";
             preferences.put(privilegeCheckKey, "temp_privileged_process_check"); // SecurityException if process is not privileged
             preferences.remove(privilegeCheckKey);
+            preferences.flush();
             return true;
-        } catch (SecurityException e) {
+        } catch (SecurityException | BackingStoreException e) {
             return false;
         } finally {
             setErr(err);
