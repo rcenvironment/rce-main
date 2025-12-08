@@ -79,7 +79,7 @@ public class ClientSideUplinkLowLevelProtocolWrapper extends CommonUplinkLowLeve
             // rethrow
             throw e;
         } catch (TimeoutException e) {
-            throw new UplinkConnectionRefusedException(UplinkProtocolErrorType.INTERNAL_SERVER_ERROR,
+            throw new UplinkConnectionRefusedException(UplinkProtocolErrorType.UNKNOWN_ERROR_ALLOW_RECONNECT,
                 "Received an initial response from the server, but reached the timeout while waiting for further data - "
                     + "assuming an internal server error",
                 false);

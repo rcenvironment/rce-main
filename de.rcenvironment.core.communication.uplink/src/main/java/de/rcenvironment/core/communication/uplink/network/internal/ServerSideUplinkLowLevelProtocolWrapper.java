@@ -92,7 +92,7 @@ public class ServerSideUplinkLowLevelProtocolWrapper extends CommonUplinkLowLeve
             final String errorMarker = LogUtils.logExceptionAsSingleLineAndAssignUniqueMarker(log,
                 logPrefix + "Error while processing handshake data, closing incoming connection", e);
             // generate an exception that causes an error message to be sent
-            throw new UplinkConnectionRefusedException(UplinkProtocolErrorType.INTERNAL_SERVER_ERROR,
+            throw new UplinkConnectionRefusedException(UplinkProtocolErrorType.PROTOCOL_VIOLATION,
                 ERROR_MESSAGE_CONNECTION_SETUP_FAILED + " (internal error log marker " + errorMarker + ")", true);
         } catch (UplinkConnectionRefusedException e) {
             // rethrow

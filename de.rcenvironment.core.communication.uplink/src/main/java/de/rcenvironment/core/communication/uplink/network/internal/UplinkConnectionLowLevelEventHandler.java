@@ -67,7 +67,8 @@ public interface UplinkConnectionLowLevelEventHandler {
      * is shutting down. This may also be sent optimistically by the other side if something irregular happened (e.g. a network protocol
      * violation).
      * 
-     * @param type the parsed type of the error message, or {@link UplinkProtocolErrorType#UNKNOWN_ERROR} if it could not be identified
+     * @param type the parsed type of the error message, or {@link UplinkProtocolErrorType#UNRECOGNIZED_ERROR_MESSAGE} if it could not be
+     *        identified
      * @param errorMessage the error message (unwrapped, ie without the encoded error type) provided by the other side
      */
     void onErrorGoodbyeMessage(UplinkProtocolErrorType type, String errorMessage);

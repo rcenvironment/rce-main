@@ -368,7 +368,7 @@ public abstract class CommonUplinkLowLevelProtocolWrapper {
                             logPrefix + "Error while receiving a message, closing the connection", e);
                         // report unexpected errors
                         eventHandler.onStreamReadError(e);
-                        attemptToSendErrorGoodbyeMessage(UplinkProtocolErrorType.INTERNAL_SERVER_ERROR,
+                        attemptToSendErrorGoodbyeMessage(UplinkProtocolErrorType.UNKNOWN_ERROR_ALLOW_RECONNECT,
                             "Closing the connection after an error (internal error log marker " + errorMarker + ")");
                     } else {
                         log.error(logPrefix + "Not expecting further messages, but encountered a non-EOF exception; "
