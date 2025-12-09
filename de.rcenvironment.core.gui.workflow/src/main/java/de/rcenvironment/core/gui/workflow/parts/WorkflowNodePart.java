@@ -485,9 +485,9 @@ public class WorkflowNodePart extends AbstractGraphicalEditPart implements Prope
             String actualVersion = node.getComponentDescription().getComponentInterface().getVersion();
             if (!actualVersion.isEmpty()) {
                 enabled = de.rcenvironment.core.utils.common.StringUtils
-                    .format("current version %s is not available; another version may be avaiable", actualVersion);
+                    .format("current version %s is not available; another version may be available", actualVersion);
             } else {
-                enabled = "curent version is unknown; another version may be avaiable";
+                enabled = "curent version is unknown; another version may be available";
             }
         }
         if (Boolean.valueOf(node.getConfigurationDescription()
