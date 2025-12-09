@@ -702,7 +702,7 @@ public abstract class AbstractUplinkSessionImpl implements UplinkSession {
     }
 
     protected void handleFatalError(UplinkProtocolErrorType errorType, String errorMessage) {
-        log.warn(StringUtils.format("%sFatal error in Uplink session for %s, closing the session: %s [type %s]",
+        log.debug(StringUtils.format("%sFatal error in Uplink connection to %s, closing the session: %s [type %s]",
             logPrefix, getRemoteSideInformationString(), errorMessage, errorType.name()));
         synchronized (sessionState) {
             sessionState.markFatalError(errorType);
