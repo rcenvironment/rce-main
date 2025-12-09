@@ -203,23 +203,41 @@ run_unit_tests() {
     #
     # Note: The report files are also collected if the Maven run returns a non-zero exit code.
 
+    UNIT_TESTS_FILTER="$1"  # -d = default, -e = extended
+    BUILD_SCOPE="${2:-$RCE_DEFAULT_UNIT_TESTS_BUILD_SCOPE}"
+    
+    if [ $UNIT_TESTS_FILTER == '-d' ]; then
+      EXTENDED_TESTS_ON_OFF_OPTION=""
+    elif [ $UNIT_TESTS_FILTER == '-e' ]; then
+      # the property can be set to anything, but must have a value
+      EXTENDED_TESTS_ON_OFF_OPTION="-Drce.tests.runExtended=true"
+    else 
+      echo "Invalid test filter option (neither -d nor -e): '$UNIT_TESTS_FILTER'"
+      exit 1
+    fi
+
     # delete previous output
     rm -rf "target/unit-tests"
     mkdir -p "target/unit-tests"
+    
+    # delete previous test reports in sub-projects, as these can get left
+    # behind when switching between build scopes on repeated runs, as Maven
+    # only clears the sub-projects included in the new build scope
+    find .. -name '*.xml' -path '*/target/surefire-reports/*' -exec rm "{}" \;
 
-    echo "Running Unit Tests (Build Scope '$RCE_UNIT_TESTS_BUILD_SCOPE')"
+    echo "Running Unit Tests (Test Filter '$UNIT_TESTS_FILTER', Build Scope '$BUILD_SCOPE')"
 
     BUILD_LOG_FILE="target/unit-tests/build.log"
     echo "  Build Log File:                $(pwd)/$BUILD_LOG_FILE"
 
     # TODO consider compiling and running tests against the intermediate repository
     # TODO consider making the test scope more configurable, e.g. per bundle
-
     set +e
     mvn $MAVEN_SETTINGS \
     -f ../de.rcenvironment/maven/secondStage/pom.xml \
-    -Drce.maven.buildScope="$RCE_UNIT_TESTS_BUILD_SCOPE" \
+    -Drce.maven.buildScope="$BUILD_SCOPE" \
     -Drce.maven.buildType="$RCE_BUILD_TYPE" \
+    $EXTENDED_TESTS_ON_OFF_OPTION \
     -Drce.maven.repositories.foundation.url="$RCE_THIRD_PARTY_REPOSITORY_URL" \
     -Drce.maven.skipDocumentation \
     -P !generateHelpFromDocbook \
@@ -228,15 +246,15 @@ run_unit_tests() {
     EXIT_CODE=$?
     set -e
 
-    # collect individual XML report files
+    # collect individual XML report files in a single directory
     mkdir -p target/unit-tests/reports/xml
     find .. -name '*.xml' -path '*/target/surefire-reports/*' \
-      -exec cp {} target/unit-tests/reports/xml/ \;
+      -exec cp "{}" target/unit-tests/reports/xml/ \;
 
     # a first quick-and-dirty check for test errors, but better than nothing
     # TODO generate a proper overview/report from these files
-    echo "Checking for test errors (preliminary approach)"
-    grep "<error" target/unit-tests/reports/xml/* || true
+    echo "Scanning for test failures and errors (preliminary approach):"
+    grep -E "<(failure|error)" target/unit-tests/reports/xml/* || true
 
     fail_with_log_tail_if_non_zero $EXIT_CODE "$BUILD_LOG_FILE"
 

@@ -8,6 +8,8 @@
 
 package de.rcenvironment.core.utils.testing;
 
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Simple holder for runtime test options, typically set by system properties. Currently, the only option is to enable "extended testing",
  * which means that "higher intensity" versions of tests should be enabled, for example by increasing iteration counts or test sizes.
@@ -31,12 +33,14 @@ public final class CommonTestOptions {
     private final boolean withExtendedTests;
 
     public CommonTestOptions() {
-        withExtendedTests = DEV_OPTION_ENABLE_RUN_EXTENDED || System.getProperty(SYSTEM_PROPERTY_RUN_EXTENDED) != null;
+        final String extendedTestingProperty = System.getProperty(SYSTEM_PROPERTY_RUN_EXTENDED);
+        withExtendedTests = DEV_OPTION_ENABLE_RUN_EXTENDED || (extendedTestingProperty != null && extendedTestingProperty.length() > 0);
+        LogFactory.getLog(getClass()).debug("Extended testing: " + withExtendedTests);
     }
 
     /**
-     * @return true if "extended" tests should be run; this can either mean that certain tests should be included, or that any
-     *         "higher intensity" versions of tests should be enabled, for example by increasing iteration counts or test sizes
+     * @return true if "extended" tests should be run; this can either mean that certain tests should be included, or that any "higher
+     *         intensity" versions of tests should be enabled, for example by increasing iteration counts or test sizes
      */
     public static boolean isExtendedTestingEnabled() {
         return sharedInstance.withExtendedTests;

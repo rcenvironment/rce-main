@@ -317,6 +317,9 @@
 							<level>4</level>
 							<autoStart>false</autoStart>
 						</defaultStartLevel>
+						<systemProperties>
+							<rce.tests.runExtended>${rce.tests.runExtended}</rce.tests.runExtended>
+						</systemProperties>
 					</configuration>
 				</plugin>
 				<plugin>
