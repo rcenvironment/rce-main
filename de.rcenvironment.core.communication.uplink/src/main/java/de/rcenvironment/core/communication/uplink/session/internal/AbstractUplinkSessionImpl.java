@@ -218,14 +218,20 @@ public abstract class AbstractUplinkSessionImpl implements UplinkSession {
 
         public synchronized void markIncomingStreamClosedOrEOF() {
             if (incomingStreamClosedOrEOF) {
-                throw new IllegalStateException("Redundant call");
+                log.warn(logPrefix + "Redundant call to mark the incoming stream as closed or EOF");
+                return;
             }
             incomingStreamClosedOrEOF = true;
 
             if (mainState == UplinkSessionState.UNCLEAN_SHUTDOWN_INITIATED) {
-                log.debug(logPrefix
-                    + "Incoming stream closed after closing the local end of the stream; considering unclean shutdown complete");
-                setMainStateInternal(UplinkSessionState.UNCLEAN_SHUTDOWN);
+                if (outgoingStreamClosed) {
+                    log.debug(logPrefix
+                        + "Incoming stream closed after closing the local end of the stream; considering unclean shutdown complete");
+                    setMainStateInternal(UplinkSessionState.UNCLEAN_SHUTDOWN);
+                } else {
+                    log.debug(logPrefix + "Incoming stream marked as closed or EOF, "
+                        + "but the outgoing stream was not closed yet; postponing final state change");
+                }
                 return;
             }
 
@@ -696,7 +702,7 @@ public abstract class AbstractUplinkSessionImpl implements UplinkSession {
     }
 
     protected void handleFatalError(UplinkProtocolErrorType errorType, String errorMessage) {
-        log.warn(StringUtils.format("%sFatal error in Uplink session for %s, closing the session: %s [type %s]",
+        log.debug(StringUtils.format("%sFatal error in Uplink connection to %s, closing the session: %s [type %s]",
             logPrefix, getRemoteSideInformationString(), errorMessage, errorType.name()));
         synchronized (sessionState) {
             sessionState.markFatalError(errorType);

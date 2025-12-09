@@ -39,7 +39,7 @@ public class UplinkProtocolErrorTypeTest {
     public void unknownTypeFallback() {
         // just use an unwrapped message as invalid input
         String testMessage = "my message";
-        assertEquals(UplinkProtocolErrorType.UNKNOWN_ERROR, UplinkProtocolErrorType.typeOfWrappedErrorMessage(testMessage));
+        assertEquals(UplinkProtocolErrorType.UNRECOGNIZED_ERROR_MESSAGE, UplinkProtocolErrorType.typeOfWrappedErrorMessage(testMessage));
         assertNotNull(UplinkProtocolErrorType.unwrapErrorMessage(testMessage));
         // the fallback for the "unwrapped" message text should include the whole invalid input
         assertTrue(UplinkProtocolErrorType.unwrapErrorMessage(testMessage).contains(testMessage));

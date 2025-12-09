@@ -229,6 +229,7 @@ Scenario: Remote visibility of Uplink tool after crashes and restarts of clients
     """
     An Uplink connection (Server1_Client1_default) finished with a warning or error
     An Uplink connection (Server1_Client2_default) finished with a warning or error
+    Uplink session or connection error: Connection closed by the remote side
     java.net.ConnectException: Connection refused
     """
     

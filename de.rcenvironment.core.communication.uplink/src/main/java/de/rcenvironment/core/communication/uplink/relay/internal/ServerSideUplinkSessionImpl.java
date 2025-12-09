@@ -224,7 +224,7 @@ public class ServerSideUplinkSessionImpl extends AbstractUplinkSessionImpl imple
 
         @Override
         public void onNonProtocolError(Exception exception) {
-            handleFatalError(UplinkProtocolErrorType.INTERNAL_SERVER_ERROR, exception.toString());
+            handleFatalError(UplinkProtocolErrorType.UNKNOWN_ERROR_ALLOW_RECONNECT, exception.toString());
         }
 
         @Override

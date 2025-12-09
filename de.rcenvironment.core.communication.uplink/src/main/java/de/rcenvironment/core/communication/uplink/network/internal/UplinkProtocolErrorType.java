@@ -64,9 +64,9 @@ public enum UplinkProtocolErrorType {
     INVALID_HANDSHAKE_DATA(91, false),
 
     /**
-     * Thrown by the server on internal errors.
+     * An unspecified communication error occurred, but there is no indication that the cause is permanent.
      */
-    INTERNAL_SERVER_ERROR(92, false),
+    UNKNOWN_ERROR_ALLOW_RECONNECT(92, true),
 
     /**
      * Thrown by the client on internal errors.
@@ -74,9 +74,10 @@ public enum UplinkProtocolErrorType {
     INTERNAL_CLIENT_ERROR(93, false),
 
     /**
-     * Fallback for when an error message cannot be recognized as a known type.
+     * Fallback for when an error message cannot be recognized as a known type; as this indicates some sort of permanent mismatch, do not
+     * try to reconnect.
      */
-    UNKNOWN_ERROR(99, false);
+    UNRECOGNIZED_ERROR_MESSAGE(99, false);
 
     private static final Pattern PARSE_PATTERN = Pattern.compile("E(\\d+): (.*)");
 
@@ -115,10 +116,10 @@ public enum UplinkProtocolErrorType {
                 }
             }
             LogFactory.getLog(UplinkProtocolErrorType.class).warn("Failed to recognize error code of message; raw text: " + message);
-            return UNKNOWN_ERROR;
+            return UNRECOGNIZED_ERROR_MESSAGE;
         } else {
             LogFactory.getLog(UplinkProtocolErrorType.class).warn("Failed to parse error code of message; raw text: " + message);
-            return UNKNOWN_ERROR;
+            return UNRECOGNIZED_ERROR_MESSAGE;
         }
     }
 

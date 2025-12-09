@@ -66,6 +66,8 @@ public enum UplinkSessionState {
     /**
      * Represents that the local side has encountered a fatal error, and will close the outgoing stream, but the session has not fully
      * terminated yet.
+     * 
+     * TODO (p2) consider splitting this into two states for clarity: incoming vs outgoing stream closed?
      */
     UNCLEAN_SHUTDOWN_INITIATED(false),
     /**
