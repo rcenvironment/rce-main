@@ -13,17 +13,11 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardWatchEventKinds;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import de.rcenvironment.core.configuration.bootstrap.profile.CommonProfile;
@@ -33,6 +27,7 @@ import de.rcenvironment.core.configuration.bootstrap.profile.CommonProfile;
  * Utility class for {@link InstanceOperationsImpl}.
  *
  * @author David Scholz
+ * @author Robert Mischke
  */
 public final class InstanceOperationsUtils {
 
@@ -67,9 +62,9 @@ public final class InstanceOperationsUtils {
 
     private static final String SLASH = "/";
 
-    private InstanceOperationsUtils() {
+    private static final Log sharedLog = LogFactory.getLog(InstanceOperationsUtils.class);
 
-    }
+    private InstanceOperationsUtils() {}
 
     /**
      * 
@@ -77,7 +72,7 @@ public final class InstanceOperationsUtils {
      * 
      * @param profile the profile to lock.
      * @param timeout the maximum time trying to acquire the lock.
-     * @return <code>true</code> if locking was successfull, else <code>false</code> is returned.
+     * @return <code>true</code> if locking was successful, else <code>false</code> is returned.
      * @throws IOException on failure.
      */
     public static boolean lockIMLockFile(final File profile, final long timeout) throws IOException {
@@ -175,57 +170,46 @@ public final class InstanceOperationsUtils {
      * 
      * Simple watchdog for the shutdown file.
      * 
-     * @param path the path to the location, where the shutdown file should be located.
-     * @return <code>true</code> if shutdown file was found, <code>false</code> otherwise.
+     * @param profilePath the path to the profile directory in which the shutdown file should be detected
+     * @param timeoutMsec the maximum time to wait for the file to appear, in msec
+     * @return <code>true</code> if shutdown file was found and is not empty, <code>false</code> otherwise
      * @throws IOException on failure.
      */
-    public static boolean detectShutdownFile(final String path) throws IOException {
-        WatchService watcher = FileSystems.getDefault().newWatchService();
-        Path shutdownFile = Paths.get(path + SLASH + CommonProfile.PROFILE_INTERNAL_DATA_SUBDIR + "/" + SHUTDOWN_FILE_NAME);
-        Path shutdownFileDir = shutdownFile.getParent();
-        File file = new File(shutdownFileDir.toString());
-        final int maxWaitingTime = 200;
-        shutdownFileDir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE);
-        WatchKey watchKey;
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
-                if (file.isDirectory()) {
-                    for (File f : file.listFiles()) {
-                        if (f.getName().equals(SHUTDOWN_FILE_NAME)) {
-                            return true;
-                        }
-                    }
-                }
-                watchKey = watcher.take();
-                if (!watchKey.isValid()) {
-                    continue;
-                }
-            } catch (InterruptedException e) {
-                throw new IOException("Shutdown watcher task was interrupted.");
+    public static boolean awaitShutdownFile(final Path profilePath, int timeoutMsec) throws IOException {
+        Path shutdownFile = profilePath.resolve(CommonProfile.PROFILE_INTERNAL_DATA_SUBDIR).resolve(SHUTDOWN_FILE_NAME);
+
+        final int existencePollingDelay = 500;
+        final int fileHasContentPollingDelay = 200;
+
+        long timeoutTimestamp = System.currentTimeMillis() + timeoutMsec;
+
+        while (!Files.exists(shutdownFile)) {
+            if (System.currentTimeMillis() >= timeoutTimestamp) {
+                sharedLog.debug("Reached timeout while waiting for " + shutdownFile);
+                return false;
             }
-            final List<WatchEvent<?>> watchEvents = watchKey.pollEvents();
-            for (WatchEvent<?> event : watchEvents) {
-                if (event.kind().equals(StandardWatchEventKinds.ENTRY_CREATE)) {
-                    Path createdFileRelativePath = (Path) event.context();
-                    Path createdFileAbsolutePath = shutdownFileDir.resolve(createdFileRelativePath);
-                    if (createdFileAbsolutePath.equals(shutdownFile)) {
-                        for (int i = 0; i < 2; i++) {
-                            if (Files.size(Paths.get(createdFileAbsolutePath.toUri())) == 0) {
-                                try {
-                                    Thread.sleep(maxWaitingTime);
-                                    continue;
-                                } catch (InterruptedException e) {
-                                    throw new IOException("Interrupted while waiting for shutdown file to appear");
-                                }
-                            } else {
-                                return true;
-                            }
-                        }
-                    }
-                }
+            try {
+                Thread.sleep(existencePollingDelay);
+            } catch (InterruptedException e) {
+                sharedLog.debug("Interrupted while waiting for " + shutdownFile);
+                return false;
             }
         }
 
+        for (int i = 0; i < 2; i++) {
+            if (Files.size(shutdownFile) != 0) {
+                return true;
+            }
+            try {
+                Thread.sleep(fileHasContentPollingDelay);
+            } catch (InterruptedException e) {
+                sharedLog.debug("Interrupted while waiting for " + shutdownFile);
+                return false;
+            }
+        }
+
+        // unusual case, log as waning
+        sharedLog.warn("Found expected file " + shutdownFile + ", but it remained empty even after waiting");
         return false;
     }
 
