@@ -160,11 +160,24 @@ public final class RCELauncherCustomization {
 
     /**
      * Checks if we are currently in a privileged mode, i.e. whether the program was started as admin in case of windows or as root in case
-     * of Linux. This was implemented based on https://stackoverflow.com/a/23538961
+     * of Linux. 
      * 
      * @return true if we are currently privileged, false otherwise.
      */
     private static boolean checkPrivileged() {
+        final String os = System.getProperty("os.name", "Linux" /* fallback */);
+        if (os.startsWith("Windows")) {
+            return checkPrivilegedOnWindows();
+        } else if (os.toLowerCase().indexOf("linux") >= 0) {
+            return checkPrivilegedOnLinux();
+        } else {
+            System.err.println("Could not detect operating system, please report this to rce@dlr.de");
+            return false;
+        }
+    }
+
+    // Implementation based on https://stackoverflow.com/a/23538961
+    private static boolean checkPrivilegedOnWindows() {
         // Set err temporarily to dummy stream to avoid printing errors from running the below test in non-privileged mode,
         // which will be the default. Single-threaded execution is assumed here, otherwise synchronize on err.
         // Also see SO thread linked above.
@@ -181,15 +194,20 @@ public final class RCELauncherCustomization {
             Preferences preferences = systemRoot();
             // Key name below is more or less irrelevant, the UUID prevents collisions with other applications in fringe scenarios.
             String privilegeCheckKey = "rce_d47c7287-4e4d-4970-840a-b65b69c2a4e7";
-            preferences.put(privilegeCheckKey, "temp_privileged_process_check"); // SecurityException on Windows
+            preferences.put(privilegeCheckKey, "temp_privileged_process_check"); // SecurityException if process is not privileged
             preferences.remove(privilegeCheckKey);
-            preferences.flush(); // BackingStoreException on Linux
+            preferences.flush();
             return true;
-        } catch (SecurityException | BackingStoreException exception) {
+        } catch (SecurityException | BackingStoreException e) {
             return false;
         } finally {
             setErr(err);
         }
+    }
+    
+    private static boolean checkPrivilegedOnLinux() {
+        File etc = new File("/etc");
+        return etc.canWrite();
     }
 
     public static String[] rewriteCommandLineArguments(String[] args) {
