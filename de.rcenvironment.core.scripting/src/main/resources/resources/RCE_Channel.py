@@ -11,11 +11,12 @@ import math
 import os
 from decimal import *
 from io import IOBase 
+from collections import OrderedDict
 
 import input_file_factory as IFF
 
 def create_input_file():
-	return IFF.InputFileFactory(json.OrderedDict(),RCE_INPUT_FILES)
+	return IFF.InputFileFactory(OrderedDict(),RCE_INPUT_FILES)
 
 def readinput_internal():
     """ 
