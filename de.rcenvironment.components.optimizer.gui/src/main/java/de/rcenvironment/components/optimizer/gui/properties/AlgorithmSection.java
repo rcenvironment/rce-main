@@ -12,7 +12,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -149,6 +148,7 @@ public abstract class AlgorithmSection extends ValidatingWorkflowNodePropertySec
         new Label(firstAlgo, SWT.NONE).setText("Main algorithm");
         new Label(firstAlgo, SWT.NONE);
         comboMainAlgorithmSelection = new Combo(firstAlgo, SWT.BORDER | SWT.READ_ONLY);
+        comboMainAlgorithmSelection.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
         comboMainAlgorithmSelection.addListener(SWT.Selection, new SelectAlgorithmListener());
         comboMainAlgorithmSelection.setData(CONTROL_PROPERTY_KEY, OptimizerComponentConstants.ALGORITHMS);
         Button buttonProperties = new Button(firstAlgo, SWT.PUSH);
@@ -163,6 +163,7 @@ public abstract class AlgorithmSection extends ValidatingWorkflowNodePropertySec
         new Label(secondAlgo, SWT.NONE).setText("Second algorithm");
         new Label(secondAlgo, SWT.NONE);
         comboSecondAlgorithmSelection = new Combo(secondAlgo, SWT.BORDER | SWT.READ_ONLY);
+        comboSecondAlgorithmSelection.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
         comboSecondAlgorithmSelection.setItems(allMethods);
         comboSecondAlgorithmSelection.addListener(SWT.Selection, new SelectAlgorithmListener());
         comboSecondAlgorithmSelection.setData(CONTROL_PROPERTY_KEY, OptimizerComponentConstants.ALGORITHMS);
@@ -178,6 +179,7 @@ public abstract class AlgorithmSection extends ValidatingWorkflowNodePropertySec
         new Label(thirdAlgo, SWT.NONE).setText("Third algorithm");
         new Label(thirdAlgo, SWT.NONE);
         comboThirdAlgorithmSelection = new Combo(thirdAlgo, SWT.BORDER | SWT.READ_ONLY);
+        comboThirdAlgorithmSelection.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
         comboThirdAlgorithmSelection.setItems(allMethods);
         comboThirdAlgorithmSelection.addListener(SWT.Selection, new SelectAlgorithmListener());
         comboThirdAlgorithmSelection.setData(CONTROL_PROPERTY_KEY, OptimizerComponentConstants.ALGORITHMS);
