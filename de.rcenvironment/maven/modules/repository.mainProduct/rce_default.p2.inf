@@ -16,6 +16,7 @@ instructions.configure=\
 	org.eclipse.equinox.p2.touchpoint.eclipse.removeJvmArg(jvmArg:-Xmx1024m);\
 	org.eclipse.equinox.p2.touchpoint.eclipse.removeJvmArg(jvmArg:-Xmx1280m);\
 	org.eclipse.equinox.p2.touchpoint.eclipse.removeJvmArg(jvmArg:-Xmx2048m);\
+	org.eclipse.equinox.p2.touchpoint.eclipse.removeJvmArg(jvmArg:-Xmx4g);\
 	org.eclipse.equinox.p2.touchpoint.eclipse.removeJvmArg(jvmArg:-XX:MaxPermSize=256m);\
 	org.eclipse.equinox.p2.touchpoint.eclipse.removeJvmArg(jvmArg:-XX:+HeapDumpOnOutOfMemoryError);\
 	org.eclipse.equinox.p2.touchpoint.eclipse.removeJvmArg(jvmArg:-XX:ErrorFile=rce_error%p.log);\
@@ -31,6 +32,7 @@ instructions.configure=\
 	org.eclipse.equinox.p2.touchpoint.eclipse.addJvmArg(jvmArg:-Dosgi.module.lock.timeout=30);\
 	org.eclipse.equinox.p2.touchpoint.eclipse.addJvmArg(jvmArg:-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN);\
 	org.eclipse.equinox.p2.touchpoint.eclipse.addJvmArg(jvmArg:-Xms512m);\
+	org.eclipse.equinox.p2.touchpoint.eclipse.addJvmArg(jvmArg:-Xmx4g);\
 	org.eclipse.equinox.p2.touchpoint.eclipse.addJvmArg(jvmArg:-XX:+HeapDumpOnOutOfMemoryError);\
 	org.eclipse.equinox.p2.touchpoint.eclipse.addJvmArg(jvmArg:-XX:ErrorFile=rce_error%p.log);\
 	org.eclipse.equinox.p2.touchpoint.natives.remove(path:${installFolder}/plugins/org.apache.commons.logging_1.1.1.v201101211721.jar);
@@ -38,43 +40,17 @@ instructions.configure=\
 # platform-dependent customizations
 	
 requires.1.namespace=org.eclipse.equinox.p2.iu
-requires.1.name=de.rcenvironment.products.rce.default.maxheap.2gb
-requires.1.filter=(!(&(osgi.os=win32) (osgi.arch=x86)))
+requires.1.name=de.rcenvironment.products.rce.default.browser.mozilla
+requires.1.filter=(osgi.os=linux)
 requires.1.range=[$version$,$version$]
 requires.1.greedy=true
 
-requires.2.namespace=org.eclipse.equinox.p2.iu
-requires.2.name=de.rcenvironment.products.rce.default.maxheap.1gb
-requires.2.filter=(&(osgi.os=win32) (osgi.arch=x86))
-requires.2.range=[$version$,$version$]
-requires.2.greedy=true
-
-requires.3.namespace=org.eclipse.equinox.p2.iu
-requires.3.name=de.rcenvironment.products.rce.default.browser.mozilla
-requires.3.filter=(osgi.os=linux)
-requires.3.range=[$version$,$version$]
-requires.3.greedy=true
-
-units.1.id=de.rcenvironment.products.rce.default.maxheap.2gb
+units.1.id=de.rcenvironment.products.rce.default.browser.mozilla
 units.1.version=$version$
 units.1.provides.1.namespace=org.eclipse.equinox.p2.iu
-units.1.provides.1.name=de.rcenvironment.products.rce.default.maxheap.2gb
+units.1.provides.1.name=de.rcenvironment.products.rce.default.browser.mozilla
 units.1.provides.1.version=$version$
-units.1.instructions.configure=org.eclipse.equinox.p2.touchpoint.eclipse.addJvmArg(jvmArg:-Xmx2048m);
-
-units.2.id=de.rcenvironment.products.rce.default.maxheap.1gb
-units.2.version=$version$
-units.2.provides.1.namespace=org.eclipse.equinox.p2.iu
-units.2.provides.1.name=de.rcenvironment.products.rce.default.maxheap.1gb
-units.2.provides.1.version=$version$
-units.2.instructions.configure=org.eclipse.equinox.p2.touchpoint.eclipse.addJvmArg(jvmArg:-Xmx1280m);
-
-units.3.id=de.rcenvironment.products.rce.default.browser.mozilla
-units.3.version=$version$
-units.3.provides.1.namespace=org.eclipse.equinox.p2.iu
-units.3.provides.1.name=de.rcenvironment.products.rce.default.browser.mozilla
-units.3.provides.1.version=$version$
-units.3.instructions.configure=org.eclipse.equinox.p2.touchpoint.eclipse.addJvmArg(jvmArg:-Dorg.eclipse.swt.browser.DefaultType=mozilla);
+units.1.instructions.configure=org.eclipse.equinox.p2.touchpoint.eclipse.addJvmArg(jvmArg:-Dorg.eclipse.swt.browser.DefaultType=mozilla);
 
 # Register instructions to uninstall the legacy org.apache.commons.logging bundle JAR if it is present,
 # as it can cause OSGi wiring problems. This is intended for "fixing" older installations on upgrade.
