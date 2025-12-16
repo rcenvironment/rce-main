@@ -108,8 +108,12 @@ public class RemotableFileDataServiceImpl implements RemotableFileDataService {
 
         public synchronized void setDataReference(DataReference dataReference) throws IOException {
             this.dataReference = dataReference;
-            // dispose temp file
+        }
+
+        public void releaseTempFile() throws IOException {
+            // dispose/delete
             TempFileServiceAccess.getInstance().disposeManagedTempDirOrFile(tempFile);
+            // detect accidental use after this point
             tempFile = null;
         }
 
@@ -286,6 +290,7 @@ public class RemotableFileDataServiceImpl implements RemotableFileDataService {
                     upload.setDataReference(reference);
                 } finally {
                     IOUtils.closeQuietly(fis);
+                    upload.releaseTempFile();
                 }
             } catch (IOException e) {
                 // on any error, attach the exception to the upload data
@@ -334,20 +339,26 @@ public class RemotableFileDataServiceImpl implements RemotableFileDataService {
     public DataReference uploadInSingleStep(byte[] data, MetaDataSet metaDataSet, Boolean alreadyCompressed) throws IOException,
         RemoteOperationException {
         UploadHolder upload = new UploadHolder();
-        upload.appendData(data);
+        try {
+            upload.appendData(data);
 
-        final File tempFile = upload.finishAndGetFile();
-        if (tempFile == null) {
-            throw new IOException("Internal error: upload stream was valid, but no file set");
+            final File tempFile = upload.finishAndGetFile();
+            if (tempFile == null) {
+                throw new IOException("Internal error: upload stream was valid, but no file set");
+            }
+
+            // synchronously transfer the upload file to data management
+            InputStream fis = new BufferedInputStream(new FileInputStream(tempFile), UPLOAD_TEMP_FILE_STREAM_BUFFER_SIZE);
+            try {
+                DataReference reference = newReferenceFromStream(fis, metaDataSet, alreadyCompressed);
+                // on success, attach the reference to the upload data
+                upload.setDataReference(reference);
+            } finally {
+                IOUtils.closeQuietly(fis);
+            }
+        } finally {
+            upload.releaseTempFile();
         }
-
-        // synchronously transfer the upload file to data management
-        InputStream fis = new BufferedInputStream(new FileInputStream(tempFile), UPLOAD_TEMP_FILE_STREAM_BUFFER_SIZE);
-        DataReference reference;
-        reference = newReferenceFromStream(fis, metaDataSet, alreadyCompressed);
-        // on success, attach the reference to the upload data
-        upload.setDataReference(reference);
-        IOUtils.closeQuietly(fis);
 
         return upload.getDataReference();
     }
