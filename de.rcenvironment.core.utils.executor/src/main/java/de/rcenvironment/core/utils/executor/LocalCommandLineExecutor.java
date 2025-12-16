@@ -45,13 +45,11 @@ public class LocalCommandLineExecutor extends AbstractCommandLineExecutor implem
     private Log log = LogFactory.getLog(getClass());
 
     /**
-     * Creates a local executor with the given path as its working directory. If the given path is
-     * not a directory, it is created.
+     * Creates a local executor with the given path as its working directory. If the given path is not a directory, it is created.
      * 
      * @param workDirPath the directory on the local system to use for execution
      * 
-     * @throws IOException if the given {@link File} is not a directory and also could not be
-     *         created
+     * @throws IOException if the given {@link File} is not a directory and also could not be created
      */
     public LocalCommandLineExecutor(File workDirPath) throws IOException {
 
@@ -76,8 +74,20 @@ public class LocalCommandLineExecutor extends AbstractCommandLineExecutor implem
 
         // build environment key/value array
         Set<Entry<String, String>> entries = env.entrySet();
-        String[] envArray = new String[entries.size()];
-        int pos = 0;
+        final String[] envArray;
+        int pos;
+        if (OS.isFamilyWindows() && !env.containsKey("PATH")) {
+            envArray = new String[entries.size() + 1];
+            // Add a minimal PATH to the environment so the executor can find the
+            // "DOSKEY" command it apparently needs (#18301). Note that allowing
+            // to override the PATH via the provided environment map can still
+            // break the executor; this is the caller's responsibility.
+            envArray[0] = "PATH=C:\\Windows\\System32"; // hardcoded until there is a reason not to
+            pos = 1;
+        } else {
+            envArray = new String[entries.size()];
+            pos = 0;
+        }
         for (Entry<String, String> entry : entries) {
             envArray[pos++] = entry.getKey() + "=" + entry.getValue();
         }
