@@ -696,29 +696,57 @@ public class SshUplinkConnectionServiceImpl implements SshUplinkConnectionServic
                 if (reason == null) {
                     reason = "";
                 }
-                // Reconnect only makes sense if some network problem occured, not if the credentials are wrong.
+                // Reconnect only makes sense for certain kinds of network problems, so we
+                // try to detect several known failure situations here. This also serves to
+                // display better user feedback messages than the raw technical errors.
                 boolean shouldTryToReconnect = setup.wantToReconnect();
                 if (cause != null && cause instanceof ConnectException) {
-                    reason = "The remote instance could not be reached. Probably the hostname or port is wrong.";
+                    reason = "The configured Uplink server could not be reached. "
+                        + "Most likely, either the server is currently not running "
+                        + "or the configured hostname or port is wrong.";
+                    // allow auto-reconnect if configured
                 } else if (cause != null && cause instanceof UnknownHostException) {
-                    reason = "No host with this name could be found.";
-                } else if (reason.startsWith("Auth fail")) {
-                    reason = "Authentication failed. Either the user name or passphrase is wrong, "
-                        + "or the wrong key file was used, or the account is not enabled on the server.";
+                    reason = "The configured Uplink server could not be reached "
+                        + "as the hostname could not be resolved. "
+                        + "This may be a temporary problem with your network connection.";
+                    // allow auto-reconnect if configured
+                } else if (cause != null && reason.endsWith("Connection reset")) {
+                    reason = "Successfully connected to the configured server, "
+                        + "but then the connection was abruptly closed. Potential reasons could "
+                        + "be the server shutting down, or your RCE version being too old, "
+                        + "or the configured server is running some other software than RCE.";
                     shouldTryToReconnect = false;
-                } else if (reason.startsWith("USERAUTH fail")) {
-                    reason = "Authentication failed. The wrong passphrase for the key file " + setup.getKeyfileLocation() + " was used.";
+                } else if (reason.startsWith("Auth fail")) {
+                    reason = "Authentication failed. Either the given user name or passphrase is wrong, "
+                        + "or an incorrect key file was used, or the account is not enabled on the server.";
+                    shouldTryToReconnect = false;
+                } else if (reason.startsWith("USERAUTH fail") || reason.equals("Incorrect passphrase provided.")) {
+                    reason = "Authentication failed. Most likely, a wrong passphrase was used for "
+                        + "the configured key file " + setup.getKeyfileLocation() + ".";
                     shouldTryToReconnect = false;
                 } else if (reason.startsWith("invalid privatekey")) {
-                    // happens when the key file is corrupted. Only happens for keys without passphrase, otherwise a "USERAUTH" failure is thrown instead.
-                    reason = "Authentication failed. An invalid private key was used.";
+                    // happens when the key file is corrupted. Only happens for keys without passphrase,
+                    // otherwise a "USERAUTH" failure is thrown instead.
+                    reason = "Authentication failed. The configured private key file "
+                        + "seems to be invalid or corrupted.";
                     shouldTryToReconnect = false;
                 } else if (reason.equals("The authentication phrase cannot be empty")) {
-                    reason = "The authentication phrase cannot be empty.";
+                    reason = "Authentication failed. The authentication phrase "
+                        + "(the \"password\") cannot be empty.";
                     shouldTryToReconnect = false;
                 } else {
-                    log.warn("Unexpected reason for SSH connection failure. Will not try to reconnect."); // reason is already logged above.
-                    reason = "Please refer to the logs for technical details.";
+                    // note: error details were already logged above
+                    log.warn("Unidentified reason for SSH/Uplink connection failure, "
+                        + "will not try to reconnect.");
+                    String causePrefix = "";
+                    if (cause != null) {
+                        causePrefix = "\"" + cause.toString() + "\", ";
+                    }
+                    reason = StringUtils.format("An unidentified error occurred while trying to connect "
+                        + "to the configured Uplink server.\n\n"
+                        + "Technical details: %s\"%s\"\n\n"
+                        + "More information may be available in the local log files or those of the server.",
+                        causePrefix, reason);
                     shouldTryToReconnect = false;
                 }
 
