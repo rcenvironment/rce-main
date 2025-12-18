@@ -1,3 +1,57 @@
+RCE 10.7.0 (December 18, 2025)
+
+# Uplink Connections
+
+- Improved cancellation behavior, e.g. when cancelling during tool data upload/download
+- Improved behavior and automatic reconnection after connection interruptions
+- Improved notifications for failed Uplink/SSH connection attempts
+- Added transmission of early RCE version information during SSH login at client-side
+- Added event log entries on received early RCE version information at server-side
+- Prevented SSH/Uplink connections from auto-reconnecting on authentication failure
+- The SSH/Uplink connections have been modified to not automatically reconnect in case of unknown errors.
+
+# GUI
+
+- Fixed transparency issues with some combo boxes on Ubuntu that led to unreadable entries
+
+# Third-party Library Upgrades
+
+- Upgraded activemq to 5.19.1
+- Upgraded apache sshd to 2.16.0
+- Upgraded bouncycastle to 1.83
+- Upgraded commons-exec to 1.5.0
+- Upgraded commons-lang3 to 3.20.0
+- Upgraded jackson to 2.20.1
+- Upgraded mwiede-jsch to 2.27.6
+
+# Build/CI
+
+- Made build shells scripts more portable by not requiring an installed "zip" command
+
+# QA
+
+- Fixed an issue in the BDD test executor that could cause long test sessions to fail with "inotify" errors
+- Improved the Uplink crash-and-reconnect BDD test setup
+- Improved "repoguard" rules
+- The REUSE declarations were updated by splitting the deb5 file into TOML files for each bundle to comply with the REUSE 3.3 specification
+- The Checkstyle rules have been updated to match the latest Checkstyle version
+- Fixed various minor warnings and Checkstyle issues
+
+# Bugfixes
+
+- An issue with the script API that affected the RCE.create_input_file() method when using the Python integration has been fixed
+- Fixed a bug that prevented the deletion of temporary files generated during the execution of Jython scripts
+- Prevented issues with .rce/common folders created without version information
+- Command "components list -r" now lists only the remote components
+
+# Other Fixes and Improvements
+
+- Increased the maximum heap space property in the rce.ini file from 2g to 4g
+- The integration of the Example tool during the generation of the Workflow Examples Project is now avoided if another workflow component named "Example" already exists
+- Implemented a safeguard that prevents application startup when executing RCE as administrator/root, unless enabled via a --allow-privileged command line flag
+- Improved documentation in the user guide
+
+
 RCE 10.6.0 (May 28, 2025)
 
 # Components
