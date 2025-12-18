@@ -44,3 +44,16 @@ Please refer to `build/README.ad` for instructions.
 RCE is Open Source Software provided under the terms of the [Eclipse Public License (EPL)](http://opensource.org/licenses/EPL-1.0).
 This source repository as well as related releases also contain software covered by other open source licenses.
 More information is available in embedded licensing files.
+
+##### Update/Security Information for RCE Releases
+
+Please refer to our [Updates/Security](https://rcenvironment.de/pages/updatessecurity.html) website page for the latest update recommendations.
+
+
+##### Citation
+
+If you use RCE in your research project, please cite either the software itself or our reference publication:
+
+- Latest software release: Jan Flink, Robert Mischke, David Wichter. RCE (10.7.0). Zenodo (2025). https://doi.org/10.5281/zenodo.17878323
+- RCE software in general: https://doi.org/10.5281/zenodo.3691674
+- Reference publication: Brigitte Boden, Jan Flink, Niklas Först, Robert Mischke, Kathrin Schaffert, Alexander Weinert, Annika Wohlan, and Andreas Schreiber. "RCE: an integration environment for engineering and science." SoftwareX 15 (2021): 100759. https://doi.org/10.1016/j.softx.2021.100759. 

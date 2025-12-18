@@ -12,6 +12,7 @@ RCE 10.7.0 (December 18, 2025)
 
 # GUI
 
+- Fixed an issue with the "Connect immediatly" property in connection dialogs
 - Fixed transparency issues with some combo boxes on Ubuntu that led to unreadable entries
 
 # Bugfixes
