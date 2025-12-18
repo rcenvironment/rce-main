@@ -5,14 +5,37 @@ RCE 10.7.0 (December 18, 2025)
 - Improved cancellation behavior, e.g. when cancelling during tool data upload/download
 - Improved behavior and automatic reconnection after connection interruptions
 - Improved notifications for failed Uplink/SSH connection attempts
-- Added transmission of early RCE version information during SSH login at client-side
-- Added event log entries on received early RCE version information at server-side
-- Prevented SSH/Uplink connections from auto-reconnecting on authentication failure
-- The SSH/Uplink connections have been modified to not automatically reconnect in case of unknown errors.
+- Added transmission of early RCE version information from client side during SSH login
+- Added received early RCE version information to related event log entries on server side
+- Prevented SSH/Uplink connections from auto-reconnecting after certain authentication failures
+- Prevented SSH/Uplink connections from auto-reconnecting in case of unknown errors
 
 # GUI
 
 - Fixed transparency issues with some combo boxes on Ubuntu that led to unreadable entries
+
+# Bugfixes
+
+- An issue with the script API that affected the RCE.create_input_file() method when using the Python 
+  integration has been fixed
+- Fixed a bug that prevented the deletion of temporary files generated during the execution of Jython scripts
+- Prevented issues with .rce/common folders created without version information
+- Command "components list -r" now only lists the remote components as expected
+
+# Other Improvements
+
+- Added a CITATION.cff file (see https://github.com/citation-file-format/), making this release
+  citable (DOI 10.5281/zenodo.17878323).
+- Increased the maximum heap space property in the rce.ini file from 2GiB to 4GiB.
+  This should have no effect on RAM usage unless your RCE instance actually needs that much RAM
+- The integration of the Example tool during the generation of the Workflow Examples Project is now 
+  avoided if another workflow component named "Example" already exists
+- Implemented a safeguard that prevents application startup when executing RCE as administrator/root,
+  unless explicitly allowed via the new --allow-privileged command line flag.
+  You may need to set this flag when running RCE as pseudo-root in rootless containers, e.g. Podman
+- Improved documentation in the user guide
+- Made build shells scripts more portable by not requiring an installed "zip" command
+- Added "-e" flag to the run-unit-tests script to enable "extended" unit tests
 
 # Third-party Library Upgrades
 
@@ -24,32 +47,16 @@ RCE 10.7.0 (December 18, 2025)
 - Upgraded jackson to 2.20.1
 - Upgraded mwiede-jsch to 2.27.6
 
-# Build/CI
-
-- Made build shells scripts more portable by not requiring an installed "zip" command
-
-# QA
+# Quality assurance
 
 - Fixed an issue in the BDD test executor that could cause long test sessions to fail with "inotify" errors
 - Improved the Uplink crash-and-reconnect BDD test setup
 - Improved "repoguard" rules
-- The REUSE declarations were updated by splitting the deb5 file into TOML files for each bundle to comply with the REUSE 3.3 specification
+- The REUSE declarations were updated by splitting the deb5 file into TOML files for each bundle
+  to adapt to the REUSE 3.3 specification
 - The Checkstyle rules have been updated to match the latest Checkstyle version
+- Fixed a unit test that was broken on Windows 11
 - Fixed various minor warnings and Checkstyle issues
-
-# Bugfixes
-
-- An issue with the script API that affected the RCE.create_input_file() method when using the Python integration has been fixed
-- Fixed a bug that prevented the deletion of temporary files generated during the execution of Jython scripts
-- Prevented issues with .rce/common folders created without version information
-- Command "components list -r" now lists only the remote components
-
-# Other Fixes and Improvements
-
-- Increased the maximum heap space property in the rce.ini file from 2g to 4g
-- The integration of the Example tool during the generation of the Workflow Examples Project is now avoided if another workflow component named "Example" already exists
-- Implemented a safeguard that prevents application startup when executing RCE as administrator/root, unless enabled via a --allow-privileged command line flag
-- Improved documentation in the user guide
 
 
 RCE 10.6.0 (May 28, 2025)
