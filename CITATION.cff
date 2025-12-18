@@ -1,0 +1,76 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite both the article from preferred-citation and the software itself."
+
+title: "RCE (Remote Component Environment)"
+license: EPL-1.0
+abstract: >
+  This software is a distributed, workflow-driven integration environment.
+  It is used by engineers and scientists to design and simulate complex 
+  systems (e.g., aircraft, ships, or satellites) by using and integrating
+  their own design and simulation tools.
+repository-code: https://github.com/rcenvironment/rce-main
+contact:
+  - name: "German Aerospace Center (DLR), Institute for Software Technology, RCE Project"
+    email: rce@dlr.de
+    website: "https://rcenvironment.de/"
+identifiers:
+  - description: "The DOI of RCE 10.7.0"
+    type: doi
+    value: 10.5281/zenodo.17878323
+  - description: "The Concept DOI of RCE"
+    type: doi
+    value: 10.5281/zenodo.3691674
+preferred-citation:
+  type: article
+  title: "RCE: An Integration Environment for Engineering and Science"
+  authors:
+    - family-names: Boden
+      given-names: Brigitte
+      orcid: "https://orcid.org/0000-0002-2326-2762"
+    - family-names: Flink
+      given-names: Jan
+      orcid: "https://orcid.org/0000-0002-2461-6569"
+    - family-names: Först
+      given-names: Niklas
+      orcid: "https://orcid.org/0000-0003-0132-6937"
+    - family-names: Mischke
+      given-names: Robert
+      orcid: "https://orcid.org/0000-0003-3419-4897"
+    - family-names: Schaffert
+      given-names: Kathrin
+      orcid: "https://orcid.org/0000-0002-9729-7730"
+    - family-names: Weinert
+      given-names: Alexander
+      orcid: "https://orcid.org/0000-0001-8143-246X"
+    - family-names: Wohlan
+      given-names: Annika
+      orcid: "https://orcid.org/0000-0002-5635-2414"
+    - family-names: Schreiber
+      given-names: Andreas
+      orcid: "https://orcid.org/0000-0001-5750-5649"
+  journal: SoftwareX
+  volume: 15
+  pages: 100759
+  doi: 10.1016/j.softx.2021.100759
+
+version: 10.7.0
+date-released: "2025-12-18"
+authors:
+  - family-names: Flink
+    given-names: Jan
+    orcid: "https://orcid.org/0000-0002-2461-6569"
+  - family-names: Mischke
+    given-names: Robert
+    orcid: "https://orcid.org/0000-0003-3419-4897"
+  - family-names: Wichter
+    given-names: David
+    orcid: "https://orcid.org/0009-0004-1502-7617"
+
+# We would also like to recognize the assistance of
+# - Lukas Rosenbach (https://orcid.org/0009-0002-1700-828X) and
+# - Matthias Wagner (https://orcid.org/0000-0002-1044-5367)
+# during final testing of this release.
+# 
+# We look forward to future versions of the CFF standard 
+# supporting the structured recognition of such contributions 
+# below the threshold of authorship.
