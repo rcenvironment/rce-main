@@ -16,80 +16,54 @@ import java.util.Map;
  * Used for defining command groups which define the first token of a command.
  * 
  * @author Sebastian Nocke
- *
+ * @author Robert Mischke (refactoring)
  */
 public class MainCommandDescription extends AbstractCommandDescription {
 
     private SubCommandDescription[] subCommands;
+
     private Map<String, SubCommandDescription> nSubCommands = new HashMap<>();
+
     private String commandGroupDescription;
 
     public MainCommandDescription(String command, String commandGroupDescription, String description,
-            SingleCommandHandler handler, CommandModifierInfo modifiers, SubCommandDescription... subCommands) {
-        super(command, description, handler, modifiers);
-        this.commandGroupDescription = commandGroupDescription;
-        this.subCommands = subCommands;
-        putSubCommandsInMap();
-    }
-    
-    public MainCommandDescription(String command, String commandGroupDescription, String description,
-            SingleCommandHandler handler, CommandModifierInfo modifiers,
-            boolean isDevcommand, SubCommandDescription... subCommands) {
+        SingleCommandHandler handler, CommandModifierInfo modifiers,
+        boolean isDevcommand, SubCommandDescription... subCommands) {
         super(command, description, handler, modifiers, isDevcommand);
         this.commandGroupDescription = commandGroupDescription;
         this.subCommands = subCommands;
         putSubCommandsInMap();
     }
-    
+
     public MainCommandDescription(String command, String commandGroupDescription, String description,
-            SingleCommandHandler handler, SubCommandDescription... subCommands) {
-        super(command, description, handler);
-        this.commandGroupDescription = commandGroupDescription;
-        this.subCommands = subCommands;
-        putSubCommandsInMap();
+        SingleCommandHandler handler, CommandModifierInfo modifiers, SubCommandDescription... subCommands) {
+        this(command, commandGroupDescription, description, handler, modifiers, false, subCommands);
     }
-    
+
     public MainCommandDescription(String command, String commandGroupDescription, String description,
-            SingleCommandHandler handler, boolean isDevcommand, SubCommandDescription... subCommands) {
-        super(command, description, handler, isDevcommand);
-        this.commandGroupDescription = commandGroupDescription;
-        this.subCommands = subCommands;
-        putSubCommandsInMap();
+        SingleCommandHandler handler, SubCommandDescription... subCommands) {
+        this(command, commandGroupDescription, description, handler, new CommandModifierInfo(), false, subCommands);
     }
-    
-    public MainCommandDescription(String command, String commandGroupDescription,
-            String description, SubCommandDescription... subCommands) {
-        super(command, description);
-        this.commandGroupDescription = commandGroupDescription;
-        this.subCommands = subCommands;
-        putSubCommandsInMap();
-    }
-    
+
     public MainCommandDescription(String command, String commandGroupDescription, String description,
-            boolean isDevcommand, SubCommandDescription... subCommands) {
-        super(command, description, isDevcommand);
-        this.commandGroupDescription = commandGroupDescription;
-        this.subCommands = subCommands;
-        putSubCommandsInMap();
-    }
-    
-    public MainCommandDescription(String command, String commandGroupDescription, String description) {
-        super(command, description);
-        this.commandGroupDescription = commandGroupDescription;
-        this.subCommands = new SubCommandDescription[] {};
+        SingleCommandHandler handler, boolean isDevcommand, SubCommandDescription... subCommands) {
+        this(command, commandGroupDescription, description, handler, new CommandModifierInfo(), isDevcommand, subCommands);
     }
 
     public MainCommandDescription(String command, String commandGroupDescription,
-            String description, boolean isDevcommand) {
-        super(command, description, isDevcommand);
-        this.commandGroupDescription = commandGroupDescription;
-        this.subCommands = new SubCommandDescription[] {};
+        String description, SubCommandDescription... subCommands) {
+        this(command, commandGroupDescription, description, null, new CommandModifierInfo(), false, subCommands);
     }
-    
+
+    public MainCommandDescription(String command, String commandGroupDescription, String description,
+        boolean isDevcommand, SubCommandDescription... subCommands) {
+        this(command, commandGroupDescription, description, null, new CommandModifierInfo(), isDevcommand, subCommands);
+    }
+
     public SubCommandDescription[] getSubCommands() {
         return subCommands;
     }
-    
+
     public String getCommandGroupDescription() {
         return commandGroupDescription;
     }
@@ -97,11 +71,11 @@ public class MainCommandDescription extends AbstractCommandDescription {
     public boolean hasSubCommand(String subCommand) {
         return nSubCommands.containsKey(subCommand);
     }
-    
+
     public SubCommandDescription getSubCommand(String subCommand) {
         return nSubCommands.get(subCommand);
     }
-    
+
     private void putSubCommandsInMap() {
         Arrays.stream(subCommands).forEach(subCommnad -> nSubCommands.put(subCommnad.getCommand(), subCommnad));
     }
