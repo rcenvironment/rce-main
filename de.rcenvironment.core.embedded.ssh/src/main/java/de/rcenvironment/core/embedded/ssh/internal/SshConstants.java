@@ -42,7 +42,9 @@ public final class SshConstants {
         EXIT_COMMAND,
         "version",
         "dev",
-        "dummy"
+        "dummy",
+        "keytool ssh-pw",
+        "keytool uplink-pw"
     );
 
     /**
