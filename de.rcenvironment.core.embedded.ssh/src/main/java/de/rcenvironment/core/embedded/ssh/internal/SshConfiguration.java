@@ -229,6 +229,9 @@ public class SshConfiguration {
         Set<String> defaultAllowedCommands = new HashSet<String>();
         defaultAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
         SshAccountRole defaultRole = new SshAccountRole(SshConstants.ROLE_NAME_DEFAULT, true, false, defaultAllowedCommands);
+        
+        // create the "health check" role with the same permissions as the default role, but with its special id
+        SshAccountRole healthCheckRole = new SshAccountRole(SshConstants.ROLE_NAME_HEALTH_CHECK, true, false, defaultAllowedCommands);
 
         return Arrays.asList(
             remoteAccessUser,
@@ -241,7 +244,8 @@ public class SshConfiguration {
             imDelegate,
             uplinkClient,
             developer,
-            defaultRole
+            defaultRole,
+            healthCheckRole
         );
     }
 
