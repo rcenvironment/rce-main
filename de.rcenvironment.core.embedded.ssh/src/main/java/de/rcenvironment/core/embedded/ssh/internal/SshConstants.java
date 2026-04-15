@@ -16,6 +16,7 @@ import java.util.List;
  * 
  * @author Sebastian Holtappels
  * @author Robert Mischke
+ * @author David Wichter
  */
 public final class SshConstants {
 

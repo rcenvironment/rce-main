@@ -49,6 +49,7 @@ import de.rcenvironment.toolkit.modules.concurrency.api.AsyncTaskService;
  * Default implementation of {@link CommandExecutionService}.
  * 
  * @author Robert Mischke
+ * @author David Wichter
  */
 public class CommandExecutionServiceImpl implements CommandExecutionService {
 
@@ -334,7 +335,7 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
         }
 
         if (foundCommand == null) {
-            outputReceiver.addOutput("Specified command was not found.");
+            outputReceiver.addOutput("The requested command was not found");
             return;
         } 
         
@@ -374,7 +375,7 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
     private void printSubcommandHelp(MainCommandDescription foundCommand, List<SubCommandDescription> subcommands, 
         TextOutputReceiver outputReceiver, boolean showCommandModifiers) {
         if (subcommands.size() != 0) {
-            outputReceiver.addOutput(foundCommand.getCommand() + " subcommands:");
+            outputReceiver.addOutput(foundCommand.getCommand() + " sub-commands:");
             final String commandName = foundCommand.getCommand();
             subcommands.stream()
                 .sorted((desc0, desc1) -> desc0.getCommand().compareTo(desc1.getCommand()))
