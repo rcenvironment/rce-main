@@ -8,7 +8,6 @@
 
 package de.rcenvironment.core.command.spi;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,94 +15,75 @@ import java.util.Map;
  * Used for defining command groups which define the first token of a command.
  * 
  * @author Sebastian Nocke
- *
+ * @author Robert Mischke
  */
 public class MainCommandDescription extends AbstractCommandDescription {
 
-    private SubCommandDescription[] subCommands;
-    private Map<String, SubCommandDescription> nSubCommands = new HashMap<>();
-    private String commandGroupDescription;
+    private final String commandGroupDescription;
+
+    private final SubCommandDescription[] subCommands;
+
+    private final Map<String, SubCommandDescription> subCommandsById = new HashMap<>();
+
+    public MainCommandDescription(String mainCommand, String commandGroupDescription, String description,
+        SingleCommandHandler handler, CommandModifierInfo modifiers,
+        boolean isDevcommand, SubCommandDescription... subCommandsParam) {
+        super(mainCommand, description, handler, modifiers, isDevcommand);
+        this.commandGroupDescription = commandGroupDescription;
+        if (subCommandsParam != null) {
+            this.subCommands = subCommandsParam;
+        } else {
+            this.subCommands = new SubCommandDescription[0];
+        }
+        for (SubCommandDescription sc : this.subCommands) {
+            sc.setCommandGroup(mainCommand);
+            subCommandsById.put(sc.getCommand(), sc);
+        }
+    }
 
     public MainCommandDescription(String command, String commandGroupDescription, String description,
-            SingleCommandHandler handler, CommandModifierInfo modifiers, SubCommandDescription... subCommands) {
-        super(command, description, handler, modifiers);
-        this.commandGroupDescription = commandGroupDescription;
-        this.subCommands = subCommands;
-        putSubCommandsInMap();
+        SingleCommandHandler handler, CommandModifierInfo modifiers, SubCommandDescription... subCommands) {
+        this(command, commandGroupDescription, description, handler, modifiers, false, subCommands);
     }
-    
+
     public MainCommandDescription(String command, String commandGroupDescription, String description,
-            SingleCommandHandler handler, CommandModifierInfo modifiers,
-            boolean isDevcommand, SubCommandDescription... subCommands) {
-        super(command, description, handler, modifiers, isDevcommand);
-        this.commandGroupDescription = commandGroupDescription;
-        this.subCommands = subCommands;
-        putSubCommandsInMap();
+        SingleCommandHandler handler, SubCommandDescription... subCommands) {
+        this(command, commandGroupDescription, description, handler, new CommandModifierInfo(), false, subCommands);
     }
-    
+
     public MainCommandDescription(String command, String commandGroupDescription, String description,
-            SingleCommandHandler handler, SubCommandDescription... subCommands) {
-        super(command, description, handler);
-        this.commandGroupDescription = commandGroupDescription;
-        this.subCommands = subCommands;
-        putSubCommandsInMap();
-    }
-    
-    public MainCommandDescription(String command, String commandGroupDescription, String description,
-            SingleCommandHandler handler, boolean isDevcommand, SubCommandDescription... subCommands) {
-        super(command, description, handler, isDevcommand);
-        this.commandGroupDescription = commandGroupDescription;
-        this.subCommands = subCommands;
-        putSubCommandsInMap();
-    }
-    
-    public MainCommandDescription(String command, String commandGroupDescription,
-            String description, SubCommandDescription... subCommands) {
-        super(command, description);
-        this.commandGroupDescription = commandGroupDescription;
-        this.subCommands = subCommands;
-        putSubCommandsInMap();
-    }
-    
-    public MainCommandDescription(String command, String commandGroupDescription, String description,
-            boolean isDevcommand, SubCommandDescription... subCommands) {
-        super(command, description, isDevcommand);
-        this.commandGroupDescription = commandGroupDescription;
-        this.subCommands = subCommands;
-        putSubCommandsInMap();
-    }
-    
-    public MainCommandDescription(String command, String commandGroupDescription, String description) {
-        super(command, description);
-        this.commandGroupDescription = commandGroupDescription;
-        this.subCommands = new SubCommandDescription[] {};
+        SingleCommandHandler handler, boolean isDevcommand, SubCommandDescription... subCommands) {
+        this(command, commandGroupDescription, description, handler, new CommandModifierInfo(), isDevcommand, subCommands);
     }
 
     public MainCommandDescription(String command, String commandGroupDescription,
-            String description, boolean isDevcommand) {
-        super(command, description, isDevcommand);
-        this.commandGroupDescription = commandGroupDescription;
-        this.subCommands = new SubCommandDescription[] {};
+        String description, SubCommandDescription... subCommands) {
+        this(command, commandGroupDescription, description, null, new CommandModifierInfo(), false, subCommands);
     }
-    
+
+    public MainCommandDescription(String command, String commandGroupDescription, String description,
+        boolean isDevcommand, SubCommandDescription... subCommands) {
+        this(command, commandGroupDescription, description, null, new CommandModifierInfo(), isDevcommand, subCommands);
+    }
+
     public SubCommandDescription[] getSubCommands() {
         return subCommands;
     }
-    
+
     public String getCommandGroupDescription() {
         return commandGroupDescription;
     }
 
     public boolean hasSubCommand(String subCommand) {
-        return nSubCommands.containsKey(subCommand);
+        return subCommandsById.containsKey(subCommand);
     }
-    
+
     public SubCommandDescription getSubCommand(String subCommand) {
-        return nSubCommands.get(subCommand);
+        return subCommandsById.get(subCommand);
     }
-    
-    private void putSubCommandsInMap() {
-        Arrays.stream(subCommands).forEach(subCommnad -> nSubCommands.put(subCommnad.getCommand(), subCommnad));
+
+    @Override
+    public String getQualifiedCommand() {
+        return getCommand();
     }
-    
 }

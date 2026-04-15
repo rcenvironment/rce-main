@@ -19,9 +19,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import de.rcenvironment.core.command.api.CommandExecutionResult;
+import de.rcenvironment.core.command.api.CommandAuthFilter;
 import de.rcenvironment.core.command.common.CommandException;
+import de.rcenvironment.core.command.spi.AbstractCommandDescription;
 import de.rcenvironment.core.command.spi.CommandContext;
 import de.rcenvironment.core.command.spi.CommandParser;
+import de.rcenvironment.core.command.spi.ExecutableCommand;
 import de.rcenvironment.core.command.spi.SingleCommandHandler;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 import de.rcenvironment.toolkit.modules.concurrency.api.TaskDescription;
@@ -82,6 +85,8 @@ public class MultiCommandHandler implements Callable<CommandExecutionResult> {
     private TextOutputReceiver outputReceiver;
 
     private final SingleCommandHandler singleCommandHandler;
+    
+    private final CommandAuthFilter commandAuthFilter;
 
     private volatile Object initiatorInformation;
     
@@ -92,22 +97,25 @@ public class MultiCommandHandler implements Callable<CommandExecutionResult> {
     // private final File profileOutputDirectory;
 
     public MultiCommandHandler(List<String> tokens, TextOutputReceiver outputReceiver, SingleCommandHandler singleCommandHandler,
-        File profileOutput) {
+        CommandAuthFilter commandAuthFilter, File profileOutput) {
 
         this.rawTokens = tokens;
         this.remainingTokens = new LinkedList<String>(); // empty list; filled after normalization
         this.outputReceiver = outputReceiver;
         this.singleCommandHandler = singleCommandHandler;
+        this.commandAuthFilter = commandAuthFilter;
         this.parser = null;
         // this.profileOutputDirectory = profileOutput;
     }
 
-    public MultiCommandHandler(List<String> tokens, TextOutputReceiver outputReceiver, CommandParser parser, File fileOutput) {
+    public MultiCommandHandler(List<String> tokens, TextOutputReceiver outputReceiver, CommandParser parser,
+        CommandAuthFilter commandAuthFilter, File fileOutput) {
         
         this.rawTokens = tokens;
         this.remainingTokens = new LinkedList<String>(); // empty list; filled after normalization
         this.outputReceiver = outputReceiver;
         this.singleCommandHandler = null;
+        this.commandAuthFilter = commandAuthFilter;
         this.parser = parser;
     }
     
@@ -115,9 +123,10 @@ public class MultiCommandHandler implements Callable<CommandExecutionResult> {
      * This constructor is manly intended for easing testing. As it does not specify the location of the profile output directory, this
      * class will return an error if the 'saveto' command is encountered during command execution.
      */
-    public MultiCommandHandler(List<String> tokens, TextOutputReceiver outputReceiver, SingleCommandHandler singleCommandHandler) {
+    public MultiCommandHandler(List<String> tokens, TextOutputReceiver outputReceiver, SingleCommandHandler singleCommandHandler,
+        CommandAuthFilter cmdAuthFilter) {
 
-        this(tokens, outputReceiver, singleCommandHandler, null);
+        this(tokens, outputReceiver, singleCommandHandler, cmdAuthFilter, null);
     }
 
     /**
@@ -144,7 +153,8 @@ public class MultiCommandHandler implements Callable<CommandExecutionResult> {
 
         if (remainingTokens.isEmpty()) {
             // empty command string -> trigger help output
-            CommandContext context = new CommandContext(new ArrayList<>(remainingTokens), outputReceiver, initiatorInformation);
+            CommandContext context = new CommandContext(new ArrayList<>(remainingTokens), outputReceiver,
+                commandAuthFilter, initiatorInformation);
             outputReceiver.onFatalError(CommandException.requestHelp(context));
             return CommandExecutionResult.DEFAULT; // TODO add result key for this?
         }
@@ -356,9 +366,16 @@ public class MultiCommandHandler implements Callable<CommandExecutionResult> {
     }
 
     private void executeSingleCommand(List<String> tokens) throws CommandException {
-        CommandContext commandContext = new CommandContext(tokens, outputReceiver, initiatorInformation);
-        
-        parser.parseCommand(commandContext).execute();
+        CommandContext commandContext = new CommandContext(tokens, outputReceiver, commandAuthFilter, initiatorInformation);
+        AbstractCommandDescription commandDescription = parser.parseCommand(commandContext);
+
+        boolean commandIsAuthorized = commandAuthFilter.isAuthorized(commandDescription.getQualifiedCommand());
+        if (commandIsAuthorized) {
+            ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), commandContext);
+            command.execute();
+        } else {
+            throw CommandException.unauthorized(commandContext);
+        }
     }
 
 }

@@ -76,6 +76,7 @@ public abstract class AbstractInteractiveCommandConsole implements TextOutputRec
                 addOutput(StringUtils.format("Unknown command \"%s\". Use \"%shelp\" to see all available commands.",
                     ce.getCommandString(), commandPrefix));
                 break;
+            case UNAUTHORIZED:
             case EXECUTION_ERROR:
                 log.warn(StringUtils.format("Error executing command \"%s\"; message=%s", ce.getCommandString(), ce.getMessage()));
                 if (ce.getMessage() != null) {
@@ -88,7 +89,7 @@ public abstract class AbstractInteractiveCommandConsole implements TextOutputRec
             case HELP_REQUESTED:
                 // explicitly fetch the selected output receiver, as it may have been redirected via "saveto"
                 TextOutputReceiver outputReceiver = ce.getOutputReceiver();
-                commandExecutionService.printHelpText(ce.getParsedModifiers(), outputReceiver);
+                commandExecutionService.printHelpText(ce.getParsedModifiers(), outputReceiver, ce.getCommandAuthFilter());
                 break;
             default:
                 // should never happen

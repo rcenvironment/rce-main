@@ -22,6 +22,8 @@ import org.eclipse.equinox.app.IApplication;
 
 import de.rcenvironment.core.command.api.CommandExecutionResult;
 import de.rcenvironment.core.command.api.CommandExecutionService;
+import de.rcenvironment.core.command.api.DefaultCommandAuthFilter;
+import de.rcenvironment.core.command.api.CommandAuthFilter;
 import de.rcenvironment.core.command.common.CommandException;
 import de.rcenvironment.core.start.common.validation.api.InstanceValidationResult;
 import de.rcenvironment.core.start.common.validation.api.InstanceValidationResult.InstanceValidationResultType;
@@ -241,6 +243,7 @@ public abstract class InstanceRunner {
         final String taskDescriptionWithTokens = taskDescription + " (\""
             + org.apache.commons.lang3.StringUtils.join(execCommandTokens, " ") + "\")";
 
+        CommandAuthFilter authFilter = new DefaultCommandAuthFilter();
         final PrintStream stdout = System.out;
         TextOutputReceiver outputReceiver = new TextOutputReceiver() {
 
@@ -263,7 +266,7 @@ public abstract class InstanceRunner {
             public void onFatalError(Exception e) {
                 CommandException ce = (CommandException) e;
                 if (ce.getType().equals(CommandException.Type.HELP_REQUESTED)) {
-                    stdout.println(commandExecutionService.getHelpText(false, ce.shouldPrintDeveloperHelp()));
+                    stdout.println(commandExecutionService.getHelpText(false, ce.shouldPrintDeveloperHelp(), authFilter));
                 } else {
                     log.error("Error during " + taskDescription, e);
                 }
@@ -274,7 +277,8 @@ public abstract class InstanceRunner {
                 log.debug("Finished " + taskDescriptionWithTokens);
             }
         };
-        return commandExecutionService.asyncExecMultiCommand(Arrays.asList(execCommandTokens), outputReceiver, taskDescription);
+        
+        return commandExecutionService.asyncExecMultiCommand(Arrays.asList(execCommandTokens), outputReceiver, authFilter, taskDescription);
     }
 
 }

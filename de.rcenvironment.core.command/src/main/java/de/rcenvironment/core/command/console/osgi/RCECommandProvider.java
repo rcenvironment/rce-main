@@ -15,6 +15,8 @@ import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
 
 import de.rcenvironment.core.command.api.CommandExecutionService;
+import de.rcenvironment.core.command.api.DefaultCommandAuthFilter;
+import de.rcenvironment.core.command.api.CommandAuthFilter;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 
 /**
@@ -25,6 +27,7 @@ import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 public class RCECommandProvider implements CommandProvider {
 
     private CommandExecutionService commandExecutionService;
+    private final CommandAuthFilter authFilter = new DefaultCommandAuthFilter();
 
     /**
      * Handler for the RCE top-level command. Delegates to the {@link CommandExecutionService}.
@@ -35,7 +38,7 @@ public class RCECommandProvider implements CommandProvider {
     public Object _rce(final CommandInterpreter interpreter) {
         final List<String> tokens = getTokens(interpreter);
         final TextOutputReceiver outputReceiver = new OsgiConsoleOutputAdapter(interpreter, commandExecutionService);
-        commandExecutionService.asyncExecMultiCommand(tokens, outputReceiver, "osgi console");
+        commandExecutionService.asyncExecMultiCommand(tokens, outputReceiver, authFilter, "osgi console");
         return null;
     }
 
@@ -54,7 +57,7 @@ public class RCECommandProvider implements CommandProvider {
 
     @Override
     public String getHelp() {
-        return commandExecutionService.getHelpText(true, false); // with prefix, no developer commands
+        return commandExecutionService.getHelpText(true, false, authFilter); // with prefix, no developer commands
     }
 
 }

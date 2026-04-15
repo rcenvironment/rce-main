@@ -19,8 +19,11 @@ import de.rcenvironment.core.authorization.api.AuthorizationPermissionSet;
 import de.rcenvironment.core.authorization.api.AuthorizationService;
 import de.rcenvironment.core.authorization.api.DefaultAuthorizationObjects;
 import de.rcenvironment.core.command.common.CommandException;
+import de.rcenvironment.core.command.spi.AbstractCommandDescription;
 import de.rcenvironment.core.command.spi.CommandContext;
 import de.rcenvironment.core.command.spi.CommandParser;
+import de.rcenvironment.core.command.spi.ExecutableCommand;
+import de.rcenvironment.core.command.api.DefaultCommandAuthFilter;
 import de.rcenvironment.core.component.api.DistributedComponentKnowledge;
 import de.rcenvironment.core.component.api.DistributedComponentKnowledgeService;
 import de.rcenvironment.core.component.api.UserComponentIdMappingService;
@@ -161,9 +164,11 @@ public class ComponentsCommandPluginTest {
         final List<String> originalTokens = COMMAND_TOKENS_LIST_AUTH;
         final TextOutputReceiver outputReceiver = createOutputReceiverMock(EXPECTED_MESSAGE_NO_EXTERNAL_PERMISSIONS);
 
-        final CommandContext context = new CommandContext(originalTokens, outputReceiver, new Object());
+        final CommandContext context = new CommandContext(originalTokens, outputReceiver, new DefaultCommandAuthFilter(), new Object());
         
-        parser.parseCommand(context).execute();
+        AbstractCommandDescription commandDescription = parser.parseCommand(context);
+        ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), context);
+        command.execute();
 
         EasyMock.verify(outputReceiver);
     }
@@ -201,9 +206,11 @@ public class ComponentsCommandPluginTest {
         final List<String> originalTokens = COMMAND_TOKENS_LIST_AUTH;
         final TextOutputReceiver outputReceiver = createOutputReceiverMock(EXPECTED_MESSAGE_NO_EXTERNAL_PERMISSIONS);
 
-        final CommandContext context = new CommandContext(originalTokens, outputReceiver, new Object());
+        final CommandContext context = new CommandContext(originalTokens, outputReceiver, new DefaultCommandAuthFilter(), new Object());
         
-        parser.parseCommand(context).execute();
+        AbstractCommandDescription commandDescription = parser.parseCommand(context);
+        ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), context);
+        command.execute();
 
         EasyMock.verify(outputReceiver);
     }
@@ -252,9 +259,11 @@ public class ComponentsCommandPluginTest {
             "|common/publicTool|Public                       |",
             "|common/groupTool |<GroupA:ABCDEF;GroupB:123456>|");
 
-        final CommandContext context = new CommandContext(originalTokens, outputReceiver, new Object());
+        final CommandContext context = new CommandContext(originalTokens, outputReceiver, new DefaultCommandAuthFilter(), new Object());
         
-        parser.parseCommand(context).execute();
+        AbstractCommandDescription commandDescription = parser.parseCommand(context);
+        ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), context);
+        command.execute();
 
         EasyMock.verify(outputReceiver);
     }
@@ -306,9 +315,11 @@ public class ComponentsCommandPluginTest {
             "|common/publicTool|Public                       |             |",
             "|common/groupTool |<GroupA:ABCDEF;GroupB:123456>|not available|");
 
-        final CommandContext context = new CommandContext(originalTokens, outputReceiver, new Object());
+        final CommandContext context = new CommandContext(originalTokens, outputReceiver, new DefaultCommandAuthFilter(), new Object());
 
-        parser.parseCommand(context).execute();
+        AbstractCommandDescription commandDescription = parser.parseCommand(context);
+        ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), context);
+        command.execute();
 
         EasyMock.verify(outputReceiver);
     }

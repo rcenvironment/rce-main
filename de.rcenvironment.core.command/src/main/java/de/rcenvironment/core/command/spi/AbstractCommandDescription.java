@@ -70,6 +70,13 @@ public abstract class AbstractCommandDescription {
     public String getCommand() {
         return command;
     }
+    
+    /**
+     * Gets the fully qualified command. For group commands this is the same as the normal command name. 
+     * For sub commands this includes the command group, e.g. "auth create".
+     * @return The fully qualified command.
+     */
+    public abstract String getQualifiedCommand(); 
 
     public String getDescription() {
         return description;

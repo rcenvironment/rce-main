@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import de.rcenvironment.core.command.api.CommandAuthFilter;
 import de.rcenvironment.core.command.spi.CommandContext;
 import de.rcenvironment.core.command.spi.ParsedCommandModifiers;
 import de.rcenvironment.core.command.spi.ParsedStringParameter;
@@ -48,7 +49,12 @@ public final class CommandException extends Exception {
         /**
          * Indicates that the command was syntactically correct, but has encountered an error.
          */
-        EXECUTION_ERROR
+        EXECUTION_ERROR,
+        
+        /**
+         * The current role was not authorized to execute the command.
+         */
+        UNAUTHORIZED
     }
 
     private static final long serialVersionUID = 405551760124111120L;
@@ -63,6 +69,8 @@ public final class CommandException extends Exception {
 
     // store the output receiver of the provided context to support output redirection via "saveto"
     private final TextOutputReceiver outputReceiver;
+    
+    private final CommandAuthFilter authFilter;
 
     private CommandException(Type type, String message, CommandContext context) {
         super(message);
@@ -71,6 +79,7 @@ public final class CommandException extends Exception {
         this.showDeveloperHelp = context.isDeveloperCommandSetEnabled(); // TODO move to getter?
         this.modifiers = context.getParsedModifiers();
         this.outputReceiver = context.getOutputReceiver();
+        this.authFilter = context.getCommandAuthFilter();
     }
 
     public static CommandException missingFilename(CommandContext context) {
@@ -133,6 +142,16 @@ public final class CommandException extends Exception {
         }
         return new CommandException(Type.HELP_REQUESTED, text, context);
     }
+    
+    /**
+     * Creates a {@link Type#UNAUTHORIZED} exception.
+     * 
+     * @param context the {@link CommandContext}
+     * @return the generated exception
+     */
+    public static CommandException unauthorized(CommandContext context) {
+        return new CommandException(Type.UNAUTHORIZED, "The current user is not authorized to use this command", context);
+    }
 
     public Type getType() {
         return type;
@@ -161,6 +180,10 @@ public final class CommandException extends Exception {
     public String toString() {
         return de.rcenvironment.core.utils.common.StringUtils.format("Type=%s, Tokens=%s, ShowDevHelp=%s, Message=%s", type, commandTokens,
             showDeveloperHelp, getMessage());
+    }
+
+    public CommandAuthFilter getCommandAuthFilter() {
+        return authFilter;
     }
 
 }

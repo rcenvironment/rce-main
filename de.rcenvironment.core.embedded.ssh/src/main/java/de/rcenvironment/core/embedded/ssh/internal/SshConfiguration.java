@@ -10,11 +10,14 @@ package de.rcenvironment.core.embedded.ssh.internal;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -132,11 +135,118 @@ public class SshConfiguration {
     }
 
     private List<SshAccountRole> createPredefinedRoles() {
-        List<SshAccountRole> predefRoles = new ArrayList<SshAccountRole>();
-        for (String roleName : SshConstants.PREDEFINED_ROLE_NAMES) {
-            predefRoles.add(new SshAccountRole(roleName));
-        }
-        return predefRoles;
+        // Remote access user and Remote access user alias
+        Set<String> remoteAccessUserAllowedCommands = new HashSet<String>();
+        remoteAccessUserAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
+        remoteAccessUserAllowedCommands.addAll(SshConstants.RA_COMMAND_GROUP);
+        remoteAccessUserAllowedCommands.addAll(SshConstants.SYSMON_COMMAND_GROUP);
+        SshAccountRole remoteAccessUser = new SshAccountRole(SshConstants.ROLE_NAME_REMOTE_ACCESS_USER, 
+            true, true, remoteAccessUserAllowedCommands);
+        SshAccountRole remoteAccessUserAlias = new SshAccountRole(SshConstants.ROLE_NAME_REMOTE_ACCESS_USER_ALIAS,
+            true, true, remoteAccessUserAllowedCommands);
+
+        //Remote access admin
+        Set<String> remoteAccessUserAdminAllowedCommands = new HashSet<String>();
+        remoteAccessUserAdminAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
+        remoteAccessUserAdminAllowedCommands.addAll(SshConstants.RA_COMMAND_GROUP);
+        remoteAccessUserAdminAllowedCommands.addAll(SshConstants.RA_ADMIN_COMMAND_GROUP);
+        remoteAccessUserAdminAllowedCommands.addAll(SshConstants.SYSMON_COMMAND_GROUP);
+        remoteAccessUserAdminAllowedCommands.addAll(SshConstants.COMPONENTS_COMMAND_GROUP);
+        SshAccountRole remoteAccessUserAdmin = new SshAccountRole(SshConstants.ROLE_NAME_REMOTE_ACCESS_ADMIN,
+            true, false, remoteAccessUserAdminAllowedCommands);
+
+        //Workflow observer
+        Set<String> workflowObserverAllowedCommands = new HashSet<String>();
+        workflowObserverAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
+        workflowObserverAllowedCommands.addAll(SshConstants.COMPONENTS_COMMAND_GROUP);
+        workflowObserverAllowedCommands.addAll(SshConstants.REDUCED_NET_COMMAND_GROUP);
+        workflowObserverAllowedCommands.addAll(SshConstants.SYSMON_COMMAND_GROUP);
+        workflowObserverAllowedCommands.addAll(SshConstants.REDUCED_WF_COMMAND_GROUP);
+        SshAccountRole workflowObserver = new SshAccountRole(SshConstants.ROLE_NAME_WORKFLOW_OBSERVER,
+            true, false, workflowObserverAllowedCommands);
+
+        //Workflow admin
+        Set<String> workflowAdminAllowedCommands = new HashSet<String>();
+        workflowAdminAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
+        workflowAdminAllowedCommands.addAll(SshConstants.COMPONENTS_COMMAND_GROUP);
+        workflowAdminAllowedCommands.addAll(SshConstants.REDUCED_NET_COMMAND_GROUP);
+        workflowAdminAllowedCommands.addAll(SshConstants.SYSMON_COMMAND_GROUP);
+        workflowAdminAllowedCommands.addAll(SshConstants.WF_COMMAND_GROUP);
+        SshAccountRole workflowAdmin = new SshAccountRole(SshConstants.ROLE_NAME_WORKFLOW_ADMIN, true, false, workflowAdminAllowedCommands);
+
+        //Local admin
+        Set<String> localAdminAllowedCommands = new HashSet<String>();
+        localAdminAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
+        localAdminAllowedCommands.addAll(SshConstants.CN_COMMAND_GROUP);
+        localAdminAllowedCommands.addAll(SshConstants.COMPONENTS_COMMAND_GROUP);
+        localAdminAllowedCommands.add(SshConstants.MAIL_COMMAND);
+        localAdminAllowedCommands.addAll(SshConstants.NET_COMMAND_GROUP);
+        localAdminAllowedCommands.add(SshConstants.RESTART_COMMAND);
+        localAdminAllowedCommands.add(SshConstants.SHUTDOWN_COMMAND);
+        localAdminAllowedCommands.add(SshConstants.STOP_COMMAND);
+        localAdminAllowedCommands.add(SshConstants.STATS_COMMAND);
+        localAdminAllowedCommands.add(SshConstants.TASKS_COMMAND);
+        localAdminAllowedCommands.addAll(SshConstants.AUTH_COMMAND_GROUP);
+        SshAccountRole localAdmin = new SshAccountRole(SshConstants.ROLE_NAME_LOCAL_ADMIN, true, false, localAdminAllowedCommands);
+
+        //Instance management admin
+        Set<String> imAdminAllowedCommands = new HashSet<String>();
+        imAdminAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
+        imAdminAllowedCommands.addAll(SshConstants.IM_COMMAND_GROUP);
+        imAdminAllowedCommands.addAll(SshConstants.REDUCED_NET_COMMAND_GROUP);
+        imAdminAllowedCommands.addAll(SshConstants.AUTH_COMMAND_GROUP);
+        SshAccountRole imAdmin = new SshAccountRole(SshConstants.ROLE_NAME_IM_ADMIN, true, false, imAdminAllowedCommands);
+
+        //Instance management delegate
+        Set<String> imDelegateAllowedCommands = new HashSet<String>();
+        imDelegateAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
+        imDelegateAllowedCommands.addAll(SshConstants.CN_COMMAND_GROUP);
+        imDelegateAllowedCommands.addAll(SshConstants.COMPONENTS_COMMAND_GROUP);
+        imDelegateAllowedCommands.addAll(SshConstants.NET_COMMAND_GROUP);
+        imDelegateAllowedCommands.add(SshConstants.RESTART_COMMAND);
+        imDelegateAllowedCommands.add(SshConstants.SHUTDOWN_COMMAND);
+        imDelegateAllowedCommands.add(SshConstants.STOP_COMMAND);
+        imDelegateAllowedCommands.add(SshConstants.STATS_COMMAND);
+        imDelegateAllowedCommands.add(SshConstants.TASKS_COMMAND);
+        imDelegateAllowedCommands.addAll(SshConstants.WF_COMMAND_GROUP);
+        imDelegateAllowedCommands.addAll(SshConstants.WF_COMMAND_GROUP);
+        imDelegateAllowedCommands.addAll(SshConstants.RA_ADMIN_COMMAND_GROUP);
+        imDelegateAllowedCommands.addAll(SshConstants.TC_COMMAND_GROUP);
+        imDelegateAllowedCommands.addAll(SshConstants.AUTH_COMMAND_GROUP);
+        imDelegateAllowedCommands.addAll(SshConstants.UPLINK_COMMAND_GROUP);
+        imDelegateAllowedCommands.add(SshConstants.FORCE_CRASH_COMMAND);
+        SshAccountRole imDelegate = new SshAccountRole(SshConstants.ROLE_NAME_IM_DELEGATE, true, false, imDelegateAllowedCommands);
+
+        //Uplink client. Has no authorized commands, but is allowed to use uplink (note different boolean flags in constructor).
+        Set<String> uplinkClientAllowedCommands = new HashSet<String>();
+        uplinkClientAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
+        SshAccountRole uplinkClient = new SshAccountRole(SshConstants.ROLE_NAME_UPLINK_CLIENT, false, true, uplinkClientAllowedCommands);
+
+        // Developer. Has no allowed commands here because this role is handled as a special case (see SshAccountRoleCommandAuthFilter)
+        SshAccountRole developer = new SshAccountRole(SshConstants.ROLE_NAME_DEVELOPER, true, false, new HashSet<String>());
+
+        //Default
+        Set<String> defaultAllowedCommands = new HashSet<String>();
+        defaultAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
+        SshAccountRole defaultRole = new SshAccountRole(SshConstants.ROLE_NAME_DEFAULT, true, false, defaultAllowedCommands);
+        
+        // create the "health check" role with the same permissions as the default role, but with its special id
+        SshAccountRole healthCheckRole = new SshAccountRole(SshConstants.ROLE_NAME_HEALTH_CHECK, true, false, defaultAllowedCommands);
+
+        return Arrays.asList(
+            remoteAccessUser,
+            remoteAccessUserAlias,
+            remoteAccessUserAdmin,
+            workflowObserver,
+            workflowAdmin,
+            localAdmin,
+            imAdmin,
+            imDelegate,
+            uplinkClient,
+            developer,
+            defaultRole,
+            healthCheckRole
+        );
     }
 
     /**

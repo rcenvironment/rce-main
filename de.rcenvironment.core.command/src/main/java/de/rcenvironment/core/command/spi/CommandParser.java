@@ -80,7 +80,7 @@ public class CommandParser {
         }
     }
     
-    public ExecutableCommand parseCommand(CommandContext context) throws CommandException {
+    public AbstractCommandDescription parseCommand(CommandContext context) throws CommandException {
         
         String firstToken = context.consumeNextToken();
         
@@ -90,17 +90,17 @@ public class CommandParser {
             
             if (HELP.equalsIgnoreCase(firstToken)) {
                 context.setParsedModifiers(parseHelpCommand(context, false));
-                return new ExecutableCommand(mainCommand.getHandler(), context);
+                return mainCommand;
                 
             } else if (DEV.equalsIgnoreCase(firstToken)) {
                 context.setParsedModifiers(parseHelpCommand(context, true));
-                return new ExecutableCommand(mainCommand.getHandler(), context);
+                return mainCommand;
                 
             } else if (SAVETO.equalsIgnoreCase(firstToken)) {
                 return parseSavetoCommand(context);
                 
             } else if (EXPLAIN.equalsIgnoreCase(firstToken)) {
-                return new ExecutableCommand(mainCommand.getHandler(), context);
+                return mainCommand;
             }
             
             String secondToken = context.peekNextToken();
@@ -110,7 +110,7 @@ public class CommandParser {
                 if (mainCommand.isExecutable()) {
                     ParsedCommandModifiers values = mainCommand.getModifiers().parseModifiers(context);
                     context.setParsedModifiers(values);
-                    return new ExecutableCommand(mainCommand.getHandler(), context);
+                    return mainCommand;
                     
                 } else {
                     throw CommandException.syntaxError(QUOTAION_MARK + firstToken
@@ -125,13 +125,13 @@ public class CommandParser {
                 ParsedCommandModifiers values = command.getModifiers().parseModifiers(context);
                 
                 context.setParsedModifiers(values);
-                return new ExecutableCommand(command.getHandler(), context);
+                return command;
                 
             } else if (mainCommand.isExecutable()) {
             
                 ParsedCommandModifiers values = mainCommand.getModifiers().parseModifiers(context);
                 context.setParsedModifiers(values);
-                return new ExecutableCommand(mainCommand.getHandler(), context);
+                return mainCommand;
                 
             } else {
                 throw CommandException.syntaxError(QUOTAION_MARK + secondToken
@@ -252,7 +252,7 @@ public class CommandParser {
         return modifiers;
     }
     
-    private ExecutableCommand parseSavetoCommand(CommandContext context) throws CommandException {
+    private AbstractCommandDescription parseSavetoCommand(CommandContext context) throws CommandException {
         
         String token = context.consumeNextToken();
         
@@ -290,7 +290,7 @@ public class CommandParser {
             
         }
         
-        CommandContext newContext = new CommandContext(context.consumeRemainingTokens(), newReceiver, context.getInvokerInformation());
+        CommandContext newContext = new CommandContext(context.consumeRemainingTokens(), newReceiver, context.getCommandAuthFilter(), context.getInvokerInformation());
 
         try {
             return parseCommand(newContext);

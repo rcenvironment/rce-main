@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.logging.Log;
@@ -233,33 +232,6 @@ public class SshAuthenticationManager implements PasswordAuthenticator, Temporar
 
     /**
      * 
-     * Used to determine if a user has the rights to execute a command.
-     * 
-     * @param username the user who wants to execute the command
-     * @param command the command to be executed
-     * @return true (is allowed) false (not allowed)
-     */
-    public boolean isAllowedToExecuteConsoleCommand(String username, String command) {
-        boolean isAllowed = false;
-        SshAccountRole userRole = getRoleForUser(username);
-        try {
-            if (userRole != null) {
-                final boolean commandIsOnWhitelist = command.matches(userRole.getAllowedCommandRegEx());
-                final boolean commandIsOnBlacklist = command.matches(userRole.getDisallowedCommandRegEx());
-                if (commandIsOnWhitelist && !commandIsOnBlacklist) {
-                    isAllowed = true;
-                }
-            }
-        } catch (PatternSyntaxException e) {
-            // Should never happen as the allowed command patterns are checked when the SSH server is started
-            log.error("Could not verify if user " + username + " is allowed to execute command " + command
-                + ". Probable cause: The allowed commands pattern is invalid.");
-        }
-        return isAllowed;
-    }
-
-    /**
-     * 
      * Used to determine if a user has the rights to use scp to copy files to the given destinations.
      * 
      * @param username - The name of the active user
@@ -306,7 +278,7 @@ public class SshAuthenticationManager implements PasswordAuthenticator, Temporar
         return getTemporaryAccountByName(username) != null;
     }
 
-    private SshAccountRole getRoleForUser(String userName) {
+    public SshAccountRole getRoleForUser(String userName) {
         SshAccount user = configuration.getAccountByName(userName, true);
         SshAccountRole role = null;
         if (user != null) {

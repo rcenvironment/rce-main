@@ -49,6 +49,8 @@ import org.eclipse.ui.part.ViewPart;
 
 import de.rcenvironment.core.command.api.CommandExecutionResult;
 import de.rcenvironment.core.command.api.CommandExecutionService;
+import de.rcenvironment.core.command.api.DefaultCommandAuthFilter;
+import de.rcenvironment.core.command.api.CommandAuthFilter;
 import de.rcenvironment.core.command.spi.AbstractInteractiveCommandConsole;
 import de.rcenvironment.core.gui.resources.api.FontManager;
 import de.rcenvironment.core.gui.resources.api.ImageManager;
@@ -783,9 +785,10 @@ public class CommandConsoleViewer extends ViewPart {
             commandService.saveCommand(command);
             commandService.addUsedCommand(command);
 
+            CommandAuthFilter authFilter = new DefaultCommandAuthFilter();
             List<String> tokens = getTokens();
             Future<CommandExecutionResult> asyncExecMultiCommand =
-                commandExecutionService.asyncExecMultiCommand(tokens, textOutputReceiver, "command console");
+                commandExecutionService.asyncExecMultiCommand(tokens, textOutputReceiver, authFilter, "command console");
             // waitWithDelay();
             // waitForExecToFinish(asyncExecMultiCommand);
         }

@@ -8,11 +8,15 @@
 
 package de.rcenvironment.core.embedded.ssh.internal;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Used to have a single point to add/ read constants.
  * 
  * @author Sebastian Holtappels
  * @author Robert Mischke
+ * @author David Wichter
  */
 public final class SshConstants {
 
@@ -25,26 +29,233 @@ public final class SshConstants {
      * Template for the interactive shell prompt.
      */
     public static final String CONSOLE_PROMPT_TEMPLATE = "\r\n%s@RCE: ";
-
+    
     /**
      * Constant for exit command.
      */
     public static final String EXIT_COMMAND = "exit";
+    
+    /**
+     * Default command group.
+     */
+    public static final List<String> DEFAULT_COMMAND_GROUP = Arrays.asList(
+        "help",
+        EXIT_COMMAND,
+        "version",
+        "dev",
+        "dummy",
+        "keytool ssh-pw",
+        "keytool uplink-pw"
+    );
 
     /**
-     * Constant for help command.
+     * sysmon command group.
      */
-    public static final String HELP_COMMAND = "help";
+    public static final List<String> SYSMON_COMMAND_GROUP = Arrays.asList(
+        "sysmon",
+        "sysmon api",
+        "sysmon remote"
+    );
 
     /**
-     * Constant for exit command.
+     * auth command group.
      */
-    public static final String DEFAULT_COMMANDS = "help|exit|(version.*)";
+    public static final List<String> AUTH_COMMAND_GROUP = Arrays.asList(
+        "auth",
+        "auth list",
+        "auth create",
+        "auth delete",
+        "auth export",
+        "auth import"
+    );
+
+    /**
+     * Constant for auth command.
+     */
+    public static final String AUTH_COMMAND = "auth";
+
+    /**
+     * components command group.
+     */
+    public static final List<String> COMPONENTS_COMMAND_GROUP = Arrays.asList(
+        "components",
+        "components list", 
+        "components list-auth",
+        "components set-auth",
+        "components show"
+    );
+
+    /**
+     * Reduced net command group.
+     */
+    public static final List<String> REDUCED_NET_COMMAND_GROUP = Arrays.asList(
+        "net",
+        "net info"
+    );
+
+    /**
+     * net command group.
+     */
+    public static final List<String> NET_COMMAND_GROUP = Arrays.asList(
+        "net",
+        "net info",
+        "net graph",
+        "net filter",
+        "net reload-filter",
+        "net bench",
+        "net np"
+    );
 
     /**
      * Constant for scp command.
      */
     public static final String SCP_COMMAND = "scp";
+
+
+    /**
+     * ra command group.
+     */
+    public static final List<String> RA_COMMAND_GROUP = Arrays.asList(
+        "ra cancel",
+        "ra describe-tool",
+        "ra describe-wf",
+        "ra dispose",
+        "ra get-doc-list",
+        "ra get-tool-doc",
+        "ra init",
+        "ra list-tools",
+        "ra list-wfs",
+        "ra protocol-version",
+        "ra run-tool",
+        "ra run-wf"
+    );
+
+    /**
+     * ra-admin command group.
+     */
+    public static final List<String> RA_ADMIN_COMMAND_GROUP = Arrays.asList(
+        "ra-admin list-wfs", 
+        "ra-admin publish-wf",
+        "ra-admin unpublish-wf"
+    );
+
+    /**
+     * Reduced wf command group.
+     */
+    public static final List<String> REDUCED_WF_COMMAND_GROUP = Arrays.asList(
+        "wf",
+        "wf list",
+        "wf details"
+    );
+
+    /**
+     * wf command group. 
+     */
+    public static final List<String> WF_COMMAND_GROUP = Arrays.asList(
+        //Does not contain wf open, as this is only allowed for developers because it may influence the remote user's GUI.
+        "wf",
+        "wf list",
+        "wf cancel",
+        "wf delete",
+        "wf details",
+        "wf dispose",
+        "wf pause",
+        "wf resume",
+        "wf run",
+        "wf start",
+        "wf verify",
+        "wf-integrate",
+        "wf check-self-test-cases",
+        "wf graph",
+        "wf list-self-test-cases",
+        "wf self-test"
+    );
+
+    /**
+     * Constant for stop command.
+     */
+    public static final String STOP_COMMAND = "stop";
+
+    /**
+     * Constant for shutdown command.
+     */
+    public static final String SHUTDOWN_COMMAND = "shutdown";
+
+    /**
+     * Constant for restart command.
+     */
+    public static final String RESTART_COMMAND = "restart";
+
+    /**
+     * Constant for mail command.
+     */
+    public static final String MAIL_COMMAND = "mail";
+
+    /**
+     * Constant for stats command.
+     */
+    public static final String STATS_COMMAND = "stats";
+
+    /**
+     * Constant for task command.
+     */
+    public static final String TASKS_COMMAND = "tasks";
+
+    /**
+     * cn command group.
+     */
+    public static final List<String> CN_COMMAND_GROUP = Arrays.asList(
+        "cn",
+        "cn list",
+        "cn add",
+        "cn start",
+        "cn stop"
+    );
+
+    /**
+     * im command group.
+     */
+    public static final List<String> IM_COMMAND_GROUP = Arrays.asList(
+        "im install",
+        "im reinstall",
+        "im configure",
+        "im start",
+        "im stop",
+        "im start-all",
+        "im stop-all",
+        "im restart",
+        "im dispose",
+        "im list",
+        "im info"
+    );
+
+    /**
+     * tc command group.
+     */
+    public static final List<String> TC_COMMAND_GROUP = Arrays.asList(
+        "tc open_view",
+        "tc close_view",
+        "tc close_welcome",
+        "tc export_wf_run",
+        "tc compare_wf_runs",
+        "tc export_all_wf_runs"
+    );
+
+    /**
+     * uplink command group.
+     */
+    public static final List<String> UPLINK_COMMAND_GROUP = Arrays.asList(
+        "uplink",
+        "uplink list",
+        "uplink add",
+        "uplink start",
+        "uplink stop"
+    );
+
+    /**
+     * Constant for force-crash command.
+     */
+    public static final String FORCE_CRASH_COMMAND = "force-crash";
 
     /**
      * Constant for the name of the configuration file.
@@ -224,33 +435,6 @@ public final class SshConstants {
      * Names of predefined roles.
      */
     public static final String ROLE_NAME_DEFAULT = "default";
-
-    /**
-     * Allowed role names.
-     */
-    public static final String[] PREDEFINED_ROLE_NAMES = { ROLE_NAME_REMOTE_ACCESS_USER, ROLE_NAME_REMOTE_ACCESS_USER_ALIAS,
-        ROLE_NAME_REMOTE_ACCESS_ADMIN, ROLE_NAME_UPLINK_CLIENT, ROLE_NAME_WORKFLOW_OBSERVER, ROLE_NAME_WORKFLOW_ADMIN,
-        ROLE_NAME_LOCAL_ADMIN, ROLE_NAME_IM_ADMIN, ROLE_NAME_IM_DELEGATE, ROLE_NAME_DEVELOPER, ROLE_NAME_HEALTH_CHECK, ROLE_NAME_DEFAULT };
-
-    /**
-     * Command patterns.
-     */
-    public static final String COMMAND_PATTERN_SYSMON = "sysmon.*";
-
-    /**
-     * Command patterns.
-     */
-    public static final String COMMAND_PATTERN_AUTH = "auth .*";
-
-    /**
-     * Command patterns.
-     */
-    public static final String COMMAND_PATTERN_COMPONENTS = "components.*";
-
-    /**
-     * Command patterns.
-     */
-    public static final String COMMAND_PATTERN_NET_INFO = "net info|net";
 
     /**
      * The pseudo command that is "executed" from the viewpoint of the SSH uplink client to attach input and output streams to.
