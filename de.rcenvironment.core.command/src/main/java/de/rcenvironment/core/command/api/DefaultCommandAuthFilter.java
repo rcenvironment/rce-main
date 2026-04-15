@@ -8,12 +8,12 @@
 package de.rcenvironment.core.command.api;
 
 /**
- * A default command authorizer implementation. It does not implement any authorization logic, 
+ * A default command auth filter implementation. It does not implement any authorization logic, 
  * i.e. every command is considered to be authorized.
  * 
  * @author David Wichter
  */
-public class DefaultCommandAuthorizer implements ICommandAuthorizer {
+public class DefaultCommandAuthFilter implements CommandAuthFilter {
 
     @Override
     public boolean isAuthorized(String command) {

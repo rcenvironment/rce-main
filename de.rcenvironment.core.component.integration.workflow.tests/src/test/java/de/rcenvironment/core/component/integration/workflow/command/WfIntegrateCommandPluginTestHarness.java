@@ -27,7 +27,7 @@ import java.util.Set;
 import org.easymock.Capture;
 import org.easymock.CaptureType;
 import org.easymock.EasyMock;
-import de.rcenvironment.core.command.api.DefaultCommandAuthorizer;
+import de.rcenvironment.core.command.api.DefaultCommandAuthFilter;
 import de.rcenvironment.core.command.common.CommandException;
 import de.rcenvironment.core.command.common.CommandException.Type;
 import de.rcenvironment.core.command.spi.AbstractCommandDescription;
@@ -342,7 +342,7 @@ class WfIntegrateCommandPluginTestHarness {
             EasyMock.expectLastCall().anyTimes();
             EasyMock.replay(outputReceiver);
 
-            return new CommandContext(allTokens, outputReceiver, new DefaultCommandAuthorizer(), null);
+            return new CommandContext(allTokens, outputReceiver, new DefaultCommandAuthFilter(), null);
         }
     }
 

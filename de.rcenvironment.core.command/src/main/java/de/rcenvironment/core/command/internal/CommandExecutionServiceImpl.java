@@ -22,7 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import de.rcenvironment.core.command.api.CommandExecutionResult;
 import de.rcenvironment.core.command.api.CommandExecutionService;
-import de.rcenvironment.core.command.api.ICommandAuthorizer;
+import de.rcenvironment.core.command.api.CommandAuthFilter;
 import de.rcenvironment.core.command.internal.handlers.BuiltInCommandPlugin;
 import de.rcenvironment.core.command.spi.AbstractCommandParameter;
 import de.rcenvironment.core.command.spi.CommandFlag;
@@ -106,10 +106,10 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
             this.outputReceiver = outputReceiver;
         }
 
-        private void generateCommandDocumentation(Set<MainCommandDescription> mainCommands, ICommandAuthorizer authorizer,
+        private void generateCommandDocumentation(Set<MainCommandDescription> mainCommands, CommandAuthFilter authFilter,
             boolean showDevCommands) {
             mainCommands.stream().sorted((desc0, desc1) -> desc0.getCommand().compareTo(desc1.getCommand()))
-                .filter(desc -> service.commandGroupShouldBeShown(desc, authorizer, showDevCommands))
+                .filter(desc -> service.commandGroupShouldBeShown(desc, authFilter, showDevCommands))
                 .forEach(desc -> renderMainCommandSection(desc, showDevCommands));
         }
 
@@ -272,16 +272,16 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
     
     @Override
     public Future<CommandExecutionResult> asyncExecMultiCommand(List<String> tokens, TextOutputReceiver outputReceiver,
-        ICommandAuthorizer authorizer, Object initiator) {
+        CommandAuthFilter cmdAuthFilter, Object initiator) {
 
         File profileOutput = configurationService.getConfigurablePath(ConfigurablePathId.PROFILE_OUTPUT);
-        MultiCommandHandler multiCommandHandler = new MultiCommandHandler(tokens, outputReceiver, parser, authorizer, profileOutput);
+        MultiCommandHandler multiCommandHandler = new MultiCommandHandler(tokens, outputReceiver, parser, cmdAuthFilter, profileOutput);
         multiCommandHandler.setInitiatorInformation(initiator);
         return threadPool.submit(multiCommandHandler);
     }
 
     @Override
-    public void printHelpText(ParsedCommandModifiers modifiers, TextOutputReceiver outputReceiver, ICommandAuthorizer commandAuthorizer) {
+    public void printHelpText(ParsedCommandModifiers modifiers, TextOutputReceiver outputReceiver, CommandAuthFilter cmdAuthFilter) {
         synchronized (cmdDesc) {
             ParsedStringParameter command = (ParsedStringParameter) modifiers.getPositionalCommandParameter(0);
 
@@ -290,19 +290,19 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
             boolean asciidocFormat = modifiers.hasCommandFlag("--asciidoc");
 
             if (asciidocFormat) {
-                new AsciiDocHelpFormatter(this, outputReceiver).generateCommandDocumentation(cmdDesc, commandAuthorizer, showDevCommands);
+                new AsciiDocHelpFormatter(this, outputReceiver).generateCommandDocumentation(cmdDesc, cmdAuthFilter, showDevCommands);
                 return;
             }
 
             if (command == null) {
-                printGeneralHelp(showDevCommands, outputReceiver, commandAuthorizer);
+                printGeneralHelp(showDevCommands, outputReceiver, cmdAuthFilter);
             } else {
-                printSpecificHelp(command, showDevCommands, showCommandModifiers, commandAuthorizer, outputReceiver);
+                printSpecificHelp(command, showDevCommands, showCommandModifiers, cmdAuthFilter, outputReceiver);
             }
         }
     }
 
-    private void printGeneralHelp(boolean showDevCommands, TextOutputReceiver outputReceiver, ICommandAuthorizer commandAuthorizer) {
+    private void printGeneralHelp(boolean showDevCommands, TextOutputReceiver outputReceiver, CommandAuthFilter cmdAuthFilter) {
         if (showDevCommands) {
             outputReceiver.addOutput("RCE Console Dev Commands:");
         } else {
@@ -310,7 +310,7 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
         }
 
         cmdDesc.stream()
-            .filter(desc -> commandGroupShouldBeShown(desc, commandAuthorizer, showDevCommands))
+            .filter(desc -> commandGroupShouldBeShown(desc, cmdAuthFilter, showDevCommands))
             .sorted((desc0, desc1) -> desc0.getCommand().compareTo(desc1.getCommand()))
             .forEach(desc -> outputReceiver
                 .addOutput(INDENT + desc.getCommand() + ": " + desc.getCommandGroupDescription()));
@@ -323,7 +323,7 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
     }
 
     private void printSpecificHelp(ParsedStringParameter command, boolean showDevCommands, boolean showCommandModifiers,
-        ICommandAuthorizer commandAuthorizer, TextOutputReceiver outputReceiver) {
+        CommandAuthFilter cmdAuthFilter, TextOutputReceiver outputReceiver) {
         MainCommandDescription foundCommand = null;
 
         for (MainCommandDescription desc : cmdDesc) {
@@ -338,19 +338,19 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
             return;
         } 
         
-        boolean showMainCommand = mainCommandShouldBeShown(foundCommand, commandAuthorizer, showDevCommands);
+        boolean showMainCommand = mainCommandShouldBeShown(foundCommand, cmdAuthFilter, showDevCommands);
         if (showMainCommand) {
             printMaincommandHelp(foundCommand, showCommandModifiers, outputReceiver);
         }
         
-        List<SubCommandDescription> suitableSubcommands = getSuitableSubCommands(foundCommand, commandAuthorizer, showDevCommands);
+        List<SubCommandDescription> suitableSubcommands = getSuitableSubCommands(foundCommand, cmdAuthFilter, showDevCommands);
         boolean showSubcommands = suitableSubcommands.size() > 0;
         if (showSubcommands) {
             printSubcommandHelp(foundCommand, suitableSubcommands, outputReceiver, showCommandModifiers);
         }
         
         if (!showMainCommand && !showSubcommands) {
-            outputReceiver.addOutput("No authorized main- or subcommand found.");
+            outputReceiver.addOutput("No matching commands found");
         }
     }
 
@@ -610,29 +610,29 @@ public class CommandExecutionServiceImpl implements CommandExecutionService {
         return builder.toString();
     }
 
-    private boolean commandGroupShouldBeShown(MainCommandDescription mainCommand, ICommandAuthorizer authorizer, boolean showDevCommands) {
-        boolean showMainCommand = mainCommandShouldBeShown(mainCommand, authorizer, showDevCommands);
-        boolean showSubCommand = getSuitableSubCommands(mainCommand, authorizer, showDevCommands).size() > 0;
+    private boolean commandGroupShouldBeShown(MainCommandDescription mainCommand, CommandAuthFilter authFilter, boolean showDevCommands) {
+        boolean showMainCommand = mainCommandShouldBeShown(mainCommand, authFilter, showDevCommands);
+        boolean showSubCommand = getSuitableSubCommands(mainCommand, authFilter, showDevCommands).size() > 0;
         return (showMainCommand || showSubCommand);
     }
 
-    private boolean mainCommandShouldBeShown(MainCommandDescription mainCommand, ICommandAuthorizer authorizer, boolean showDevCommands) {
-        return mainCommand.getIsDevelopercommand() == showDevCommands && authorizer.isAuthorized(mainCommand.getFullyQualifiedCommand());
+    private boolean mainCommandShouldBeShown(MainCommandDescription mainCommand, CommandAuthFilter authFilter, boolean showDevCommands) {
+        return mainCommand.getIsDevelopercommand() == showDevCommands && authFilter.isAuthorized(mainCommand.getQualifiedCommand());
     }
     
     private List<SubCommandDescription> getSuitableSubCommands(MainCommandDescription mainCommand, 
-        ICommandAuthorizer authorizer, boolean showDevCommands) {
+        CommandAuthFilter cmdAuthFilter, boolean showDevCommands) {
 
         return Arrays.stream(mainCommand.getSubCommands()).filter(sub -> 
-            (sub.getIsDevelopercommand() == showDevCommands) && (authorizer.isAuthorized(sub.getFullyQualifiedCommand()))
+            (sub.getIsDevelopercommand() == showDevCommands) && (cmdAuthFilter.isAuthorized(sub.getQualifiedCommand()))
         ).collect(Collectors.toList());
     }
 
     @Override
-    public String getHelpText(boolean addCommonPrefix, boolean showDevCommands, ICommandAuthorizer commandAuthorizer) {
+    public String getHelpText(boolean addCommonPrefix, boolean showDevCommands, CommandAuthFilter cmdAuthFilter) {
         CapturingTextOutReceiver capturingReceiver = new CapturingTextOutReceiver();
         ParsedCommandModifiers modifiers = new ParsedCommandModifiers();
-        printHelpText(modifiers, capturingReceiver, commandAuthorizer);
+        printHelpText(modifiers, capturingReceiver, cmdAuthFilter);
 
         return capturingReceiver.getBufferedOutput();
     }

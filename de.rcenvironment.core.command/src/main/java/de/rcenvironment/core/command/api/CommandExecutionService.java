@@ -36,15 +36,16 @@ public interface CommandExecutionService {
      * 
      * @param tokens the tokens of the multi-command to execute
      * @param outputReceiver the receiver of output and execution lifecycle events
-     * @param authorizer A command authorizer that is used to check whether the command is currently authorized to be executed. If not,
-     *        then the command is not executed.
+     * @param cmdAuthFilter A {@link CommandAuthFilter} that is used to check whether the command is currently authorized to be executed. If
+     *        not, then the command is not executed.
      * @param initiator an arbitrary object providing information about the source that initiated this command; may be used to check account
      *        permissions
      * @return a {@link Future} for a {@link CommandExecutionResult} that can be waited for to detect the end of command execution
      */
-    Future<CommandExecutionResult> asyncExecMultiCommand(List<String> tokens, TextOutputReceiver outputReceiver, ICommandAuthorizer authorizer, Object initiator);
+    Future<CommandExecutionResult> asyncExecMultiCommand(List<String> tokens, TextOutputReceiver outputReceiver,
+        CommandAuthFilter cmdAuthFilter, Object initiator);
 
-    void printHelpText(ParsedCommandModifiers modifiers, TextOutputReceiver outputReceiver, ICommandAuthorizer commandAuthorizer);
+    void printHelpText(ParsedCommandModifiers modifiers, TextOutputReceiver outputReceiver, CommandAuthFilter cmdAuthFilter);
         
     /**
      * Prints the same output as {@link #printHelpText(boolean, TextOutputReceiver)}, but collects the output and returns it as a
@@ -52,9 +53,10 @@ public interface CommandExecutionService {
      * 
      * @param addCommonPrefix true if the common prefix ("rce ...") should be added
      * @param showDevCommands whether developer commands should be included
+     * @param cmdAuthFilter A {@link CommandAuthFilter} that is used to show authorized commands only
      * @return the collected output
      */
-    String getHelpText(boolean addCommonPrefix, boolean showDevCommands, ICommandAuthorizer commandAuthorizer);
+    String getHelpText(boolean addCommonPrefix, boolean showDevCommands, CommandAuthFilter cmdAuthFilter);
 
     CommandParser getParser();
 

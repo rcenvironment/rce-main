@@ -39,7 +39,7 @@ public class SubCommandDescription extends AbstractCommandDescription {
     }
 
     @Override
-    public String getFullyQualifiedCommand() {
+    public String getQualifiedCommand() {
         if (qualifiedCommand == null) {
             throw new IllegalStateException("Requested a qualified command, but no command group was set for " + getCommand());
         }

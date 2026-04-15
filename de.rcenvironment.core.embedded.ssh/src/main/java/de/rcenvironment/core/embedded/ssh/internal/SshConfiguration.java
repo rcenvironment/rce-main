@@ -222,7 +222,7 @@ public class SshConfiguration {
         uplinkClientAllowedCommands.addAll(SshConstants.DEFAULT_COMMAND_GROUP);
         SshAccountRole uplinkClient = new SshAccountRole(SshConstants.ROLE_NAME_UPLINK_CLIENT, false, true, uplinkClientAllowedCommands);
 
-        // Developer. Has no allowed commands here because this role is handled as a special case. See SshAccountRoleCommandAuthorizer.java
+        // Developer. Has no allowed commands here because this role is handled as a special case (see SshAccountRoleCommandAuthFilter)
         SshAccountRole developer = new SshAccountRole(SshConstants.ROLE_NAME_DEVELOPER, true, false, new HashSet<String>());
 
         //Default

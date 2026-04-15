@@ -290,7 +290,7 @@ public class CommandParser {
             
         }
         
-        CommandContext newContext = new CommandContext(context.consumeRemainingTokens(), newReceiver, context.getAuthorizer(), context.getInvokerInformation());
+        CommandContext newContext = new CommandContext(context.consumeRemainingTokens(), newReceiver, context.getCommandAuthFilter(), context.getInvokerInformation());
 
         try {
             return parseCommand(newContext);

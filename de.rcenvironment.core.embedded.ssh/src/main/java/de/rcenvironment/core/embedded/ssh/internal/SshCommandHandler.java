@@ -29,7 +29,7 @@ import org.apache.sshd.server.session.ServerSessionAware;
 
 import de.rcenvironment.core.command.api.CommandExecutionResult;
 import de.rcenvironment.core.command.api.CommandExecutionService;
-import de.rcenvironment.core.command.api.ICommandAuthorizer;
+import de.rcenvironment.core.command.api.CommandAuthFilter;
 import de.rcenvironment.core.embedded.ssh.api.SshAccount;
 import de.rcenvironment.core.toolkitbridge.transitional.ConcurrencyUtils;
 import de.rcenvironment.core.utils.common.StringUtils;
@@ -214,10 +214,10 @@ public class SshCommandHandler implements Command, Runnable, ServerSessionAware 
         }
 
         SshAccountRole currentRole = authenticationManager.getRoleForUser(loginName);
-        ICommandAuthorizer authorizer = new SshAccountRoleCommandAuthorizer(currentRole);
+        CommandAuthFilter authFilter = new SshAccountRoleCommandAuthFilter(currentRole);
         List<String> tokens = Arrays.asList(command.trim().split("\\s+"));
         Future<CommandExecutionResult> resultFuture = commandExecutionService.asyncExecMultiCommand(tokens, outputAdapter,
-            authorizer, invokerInfo);
+            authFilter, invokerInfo);
         try {
             // wait for termination
             return resultFuture.get();

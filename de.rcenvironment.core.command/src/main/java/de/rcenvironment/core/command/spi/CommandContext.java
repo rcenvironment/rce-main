@@ -14,7 +14,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.rcenvironment.core.command.api.ICommandAuthorizer;
+import de.rcenvironment.core.command.api.CommandAuthFilter;
 import de.rcenvironment.core.utils.common.textstream.TextOutputReceiver;
 
 /**
@@ -30,7 +30,7 @@ public final class CommandContext {
 
     private final TextOutputReceiver outputReceiver;
     
-    private final ICommandAuthorizer authorizer;
+    private final CommandAuthFilter authFilter;
 
     private Object invokerInformation;
 
@@ -39,13 +39,13 @@ public final class CommandContext {
     private ParsedCommandModifiers parsedModifiers = new ParsedCommandModifiers();
     
     public CommandContext(List<String> originalTokens, TextOutputReceiver outputReceiver, 
-        ICommandAuthorizer authorizer, Object invokerInformation) {
+        CommandAuthFilter authFilter, Object invokerInformation) {
 
         this.originalTokens = originalTokens;
         this.remainingTokens = new LinkedList<>(originalTokens);
         this.outputReceiver = outputReceiver;
         this.invokerInformation = invokerInformation;
-        this.authorizer = authorizer;
+        this.authFilter = authFilter;
     }
 
     /**
@@ -118,8 +118,8 @@ public final class CommandContext {
         return outputReceiver;
     }
     
-    public ICommandAuthorizer getAuthorizer() {
-        return authorizer;
+    public CommandAuthFilter getCommandAuthFilter() {
+        return authFilter;
     }
 
     /**

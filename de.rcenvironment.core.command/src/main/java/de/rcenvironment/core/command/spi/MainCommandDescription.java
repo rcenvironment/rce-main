@@ -83,7 +83,7 @@ public class MainCommandDescription extends AbstractCommandDescription {
     }
 
     @Override
-    public String getFullyQualifiedCommand() {
+    public String getQualifiedCommand() {
         return getCommand();
     }
 }

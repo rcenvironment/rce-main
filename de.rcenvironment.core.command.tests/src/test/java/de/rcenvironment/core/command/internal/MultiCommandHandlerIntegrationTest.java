@@ -26,7 +26,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import de.rcenvironment.core.authentication.Session;
-import de.rcenvironment.core.command.api.DefaultCommandAuthorizer;
+import de.rcenvironment.core.command.api.DefaultCommandAuthFilter;
 import de.rcenvironment.core.command.common.CommandException;
 import de.rcenvironment.core.command.internal.handlers.BuiltInCommandPlugin;
 import de.rcenvironment.core.command.spi.AbstractCommandDescription;
@@ -123,7 +123,7 @@ public class MultiCommandHandlerIntegrationTest {
         EasyMock.replay(outputReceiver);
 
         // invoke
-        new MultiCommandHandler(tokens, outputReceiver, commandParser, new DefaultCommandAuthorizer(), null).call();
+        new MultiCommandHandler(tokens, outputReceiver, commandParser, new DefaultCommandAuthFilter(), null).call();
         // test callback parameter(s)
         assertEquals("Unexpected CommandException sub-type", CommandException.Type.HELP_REQUESTED, capture.getValue().getType());
 
@@ -151,7 +151,7 @@ public class MultiCommandHandlerIntegrationTest {
         EasyMock.replay(outputReceiver);
 
         // invoke
-        new MultiCommandHandler(tokens, outputReceiver, commandParser, new DefaultCommandAuthorizer(), null).call();
+        new MultiCommandHandler(tokens, outputReceiver, commandParser, new DefaultCommandAuthFilter(), null).call();
         // test callback parameter(s)
         String capturedText = capture.getValue();
         assertTrue("Unexpected reponse text (should contain 'dummy')", capturedText.toLowerCase().contains("dummy"));
@@ -228,7 +228,7 @@ public class MultiCommandHandlerIntegrationTest {
         EasyMock.replay(outputReceiver);
 
         // invoke
-        new MultiCommandHandler(tokens, outputReceiver, commandParser, new DefaultCommandAuthorizer(), null).call();
+        new MultiCommandHandler(tokens, outputReceiver, commandParser, new DefaultCommandAuthFilter(), null).call();
         // test callback parameter(s)
         String capturedText = capture.getValue();
         EasyMock.verify(outputReceiver);
@@ -250,7 +250,7 @@ public class MultiCommandHandlerIntegrationTest {
         final MockCommandPlugin wfIntegratePlugin = new MockCommandPlugin("wf integrate");
         parser.registerCommands(wfPlugin.getCommands());
 
-        CommandContext context = new CommandContext(Arrays.asList("wf"), null, new DefaultCommandAuthorizer(), null);
+        CommandContext context = new CommandContext(Arrays.asList("wf"), null, new DefaultCommandAuthFilter(), null);
         AbstractCommandDescription commandDescription = parser.parseCommand(context);
         ExecutableCommand command = new ExecutableCommand(commandDescription.getHandler(), context);
         command.execute();
@@ -261,7 +261,7 @@ public class MultiCommandHandlerIntegrationTest {
         wfPlugin.resetExecutionStatus();
         wfIntegratePlugin.resetExecutionStatus();
 
-        CommandContext secondContext = new CommandContext(Arrays.asList("wf", "integrate"), null, new DefaultCommandAuthorizer(), null);
+        CommandContext secondContext = new CommandContext(Arrays.asList("wf", "integrate"), null, new DefaultCommandAuthFilter(), null);
         AbstractCommandDescription secondCommandDescription = parser.parseCommand(secondContext);
         ExecutableCommand secondCommand = new ExecutableCommand(secondCommandDescription.getHandler(), context);
         secondCommand.execute();

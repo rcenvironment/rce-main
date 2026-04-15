@@ -9,20 +9,21 @@ package de.rcenvironment.core.embedded.ssh.internal;
 
 import org.junit.Test;
 
+import de.rcenvironment.core.command.api.CommandAuthFilter;
 import junit.framework.TestCase;
 
 
 /**
- * Test class for SSH command authorizer.
+ * Test class for the SSH {@link CommandAuthFilter}.
  * 
  * @author David Wichter
  */
-public class SshAccountRoleCommandAuthorizerTest extends TestCase {
+public class SshAccountRoleCommandAuthFilterTest extends TestCase {
 
     private SshConfiguration configuration = null;
     private SshAuthenticationManager authenticationManager = null;
 
-    public SshAccountRoleCommandAuthorizerTest() {
+    public SshAccountRoleCommandAuthFilterTest() {
         configuration = SshTestUtils.getValidConfig();
         authenticationManager = new SshAuthenticationManager(configuration, null, 3);
     }
@@ -71,14 +72,14 @@ public class SshAccountRoleCommandAuthorizerTest extends TestCase {
     @Test
     public void testWrongUser() {
         SshAccountRole userRole = authenticationManager.getRoleForUser("sdhjdfsh5412546"); // this user should not exist.
-        SshAccountRoleCommandAuthorizer sut = new SshAccountRoleCommandAuthorizer(userRole);
+        SshAccountRoleCommandAuthFilter sut = new SshAccountRoleCommandAuthFilter(userRole);
         boolean actual = sut.isAuthorized("stats");
         assertFalse("unknown user is allowed to execute command (that's bad; Do not define a test user with the name sdhjdfsh5412546)",
             actual);
     }
 
     private void testRoleManagement(SshAccountRole userRole, String command, boolean expected) {
-        SshAccountRoleCommandAuthorizer sut = new SshAccountRoleCommandAuthorizer(userRole);
+        SshAccountRoleCommandAuthFilter sut = new SshAccountRoleCommandAuthFilter(userRole);
         boolean actual = sut.isAuthorized(command);
 
         assertEquals(

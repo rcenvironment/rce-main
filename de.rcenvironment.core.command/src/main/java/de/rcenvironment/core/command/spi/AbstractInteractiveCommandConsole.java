@@ -89,7 +89,7 @@ public abstract class AbstractInteractiveCommandConsole implements TextOutputRec
             case HELP_REQUESTED:
                 // explicitly fetch the selected output receiver, as it may have been redirected via "saveto"
                 TextOutputReceiver outputReceiver = ce.getOutputReceiver();
-                commandExecutionService.printHelpText(ce.getParsedModifiers(), outputReceiver, ce.getAuthorizer());
+                commandExecutionService.printHelpText(ce.getParsedModifiers(), outputReceiver, ce.getCommandAuthFilter());
                 break;
             default:
                 // should never happen
