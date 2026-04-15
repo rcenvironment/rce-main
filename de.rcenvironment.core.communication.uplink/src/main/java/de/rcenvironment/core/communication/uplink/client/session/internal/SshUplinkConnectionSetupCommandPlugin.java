@@ -159,7 +159,7 @@ public class SshUplinkConnectionSetupCommandPlugin implements CommandPlugin {
     public MainCommandDescription[] getCommands() {
         final MainCommandDescription commands = new MainCommandDescription(CMD_SSH_UPLINK, "manage uplink connections",
             "short form for \"uplink list\"", this::performList,
-            new SubCommandDescription(CMD_SSH_UPLINK, "add", "add a new uplink connection", this::performAdd,
+            new SubCommandDescription("add", "add a new uplink connection", this::performAdd,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         DISPLAY_NAME_PRAMETER,
@@ -172,9 +172,9 @@ public class SshUplinkConnectionSetupCommandPlugin implements CommandPlugin {
                     }
                 )
             ),
-            new SubCommandDescription(CMD_SSH_UPLINK, "list",
+            new SubCommandDescription("list",
                 "lists all uplink connections, including ids and connection states", this::performList),
-            new SubCommandDescription(CMD_SSH_UPLINK, "start",
+            new SubCommandDescription("start",
                 "starts/connects an uplink connection (use \" " + CMD_SSH_UPLINK + DESC,
                 this::performStart,
                 new CommandModifierInfo(
@@ -183,7 +183,7 @@ public class SshUplinkConnectionSetupCommandPlugin implements CommandPlugin {
                     }
                 )
             ),
-            new SubCommandDescription(CMD_SSH_UPLINK, "stop",
+            new SubCommandDescription("stop",
                 "stops/disconnects an uplink connection (use \" " + CMD_SSH_UPLINK + DESC,
                 this::performStop,
                 new CommandModifierInfo(

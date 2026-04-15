@@ -52,7 +52,7 @@ public class ConnectionSetupCommandPlugin implements CommandPlugin {
     public MainCommandDescription[] getCommands() {
         final MainCommandDescription commands = new MainCommandDescription(CMD_CN, "manage network connections",
             "alias for \"cn list\"", this::performList,
-            new SubCommandDescription(CMD_CN, "add", "add a new network connection (Example: cn add "
+            new SubCommandDescription("add", "add a new network connection (Example: cn add "
                 +  "activemq-tcp:rceserver.example.com:20001 \"Our RCE Server\")", this::performAdd,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
@@ -61,9 +61,9 @@ public class ConnectionSetupCommandPlugin implements CommandPlugin {
                     }
                 )
             ),
-            new SubCommandDescription(CMD_CN, "list", "lists all network connections, including ids and connection states",
+            new SubCommandDescription("list", "lists all network connections, including ids and connection states",
                 this::performList),
-            new SubCommandDescription(CMD_CN, "start", "starts/connects a READY or DISCONNECTED connection (use \"cn list\" to get the id)",
+            new SubCommandDescription("start", "starts/connects a READY or DISCONNECTED connection (use \"cn list\" to get the id)",
                 this::performStart,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
@@ -71,7 +71,7 @@ public class ConnectionSetupCommandPlugin implements CommandPlugin {
                     }
                 )
             ),
-            new SubCommandDescription(CMD_CN, "stop", "stops/disconnects an ESTABLISHED connection (use \"cn list\" to get the id)",
+            new SubCommandDescription("stop", "stops/disconnects an ESTABLISHED connection (use \"cn list\" to get the id)",
                 this::performStop,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {

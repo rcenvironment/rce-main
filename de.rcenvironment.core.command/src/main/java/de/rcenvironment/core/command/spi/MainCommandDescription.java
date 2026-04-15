@@ -8,7 +8,6 @@
 
 package de.rcenvironment.core.command.spi;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,23 +15,30 @@ import java.util.Map;
  * Used for defining command groups which define the first token of a command.
  * 
  * @author Sebastian Nocke
- * @author Robert Mischke (refactoring)
+ * @author Robert Mischke
  */
 public class MainCommandDescription extends AbstractCommandDescription {
 
-    private SubCommandDescription[] subCommands;
+    private final String commandGroupDescription;
 
-    private Map<String, SubCommandDescription> nSubCommands = new HashMap<>();
+    private final SubCommandDescription[] subCommands;
 
-    private String commandGroupDescription;
+    private final Map<String, SubCommandDescription> subCommandsById = new HashMap<>();
 
-    public MainCommandDescription(String command, String commandGroupDescription, String description,
+    public MainCommandDescription(String mainCommand, String commandGroupDescription, String description,
         SingleCommandHandler handler, CommandModifierInfo modifiers,
-        boolean isDevcommand, SubCommandDescription... subCommands) {
-        super(command, description, handler, modifiers, isDevcommand);
+        boolean isDevcommand, SubCommandDescription... subCommandsParam) {
+        super(mainCommand, description, handler, modifiers, isDevcommand);
         this.commandGroupDescription = commandGroupDescription;
-        this.subCommands = subCommands;
-        putSubCommandsInMap();
+        if (subCommandsParam != null) {
+            this.subCommands = subCommandsParam;
+        } else {
+            this.subCommands = new SubCommandDescription[0];
+        }
+        for (SubCommandDescription sc : this.subCommands) {
+            sc.setCommandGroup(mainCommand);
+            subCommandsById.put(sc.getCommand(), sc);
+        }
     }
 
     public MainCommandDescription(String command, String commandGroupDescription, String description,
@@ -69,15 +75,11 @@ public class MainCommandDescription extends AbstractCommandDescription {
     }
 
     public boolean hasSubCommand(String subCommand) {
-        return nSubCommands.containsKey(subCommand);
+        return subCommandsById.containsKey(subCommand);
     }
 
     public SubCommandDescription getSubCommand(String subCommand) {
-        return nSubCommands.get(subCommand);
-    }
-
-    private void putSubCommandsInMap() {
-        Arrays.stream(subCommands).forEach(subCommnad -> nSubCommands.put(subCommnad.getCommand(), subCommnad));
+        return subCommandsById.get(subCommand);
     }
 
     @Override

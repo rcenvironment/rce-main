@@ -78,8 +78,8 @@ public class NetCommandPlugin implements CommandPlugin {
         final MainCommandDescription commands = new MainCommandDescription(CMD_NET,
             "query the network and topology state",
             "alias for 'net info'", this::performNetInfo,
-            new SubCommandDescription(CMD_NET, INFO, "show a list of reachable RCE nodes", this::performNetInfo),
-            new SubCommandDescription(CMD_NET, "graph", "generates a Graphviz file of the current network topology", this::performNetGraph,
+            new SubCommandDescription(INFO, "show a list of reachable RCE nodes", this::performNetInfo),
+            new SubCommandDescription("graph", "generates a Graphviz file of the current network topology", this::performNetGraph,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         BASE_NAME_PARAMETER
@@ -89,11 +89,11 @@ public class NetCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(CMD_NET, "filter", "show IP filter status", this::performNetFilter),
-            new SubCommandDescription(CMD_NET, "reload-filter", "reloads the IP filter configuration", this::performRelaodFilter),
-            new SubCommandDescription(CMD_NET, "bench", "run communication benchmark", this::performNetBench,
+            new SubCommandDescription("filter", "show IP filter status", this::performNetFilter),
+            new SubCommandDescription("reload-filter", "reloads the IP filter configuration", this::performRelaodFilter),
+            new SubCommandDescription("bench", "run communication benchmark", this::performNetBench,
                     new CommandModifierInfo(new AbstractCommandParameter[] { BENCHMARK_DESCRIPTION }), true),
-            new SubCommandDescription(CMD_NET, "np", "show known RCE node properties", this::performNetNp, true)
+            new SubCommandDescription("np", "show known RCE node properties", this::performNetNp, true)
         );
         
         return new MainCommandDescription[] { commands };

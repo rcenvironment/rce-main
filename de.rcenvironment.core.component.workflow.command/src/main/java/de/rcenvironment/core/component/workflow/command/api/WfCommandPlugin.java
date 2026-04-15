@@ -251,7 +251,7 @@ public class WfCommandPlugin implements CommandPlugin {
     public MainCommandDescription[] getCommands() {
         final MainCommandDescription commands = new MainCommandDescription(WF, "manage workflows",
             "alias for \"wf list\"", this::performWfList,
-            new SubCommandDescription(WF, "run", "starts a workflow from the given file and waits for its completion",
+            new SubCommandDescription("run", "starts a workflow from the given file and waits for its completion",
             	this::performWfRun,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
@@ -267,7 +267,7 @@ public class WfCommandPlugin implements CommandPlugin {
                     }
                 )
             ),
-            new SubCommandDescription(WF, "start", "starts a workflow from the given file and returns its workflow id if validation passed",
+            new SubCommandDescription("start", "starts a workflow from the given file and returns its workflow id if validation passed",
             	this::performWfStart,
             	new CommandModifierInfo(
             		new AbstractCommandParameter[] {
@@ -283,7 +283,7 @@ public class WfCommandPlugin implements CommandPlugin {
             		}
             	)
             ),
-            new SubCommandDescription(WF, "verify", "batch test the specified workflow files", this::performWfVerify,
+            new SubCommandDescription("verify", "batch test the specified workflow files", this::performWfVerify,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         WORKFLOW_LIST_BASEDIR_PARAMETER
@@ -299,43 +299,43 @@ public class WfCommandPlugin implements CommandPlugin {
                     }
                 )
             ),
-            new SubCommandDescription(WF, "list", "show workflow list", this::performWfList),
-            new SubCommandDescription(WF, "details", "show details of a workflow", this::performWfShowDetails,
+            new SubCommandDescription("list", "show workflow list", this::performWfList),
+            new SubCommandDescription("details", "show details of a workflow", this::performWfShowDetails,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         ID_PARAMETER
                     }
                 )
             ),
-            new SubCommandDescription(WF, "open", "open a runtime viewer of a workflow. Requires GUI.", this::performWfOpen,
+            new SubCommandDescription("open", "open a runtime viewer of a workflow. Requires GUI.", this::performWfOpen,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         ID_PARAMETER
                     }
                 )
             ),
-            new SubCommandDescription(WF, "pause", "pause a running workflow", this::performWfPause,
+            new SubCommandDescription("pause", "pause a running workflow", this::performWfPause,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         ID_PARAMETER
                     }
                 )
             ),
-            new SubCommandDescription(WF, "resume", "resume a paused workflow", this::performWfResume,
+            new SubCommandDescription("resume", "resume a paused workflow", this::performWfResume,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         ID_PARAMETER
                     }
                 )
             ),
-            new SubCommandDescription(WF, "cancel", "cancel a running or paused workflow", this::performWfCancel,
+            new SubCommandDescription("cancel", "cancel a running or paused workflow", this::performWfCancel,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         ID_PARAMETER
                     }
                 )
             ),
-            new SubCommandDescription(WF, DELETE_COMMAND, "delete and dispose a finished, cancelled or failed workflow",
+            new SubCommandDescription(DELETE_COMMAND, "delete and dispose a finished, cancelled or failed workflow",
                 this::performWfDelete,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
@@ -343,7 +343,7 @@ public class WfCommandPlugin implements CommandPlugin {
                     }
                  )
             ),
-            new SubCommandDescription(WF, DISPOSE_COMMAND, "disposes a finished, cancelled or failed workflow",
+            new SubCommandDescription(DISPOSE_COMMAND, "disposes a finished, cancelled or failed workflow",
                 this::performWfDispose,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
@@ -351,7 +351,7 @@ public class WfCommandPlugin implements CommandPlugin {
                     }
                 )
             ),
-            new SubCommandDescription(WF, "self-test", "batch test workflow files of the test workflow files bundle",
+            new SubCommandDescription("self-test", "batch test workflow files of the test workflow files bundle",
                 this::performWfSelfTest,
                 new CommandModifierInfo(
                     new NamedParameter[] {
@@ -365,12 +365,12 @@ public class WfCommandPlugin implements CommandPlugin {
                 ),
                 true
             ),
-            new SubCommandDescription(WF, "list-self-test-cases", "list available test cases for wf self-test",
+            new SubCommandDescription("list-self-test-cases", "list available test cases for wf self-test",
                 this::performWfListSelfTestCases, true),
-            new SubCommandDescription(WF, "check-self-test-cases",
+            new SubCommandDescription("check-self-test-cases",
                 "check if all test workflows are part of at least one test case",
                 this::performWfCheckSelfTestCases, true),
-            new SubCommandDescription(WF, "graph",
+            new SubCommandDescription("graph",
                 "prints .dot string representation of a workflow (can be used to create graph visualization with Graphviz)",
                 this::performWfGraph,
                 new CommandModifierInfo(

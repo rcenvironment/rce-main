@@ -113,8 +113,7 @@ public class ComponentsCommandPlugin implements CommandPlugin {
                     AS_TABLE_FLAG
                 }
             ),
-            new SubCommandDescription(ROOT_COMMAND, "list", 
-                "show available components; by default, components on the local node as well as those "
+            new SubCommandDescription("list", "show available components; by default, components on the local node as well as those "
                     + "published by a reachable remote node are listed",
                 this::performComponentsList,
                 new CommandModifierInfo(
@@ -125,11 +124,10 @@ public class ComponentsCommandPlugin implements CommandPlugin {
                     }
                 )
             ),
-            new SubCommandDescription(ROOT_COMMAND, "list-auth",  "Shows a list of all defined authorization settings. "
+            new SubCommandDescription("list-auth",  "Shows a list of all defined authorization settings. "
                     + "Note that these settings are independent of whether a matching component exists, "
                     + "which means that settings are kept when a component is removed and later added again.", this::performListAuth),
-            new SubCommandDescription(ROOT_COMMAND, "set-auth", 
-                    "assigns a list of authorization groups to a component id; note that authorization "
+            new SubCommandDescription("set-auth", "assigns a list of authorization groups to a component id; note that authorization "
                     + "settings always apply to all components with using this id, regardless of the component's version",
                     this::performSetAuth,
                 new CommandModifierInfo(
@@ -139,7 +137,7 @@ public class ComponentsCommandPlugin implements CommandPlugin {
                     }
                 )
             ),
-            new SubCommandDescription(ROOT_COMMAND, "show", "Show component definition", this::performShow,
+            new SubCommandDescription("show", "Show component definition", this::performShow,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         COMPONENT_ID_PARAMETER

@@ -115,7 +115,7 @@ public class SshConnectionSetupCommandPlugin implements CommandPlugin {
     public MainCommandDescription[] getCommands() {
         final MainCommandDescription commands = new MainCommandDescription("ssh", "manage ssh connections",
                 "short form of \"ssh list\"", this::performList,
-            new SubCommandDescription("ssh", "add", "add a new ssh connection", this::performAdd,
+            new SubCommandDescription("add", "add a new ssh connection", this::performAdd,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         DISPLAY_NAME_PRAMETER,
@@ -126,15 +126,15 @@ public class SshConnectionSetupCommandPlugin implements CommandPlugin {
                     }
                 )
             ),
-            new SubCommandDescription("ssh", "list", "lists all ssh connections, including ids and connection states", this::performList),
-            new SubCommandDescription("ssh", "start", "starts/connects an ssh connection (use \" " + CMD_SSH + DESC, this::performStart,
+            new SubCommandDescription("list", "lists all ssh connections, including ids and connection states", this::performList),
+            new SubCommandDescription("start", "starts/connects an ssh connection (use \" " + CMD_SSH + DESC, this::performStart,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         ID_PARAMETER
                     }
                 )
             ),
-            new SubCommandDescription("ssh", "stop", "stops/disconnects an ssh connection (use \" " + CMD_SSH + DESC, this::performStop,
+            new SubCommandDescription("stop", "stops/disconnects an ssh connection (use \" " + CMD_SSH + DESC, this::performStop,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         ID_PARAMETER

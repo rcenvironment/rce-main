@@ -116,76 +116,37 @@ public class TestCommandPlugin implements CommandPlugin {
     @Override
     public MainCommandDescription[] getCommands() {
         final MainCommandDescription testCommands = new MainCommandDescription(ROOT_COMMAND, "test commands", "test commands", true,
-            new SubCommandDescription(
-                ROOT_COMMAND,
-                OPEN_VIEW_COMMAND,
-                "opens a GUI view and sets focus to it.", 
-                this::handleOpenViewCommand, 
-                new CommandModifierInfo(new AbstractCommandParameter[] {
-                    new StringParameter(
-                        null, 
-                        "open view parameter",
-                        "one of the following view keys is a valid input:" + viewIds.keySet().toString()
-                    )
-                }), 
-                true
+            new SubCommandDescription(OPEN_VIEW_COMMAND,  "opens a GUI view and sets focus to it.", this::handleOpenViewCommand,
+                new CommandModifierInfo(new AbstractCommandParameter[] { new StringParameter(null, "open view parameter",
+                    "one of the following view keys is a valid input:" + viewIds.keySet().toString())
+                }), true
             ),
-            new SubCommandDescription(
-                ROOT_COMMAND,
-                CLOSE_VIEW_COMMAND,
-                "closes a GUI view.", 
-                this::handleCloseViewCommand,
-                new CommandModifierInfo(new AbstractCommandParameter[] { 
-                    new StringParameter(
-                        null,
-                        "close view parameter",
-                        "one of the following view keys is a valid input:" + viewIds.keySet().toString()
-                    )
-                }), 
-                true
+            new SubCommandDescription(CLOSE_VIEW_COMMAND, "closes a GUI view.", this::handleCloseViewCommand,
+                new CommandModifierInfo(new AbstractCommandParameter[] { new StringParameter(null, "close view parameter",
+                    "one of the following view keys is a valid input:" + viewIds.keySet().toString())
+                }), true
             ),
-            new SubCommandDescription(
-                ROOT_COMMAND,
-                CLOSE_WELCOME_SCREEN,
-                "closes the welcome screen if present.",
-                this::closeWelcomeScreen,
-                true
-            ),
-            new SubCommandDescription(
-                ROOT_COMMAND,
-                EXPORT_WORKFLOW_RUN,
-                "exports the run corresponding to the workflowtitle to the given directory.",
+            new SubCommandDescription(CLOSE_WELCOME_SCREEN, "closes the welcome screen if present.", this::closeWelcomeScreen, true),
+            new SubCommandDescription(EXPORT_WORKFLOW_RUN, "exports the run corresponding to the workflowtitle to the given directory.",
                 this::exportWorkflow,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         new StringParameter(null, "absolute directory path", "absolute path to directory"),
                         new StringParameter(null, "workflow title", "title of the workflow")
                     }
-                ), 
-                true
+                ), true
             ),
-            new SubCommandDescription(
-                ROOT_COMMAND,
-                COMPARE_TWO_WORKFLOW_RUNS,
-                "compares the two given workflowruns and indicates if they are identical or wether their are differences.", 
-                this::compareWorkflowRuns,
+            new SubCommandDescription(COMPARE_TWO_WORKFLOW_RUNS, "compares the two given workflowruns and indicates if they are"
+                + " identical or wether their are differences.", this::compareWorkflowRuns,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         new FileParameter("abs export workflow path", "absolute path to exported workflowrun"),
                         new FileParameter("abs export workflow path", "absolute path to exported workflowrun")
                     }
-                ),
-                true
+                ), true
             ),
-            new SubCommandDescription(
-                ROOT_COMMAND,
-                EXPORT_ALL_WORKFLOW_RUNS,
-                "exports all workflow runs into the given export directory.",
-                this::exportAllWorkflows,
-                new CommandModifierInfo(new AbstractCommandParameter[] { 
-                    new StringParameter(null, "abs path to export dir", "absolute path to export directory") 
-                }),
-                true
+            new SubCommandDescription(EXPORT_ALL_WORKFLOW_RUNS, "exports all workflow runs into the given export directory.", this::exportAllWorkflows,
+                new CommandModifierInfo(new AbstractCommandParameter[] { new StringParameter(null, "abs path to export dir", "absolute path to export directory") }), true
             )
         );
         

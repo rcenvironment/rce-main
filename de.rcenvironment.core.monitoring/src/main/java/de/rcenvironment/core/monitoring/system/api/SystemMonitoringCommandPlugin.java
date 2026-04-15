@@ -98,11 +98,11 @@ public class SystemMonitoringCommandPlugin implements CommandPlugin {
                     REMOTE_FLAG
                 }
             ),
-            new SubCommandDescription(ROOT_COMMAND, SUBCOMMAND_REMOTE,
+            new SubCommandDescription(SUBCOMMAND_REMOTE,
                 "fetches system monitoring data from all reachable nodes in the network, and prints it in a human-readable format",
                 this::performSysmonRemote
             ),
-            new SubCommandDescription(ROOT_COMMAND, SUBCOMMAND_API,
+            new SubCommandDescription(SUBCOMMAND_API,
                 "fetches system monitoring data from all reachable nodes in the network,"
                 + "and prints it in a parser-friendly format.", this::performSysApi,
                 new CommandModifierInfo(

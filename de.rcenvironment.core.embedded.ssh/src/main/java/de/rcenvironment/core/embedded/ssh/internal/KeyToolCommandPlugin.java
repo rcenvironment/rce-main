@@ -44,12 +44,10 @@ public class KeyToolCommandPlugin implements CommandPlugin {
     public MainCommandDescription[] getCommands() {
         final MainCommandDescription keytoolCommands = new MainCommandDescription(MAIN_CMD, "generate ssh passwords",
             "commands for ssh passwords",
-            new SubCommandDescription(MAIN_CMD, SUBCMD_SSH_PW, 
-                "generates a password for an SSH or Uplink connection, and the corresponding server entry", 
-                this::performGenerateSshOrUplinkPw),
-            new SubCommandDescription(MAIN_CMD, SUBCMD_UPLINK_PW, 
-                "generates a password for an SSH or Uplink connection, and the corresponding server entry", 
-                this::performGenerateSshOrUplinkPw)
+            new SubCommandDescription(SUBCMD_SSH_PW, "generates a password for an SSH or Uplink connection, and the corresponding "
+                + "server entry", this::performGenerateSshOrUplinkPw),
+            new SubCommandDescription(SUBCMD_UPLINK_PW, "generates a password for an SSH or Uplink connection, and the corresponding "
+                    + "server entry", this::performGenerateSshOrUplinkPw)
         );
         
         return new MainCommandDescription[] { keytoolCommands };

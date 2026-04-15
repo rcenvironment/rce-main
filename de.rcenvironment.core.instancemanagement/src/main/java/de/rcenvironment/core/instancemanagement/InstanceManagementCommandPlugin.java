@@ -140,7 +140,7 @@ public class InstanceManagementCommandPlugin implements CommandPlugin {
     public MainCommandDescription[] getCommands() {
         final MainCommandDescription commands = new MainCommandDescription(ROOT_COMMAND, "Commands for instance-managing",
             "Commands for instance-managing", true,
-            new SubCommandDescription(ROOT_COMMAND, "install", "downloads and installs a new RCE installation", this::performInstall,
+            new SubCommandDescription("install", "downloads and installs a new RCE installation", this::performInstall,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         POLICY_PARAMETER,
@@ -152,7 +152,7 @@ public class InstanceManagementCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(ROOT_COMMAND, "reinstall",
+            new SubCommandDescription("reinstall",
                 "stops all instances running the given installation id, downloads and installs the new RCE"
                 + "installation, and starts the instances again with the new installation", this::performReinstall,
                 new CommandModifierInfo(
@@ -163,7 +163,7 @@ public class InstanceManagementCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(ROOT_COMMAND, "configure", "configures the configuration.json file of the specified RCE instance(s)",
+            new SubCommandDescription("configure", "configures the configuration.json file of the specified RCE instance(s)",
                 this::performConfigure,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
@@ -205,7 +205,7 @@ public class InstanceManagementCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(ROOT_COMMAND, "start",
+            new SubCommandDescription("start",
                 "starts a list of new RCE instances with the desired instance IDs and the desired installation", this::performStart,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
@@ -219,7 +219,7 @@ public class InstanceManagementCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(ROOT_COMMAND, "stop", "stops a list of running RCE instances", this::performStop,
+            new SubCommandDescription("stop", "stops a list of running RCE instances", this::performStop,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         INSTANCE_IDS_PARAMETER
@@ -229,7 +229,7 @@ public class InstanceManagementCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(ROOT_COMMAND, "start-all", "starts all available instances. Uses the given installation",
+            new SubCommandDescription("start-all", "starts all available instances. Uses the given installation",
                 this::performStartAll,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
@@ -241,7 +241,7 @@ public class InstanceManagementCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(ROOT_COMMAND, "stop-all", "stops all running instances", this::performStopAll,
+            new SubCommandDescription("stop-all", "stops all running instances", this::performStopAll,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         INSTALLATION_ID_PARAMETER
@@ -251,7 +251,7 @@ public class InstanceManagementCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(ROOT_COMMAND, "restart",
+            new SubCommandDescription("restart",
                 "restarts a list of RCE instances with the given instance IDs and the given installation", this::performRestart,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
@@ -265,7 +265,7 @@ public class InstanceManagementCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(ROOT_COMMAND, "dispose", "disposes the specified instance meaning deletion of the profile directory",
+            new SubCommandDescription("dispose", "disposes the specified instance meaning deletion of the profile directory",
                 this::performDispose,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
@@ -273,15 +273,14 @@ public class InstanceManagementCommandPlugin implements CommandPlugin {
                     }
                 ), true
             ),
-            new SubCommandDescription(ROOT_COMMAND, "list", "lists information about instances, installations or templates", 
-                this::performList,
+            new SubCommandDescription("list", "lists information about instances, installations or templates", this::performList,
                 new CommandModifierInfo(
                     new AbstractCommandParameter[] {
                         LIST_MODIFIER
                     }
                 ), true
             ),
-            new SubCommandDescription(ROOT_COMMAND, "info", "shows additional information", this::performInformation, true)
+            new SubCommandDescription("info", "shows additional information", this::performInformation, true)
         );
         
         return new MainCommandDescription[] { commands };
