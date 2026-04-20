@@ -4,7 +4,7 @@
 
 	<name>RCE Bootstrap - Modified Equinox Launcher Tests</name>
 	<artifactId>de.rcenvironment.bootstrap.launcher.tests</artifactId>
-	<version>10.6.0-SNAPSHOT</version>
+	<version>10.8.0-SNAPSHOT</version>
 	<packaging>eclipse-test-plugin</packaging>
 
 	<!-- sharing the RCE core parent POM for now -->
