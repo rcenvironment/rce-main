@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2006-2025 DLR, Germany
+# Copyright 2006-2026 DLR, Germany
 #
 # SPDX-License-Identifier: EPL-1.0
 #
