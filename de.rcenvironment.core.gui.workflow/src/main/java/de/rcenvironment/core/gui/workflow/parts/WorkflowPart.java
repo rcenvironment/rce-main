@@ -84,7 +84,10 @@ public class WorkflowPart extends AbstractGraphicalEditPart implements PropertyC
     public final void deactivate() {
         super.deactivate();
         ((PropertiesChangeSupport) getModel()).removePropertyChangeListener(this);
+        getFigure().erase();
     }
+
+
 
     @Override
     public final void propertyChange(final PropertyChangeEvent evt) {
@@ -191,6 +194,7 @@ public class WorkflowPart extends AbstractGraphicalEditPart implements PropertyC
         connLayer.setConnectionRouter(new CustomShortestPathConnectionRouter(f));
         return f;
     }
+
 
     @Override
     protected void createEditPolicies() {
@@ -378,12 +382,26 @@ public class WorkflowPart extends AbstractGraphicalEditPart implements PropertyC
                 x = (targetRect.width - sizeX) / 2;
                 y = (targetRect.height - sizeY) / 2;
 
-                if (image != null) {
-                    image.dispose();
-                }
+                disposeBackgroundImage();
+
                 image = new Image(Display.getDefault(), orgImage.getImageData().scaledTo(sizeX, sizeY));
             }
         }
+
+        
+        
+        @Override
+        public void erase() {
+            disposeBackgroundImage();
+            super.erase();
+        }
+
+        private void disposeBackgroundImage() {
+            if (image != null) {
+                image.dispose();
+            }
+        }
+
 
         @Override
         protected void paintFigure(final Graphics graphics) {
@@ -395,6 +413,7 @@ public class WorkflowPart extends AbstractGraphicalEditPart implements PropertyC
 
         @Override
         public void figureMoved(final IFigure arg0) {
+            erase();
             resize();
         }
     }
