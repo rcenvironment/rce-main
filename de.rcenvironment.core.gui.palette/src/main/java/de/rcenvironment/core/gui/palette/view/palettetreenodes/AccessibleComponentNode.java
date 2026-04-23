@@ -81,8 +81,7 @@ public class AccessibleComponentNode extends ComponentNode {
         super(parent, toolIdentification);
         ComponentInterface componentInterface = toolEntry.getComponentInstallation().getComponentInterface();
         if (componentInterface.getIcon16() != null) {
-            Image toolImage = new Image(Display.getCurrent(), new ByteArrayInputStream(componentInterface.getIcon16()));
-            setIcon(toolImage);
+            setIcon(new Image(Display.getCurrent(), new ByteArrayInputStream(componentInterface.getIcon16())));
         }
         this.componentEntry = toolEntry;
     }

@@ -235,7 +235,7 @@ public class ManageCustomGroupsDialog extends TitleAreaDialog {
                     return imagePackage.getIcon16(componentID);
                 }
                 if (node.isGroup()) {
-                    return node.getGroupNode().getIcon(treeViewer.getExpandedState(node) && node.hasChildren());
+                    return node.getGroupNode().getFolderIcon(treeViewer.getExpandedState(node) && node.hasChildren());
                 }
                 return node.getIcon().orElseGet(this::getDefaultImage);
             }

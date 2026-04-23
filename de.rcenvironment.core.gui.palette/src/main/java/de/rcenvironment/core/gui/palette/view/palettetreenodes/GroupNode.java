@@ -34,9 +34,14 @@ public class GroupNode extends PaletteTreeNode {
 
     private boolean customGroup = false;
 
+    private Image folderIcon = ImageManager.getInstance().getSharedImage(StandardImages.FOLDER_16);
+
+    private Image folderClosedIcon = ImageManager.getInstance().getSharedImage(StandardImages.FOLDER_CLOSED_16);
+
     protected GroupNode(PaletteTreeNode parent, String nodeName) {
         super(parent, nodeName);
     }
+
 
     @Override
     public void handleDoubleclick(PaletteView paletteView) {
@@ -62,31 +67,29 @@ public class GroupNode extends PaletteTreeNode {
 
     @Override
     public Optional<Image> getIcon() {
-        boolean showExpanded =
-            getContentProvider().getExpandedState(this) && isExpandable();
-        return Optional.ofNullable(getIcon(showExpanded));
+        return Optional.ofNullable(getFolderIcon());
     }
 
     private boolean isExpandable() {
         return getContentProvider().isExpandable(this);
     }
 
-    public Image getIcon(boolean showExpanded) {
-        Image icon;
-        if (showExpanded) {
-            icon = ImageManager.getInstance().getSharedImage(StandardImages.FOLDER_16);
-        } else {
-            icon = ImageManager.getInstance().getSharedImage(StandardImages.FOLDER_CLOSED_16);
-        }
-        if (isCustomGroup()) {
-            icon = getOverlayIcon(icon);
-        }
-        return icon;
+    private Image getFolderIcon() {
+        boolean showExpanded =
+            getContentProvider().getExpandedState(this) && isExpandable();
+        return getFolderIcon(showExpanded);
     }
 
-    private Image getOverlayIcon(Image icon) {
+    public Image getFolderIcon(boolean showExpanded) {
+        if (showExpanded) {
+            return folderIcon;
+        }
+        return folderClosedIcon;
+    }
+
+    private Image getOverlayIcon(Image baseIcon) {
         DecorationOverlayIcon overlayIcon =
-            new DecorationOverlayIcon(icon,
+            new DecorationOverlayIcon(baseIcon,
                 ImageManager.getInstance().getImageDescriptor(StandardImages.DECORATOR_CUSTOM), IDecoration.BOTTOM_LEFT);
         return overlayIcon.createImage();
     }
@@ -100,6 +103,9 @@ public class GroupNode extends PaletteTreeNode {
     }
 
     public void setCustomGroup(boolean isCustomGroup) {
+        if (this.customGroup != isCustomGroup) {
+            reCreateIcons(isCustomGroup);
+        }
         this.customGroup = isCustomGroup;
     }
 
@@ -117,18 +123,24 @@ public class GroupNode extends PaletteTreeNode {
 
     @Override
     public void removeChild(TreeNode child) {
-        super.removeChild(child);
         if (!hasChildren()) {
             getContentProvider().setExpandedState(this, false);
         }
+        super.removeChild(child);
     }
 
     public Image getMenuIcon() {
-        Image icon = ImageManager.getInstance().getSharedImage(StandardImages.FOLDER_CLOSED_16);
-        if (isCustomGroup() && icon != null) {
-            icon = getOverlayIcon(icon);
+        return folderIcon;
+    }
+
+
+    @Override
+    public void dispose() {
+        if (isCustomGroup()) {
+            folderIcon.dispose();
+            folderClosedIcon.dispose();
         }
-        return icon;
+        super.dispose();
     }
 
     @Override
@@ -140,4 +152,14 @@ public class GroupNode extends PaletteTreeNode {
         return Arrays.stream(this.getChildren()).filter(ComponentNode.class::isInstance).map(ComponentNode.class::cast);
     }
 
+
+    private void reCreateIcons(boolean isCustomGroup) {
+        if (isCustomGroup) {
+            folderIcon = getOverlayIcon(ImageManager.getInstance().getSharedImage(StandardImages.FOLDER_16));
+            folderClosedIcon = getOverlayIcon(ImageManager.getInstance().getSharedImage(StandardImages.FOLDER_CLOSED_16));
+        } else {
+            folderClosedIcon = ImageManager.getInstance().getSharedImage(StandardImages.FOLDER_CLOSED_16);
+            folderIcon = ImageManager.getInstance().getSharedImage(StandardImages.FOLDER_16);
+        }
+    }
 }
