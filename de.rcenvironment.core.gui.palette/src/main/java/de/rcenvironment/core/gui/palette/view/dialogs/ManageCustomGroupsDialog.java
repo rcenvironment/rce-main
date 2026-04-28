@@ -277,7 +277,7 @@ public class ManageCustomGroupsDialog extends TitleAreaDialog {
         }
     }
 
-    private class TreeSelectionChangedListener implements ISelectionChangedListener {
+    private final class TreeSelectionChangedListener implements ISelectionChangedListener {
 
         @Override
         public void selectionChanged(SelectionChangedEvent arg0) {
@@ -326,7 +326,7 @@ public class ManageCustomGroupsDialog extends TitleAreaDialog {
         }
     }
 
-    private class DeleteButtonSelectionListener implements SelectionListener {
+    private final class DeleteButtonSelectionListener implements SelectionListener {
 
         @Override
         public void widgetDefaultSelected(SelectionEvent arg0) {
@@ -363,7 +363,7 @@ public class ManageCustomGroupsDialog extends TitleAreaDialog {
         treeViewer.getTree().setVisible(visible);
     }
 
-    private class AddButtonSelectionListener implements SelectionListener {
+    private final class AddButtonSelectionListener implements SelectionListener {
 
         @Override
         public void widgetDefaultSelected(SelectionEvent arg0) {
@@ -382,7 +382,7 @@ public class ManageCustomGroupsDialog extends TitleAreaDialog {
         }
     }
 
-    private class AddSubgroupButtonSelectionListener implements SelectionListener {
+    private final class AddSubgroupButtonSelectionListener implements SelectionListener {
 
         @Override
         public void widgetDefaultSelected(SelectionEvent arg0) {
@@ -402,7 +402,7 @@ public class ManageCustomGroupsDialog extends TitleAreaDialog {
         }
     }
 
-    private class EditButtonSelectionListener implements SelectionListener {
+    private final class EditButtonSelectionListener implements SelectionListener {
 
         @Override
         public void widgetDefaultSelected(SelectionEvent arg0) {
@@ -431,7 +431,7 @@ public class ManageCustomGroupsDialog extends TitleAreaDialog {
         treeViewer.refresh();
     }
 
-    private class ResetButtonSelectionListener implements SelectionListener {
+    private final class ResetButtonSelectionListener implements SelectionListener {
 
         @Override
         public void widgetDefaultSelected(SelectionEvent arg0) {

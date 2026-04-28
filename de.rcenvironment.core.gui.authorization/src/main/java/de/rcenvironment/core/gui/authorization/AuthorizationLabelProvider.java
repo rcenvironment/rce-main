@@ -41,6 +41,10 @@ import de.rcenvironment.core.utils.incubator.ServiceRegistryAccess;
  */
 public class AuthorizationLabelProvider extends LabelProvider implements IColorProvider {
 
+    private static final Image PUBLIC_ICON = AuthorizationConstants.PUBLIC_ICON.createImage();
+
+    private static final Image GROUP_ICON = AuthorizationConstants.GROUP_ICON.createImage();
+
     private static final String ERROR_FALLBACK_LABEL_TEXT = "<Error>";
 
     private final AuthorizationService authorizationService;
@@ -126,10 +130,10 @@ public class AuthorizationLabelProvider extends LabelProvider implements IColorP
     private Image getImageForAuthorizationAccessGroup(AuthorizationAccessGroup group) {
         if (authorizationService.isPublicAccessGroup(group)) {
             // public access group
-            return AuthorizationConstants.PUBLIC_ICON.createImage();
+            return PUBLIC_ICON;
         } else {
             // non-public group
-            return AuthorizationConstants.GROUP_ICON.createImage();
+            return GROUP_ICON;
         }
     }
 
