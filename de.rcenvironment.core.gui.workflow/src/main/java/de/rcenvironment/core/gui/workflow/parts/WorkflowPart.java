@@ -82,9 +82,9 @@ public class WorkflowPart extends AbstractGraphicalEditPart implements PropertyC
 
     @Override
     public final void deactivate() {
-        super.deactivate();
         ((PropertiesChangeSupport) getModel()).removePropertyChangeListener(this);
         getFigure().erase();
+        super.deactivate();
     }
 
 
@@ -348,7 +348,7 @@ public class WorkflowPart extends AbstractGraphicalEditPart implements PropertyC
      */
     private class BackgroundLayer extends FreeformLayer implements FigureListener {
 
-        private final Image orgImage;
+        private final Image orgImage = Activator.getInstance().getImageRegistry().get(Activator.IMAGE_WORKFLOW_EDITOR_BACKGROUND);
 
         private Image image;
 
@@ -357,8 +357,6 @@ public class WorkflowPart extends AbstractGraphicalEditPart implements PropertyC
         private int y;
 
         BackgroundLayer() {
-            orgImage = Activator.getInstance().getImageRegistry().get(Activator.IMAGE_WORKFLOW_EDITOR_BACKGROUND);
-            resize();
             addFigureListener(this);
         }
 
@@ -413,7 +411,7 @@ public class WorkflowPart extends AbstractGraphicalEditPart implements PropertyC
 
         @Override
         public void figureMoved(final IFigure arg0) {
-            erase();
+            disposeBackgroundImage();
             resize();
         }
     }
