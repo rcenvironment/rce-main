@@ -96,12 +96,15 @@ public class LanternaTestUtils {
                     }
                 }
 
-                // TODO why do we need to make sure that at least one matcher was removed?
-                // This prevents the further execution if a sage has no assertions/matchers
-                if (/* removedAtLeastOneMatcher && */ currentMatchers.isEmpty()) {
-                    log.debug("Cancelling the timer!: " + timerFuture);
-                    // cancel the timer if all matchers are satisfied
-                    timerFuture.cancel(true);
+                // this "null" check was added as NPEs were observed on test shutdown with no apparent semantical meaning
+                if (timerFuture != null) {
+                    // TODO why do we need to make sure that at least one matcher was removed?
+                    // This prevents the further execution if a sage has no assertions/matchers
+                    if (/* removedAtLeastOneMatcher && */ currentMatchers.isEmpty()) {
+                        log.debug("Cancelling the timer!: " + timerFuture);
+                        // cancel the timer if all matchers are satisfied
+                        timerFuture.cancel(true);
+                    }
                     // timerFuture = null;
                 }
             }
