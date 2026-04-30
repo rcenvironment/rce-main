@@ -20,6 +20,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -71,13 +72,9 @@ public class EndpointEditDialog extends TitleAreaDialog {
 
     protected static final String MINUS = "-";
 
-    private static final int MINIMUM_HEIGHT = 125;
+    private static final int MIN_WIDTH = 320;
 
-    private static final int MINIMUM_WIDTH = 250;
-
-    private static final int DIALOG_WIDTH = 325;
-
-    private static final int DIALOG_HEIGHT = 400;
+    private static final int MIN_HEIGHT = 300;
 
     private static final int COMBO_SETTINGS_WIDTH = 235;
 
@@ -219,10 +216,21 @@ public class EndpointEditDialog extends TitleAreaDialog {
     @Override
     protected Control createDialogArea(Composite parent) {
         Composite container = (Composite) super.createDialogArea(parent);
-        createEndpointSettings(container);
+        ScrolledComposite scrolledComposite = new ScrolledComposite(container, SWT.H_SCROLL | SWT.V_SCROLL);
+        Composite content = new Composite(scrolledComposite, SWT.None);
+        content.setLayout(new GridLayout(1, false));
+
+        createEndpointSettings(content);
         if (metaDataDefined()) {
-            createConfigurationArea(container);
+            createConfigurationArea(content);
         }
+        scrolledComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        scrolledComposite.setExpandVertical(false);
+        scrolledComposite.setExpandHorizontal(true);
+        scrolledComposite.setContent(content);
+        Point point = content.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+        content.setSize(point);
+        scrolledComposite.setMinSize(point);
         return container;
     }
 
@@ -234,6 +242,7 @@ public class EndpointEditDialog extends TitleAreaDialog {
         GridData g = new GridData(GridData.FILL_BOTH);
         g.grabExcessHorizontalSpace = true;
         g.horizontalAlignment = GridData.CENTER;
+        g.verticalAlignment = GridData.CENTER;
         g.grabExcessVerticalSpace = false;
 
         configHeader = new Composite(container, SWT.FILL);
@@ -248,18 +257,21 @@ public class EndpointEditDialog extends TitleAreaDialog {
     }
 
     protected Control createConfigurationArea(Composite parent) {
-        createConfigurationHeader(parent);
         Map<String, Map<Integer, String>> groups = sortKeysByConfigurationGroups();
+        
+        if (groups.isEmpty()) {
+            return parent;
+        }
+        createConfigurationHeader(parent);
         createConfigurationGroups(parent, groups);
         return parent;
     }
 
     private void createConfigurationGroups(Composite parent, Map<String, Map<Integer, String>> groups) {
-
         Composite container = new Composite(parent, SWT.NONE);
         GridData g = new GridData(GridData.FILL, GridData.FILL, true, false);
-        container.setLayout(new GridLayout(1, false));
         container.setLayoutData(g);
+        container.setLayout(new GridLayout(1, true));
 
         for (Entry<String, Map<Integer, String>> entry : groups.entrySet()) {
             createGroupArea(container, entry.getKey(), entry.getValue());
@@ -288,11 +300,8 @@ public class EndpointEditDialog extends TitleAreaDialog {
     }
 
     private void createGroupArea(Composite composite, String groupTitle, Map<Integer, String> sortedKeyMap) {
-        GridData g = new GridData(GridData.FILL_BOTH);
-        g.grabExcessHorizontalSpace = true;
-        g.grabExcessVerticalSpace = false;
-        g.horizontalAlignment = GridData.FILL;
-        Group configGroup = new Group(composite, SWT.BEGINNING);
+        GridData g = new GridData(SWT.FILL, SWT.FILL, true, false);
+        Group configGroup = new Group(composite, SWT.NONE);
         configGroup.setLayoutData(g);
         configGroup.setText(groupTitle);
         configGroup.setLayout(new GridLayout(2, false));
@@ -331,9 +340,6 @@ public class EndpointEditDialog extends TitleAreaDialog {
                 } else {
                     Combo newCombo = createLabelAndCombo(container, metaData.getGuiName(key) + COLON,
                         key, value);
-                    GridData g = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
-                    g.minimumWidth = COMBO_GROUP_WIDTH;
-                    newCombo.setLayoutData(g);
                     widgetToKeyMap.put(newCombo, key);
                     newCombo.addModifyListener(new MethodPropertiesModifyListener());
                 }
@@ -357,7 +363,12 @@ public class EndpointEditDialog extends TitleAreaDialog {
     }
 
     protected Button createLabelAndCheckbox(Composite container, String text, String value) {
-        new Label(container, SWT.NONE).setText(text);
+        Label label = new Label(container, SWT.NONE);
+        GridData labelLayoutData = new GridData(SWT.FILL, SWT.NONE, false, false);
+        labelLayoutData.horizontalAlignment = SWT.RIGHT;
+        labelLayoutData.verticalAlignment = SWT.CENTER;
+        label.setLayoutData(labelLayoutData);
+        label.setText(text);
         Button result = new Button(container, SWT.CHECK);
         result.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         result.setSelection(value.equals("true"));
@@ -365,9 +376,16 @@ public class EndpointEditDialog extends TitleAreaDialog {
     }
 
     protected Combo createLabelAndCombo(Composite container, String text, String key, String value) {
-        new Label(container, SWT.NONE).setText(text);
-        Combo combo = new Combo(container, SWT.READ_ONLY);
-        combo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        Label label = new Label(container, SWT.NONE);
+        GridData labelLayoutData = new GridData(SWT.FILL, SWT.NONE, false, false);
+        labelLayoutData.horizontalAlignment = SWT.RIGHT;
+        labelLayoutData.verticalAlignment = SWT.CENTER;
+        label.setLayoutData(labelLayoutData);
+        label.setText(text);
+        Combo combo = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
+        GridData g = new GridData(SWT.FILL, SWT.FILL, true, false);
+        g.minimumWidth = COMBO_SETTINGS_WIDTH;
+        combo.setLayoutData(g);
         for (String entry : metaData.getGuiNamesOfPossibleValues(key)) {
             combo.add(entry);
         }
@@ -377,10 +395,15 @@ public class EndpointEditDialog extends TitleAreaDialog {
     }
 
     protected Text createLabelAndTextfield(Composite container, String text, String dataType, String value) {
-        new Label(container, SWT.NONE).setText(text);
+        Label label = new Label(container, SWT.NONE);
+        GridData labelLayoutData = new GridData(SWT.FILL, SWT.NONE, false, false);
+        labelLayoutData.horizontalAlignment = SWT.RIGHT;
+        labelLayoutData.verticalAlignment = SWT.CENTER;
+        label.setLayoutData(labelLayoutData);
+        label.setText(text);
         Text result = new Text(container, SWT.SINGLE | SWT.BORDER);
-        GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
-        result.setLayoutData(layoutData);
+        GridData resultLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        result.setLayoutData(resultLayoutData);
         result.setText(value);
         addVerifyListener(dataType, value, result);
         return result;
@@ -409,15 +432,14 @@ public class EndpointEditDialog extends TitleAreaDialog {
 
     protected void createEndpointSettings(Composite parent) {
         Composite container = new Composite(parent, SWT.NONE);
-        GridData g = new GridData(GridData.FILL, GridData.FILL, true, true);
-        g.grabExcessVerticalSpace = false;
-        container.setLayout(new GridLayout(2, false));
+        GridData g = new GridData(GridData.FILL, GridData.FILL, true, false);
         container.setLayoutData(g);
+        container.setLayout(new GridLayout(2, false));
 
-        GridData textGridData = new GridData();
-        textGridData.grabExcessHorizontalSpace = false;
+        GridData textGridData = new GridData(SWT.FILL, SWT.FILL, false, false);
+        textGridData.verticalAlignment = SWT.CENTER;
 
-        Label nameLabel = new Label(container, SWT.NONE);
+        Label nameLabel = new Label(container, SWT.RIGHT);
         nameLabel.setText(Messages.name + COLON);
         nameLabel.setLayoutData(textGridData);
 
@@ -435,18 +457,18 @@ public class EndpointEditDialog extends TitleAreaDialog {
             textfieldName.setText(currentName);
         }
 
-        Label dataTypeLabel = new Label(container, SWT.NONE);
+        Label dataTypeLabel = new Label(container, SWT.RIGHT);
         dataTypeLabel.setText(Messages.dataType + COLON);
         dataTypeLabel.setLayoutData(textGridData);
         createDataTypeComboBox(container);
 
         if (type == EndpointType.INPUT) {
-            Label inputHandlingLabel = new Label(container, SWT.NONE);
+            Label inputHandlingLabel = new Label(container, SWT.RIGHT);
             inputHandlingLabel.setText("Handling" + COLON);
             inputHandlingLabel.setLayoutData(textGridData);
             createInputHandlingComboBox(container);
 
-            Label executionConstraintLabel = new Label(container, SWT.NONE);
+            Label executionConstraintLabel = new Label(container, SWT.RIGHT);
             executionConstraintLabel.setText("Constraint" + COLON);
             executionConstraintLabel.setLayoutData(textGridData);
             createInputExecutionContraintComboBox(container);
@@ -455,8 +477,8 @@ public class EndpointEditDialog extends TitleAreaDialog {
     }
 
     private void createDataTypeComboBox(Composite container) {
-        comboDataType = new Combo(container, SWT.BORDER | SWT.READ_ONLY | SWT.RIGHT);
-        GridData g = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
+        comboDataType = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
+        GridData g = new GridData(SWT.FILL, SWT.FILL, true, false);
         g.minimumWidth = COMBO_SETTINGS_WIDTH;
         comboDataType.setLayoutData(g);
 
@@ -486,8 +508,8 @@ public class EndpointEditDialog extends TitleAreaDialog {
     }
 
     private void createInputHandlingComboBox(Composite container) {
-        comboInputDatumHandling = new Combo(container, SWT.BORDER | SWT.READ_ONLY | SWT.RIGHT);
-        GridData g = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
+        comboInputDatumHandling = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
+        GridData g = new GridData(SWT.FILL, SWT.FILL, true, false);
         g.minimumWidth = COMBO_SETTINGS_WIDTH;
         comboInputDatumHandling.setLayoutData(g);
 
@@ -521,8 +543,8 @@ public class EndpointEditDialog extends TitleAreaDialog {
     }
 
     private void createInputExecutionContraintComboBox(Composite container) {
-        comboInputExecutionContraint = new Combo(container, SWT.BORDER | SWT.READ_ONLY | SWT.RIGHT);
-        GridData g = new GridData(SWT.BEGINNING, SWT.FILL, true, false);
+        comboInputExecutionContraint = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
+        GridData g = new GridData(SWT.FILL, SWT.FILL, true, false);
         g.minimumWidth = COMBO_SETTINGS_WIDTH;
         comboInputExecutionContraint.setLayoutData(g);
 
@@ -561,7 +583,9 @@ public class EndpointEditDialog extends TitleAreaDialog {
         super.create();
         // dialog title
         setTitle(title);
-        getShell().setMinimumSize(MINIMUM_WIDTH, MINIMUM_HEIGHT);
+        Point p = getShell().computeSize(SWT.DEFAULT, SWT.DEFAULT);
+        getShell().setSize(p);
+        getShell().setMinimumSize(MIN_WIDTH, MIN_HEIGHT);
 
         // initial validation
         validateInput();
@@ -583,11 +607,6 @@ public class EndpointEditDialog extends TitleAreaDialog {
 
     protected void hideMessage() {
         setMessage(null);
-    }
-
-    @Override
-    protected Point getInitialSize() {
-        return new Point(DIALOG_WIDTH, DIALOG_HEIGHT);
     }
 
     @Override

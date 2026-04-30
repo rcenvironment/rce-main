@@ -9,11 +9,9 @@
 package de.rcenvironment.components.optimizer.gui.properties;
 
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 import de.rcenvironment.components.optimizer.common.OptimizerComponentConstants;
 import de.rcenvironment.core.component.api.LoopComponentConstants;
-import de.rcenvironment.core.component.model.endpoint.api.EndpointDescriptionsManager;
 import de.rcenvironment.core.datamodel.api.EndpointType;
 import de.rcenvironment.core.gui.workflow.editor.properties.EndpointPropertySection;
 import de.rcenvironment.core.gui.workflow.editor.properties.EndpointSelectionPane;
