@@ -76,9 +76,9 @@ public class EndpointEditDialog extends TitleAreaDialog {
 
     private static final int MIN_HEIGHT = 300;
 
-    private static final int COMBO_SETTINGS_WIDTH = 235;
+    private static final int TEXT_WIDTH = 250;
 
-    private static final int COMBO_GROUP_WIDTH = 175;
+    private static final int COMBO_SETTINGS_WIDTH = 235;
 
     private static final int MAXLENGTH_SHORTTEXT = 140;
 
@@ -383,9 +383,10 @@ public class EndpointEditDialog extends TitleAreaDialog {
         label.setLayoutData(labelLayoutData);
         label.setText(text);
         Combo combo = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
-        GridData g = new GridData(SWT.FILL, SWT.FILL, true, false);
-        g.minimumWidth = COMBO_SETTINGS_WIDTH;
-        combo.setLayoutData(g);
+        GridData comboLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        comboLayoutData.minimumWidth = COMBO_SETTINGS_WIDTH;
+        comboLayoutData.widthHint = TEXT_WIDTH;
+        combo.setLayoutData(comboLayoutData);
         for (String entry : metaData.getGuiNamesOfPossibleValues(key)) {
             combo.add(entry);
         }
@@ -403,6 +404,7 @@ public class EndpointEditDialog extends TitleAreaDialog {
         label.setText(text);
         Text result = new Text(container, SWT.SINGLE | SWT.BORDER);
         GridData resultLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        resultLayoutData.widthHint = TEXT_WIDTH;
         result.setLayoutData(resultLayoutData);
         result.setText(value);
         addVerifyListener(dataType, value, result);
@@ -444,7 +446,9 @@ public class EndpointEditDialog extends TitleAreaDialog {
         nameLabel.setLayoutData(textGridData);
 
         textfieldName = new Text(container, SWT.SINGLE | SWT.BORDER);
-        textfieldName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        GridData textfieldNameLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        textfieldNameLayoutData.widthHint = TEXT_WIDTH;
+        textfieldName.setLayoutData(textfieldNameLayoutData);
         textfieldName.setEditable((!isStatic && !epManager.getDynamicEndpointDefinition(id).isNameReadOnly())
             && readOnlyType != EndpointSelectionPane.ALL_READ_ONLY && readOnlyType != EndpointSelectionPane.NAME_AND_TYPE_READ_ONLY);
         textfieldName.addListener(SWT.Verify, new AlphanumericalTextContraintListener(true, true));

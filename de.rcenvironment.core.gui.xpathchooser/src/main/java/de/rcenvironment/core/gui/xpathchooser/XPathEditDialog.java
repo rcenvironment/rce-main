@@ -42,6 +42,8 @@ public class XPathEditDialog extends EndpointEditDialog {
 
     private static final int TEXT_HEIGHT = 60;
 
+    private static final int TEXT_WIDTH = 300;
+
     private static final String CHANNEL_XPATH = "variable.xpath";
 
     private static final int DIALOG_WIDTH = 345;
@@ -100,6 +102,7 @@ public class XPathEditDialog extends EndpointEditDialog {
         Text result = new Text(container, SWT.MULTI | SWT.WRAP | SWT.BORDER | SWT.V_SCROLL);
         GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
         layoutData.heightHint = TEXT_HEIGHT;
+        layoutData.widthHint = TEXT_WIDTH;
         result.setLayoutData(layoutData);
         result.setText(value);
         addVerifyListener(dataType, value, result);

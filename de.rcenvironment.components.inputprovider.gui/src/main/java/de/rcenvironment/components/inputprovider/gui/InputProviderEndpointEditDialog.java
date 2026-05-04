@@ -20,7 +20,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -64,9 +63,7 @@ public class InputProviderEndpointEditDialog extends EndpointEditDialog implemen
 
     private static final int SHORTTEXT_MAXLENGTH = 140;
 
-    private static final int DIALOG_WIDTH = 345;
-
-    private static final int DIALOG_HEIGHT = 400;
+    private static final int TEXT_WIDTH = 300;
 
     private Label label;
 
@@ -134,11 +131,6 @@ public class InputProviderEndpointEditDialog extends EndpointEditDialog implemen
         initializeWithValue(value);
 
         return textField;
-    }
-
-    @Override
-    protected Point getInitialSize() {
-        return new Point(DIALOG_WIDTH, DIALOG_HEIGHT);
     }
 
     private void initializeWithValue(String value) {
@@ -211,7 +203,9 @@ public class InputProviderEndpointEditDialog extends EndpointEditDialog implemen
         label.setText(Messages.value);
 
         textField = new Text(confContainer, SWT.BORDER);
-        textField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+        GridData textFieldLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
+        textFieldLayoutData.widthHint = TEXT_WIDTH;
+        textField.setLayoutData(textFieldLayoutData);
         textField.setVisible(false);
     }
 
