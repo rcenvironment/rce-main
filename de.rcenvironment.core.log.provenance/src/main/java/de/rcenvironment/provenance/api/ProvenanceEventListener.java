@@ -18,6 +18,7 @@ import de.rcenvironment.core.datamodel.api.TypedDatum;
  * @author Alexander Weinert
  *
  */
+// TODO (p2, 11.0) bundle and package names do not follow project conventions; switch for 11.0 as plugins will need to be rebuilt 
 public interface ProvenanceEventListener {
 
     void workflowRunStarted(String workflowExecutionIdentifier, String fileName, String execLoc, String comment);

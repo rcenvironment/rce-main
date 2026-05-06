@@ -27,9 +27,6 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 
 import de.rcenvironment.core.communication.api.CommunicationService;
 import de.rcenvironment.core.communication.api.ReliableRPCStreamHandle;
@@ -80,6 +77,7 @@ import de.rcenvironment.core.utils.incubator.AbstractStateMachine;
 import de.rcenvironment.core.utils.incubator.ServiceRegistryAccess;
 import de.rcenvironment.core.utils.incubator.StateChangeException;
 import de.rcenvironment.provenance.api.ProvenanceEventListener;
+import de.rcenvironment.provenance.api.ProvenanceIntegration;
 import de.rcenvironment.toolkit.modules.concurrency.api.AsyncExceptionListener;
 import de.rcenvironment.toolkit.modules.concurrency.api.AsyncTaskService;
 import de.rcenvironment.toolkit.modules.concurrency.api.CallablesGroup;
@@ -221,11 +219,8 @@ public class WorkflowStateMachine extends AbstractFixedTransitionsStateMachine<W
         wfExeStatsService = serviceRegistryAccess.getService(WorkflowExecutionStatsService.class);
         endpointDatumDispatchService = serviceRegistryAccess.getService(EndpointDatumDispatchService.class);
 
-        final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-        final Optional<ServiceReference<ProvenanceEventListener>> provenanceReference =
-            Optional.ofNullable(context.getServiceReference(ProvenanceEventListener.class));
-        final Optional<ProvenanceEventListener> provenanceService = provenanceReference.map(context::getService);
-        provenanceFacade = new ProvenanceFacade(provenanceService);
+        final Optional<ProvenanceEventListener> provenanceListener = ProvenanceIntegration.getOptionalEventListener();        
+        provenanceFacade = new ProvenanceFacade(provenanceListener);
 
         initializeEventProcessors();
     }

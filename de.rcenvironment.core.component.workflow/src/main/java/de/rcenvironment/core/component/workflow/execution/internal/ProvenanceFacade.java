@@ -17,26 +17,26 @@ import de.rcenvironment.provenance.api.ProvenanceEventListener;
 
 class ProvenanceFacade {
 
-    private final Optional<ProvenanceEventListener> service;
+    private final Optional<ProvenanceEventListener> listener;
 
     private final Map<String, String> displayNamesByComponentExecutionId = new HashMap<>();
 
     private WorkflowExecutionContext executionContext;
 
-    ProvenanceFacade(Optional<ProvenanceEventListener> service) {
-        this.service = service;
+    ProvenanceFacade(Optional<ProvenanceEventListener> listener) {
+        this.listener = listener;
     }
 
     public void onWorkflowStart(WorkflowDescription workflowDescription, WorkflowExecutionContext executionContext) {
         this.executionContext = executionContext;
 
-        service.ifPresent(
+        listener.ifPresent(
             actualService -> actualService.workflowRunStarted(executionContext.getExecutionIdentifier(), workflowDescription.getFileName(),
                 workflowDescription.getControllerNode().getAssociatedDisplayName(), workflowDescription.getAdditionalInformation()));
     }
 
     public void onWorkflowFinish() {
-        service.ifPresent(actualService -> actualService.workflowRunFinished(executionContext.getExecutionIdentifier()));
+        listener.ifPresent(actualService -> actualService.workflowRunFinished(executionContext.getExecutionIdentifier()));
     }
 
     public synchronized void onComponentInit(String executionId, String displayName) {
