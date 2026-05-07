@@ -63,7 +63,7 @@ public class InputProviderEndpointEditDialog extends EndpointEditDialog implemen
 
     private static final int SHORTTEXT_MAXLENGTH = 140;
 
-    private static final int TEXT_WIDTH = 300;
+    private static final int DEFAULT_WIDTH = 150;
 
     private Label label;
 
@@ -204,7 +204,7 @@ public class InputProviderEndpointEditDialog extends EndpointEditDialog implemen
 
         textField = new Text(confContainer, SWT.BORDER);
         GridData textFieldLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
-        textFieldLayoutData.widthHint = TEXT_WIDTH;
+        textFieldLayoutData.widthHint = DEFAULT_WIDTH;
         textField.setLayoutData(textFieldLayoutData);
         textField.setVisible(false);
     }

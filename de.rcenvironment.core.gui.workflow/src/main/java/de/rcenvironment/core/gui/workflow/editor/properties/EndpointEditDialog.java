@@ -76,9 +76,7 @@ public class EndpointEditDialog extends TitleAreaDialog {
 
     private static final int MIN_HEIGHT = 300;
 
-    private static final int TEXT_WIDTH = 250;
-
-    private static final int COMBO_SETTINGS_WIDTH = 235;
+    private static final int DEFAULT_WIDTH = 150;
 
     private static final int MAXLENGTH_SHORTTEXT = 140;
 
@@ -377,15 +375,13 @@ public class EndpointEditDialog extends TitleAreaDialog {
 
     protected Combo createLabelAndCombo(Composite container, String text, String key, String value) {
         Label label = new Label(container, SWT.NONE);
-        GridData labelLayoutData = new GridData(SWT.FILL, SWT.NONE, false, false);
-        labelLayoutData.horizontalAlignment = SWT.RIGHT;
-        labelLayoutData.verticalAlignment = SWT.CENTER;
+        GridData labelLayoutData = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
         label.setLayoutData(labelLayoutData);
         label.setText(text);
         Combo combo = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
-        GridData comboLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
-        comboLayoutData.minimumWidth = COMBO_SETTINGS_WIDTH;
-        comboLayoutData.widthHint = TEXT_WIDTH;
+        GridData comboLayoutData = new GridData(SWT.BEGINNING, SWT.CENTER, true, false);
+        comboLayoutData.minimumWidth = DEFAULT_WIDTH;
+        comboLayoutData.widthHint = DEFAULT_WIDTH;
         combo.setLayoutData(comboLayoutData);
         for (String entry : metaData.getGuiNamesOfPossibleValues(key)) {
             combo.add(entry);
@@ -404,7 +400,7 @@ public class EndpointEditDialog extends TitleAreaDialog {
         label.setText(text);
         Text result = new Text(container, SWT.SINGLE | SWT.BORDER);
         GridData resultLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
-        resultLayoutData.widthHint = TEXT_WIDTH;
+        resultLayoutData.widthHint = DEFAULT_WIDTH;
         result.setLayoutData(resultLayoutData);
         result.setText(value);
         addVerifyListener(dataType, value, result);
@@ -447,7 +443,7 @@ public class EndpointEditDialog extends TitleAreaDialog {
 
         textfieldName = new Text(container, SWT.SINGLE | SWT.BORDER);
         GridData textfieldNameLayoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
-        textfieldNameLayoutData.widthHint = TEXT_WIDTH;
+        textfieldNameLayoutData.widthHint = DEFAULT_WIDTH;
         textfieldName.setLayoutData(textfieldNameLayoutData);
         textfieldName.setEditable((!isStatic && !epManager.getDynamicEndpointDefinition(id).isNameReadOnly())
             && readOnlyType != EndpointSelectionPane.ALL_READ_ONLY && readOnlyType != EndpointSelectionPane.NAME_AND_TYPE_READ_ONLY);
@@ -483,7 +479,7 @@ public class EndpointEditDialog extends TitleAreaDialog {
     private void createDataTypeComboBox(Composite container) {
         comboDataType = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
         GridData g = new GridData(SWT.FILL, SWT.FILL, true, false);
-        g.minimumWidth = COMBO_SETTINGS_WIDTH;
+        g.minimumWidth = DEFAULT_WIDTH;
         comboDataType.setLayoutData(g);
 
         List<DataType> possibleDataTypes;
@@ -514,7 +510,7 @@ public class EndpointEditDialog extends TitleAreaDialog {
     private void createInputHandlingComboBox(Composite container) {
         comboInputDatumHandling = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
         GridData g = new GridData(SWT.FILL, SWT.FILL, true, false);
-        g.minimumWidth = COMBO_SETTINGS_WIDTH;
+        g.minimumWidth = DEFAULT_WIDTH;
         comboInputDatumHandling.setLayoutData(g);
 
         List<EndpointDefinition.InputDatumHandling> possibleInputinputHandlingOptions;
@@ -549,7 +545,7 @@ public class EndpointEditDialog extends TitleAreaDialog {
     private void createInputExecutionContraintComboBox(Composite container) {
         comboInputExecutionContraint = new Combo(container, SWT.BORDER | SWT.READ_ONLY);
         GridData g = new GridData(SWT.FILL, SWT.FILL, true, false);
-        g.minimumWidth = COMBO_SETTINGS_WIDTH;
+        g.minimumWidth = DEFAULT_WIDTH;
         comboInputExecutionContraint.setLayoutData(g);
 
         List<EndpointDefinition.InputExecutionContraint> possibleInputHandlingOptions;
