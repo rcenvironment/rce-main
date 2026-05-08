@@ -64,3 +64,4 @@ sys$command
 # TODO check: still needed?
 
 /de.rcenvironment.core.scripting.tests/cachedir
+/de.rcenvironment/eclipse/testing/generated
