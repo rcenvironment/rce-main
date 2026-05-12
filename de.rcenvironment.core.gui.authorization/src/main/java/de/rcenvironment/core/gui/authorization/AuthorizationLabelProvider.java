@@ -22,7 +22,7 @@ import de.rcenvironment.core.component.api.DistributedComponentKnowledgeService;
 import de.rcenvironment.core.component.api.UserComponentIdMappingService;
 import de.rcenvironment.core.component.authorization.api.NamedComponentAuthorizationSelector;
 import de.rcenvironment.core.component.management.api.DistributedComponentEntry;
-import de.rcenvironment.core.component.model.api.ComponentImageContainerService;
+import de.rcenvironment.core.component.model.api.ComponentImageManagerService;
 import de.rcenvironment.core.gui.resources.api.ColorManager;
 import de.rcenvironment.core.gui.resources.api.ImageManager;
 import de.rcenvironment.core.gui.resources.api.StandardColors;
@@ -53,6 +53,8 @@ public class AuthorizationLabelProvider extends LabelProvider implements IColorP
 
     private final DistributedComponentKnowledgeService componentRegistryService;
 
+    private final ComponentImageManagerService componentImageManagerService;
+
     private boolean showGroupID = false;
 
     private boolean showComponentID = false;
@@ -65,6 +67,7 @@ public class AuthorizationLabelProvider extends LabelProvider implements IColorP
         authorizationService = serviceRegistryAccess.getService(AuthorizationService.class);
 
         componentRegistryService = serviceRegistryAccess.getService(DistributedComponentKnowledgeService.class);
+        componentImageManagerService = ServiceRegistry.createAccessFor(this).getService(ComponentImageManagerService.class);
     }
 
     @Override
@@ -156,8 +159,9 @@ public class AuthorizationLabelProvider extends LabelProvider implements IColorP
                 .findFirst();
 
         if (firstMatchingEntry.isPresent()) {
-            return ServiceRegistry.createAccessFor(this).getService(ComponentImageContainerService.class)
-                .getComponentImageContainer(firstMatchingEntry.get().getComponentInterface()).getComponentIcon16();
+            String componentID = firstMatchingEntry.get().getComponentRevision().getComponentInterface().getIdentifierAndVersion();
+            return componentImageManagerService
+                .getImagePackage(componentID).getIcon16(componentID);
         } else {
             return getDefaultIconForComponentAuthorizationSelector();
         }
