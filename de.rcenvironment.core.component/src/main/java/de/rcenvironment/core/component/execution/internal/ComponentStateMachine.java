@@ -28,9 +28,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 
 import de.rcenvironment.core.component.api.ComponentConstants;
 import de.rcenvironment.core.component.api.ComponentException;
@@ -65,9 +62,9 @@ import de.rcenvironment.core.utils.common.rpc.RemoteOperationException;
 import de.rcenvironment.core.utils.incubator.AbstractFixedTransitionsStateMachine;
 import de.rcenvironment.core.utils.incubator.AbstractStateMachine;
 import de.rcenvironment.core.utils.incubator.DebugSettings;
-import de.rcenvironment.core.utils.incubator.ServiceRegistry;
 import de.rcenvironment.core.utils.incubator.StateChangeException;
 import de.rcenvironment.provenance.api.ProvenanceEventListener;
+import de.rcenvironment.provenance.api.ProvenanceIntegration;
 import de.rcenvironment.toolkit.modules.concurrency.api.AsyncTaskService;
 import de.rcenvironment.toolkit.modules.concurrency.api.TaskDescription;
 import de.rcenvironment.toolkit.utils.common.IdGenerator;
@@ -661,24 +658,17 @@ public class ComponentStateMachine extends AbstractFixedTransitionsStateMachine<
         }
 
         private void writeProvenanceStart() {
-            final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-            final Optional<ServiceReference<ProvenanceEventListener>> provenanceReference =
-                Optional.ofNullable(context.getServiceReference(ProvenanceEventListener.class));
-            final Optional<ProvenanceEventListener> provenanceService = provenanceReference.map(context::getService);
-
-            provenanceService.ifPresent(service -> service.workflowNodeExecutionStarted(componentContext.getWorkflowExecutionIdentifier(),
-                componentContext.getInstanceName(),
-                componentContext.getComponentIdentifier(), componentContext.getExecutionIdentifier(),
-                componentContext.getNodeId().toString()));
+            final Optional<ProvenanceEventListener> provenanceListener = ProvenanceIntegration.getOptionalEventListener();
+            provenanceListener
+                .ifPresent(listener -> listener.workflowNodeExecutionStarted(componentContext.getWorkflowExecutionIdentifier(),
+                    componentContext.getInstanceName(),
+                    componentContext.getComponentIdentifier(), componentContext.getExecutionIdentifier(),
+                    componentContext.getNodeId().toString()));
         }
 
         private void writeProvenanceStop() {
-            final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-            final Optional<ServiceReference<ProvenanceEventListener>> provenanceReference =
-                Optional.ofNullable(context.getServiceReference(ProvenanceEventListener.class));
-            final Optional<ProvenanceEventListener> provenanceService = provenanceReference.map(context::getService);
-
-            provenanceService.ifPresent(service -> service.workflowNodeExecutionFinished(componentContext.getExecutionIdentifier()));
+            final Optional<ProvenanceEventListener> provenanceListener = ProvenanceIntegration.getOptionalEventListener();
+            provenanceListener.ifPresent(listener -> listener.workflowNodeExecutionFinished(componentContext.getExecutionIdentifier()));
         }
 
     }
@@ -749,24 +739,16 @@ public class ComponentStateMachine extends AbstractFixedTransitionsStateMachine<
         }
 
         private void writeProvenanceStart() {
-            final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-            final Optional<ServiceReference<ProvenanceEventListener>> provenanceReference =
-                Optional.ofNullable(context.getServiceReference(ProvenanceEventListener.class));
-            final Optional<ProvenanceEventListener> provenanceService = provenanceReference.map(context::getService);
-
-            provenanceService.ifPresent(service -> service.workflowNodeExecutionStarted(componentContext.getWorkflowExecutionIdentifier(),
+            final Optional<ProvenanceEventListener> provenanceListener = ProvenanceIntegration.getOptionalEventListener();
+            provenanceListener.ifPresent(service -> service.workflowNodeExecutionStarted(componentContext.getWorkflowExecutionIdentifier(),
                 componentContext.getInstanceName(),
                 componentContext.getComponentIdentifier(), componentContext.getExecutionIdentifier(),
                 componentContext.getNodeId().toString()));
         }
 
         private void writeProvenanceStop() {
-            final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-            final Optional<ServiceReference<ProvenanceEventListener>> provenanceReference =
-                Optional.ofNullable(context.getServiceReference(ProvenanceEventListener.class));
-            final Optional<ProvenanceEventListener> provenanceService = provenanceReference.map(context::getService);
-
-            provenanceService.ifPresent(service -> service.workflowNodeExecutionFinished(componentContext.getExecutionIdentifier()));
+            final Optional<ProvenanceEventListener> provenanceListener = ProvenanceIntegration.getOptionalEventListener();
+            provenanceListener.ifPresent(listener -> listener.workflowNodeExecutionFinished(componentContext.getExecutionIdentifier()));
         }
 
     }

@@ -18,10 +18,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
-
 import de.rcenvironment.core.communication.api.ServiceCallContext;
 import de.rcenvironment.core.communication.api.ServiceCallContextUtils;
 import de.rcenvironment.core.communication.common.LogicalNodeId;
@@ -47,6 +43,7 @@ import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.incubator.ServiceRegistry;
 import de.rcenvironment.core.utils.incubator.ServiceRegistryAccess;
 import de.rcenvironment.provenance.api.ProvenanceEventListener;
+import de.rcenvironment.provenance.api.ProvenanceIntegration;
 
 /**
  * Implementation of {@link ComponentContext}.
@@ -299,10 +296,7 @@ public class ComponentContextImpl implements ComponentContext {
     @Override
     public TypedDatum readInput(String inputName) {
         final TypedDatum returnValue = compExeCtxBridge.readInput(inputName);
-        final BundleContext context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
-        final Optional<ServiceReference<ProvenanceEventListener>> provenanceReference =
-            Optional.ofNullable(context.getServiceReference(ProvenanceEventListener.class));
-        final Optional<ProvenanceEventListener> provenanceListener = provenanceReference.map(context::getService);
+        final Optional<ProvenanceEventListener> provenanceListener = ProvenanceIntegration.getOptionalEventListener();
         provenanceListener
             .ifPresent(listener -> listener.inputRead(this.compExeId, inputName, returnValue, "someconstraint", "somehandling"));
         return returnValue;

@@ -10,3 +10,4 @@ Export-Package: de.rcenvironment.provenance.api
 Import-Package: de.rcenvironment.core.datamodel.api,
  org.osgi.service.component.annotations
 Bundle-ActivationPolicy: lazy
+Service-Component: OSGI-INF/generated/*.xml
