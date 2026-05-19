@@ -192,8 +192,8 @@ public class DMCommandPlugin implements CommandPlugin {
         File wfFile;
         File logFile;
         File dummyFile;
-        try (InputStream wfFileStream = getClass().getResourceAsStream("/DummyWorkflowFile.txt");
-            InputStream logFileStream = getClass().getResourceAsStream("/DummyLogFile.txt");) {
+        try (InputStream wfFileStream = getClass().getResourceAsStream("/DummyWorkflowFile.txt.testresource");
+            InputStream logFileStream = getClass().getResourceAsStream("/DummyLogFile.txt.testresource");) {
             wfFile = tempFileService.createTempFileWithFixedFilename("DummyWorkflowFile.txt");
             FileUtils.copyInputStreamToFile(wfFileStream, wfFile);
             logFile = tempFileService.createTempFileWithFixedFilename("DummyLogFile.txt");
@@ -203,14 +203,14 @@ public class DMCommandPlugin implements CommandPlugin {
         }
 
         if (fileCreationOption.equals(FileCreationOption.SMALL)) {
-            try (InputStream dummyFileStream = getClass().getResourceAsStream("/SmallDummyFile.txt");) {
+            try (InputStream dummyFileStream = getClass().getResourceAsStream("/SmallDummyFile.txt.testresource");) {
                 dummyFile = tempFileService.createTempFileWithFixedFilename("SmallDummyFile.txt");
                 FileUtils.copyInputStreamToFile(dummyFileStream, dummyFile);
             } catch (IOException e) {
                 throw CommandException.executionError("Could not read dummy file from resources folder.", context);
             }
         } else if (fileCreationOption.equals(FileCreationOption.BIG)) {
-            try (InputStream dummyFileStream = getClass().getResourceAsStream("/BigDummyFile.xml");) {
+            try (InputStream dummyFileStream = getClass().getResourceAsStream("/BigDummyFile.xml.testresource");) {
                 dummyFile = tempFileService.createTempFileWithFixedFilename("BigDummyFile.xml");
                 FileUtils.copyInputStreamToFile(dummyFileStream, dummyFile);
             } catch (IOException e) {
