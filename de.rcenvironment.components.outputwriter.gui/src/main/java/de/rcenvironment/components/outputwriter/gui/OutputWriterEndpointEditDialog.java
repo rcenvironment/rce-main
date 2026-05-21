@@ -80,12 +80,14 @@ public class OutputWriterEndpointEditDialog extends EndpointEditDialog {
     protected Control createDialogArea(Composite parent) {
         Control superControl = super.createDialogArea(parent);
         hintLabel = new CLabel((Composite) superControl, SWT.NONE);
+        hintLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
         hintLabel
             .setText(
-                "You are adding a primitive data type input. Therefore, you also \n"
-                    + "need to add this input to a target file in the data sheet tab \n"
-                    + "of this Output Writer component.");
+                "You are adding a primitive data type input.\n"
+                    + "Therefore, you also need to add this input to a target file\n"
+                    + "in the data sheet tab of this Output Writer component.");
         hintLabel.setImage(ImageManager.getInstance().getSharedImage(StandardImages.INFORMATION_16));
+        superControl.getParent().layout(true);
         return superControl;
     }
 

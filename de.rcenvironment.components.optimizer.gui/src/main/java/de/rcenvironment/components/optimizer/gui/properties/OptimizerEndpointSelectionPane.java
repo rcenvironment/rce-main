@@ -14,7 +14,6 @@ import java.util.Map;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -149,10 +148,6 @@ public class OptimizerEndpointSelectionPane extends EndpointSelectionPane {
      */
     private class OptimizerEndpointEditDialog extends EndpointEditDialog {
 
-        private static final int DIALOG_WIDTH = 325;
-
-        private static final int DIALOG_HEIGHT = 480;
-
         OptimizerEndpointEditDialog(Shell parentShell, EndpointActionType actionType,
             ComponentInstanceProperties configuration,
             EndpointType direction, String id, boolean isStatic, EndpointMetaDataDefinition metaData, Map<String, String> metadataValues) {
@@ -164,11 +159,6 @@ public class OptimizerEndpointSelectionPane extends EndpointSelectionPane {
             super.createEndpointSettings(parent);
             textfieldName.addListener(SWT.Verify, new VariableNameVerifyListener(VariableNameVerifyListener.NO_UNDERSCORE,
                 this.textfieldName));
-        }
-
-        @Override
-        protected Point getInitialSize() {
-            return new Point(DIALOG_WIDTH, DIALOG_HEIGHT);
         }
 
         @Override
