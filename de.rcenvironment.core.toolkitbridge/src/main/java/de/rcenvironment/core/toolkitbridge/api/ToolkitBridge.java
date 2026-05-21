@@ -9,6 +9,7 @@
 package de.rcenvironment.core.toolkitbridge.api;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -120,12 +121,15 @@ public final class ToolkitBridge {
         // publish all toolkit APIs as OSGi services
         synchronized (serviceRegistrations) {
 
-            for (Class<?> apiClass : toolkitServiceRegistry.listServices()) {
+            final Collection<Class<?>> toolkitServices = toolkitServiceRegistry.listServices();
+            for (Class<?> apiClass : toolkitServices) {
                 serviceRegistrations.add(bundleContext.registerService(apiClass.getName(), toolkitServiceRegistry.getService(apiClass),
                     null));
                 // note: avoiding StringUtils here, as this would create a bundle dependency cycle
-                log.debug("Registered RCE Tookit service " + apiClass.getName() + " as an OSGi service");
+                // note 2: replaced with summary output below to reduce log verbosity during startup
+                // log.debug("Registered RCE Tookit service " + apiClass.getName() + " as an OSGi service");
             }
+            log.debug("Registered " + toolkitServices.size() + " Tookit services as OSGi services");
         }
     }
 

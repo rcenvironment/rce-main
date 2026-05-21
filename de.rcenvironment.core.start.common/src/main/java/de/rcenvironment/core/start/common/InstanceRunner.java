@@ -87,9 +87,11 @@ public abstract class InstanceRunner {
 
         RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
 
-        for (String vmArg : runtime.getInputArguments()) {
-            log.debug("JVM argument passed: " + vmArg);
-        }
+        // reduced to a single log line to reduce verbosity during startup
+        log.debug("JVM arguments passed: " + Arrays.toString(runtime.getInputArguments().toArray()));
+        // for (String vmArg : runtime.getInputArguments()) {
+        // log.debug("JVM argument passed: " + vmArg);
+        // }
 
         if (Instance.isShutdownRequested()) {
             return IApplication.EXIT_OK;
@@ -277,7 +279,7 @@ public abstract class InstanceRunner {
                 log.debug("Finished " + taskDescriptionWithTokens);
             }
         };
-        
+
         return commandExecutionService.asyncExecMultiCommand(Arrays.asList(execCommandTokens), outputReceiver, authFilter, taskDescription);
     }
 

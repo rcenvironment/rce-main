@@ -63,7 +63,8 @@ public class PicoContainerObjectGraph extends AbstractObjectGraph {
             for (Class<?> i : services.keySet()) {
                 Object impl = container.getComponent(i);
                 services.put(i, impl);
-                logDebug("Publishing service " + i.getName() + " implemented by " + impl);
+                // only useful for development; could be made configurable as verbose logging if needed
+                // logDebug("Publishing service " + i.getName() + " implemented by " + impl);
             }
             return new ImmutableServiceRegistryImpl(services);
         } catch (RuntimeException e) {
