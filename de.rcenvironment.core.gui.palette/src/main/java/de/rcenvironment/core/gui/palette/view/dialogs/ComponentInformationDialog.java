@@ -104,4 +104,10 @@ public class ComponentInformationDialog extends TitleAreaDialog {
         createButton(parent, IDialogConstants.OK_ID, IDialogConstants.CLOSE_LABEL, true);
     }
 
+    @Override
+    public boolean close() {
+        getTitleImageLabel().getImage().dispose();
+        return super.close();
+    }
+
 }

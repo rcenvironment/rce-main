@@ -82,9 +82,12 @@ public class WorkflowPart extends AbstractGraphicalEditPart implements PropertyC
 
     @Override
     public final void deactivate() {
-        super.deactivate();
         ((PropertiesChangeSupport) getModel()).removePropertyChangeListener(this);
+        getFigure().erase();
+        super.deactivate();
     }
+
+
 
     @Override
     public final void propertyChange(final PropertyChangeEvent evt) {
@@ -191,6 +194,7 @@ public class WorkflowPart extends AbstractGraphicalEditPart implements PropertyC
         connLayer.setConnectionRouter(new CustomShortestPathConnectionRouter(f));
         return f;
     }
+
 
     @Override
     protected void createEditPolicies() {
@@ -344,7 +348,7 @@ public class WorkflowPart extends AbstractGraphicalEditPart implements PropertyC
      */
     private class BackgroundLayer extends FreeformLayer implements FigureListener {
 
-        private final Image orgImage;
+        private final Image orgImage = Activator.getInstance().getImageRegistry().get(Activator.IMAGE_WORKFLOW_EDITOR_BACKGROUND);
 
         private Image image;
 
@@ -353,8 +357,6 @@ public class WorkflowPart extends AbstractGraphicalEditPart implements PropertyC
         private int y;
 
         BackgroundLayer() {
-            orgImage = Activator.getInstance().getImageRegistry().get(Activator.IMAGE_WORKFLOW_EDITOR_BACKGROUND);
-            resize();
             addFigureListener(this);
         }
 
@@ -378,12 +380,26 @@ public class WorkflowPart extends AbstractGraphicalEditPart implements PropertyC
                 x = (targetRect.width - sizeX) / 2;
                 y = (targetRect.height - sizeY) / 2;
 
-                if (image != null) {
-                    image.dispose();
-                }
+                disposeBackgroundImage();
+
                 image = new Image(Display.getDefault(), orgImage.getImageData().scaledTo(sizeX, sizeY));
             }
         }
+
+        
+        
+        @Override
+        public void erase() {
+            disposeBackgroundImage();
+            super.erase();
+        }
+
+        private void disposeBackgroundImage() {
+            if (image != null) {
+                image.dispose();
+            }
+        }
+
 
         @Override
         protected void paintFigure(final Graphics graphics) {
@@ -395,6 +411,7 @@ public class WorkflowPart extends AbstractGraphicalEditPart implements PropertyC
 
         @Override
         public void figureMoved(final IFigure arg0) {
+            disposeBackgroundImage();
             resize();
         }
     }

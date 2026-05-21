@@ -54,6 +54,10 @@ public class SplashHandler extends BasicSplashHandler {
 
     private static String releasename;
 
+    private GC gc;
+
+    private Image splashImg;
+
     @Override
     public void init(Shell splash) {
         super.init(splash);
@@ -68,8 +72,8 @@ public class SplashHandler extends BasicSplashHandler {
         }
 
         ImageDescriptor descriptor = AbstractUIPlugin.imageDescriptorFromPlugin(BUNDLE, SPLASHIMAGE);
-        Image splashImg = descriptor.createImage();
-        GC gc = new GC(splashImg);
+        splashImg = descriptor.createImage();
+        gc = new GC(splashImg);
         gc.setFont(new Font(gc.getDevice(), "Arial", 7, SWT.BOLD));
         // FIXME: the newly created color object will never be disposed
         gc.setForeground(new Color(null, GRAY, GRAY, GRAY));
@@ -98,4 +102,12 @@ public class SplashHandler extends BasicSplashHandler {
         setProgressRect(progressRect);
         getContent(); // ensure creation of the progress
     }
+
+    @Override
+    public void dispose() {
+        gc.dispose();
+        splashImg.dispose();
+        super.dispose();
+    }
+
 }

@@ -58,10 +58,7 @@ public class OutlineView extends ContentOutlinePage {
 
             @Override
             public void widgetDisposed(DisposeEvent e) {
-                if (editorThumbnail != null) {
-                    editorThumbnail.deactivate();
-                    editorThumbnail = null;
-                }
+                disposeThumbnail();
             }
         };
 
@@ -79,7 +76,15 @@ public class OutlineView extends ContentOutlinePage {
             if (viewer.getControl() != null && !viewer.getControl().isDisposed()) {
                 viewer.getControl().removeDisposeListener(disposeListener);
             }
-            super.dispose();
+        }
+        disposeThumbnail();
+        super.dispose();
+    }
+
+    private void disposeThumbnail() {
+        if (editorThumbnail != null) {
+            editorThumbnail.deactivate();
+            editorThumbnail = null;
         }
     }
 }

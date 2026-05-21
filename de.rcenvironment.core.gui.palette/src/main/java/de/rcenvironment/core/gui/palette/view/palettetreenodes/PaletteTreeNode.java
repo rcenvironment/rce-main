@@ -91,8 +91,8 @@ public abstract class PaletteTreeNode extends TreeNode implements Comparable<Pal
 
     public abstract Optional<String> getHelpContextID();
 
-    public void setIcon(Image icon) {
-        this.icon = icon;
+    public void setIcon(Image newIcon) {
+        this.icon = newIcon;
     }
 
     public String getNodeName() {
@@ -265,5 +265,11 @@ public abstract class PaletteTreeNode extends TreeNode implements Comparable<Pal
         throw new ClassCastException("All tree nodes in the palette tree are expected to be instance of type PaletteTreeNode.");
     }
 
+    public void dispose() {
+        if (this.hasChildren()) {
+            Arrays.stream(this.getChildren()).filter(PaletteTreeNode.class::isInstance).map(PaletteTreeNode.class::cast)
+                .forEach(child -> child.dispose());
+        }
+    }
 
 }

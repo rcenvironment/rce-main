@@ -8,10 +8,14 @@
  
 package de.rcenvironment.core.gui.palette.view.palettetreenodes;
 
+import java.util.Optional;
+
 import org.eclipse.jface.viewers.TreeNode;
 
 import de.rcenvironment.core.gui.palette.toolidentification.ToolIdentification;
 import de.rcenvironment.core.gui.palette.toolidentification.ToolType;
+import de.rcenvironment.core.gui.palette.view.PaletteView;
+import de.rcenvironment.core.gui.workflow.editor.WorkflowEditor;
 
 
 /**
@@ -67,4 +71,47 @@ public abstract class ComponentNode extends PaletteTreeNode {
         builder.append(getType().toString());
         return builder.toString().hashCode();
     }
+
+    @Override
+    public void handleDoubleclick(PaletteView paletteView) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void handleWidgetSelected(WorkflowEditor editor) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void handleEditEvent() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public boolean canHandleEditEvent() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Optional<String> getHelpContextID() {
+        // TODO Auto-generated method stub
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean isCustomized() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void dispose() {
+        getIcon().ifPresent(icon -> icon.dispose());
+        super.dispose();
+    }
+
 }

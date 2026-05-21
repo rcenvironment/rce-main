@@ -374,9 +374,8 @@ public class ComponentPublishingView extends ViewPart {
                             || componentsTreeViewer.getControl().isDisposed()) {
                             return;
                         }
-
-                        groupsTreeViewer.refresh();
-                        componentsTreeViewer.refresh();
+                        groupsTreeViewer.refresh(true);
+                        componentsTreeViewer.refresh(true);
                     });
 
                 }

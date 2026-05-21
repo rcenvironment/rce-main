@@ -304,6 +304,7 @@ public class PaletteViewContentProvider implements ITreeContentProvider {
         nodeList.stream().filter(node -> node.getToolIdentification().equals(identification)).forEach(node -> {
             PaletteTreeNode parent = node.getPaletteParent();
             parent.removeChild(node);
+            node.dispose();
             if (refreshGroupNode) {
                 refreshPaletteTreeViewer(parent);
                 removeEmptyToolIntegrationGroups(parent);
@@ -482,6 +483,7 @@ public class PaletteViewContentProvider implements ITreeContentProvider {
         }
         PaletteTreeNode parent = node.getPaletteParent();
         parent.removeChild(node);
+        node.dispose();
         refreshPaletteTreeViewer(parent);
         removeEmptyToolIntegrationGroups(parent);
     }
@@ -536,6 +538,7 @@ public class PaletteViewContentProvider implements ITreeContentProvider {
 
     @Override
     public void dispose() {
+        rootNode.dispose();
         serviceRegistryAccess.dispose();
     }
 

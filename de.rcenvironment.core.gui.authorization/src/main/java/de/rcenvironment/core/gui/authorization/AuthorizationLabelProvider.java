@@ -22,7 +22,7 @@ import de.rcenvironment.core.component.api.DistributedComponentKnowledgeService;
 import de.rcenvironment.core.component.api.UserComponentIdMappingService;
 import de.rcenvironment.core.component.authorization.api.NamedComponentAuthorizationSelector;
 import de.rcenvironment.core.component.management.api.DistributedComponentEntry;
-import de.rcenvironment.core.component.model.api.ComponentImageContainerService;
+import de.rcenvironment.core.component.model.api.ComponentImageManagerService;
 import de.rcenvironment.core.gui.resources.api.ColorManager;
 import de.rcenvironment.core.gui.resources.api.ImageManager;
 import de.rcenvironment.core.gui.resources.api.StandardColors;
@@ -41,6 +41,10 @@ import de.rcenvironment.core.utils.incubator.ServiceRegistryAccess;
  */
 public class AuthorizationLabelProvider extends LabelProvider implements IColorProvider {
 
+    private static final Image PUBLIC_ICON = AuthorizationConstants.PUBLIC_ICON.createImage();
+
+    private static final Image GROUP_ICON = AuthorizationConstants.GROUP_ICON.createImage();
+
     private static final String ERROR_FALLBACK_LABEL_TEXT = "<Error>";
 
     private final AuthorizationService authorizationService;
@@ -48,6 +52,8 @@ public class AuthorizationLabelProvider extends LabelProvider implements IColorP
     private final UserComponentIdMappingService userComponentIdMappingService;
 
     private final DistributedComponentKnowledgeService componentRegistryService;
+
+    private final ComponentImageManagerService componentImageManagerService;
 
     private boolean showGroupID = false;
 
@@ -61,6 +67,7 @@ public class AuthorizationLabelProvider extends LabelProvider implements IColorP
         authorizationService = serviceRegistryAccess.getService(AuthorizationService.class);
 
         componentRegistryService = serviceRegistryAccess.getService(DistributedComponentKnowledgeService.class);
+        componentImageManagerService = ServiceRegistry.createAccessFor(this).getService(ComponentImageManagerService.class);
     }
 
     @Override
@@ -126,10 +133,10 @@ public class AuthorizationLabelProvider extends LabelProvider implements IColorP
     private Image getImageForAuthorizationAccessGroup(AuthorizationAccessGroup group) {
         if (authorizationService.isPublicAccessGroup(group)) {
             // public access group
-            return AuthorizationConstants.PUBLIC_ICON.createImage();
+            return PUBLIC_ICON;
         } else {
             // non-public group
-            return AuthorizationConstants.GROUP_ICON.createImage();
+            return GROUP_ICON;
         }
     }
 
@@ -152,8 +159,9 @@ public class AuthorizationLabelProvider extends LabelProvider implements IColorP
                 .findFirst();
 
         if (firstMatchingEntry.isPresent()) {
-            return ServiceRegistry.createAccessFor(this).getService(ComponentImageContainerService.class)
-                .getComponentImageContainer(firstMatchingEntry.get().getComponentInterface()).getComponentIcon16();
+            String componentID = firstMatchingEntry.get().getComponentRevision().getComponentInterface().getIdentifierAndVersion();
+            return componentImageManagerService
+                .getImagePackage(componentID).getIcon16(componentID);
         } else {
             return getDefaultIconForComponentAuthorizationSelector();
         }
