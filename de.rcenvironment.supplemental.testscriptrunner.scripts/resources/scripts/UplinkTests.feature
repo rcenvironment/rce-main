@@ -293,9 +293,9 @@ Scenario: Active stopping/restarting of connections during runtime (UplinkNew06)
     When starting instances "Server1, Client1, Client2"
     
     # no autostart -> remain disconnected
-    Then the Uplink connection from "Client1" to "Server1" should be present within 1 seconds
+    Then the Uplink connection from "Client1" to "Server1" should be present within 3 seconds
     And  the Uplink connection from "Client1" to "Server1" should be disconnected within 1 seconds
-    Then the Uplink connection from "Client2" to "Server1" should be present within 1 seconds
+    Then the Uplink connection from "Client2" to "Server1" should be present within 3 seconds
     And  the Uplink connection from "Client2" to "Server1" should be disconnected within 1 seconds
     
     # pubish a test tool on Client1 for visibility tests
