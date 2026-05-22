@@ -34,9 +34,9 @@ public class GroupNode extends PaletteTreeNode {
 
     private boolean customGroup = false;
 
-    private Image folderIcon = ImageManager.getInstance().getSharedImage(StandardImages.FOLDER_16);
+    private Image folderIcon;
 
-    private Image folderClosedIcon = ImageManager.getInstance().getSharedImage(StandardImages.FOLDER_CLOSED_16);
+    private Image folderClosedIcon;
 
     protected GroupNode(PaletteTreeNode parent, String nodeName) {
         super(parent, nodeName);
@@ -67,20 +67,19 @@ public class GroupNode extends PaletteTreeNode {
 
     @Override
     public Optional<Image> getIcon() {
-        return Optional.ofNullable(getFolderIcon());
+        boolean showExpanded =
+            isExpandable() && getContentProvider().getExpandedState(this);
+        return Optional.ofNullable(getFolderIcon(showExpanded));
     }
 
     private boolean isExpandable() {
         return getContentProvider().isExpandable(this);
     }
 
-    private Image getFolderIcon() {
-        boolean showExpanded =
-            getContentProvider().getExpandedState(this) && isExpandable();
-        return getFolderIcon(showExpanded);
-    }
-
     public Image getFolderIcon(boolean showExpanded) {
+        if (folderIcon == null || folderClosedIcon == null) {
+            createIcons(isCustomGroup());
+        }
         if (showExpanded) {
             return folderIcon;
         }
@@ -104,7 +103,7 @@ public class GroupNode extends PaletteTreeNode {
 
     public void setCustomGroup(boolean isCustomGroup) {
         if (this.customGroup != isCustomGroup) {
-            reCreateIcons(isCustomGroup);
+            createIcons(isCustomGroup);
         }
         this.customGroup = isCustomGroup;
     }
@@ -137,8 +136,12 @@ public class GroupNode extends PaletteTreeNode {
     @Override
     public void dispose() {
         if (isCustomGroup()) {
-            folderIcon.dispose();
-            folderClosedIcon.dispose();
+            if (folderIcon != null && !folderIcon.isDisposed()) {
+                folderIcon.dispose();
+            }
+            if (folderClosedIcon != null && !folderClosedIcon.isDisposed()) {
+                folderClosedIcon.dispose();
+            }
         }
         super.dispose();
     }
@@ -153,7 +156,7 @@ public class GroupNode extends PaletteTreeNode {
     }
 
 
-    private void reCreateIcons(boolean isCustomGroup) {
+    private void createIcons(boolean isCustomGroup) {
         if (isCustomGroup) {
             folderIcon = getOverlayIcon(ImageManager.getInstance().getSharedImage(StandardImages.FOLDER_16));
             folderClosedIcon = getOverlayIcon(ImageManager.getInstance().getSharedImage(StandardImages.FOLDER_CLOSED_16));
