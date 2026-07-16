@@ -1,8 +1,13 @@
 <!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN" "http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
 <section id="command_line">
 	<title>Command Line Parameters</title>
-	<para>General syntax </para>
-	<programlisting>&gt;  rce --[RCE arguments] -[RCP arguments] -[vmargs -[VM arguments]]</programlisting>
+	<para>General syntax</para>
+	<programlisting os="windows">&gt;rce.exe --[RCE arguments] -[RCP arguments] -[vmargs -[VM arguments]]</programlisting>
+	<note os="windows">To launch RCE as a console application, you can also use <code>rcec.exe</code>. 
+		The Windows operating system then automatically allocates a console for the application that shows the console output. 
+		This executable does not automatically add any arguments, so you still need to specify <code>-console</code>, <code>-consoleLog</code>, etc.
+	</note>
+	<programlisting os="linux">&gt;./rce --[RCE arguments] -[RCP arguments] -[vmargs -[VM arguments]]</programlisting>
 	<para>
 		<table frame="all">
 			<title>Command line arguments for RCE</title>
