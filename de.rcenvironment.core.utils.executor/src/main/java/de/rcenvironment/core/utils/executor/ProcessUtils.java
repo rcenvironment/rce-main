@@ -9,17 +9,11 @@
 package de.rcenvironment.core.utils.executor;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.PumpStreamHandler;
-import org.apache.commons.logging.LogFactory;
-
 import com.sun.jna.Native;
 import com.sun.jna.Platform;
 import com.sun.jna.win32.StdCallLibrary;
@@ -30,6 +24,7 @@ import de.rcenvironment.core.utils.common.StringUtils;
  * Utility class to interact with processes in a system dependent way.
  *
  * @author Tobias Rodehutskors
+ * @author Lukas Rosenbach (#18333)
  */
 final class ProcessUtils {
 
@@ -126,53 +121,12 @@ final class ProcessUtils {
     }
 
     /**
-     * Extracts the system dependent process id from {@link Process}. This method is implemented using Reflection API and JNA and is
-     * therefore naturally platform dependent. It is possible to extract the PID from already finished processes for both Windows as well as
-     * Linux. TODO The use of reflection will be unnecessary in Java >=9 and should be refactored to access the pid directly via the
-     * processes' method.
+     * Extracts the system dependent process id from {@link Process}.
+     * 
+     * @return the system dependent process id
      */
-    static int getPid(Process pProcess)
-        throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-
-        try {
-            if (Platform.isWindows()) {
-                // extract the handle from the process object using the reflection API
-                Field f = pProcess.getClass().getDeclaredField("handle");
-                f.setAccessible(true);
-                long processHandle = f.getLong(pProcess);
-
-                // get the process id from the process handle using JNA
-                return Kernel32.INSTANCE.GetProcessId(processHandle);
-
-            } else if (Platform.isLinux()) {
-
-                // extract the process id from the process object using the reflection API
-                Field f = pProcess.getClass().getDeclaredField("pid");
-                f.setAccessible(true);
-                return f.getInt(pProcess);
-
-            } else {
-                throw new IllegalStateException(UNKOWN_PLATFORM_ERROR);
-            }
-        } catch (RuntimeException e) {
-            if (e.getClass().getSimpleName().contains(INACCESSIBLE_OBJECT_EXCEPTION)) {
-                LogFactory.getLog(ProcessUtils.class.getCanonicalName())
-                    .debug(
-                        "Using fallback method to retrieve process id due to limited reflection access in Java versions >=16."
-                            + " Original exception:",
-                        e);
-                String processString = pProcess.toString();
-                Pattern pattern = Pattern.compile("pid=(\\d+),");
-                Matcher matcher = pattern.matcher(processString);
-                if (matcher.find()) {
-                    return Integer.parseInt(matcher.group(1));
-                } else {
-                    throw e;
-                }
-            } else {
-                throw e;
-            }
-        }
+    static long getPid(Process pProcess) {
+        return pProcess.pid();
     }
 
     /**
@@ -189,7 +143,7 @@ final class ProcessUtils {
      * @exception ExecuteException Thrown if the process id/session id was not found or the command failed for another reason.
      * @throws InterruptedException
      */
-    static boolean killProcessTree(int pid) throws ExecuteException, IOException, InterruptedException {
+    static boolean killProcessTree(long pid) throws ExecuteException, IOException, InterruptedException {
 
         DefaultExecutor executor = new DefaultExecutor();
 
@@ -231,7 +185,7 @@ final class ProcessUtils {
     }
 
     // Linux only function
-    private static boolean termOrKill(DefaultExecutor executor, int attempts, String terminationCommand, int pid)
+    private static boolean termOrKill(DefaultExecutor executor, int attempts, String terminationCommand, long pid)
         throws ExecuteException, IOException {
 
         // as child processes can be created asynchronously, we check if we succeeded in terminating them and repeat the termination several

@@ -35,6 +35,7 @@ import de.rcenvironment.core.utils.common.TempFileServiceAccess;
  * Tests for {@link ProcessUtils}.
  *
  * @author Tobias Rodehutskors
+ * @author Lukas Rosenbach (#18333)
  */
 public class ProcessUtilsTest {
 
@@ -167,7 +168,7 @@ public class ProcessUtilsTest {
         Process process = processExtractor.getProcess();
         assertNotNull(process);
         assertTrue(isRunning(process));
-        int pid = ProcessUtils.getPid(process);
+        long pid = ProcessUtils.getPid(process);
         assertTrue(isRunning(process));
 
         // kill the process tree
@@ -231,7 +232,7 @@ public class ProcessUtilsTest {
         Process process = processExtractor.getProcess();
         assertNotNull(process);
         assertTrue(isRunning(process));
-        int pid = ProcessUtils.getPid(process);
+        long pid = ProcessUtils.getPid(process);
         assertTrue(isRunning(process));
 
         // wait for the process to finish
