@@ -10,6 +10,8 @@ package de.rcenvironment.core.gui.configuration;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -17,6 +19,7 @@ import java.util.TreeMap;
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -54,6 +57,8 @@ import de.rcenvironment.core.utils.incubator.ServiceRegistry;
  * @author Sascha Zur
  */
 public class ConfigurationInformationDialog extends Dialog {
+
+    private static final String WORKSPACE_LOCATION_COULD_NOT_BE_DETERMINED = "Workspace location could not be determined.";
 
     private static final int MINIMUM_HEIGHT = 250;
 
@@ -102,7 +107,12 @@ public class ConfigurationInformationDialog extends Dialog {
 
         // get last workspace location and "don't as again" setting
         WorkspaceSettings workspaceSettings = WorkspaceSettings.getInstance();
-        workspaceLocation = workspaceSettings.getLastLocation();
+        try {
+            workspaceLocation = Paths.get(Platform.getInstanceLocation().getURL().toURI()).normalize().toString();
+        } catch (URISyntaxException e) {
+            workspaceLocation = WORKSPACE_LOCATION_COULD_NOT_BE_DETERMINED;
+            log.debug(WORKSPACE_LOCATION_COULD_NOT_BE_DETERMINED, e);
+        }
         dontAskForWorkspaceLocationOnStartup = workspaceSettings.getDontAskAgainSetting();
     }
 
