@@ -21,6 +21,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -84,8 +85,11 @@ import de.rcenvironment.core.utils.ssh.jsch.executor.JSchRCECommandLineExecutor;
  * @author Lukas Rosenbach
  * @author Alexander Weinert
  * @author Marlon Schroeter
+ * @author Lukas Rosenbach (#18331)
  */
 public class InstanceManagementServiceImpl implements InstanceManagementService {
+
+    private static final String ZIP_FOLDER = "zip/";
 
     private static final int THREAD_SLEEP_DEFAULT_IN_MILLIS = 500;
 
@@ -101,7 +105,7 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
 
     private static final String COMMAND_ARGUMENTS_FILE_NAME = File.separator + "commandArguments";
 
-    private static final String DEFAULT_DOWNLOAD_URL_PATTERN = "https://download.rcenvironment.de/rce/10.x/products/standard/*/zip/";
+    private static final String DEFAULT_DOWNLOAD_URL_PATTERN = "https://download.rcenvironment.de/rce/10.x/products/standard/*/";
 
     private static final String DEFAULT_DOWNLOAD_FILENAME_PATTERN_WINDOWS = "rce-*-standard-win32.x86_64.zip";
 
@@ -1117,15 +1121,24 @@ public class InstanceManagementServiceImpl implements InstanceManagementService 
         validateConfiguration(false, true);
         File tempVersionFile = tfs.createTempFileFromPattern("versionfile-*.tmp");
         String versionFileUrl = getSourceFolderUrl(urlQualifier) + "VERSION";
+
         log.debug("Fetching remote version information from " + versionFileUrl);
-        deploymentOperations.downloadFile(versionFileUrl, tempVersionFile,
-            true, false, timeout); // allow overwrite as temp file already exists
-        return FileUtils.readFileToString(tempVersionFile).trim();
+        try {
+            deploymentOperations.downloadFile(versionFileUrl, tempVersionFile, true, false, timeout);
+        } catch (IOException e) {
+            versionFileUrl = getSourceFolderUrl(urlQualifier) + ZIP_FOLDER + "VERSION";
+            log.debug("Error while downloading VERSION file: " + e.getMessage());
+            log.debug("Fetching remote version information from fallback location " + versionFileUrl);
+            deploymentOperations.downloadFile(versionFileUrl, tempVersionFile, true, false, timeout);
+        }
+
+        return FileUtils.readFileToString(tempVersionFile, Charset.defaultCharset()).trim();
     }
 
     protected void downloadInstallationPackage(String urlQualifier, String version, File localFile, int timeout) throws IOException {
         validateConfiguration(false, true);
-        String remoteFileUrl = getSourceFolderUrl(urlQualifier) + downloadFilenamePattern.replace(GENERIC_PLACEHOLDER_STRING, version);
+        String remoteFileUrl =
+            getSourceFolderUrl(urlQualifier) + ZIP_FOLDER + downloadFilenamePattern.replace(GENERIC_PLACEHOLDER_STRING, version);
         log.debug("Downloading installation package from '" + remoteFileUrl + "' to local file '" + localFile.getAbsolutePath() + "'");
         deploymentOperations.downloadFile(remoteFileUrl, localFile, true, true, timeout); // allow overwrite
     }
