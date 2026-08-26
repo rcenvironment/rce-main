@@ -17,6 +17,7 @@ SPDX-FileComment = "Exclusion of version control files; note that some of these 
 
 [[annotations]]
 path = [
+	"CITATION.cff",
 	"de.rcenvironment**.launch",
 	"de.rcenvironment**.target",
 	"de.rcenvironment.**.gui/help/**.xml",

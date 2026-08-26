@@ -4,8 +4,7 @@ SPDX-PackageDownloadLocation = "https://rcenvironment.de/"
 
 [[annotations]]
 path = [
-	"src/main/resources/*.xml",
-	"src/main/resources/*.txt",
+	"src/main/resources/*.testresource",
 	"src/test/resources/*.pem"
 ]
 precedence = "aggregate"
