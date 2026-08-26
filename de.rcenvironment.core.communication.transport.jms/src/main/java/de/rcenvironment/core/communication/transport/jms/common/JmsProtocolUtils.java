@@ -9,6 +9,7 @@ package de.rcenvironment.core.communication.transport.jms.common;
 
 import java.net.ProtocolException;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
@@ -19,6 +20,8 @@ import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+
+import org.fusesource.hawtbuf.UTF8Buffer;
 
 import de.rcenvironment.core.communication.common.CommunicationException;
 import de.rcenvironment.core.communication.common.SerializationException;
@@ -132,13 +135,37 @@ public final class JmsProtocolUtils {
      * @throws JMSException on JMS errors
      * @throws CommunicationException on message format errors
      */
+    @SuppressWarnings("unchecked")
     public static NetworkRequest createNetworkRequestFromMessage(Message jmsRequest) throws JMSException, CommunicationException {
         byte[] content = (byte[]) ((ObjectMessage) jmsRequest).getObject();
         if (content.length == 0) {
             throw new CommunicationException("Received message with zero-length payload");
         }
-        @SuppressWarnings("unchecked") Map<String, String> requestMetadata = (Map<String, String>) jmsRequest
+        // This is an ugly fix/workaround for #18337 (Map<String, String> being received as Map<String, UTF8Buffer>).
+        // First, cast the received map in a "safe" way (still uncheched, but it does not depend on the map value type).
+        Map<String, ? extends Object> rawRequestMetadata = (Map<String, Object>) jmsRequest
             .getObjectProperty(JmsProtocolConstants.MESSAGE_FIELD_METADATA);
+        // Also, optimistically cast the map to the actual expected target type. Note that this only casts the
+        // map's expected type, and does nothing to its entries yet.
+        final Map<String, String> requestMetadata = (Map<String, String>) rawRequestMetadata;
+        // Make sure there is an entry to probe. This should always be the case in practice (see "else").
+        if (rawRequestMetadata.size() != 0) {
+            // Probe an arbitrary entry for the actual value type WITHOUT casting it
+            Object arbitraryValue = rawRequestMetadata.entrySet().iterator().next().getValue();
+            // This is the ActiveMQ 5.19.10 behavior: String values are received as UTF8Buffers
+            if (arbitraryValue.getClass().equals(UTF8Buffer.class)) {
+                // To fix this without the overhead of creating a new HashMap for every message,
+                // fix the map entries in place by replacing each UTF8Buffer with its string form.
+                // After this, the <String, String> map only contains expected entries and can be used as expected.
+                for (Entry<String, Object> entry : ((Map<String, Object>) rawRequestMetadata).entrySet()) {
+                    entry.setValue(entry.getValue().toString());
+                }
+            } else if (!arbitraryValue.getClass().equals(String.class)) {
+                throw new IllegalStateException("Unexpected metadata map value type: " + arbitraryValue.getClass().getCanonicalName());
+            }
+        } else {
+            throw new IllegalStateException("Unexpected empty metadata map");
+        }
         NetworkRequest originalRequest = NetworkRequestFactory.reconstructNetworkRequest(content, requestMetadata);
         return originalRequest;
     }
