@@ -949,7 +949,7 @@ public class CommonToolIntegratorComponent extends DefaultComponent {
                 .replaceAll("(\\[|\\])", "");
 
         Pattern pattern = Pattern
-            .compile("\\{((?<osPrefix>" + osPrefixes + ")_)?rel_path:\\s*(?<basePath>.*)\\s*,\\s*(?<targetPath>.*)\\s*\\}");
+            .compile("\\$\\{((?<osPrefix>" + osPrefixes + ")_)?rel_path:\\s*(?<basePath>.*)\\s*,\\s*(?<targetPath>.*)\\s*\\}");
         Matcher matcher = pattern.matcher(script);
 
         while (matcher.find()) {
