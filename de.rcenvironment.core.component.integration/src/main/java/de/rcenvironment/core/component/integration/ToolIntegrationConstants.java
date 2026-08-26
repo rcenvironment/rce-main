@@ -200,32 +200,32 @@ public final class ToolIntegrationConstants {
     public static final String KEY_ICON_MODIFICATION_DATE = "iconModified";
 
     /** Constant. */
-    public static final String PROPERTY_PLACEHOLDER_TEMPLATE = "{prop:%s}";
+    public static final String PROPERTY_PLACEHOLDER_TEMPLATE = "${prop:%s}";
 
     /** Constant. */
-    public static final String ADD_PROPERTY_PLACEHOLDER_TEMPLATE = "{addProp:%s}";
+    public static final String ADD_PROPERTY_PLACEHOLDER_TEMPLATE = "${addProp:%s}";
 
     /** Constant. */
-    public static final String OUTPUT_PLACEHOLDER_TEMPLATE = "{out:%s}";
+    public static final String OUTPUT_PLACEHOLDER_TEMPLATE = "${out:%s}";
 
     /** Constant. */
-    public static final String INPUT_PLACEHOLDER_TEMPLATE = "{in:%s}";
+    public static final String INPUT_PLACEHOLDER_TEMPLATE = "${in:%s}";
 
     /** Constant. */
-    public static final String DIRECTORY_PLACEHOLDER_TEMPLATE = "{dir:%s}";
+    public static final String DIRECTORY_PLACEHOLDER_TEMPLATE = "${dir:%s}";
 
     /** Constant. */
-    public static final String FILE_NAME_PLACEHOLDER_TEMPLATE = "{file_name:%s}";
+    public static final String FILE_NAME_PLACEHOLDER_TEMPLATE = "${file_name:%s}";
 
     /**
      * Constant. Prototypical implementation (RCE 10.8.0). Do not use in productive environments.
      */
-    public static final String REL_PATH_PLACEHOLDER_TEMPLATE = "{rel_path:\"%s\", \"%s\"}";
+    public static final String REL_PATH_PLACEHOLDER_TEMPLATE = "${rel_path:\"%s\", \"%s\"}";
 
     /**
      * Constant. Prototypical implementation (RCE 10.8.0). Do not use in productive environments.
      */
-    public static final String OS_SPECIFIC_REL_PATH_PLACEHOLDER_TEMPLATE = "{%s_rel_path:\"%s\", \"%s\"}";
+    public static final String OS_SPECIFIC_REL_PATH_PLACEHOLDER_TEMPLATE = "${%s_rel_path:\"%s\", \"%s\"}";
 
     /** Enum representing the placeholders for tool integration directories. */
     public enum DirectoryPlaceholder {
