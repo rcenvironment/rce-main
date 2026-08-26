@@ -54,7 +54,7 @@ public class ShowIntegrationEditWizardHandler extends AbstractHandler {
             return 
                 ToolIntegrationWizardDialog.createIntegrationEditWizardWithPreselectedTool(display.getActiveShell(), integrationWizard);
         } else {
-            final IWizard integrationWizard = new ToolIntegrationWizard(true, ToolIntegrationConstants.EDIT_WIZARD);
+            final IWizard integrationWizard = new ToolIntegrationWizard(false, ToolIntegrationConstants.EDIT_WIZARD);
             return 
                 ToolIntegrationWizardDialog.createIntegrationEditWizardWithoutPreselectedTool(display.getActiveShell(), integrationWizard);
         }

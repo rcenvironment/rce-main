@@ -18,6 +18,7 @@ import de.rcenvironment.core.component.api.ComponentConstants;
  * 
  * @author Sascha Zur
  * @author Kathrin Schaffert
+ * @author Jan Flink
  */
 public final class ToolIntegrationConstants {
 
@@ -82,12 +83,6 @@ public final class ToolIntegrationConstants {
     public static final String KEY_MOCK_SCRIPT = "imitationScript";
 
     /** Constant. */
-    public static final String PLACEHOLDER_PREFIX = "${";
-
-    /** Constant. */
-    public static final String PLACEHOLDER_SUFFIX = "}";
-
-    /** Constant. */
     public static final String KEY_ENDPOINT_IDENTIFIER = "endpointIdentifier";
 
     /** Constant. */
@@ -122,28 +117,6 @@ public final class ToolIntegrationConstants {
 
     /** Constant. */
     public static final String DEFAULT_CONFIG_FILE_SUFFIX = ".conf";
-
-    /** Constant. */
-    public static final String PLACEHOLDER_INPUT_PREFIX = "in";
-
-    /** Constant. */
-    public static final String PLACEHOLDER_SEPARATOR = ":";
-
-    /** Constant. */
-    public static final String PLACEHOLDER_OUTPUT_PREFIX = "out";
-
-    /** Constant. */
-    public static final String PLACEHOLDER_PROPERTY_PREFIX = "prop";
-
-    /** Constant. */
-    public static final String PLACEHOLDER_DIRECTORY_PREFIX = "dir";
-
-    /** Constant. */
-    public static final String[] DIRECTORIES_PLACEHOLDERS_DISPLAYNAMES = new String[] { "Config dir", "Working dir",
-        "Input dir", "Tool dir", "Output dir" };
-
-    /** Constant. */
-    public static final String[] DIRECTORIES_PLACEHOLDER = new String[] { "config", "working", "input", "tool", "output" };
 
     /** Constant. */
     public static final String PLACEHOLDER_EXIT_CODE = "exitCode";
@@ -181,9 +154,6 @@ public final class ToolIntegrationConstants {
 
     /** Constant. */
     public static final String DONT_CRASH_ON_NON_ZERO_EXIT_CODES = "dontCrashOnNonZeroExitCodes";
-
-    /** Constant. */
-    public static final String PLACEHOLDER_ADDITIONAL_PROPERTIES_PREFIX = "addProp";
 
     // tool publication mixed into tool integration is disabled for now; see Mantis #16044
     // public static final String TEMP_KEY_PUBLISH_COMPONENT = "publishComponent";
@@ -228,6 +198,60 @@ public final class ToolIntegrationConstants {
 
     /** Constant. */
     public static final String KEY_ICON_MODIFICATION_DATE = "iconModified";
+
+    /** Constant. */
+    public static final String PROPERTY_PLACEHOLDER_TEMPLATE = "{prop:%s}";
+
+    /** Constant. */
+    public static final String ADD_PROPERTY_PLACEHOLDER_TEMPLATE = "{addProp:%s}";
+
+    /** Constant. */
+    public static final String OUTPUT_PLACEHOLDER_TEMPLATE = "{out:%s}";
+
+    /** Constant. */
+    public static final String INPUT_PLACEHOLDER_TEMPLATE = "{in:%s}";
+
+    /** Constant. */
+    public static final String DIRECTORY_PLACEHOLDER_TEMPLATE = "{dir:%s}";
+
+    /** Constant. */
+    public static final String FILE_NAME_PLACEHOLDER_TEMPLATE = "{file_name:%s}";
+
+    /**
+     * Constant. Prototypical implementation (RCE 10.8.0). Do not use in productive environments.
+     */
+    public static final String REL_PATH_PLACEHOLDER_TEMPLATE = "{rel_path:\"%s\", \"%s\"}";
+
+    /**
+     * Constant. Prototypical implementation (RCE 10.8.0). Do not use in productive environments.
+     */
+    public static final String OS_SPECIFIC_REL_PATH_PLACEHOLDER_TEMPLATE = "{%s_rel_path:\"%s\", \"%s\"}";
+
+    /** Enum representing the placeholders for tool integration directories. */
+    public enum DirectoryPlaceholder {
+
+        /** Configuration directory. */
+        CONFIG_DIR("config", "Config dir"),
+        /** Working directory. */
+        WORKING_DIR("working", "Working dir"),
+        /** Input directory. */
+        INPUT_DIR("input", "Input dir"),
+        /** Tool directory. */
+        TOOL_DIR("tool", "Tool dir"),
+        /** Output directory. */
+        OUTPUT_DIR("output", "Output dir");
+
+        /** The placeholder. */
+        public String placeholderString;
+
+        /** The display name of the placeholder. */
+        public String displayName;
+
+        DirectoryPlaceholder(String placeholder, String displayName) {
+            this.placeholderString = placeholder;
+            this.displayName = displayName;
+        }
+    }
 
     private ToolIntegrationConstants() {
 

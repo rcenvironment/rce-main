@@ -11,6 +11,8 @@ package de.rcenvironment.core.gui.integration.toolintegration;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -34,6 +36,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import de.rcenvironment.core.component.integration.ToolIntegrationConstants;
+import de.rcenvironment.core.component.integration.ToolIntegrationConstants.DirectoryPlaceholder;
+import de.rcenvironment.core.datamodel.api.DataType;
 import de.rcenvironment.core.gui.resources.api.ImageManager;
 import de.rcenvironment.core.gui.resources.api.StandardImages;
 import de.rcenvironment.core.utils.common.StringUtils;
@@ -42,6 +46,7 @@ import de.rcenvironment.core.utils.common.StringUtils;
  * A dialog for inserting a copy command in pre/post script.
  * 
  * @author Sascha Zur
+ * @author Jan Flink (refactoring)
  */
 public class WizardInsertCopyCommandDialog extends Dialog {
 
@@ -51,7 +56,7 @@ public class WizardInsertCopyCommandDialog extends Dialog {
 
     private static final String SLASH = "/";
 
-    private static final String DIRECTORY_PREFIX = "Directory: ";
+    private static final String DIRECTORY_PREFIX = "Directory";
 
     private static final String INPUT_PREFIX = "Input ";
 
@@ -74,9 +79,9 @@ public class WizardInsertCopyCommandDialog extends Dialog {
 
     private String command;
 
-    private final List<String> inputs;
+    private final Map<String, String> inputs;
 
-    private final String[] directories;
+    private final Set<DirectoryPlaceholder> directories;
 
     private Button fileToDirButton;
 
@@ -98,10 +103,11 @@ public class WizardInsertCopyCommandDialog extends Dialog {
 
     private CLabel validationLabel;
 
-    public WizardInsertCopyCommandDialog(Shell parentShell, List<String> endpointNames, String[] directories) {
+    public WizardInsertCopyCommandDialog(Shell parentShell, Map<String, String> endpointNames,
+        Set<DirectoryPlaceholder> directoryPlaceholders) {
         super(parentShell);
         this.inputs = endpointNames;
-        this.directories = directories;
+        this.directories = directoryPlaceholders;
         setShellStyle(SWT.CLOSE | SWT.MAX | SWT.TITLE | SWT.BORDER | SWT.RESIZE
             | getDefaultOrientation());
     }
@@ -249,15 +255,28 @@ public class WizardInsertCopyCommandDialog extends Dialog {
     private void fillCombo(Combo combo, int type) {
         String selection = combo.getText();
         combo.removeAll();
-        for (String input : inputs) {
-            if (input.startsWith(FILE) && type == SOURCE && (fileToFileButton.getSelection() || fileToDirButton.getSelection())) {
-                combo.add(INPUT_PREFIX + input);
-            } else if (input.startsWith(FILE) && type == TARGET && fileToFileButton.getSelection()) {
-                combo.add(INPUT_PREFIX + input);
+        String displayNameString = "%s: %s";
+        for (String input : inputs.keySet()) {
+            String displayName = StringUtils.format(displayNameString, INPUT_PREFIX + inputs.get(input), input);
+            if (inputs.get(input).equals(DataType.FileReference.getDisplayName()) && type == SOURCE
+                && (fileToFileButton.getSelection() || fileToDirButton.getSelection())) {
+                combo.add(displayName);
+                combo.setData(displayName, StringUtils.format(ToolIntegrationConstants.INPUT_PLACEHOLDER_TEMPLATE, input));
+            } else if (inputs.get(input).equals(DataType.FileReference.getDisplayName()) && type == TARGET
+                && fileToFileButton.getSelection()) {
+                combo.add(displayName);
+                combo.setData(displayName, StringUtils.format(ToolIntegrationConstants.INPUT_PLACEHOLDER_TEMPLATE, input));
+            } else if (inputs.get(input).equals(DataType.DirectoryReference.getDisplayName()) && type == SOURCE
+                && dirButton.getSelection()) {
+                combo.add(displayName);
+                combo.setData(displayName, StringUtils.format(ToolIntegrationConstants.INPUT_PLACEHOLDER_TEMPLATE, input));
             }
         }
-        for (String dir : directories) {
-            combo.add(DIRECTORY_PREFIX + dir);
+        for (DirectoryPlaceholder dir : directories) {
+            String displayName = StringUtils.format(displayNameString, DIRECTORY_PREFIX, dir.displayName);
+            combo.add(displayName);
+            combo.setData(displayName,
+                StringUtils.format(ToolIntegrationConstants.DIRECTORY_PLACEHOLDER_TEMPLATE, dir.placeholderString));
         }
         if (selection != null && combo.indexOf(selection) >= 0) {
             combo.select(combo.indexOf(selection));
@@ -389,7 +408,7 @@ public class WizardInsertCopyCommandDialog extends Dialog {
                 slash = "";
             }
             command =
-                command.replace(SOURCE_STRING, getPlaceholder(predefCombos[SOURCE].getText()) + slash + predefTexts[SOURCE].getText());
+                command.replace(SOURCE_STRING, getPlaceholder(predefCombos[SOURCE]) + slash + predefTexts[SOURCE].getText());
         } else {
             command = command.replace(SOURCE_STRING, customTexts[SOURCE].getText());
         }
@@ -400,7 +419,7 @@ public class WizardInsertCopyCommandDialog extends Dialog {
                 slash = "";
             }
             command =
-                command.replace(TARGET_STRING, getPlaceholder(predefCombos[TARGET].getText()) + slash + predefTexts[TARGET].getText());
+                command.replace(TARGET_STRING, getPlaceholder(predefCombos[TARGET]) + slash + predefTexts[TARGET].getText());
         } else {
             command = command.replace(TARGET_STRING, customTexts[TARGET].getText());
         }
@@ -412,22 +431,9 @@ public class WizardInsertCopyCommandDialog extends Dialog {
 
     }
 
-    private String getPlaceholder(String selection) {
-        if (selection != null && !selection.isEmpty()) {
-            String name = selection.substring(selection.indexOf(":") + 2);
-            String insertString = "${%s:%s}";
-            if (selection.startsWith(INPUT_PREFIX)) {
-                insertString = StringUtils.format(insertString, "in", name);
-            } else if (selection.startsWith(DIRECTORY_PREFIX)) {
-                int i = 0;
-                while (!name.equals(ToolIntegrationConstants.DIRECTORIES_PLACEHOLDERS_DISPLAYNAMES[i])) {
-                    i++;
-                }
-                if (i < ToolIntegrationConstants.DIRECTORIES_PLACEHOLDER.length) {
-                    insertString = StringUtils.format(insertString, "dir", ToolIntegrationConstants.DIRECTORIES_PLACEHOLDER[i]);
-                }
-            }
-            return insertString;
+    private String getPlaceholder(Combo combo) {
+        if (combo.getText() != null && combo.getData(combo.getText()) != null) {
+            return combo.getData(combo.getText()).toString();
         }
         return "";
     }
@@ -441,7 +447,7 @@ public class WizardInsertCopyCommandDialog extends Dialog {
      * 
      * @author Sascha Zur
      */
-    private class UpdateListener implements SelectionListener, ModifyListener {
+    private final class UpdateListener implements SelectionListener, ModifyListener {
 
         @Override
         public void widgetSelected(SelectionEvent arg0) {

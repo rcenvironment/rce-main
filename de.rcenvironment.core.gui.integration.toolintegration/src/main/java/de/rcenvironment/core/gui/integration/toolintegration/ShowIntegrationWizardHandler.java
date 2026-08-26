@@ -26,7 +26,7 @@ public class ShowIntegrationWizardHandler extends AbstractHandler {
 
     @Override
     public Object execute(final ExecutionEvent event) throws ExecutionException {
-        final IWizard integrationWizard = new ToolIntegrationWizard(true, ToolIntegrationConstants.NEW_WIZARD);
+        final IWizard integrationWizard = new ToolIntegrationWizard(false, ToolIntegrationConstants.NEW_WIZARD);
         Display display = Display.getCurrent();
         if (display == null) {
             display = Display.getDefault();

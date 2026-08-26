@@ -15,6 +15,7 @@ import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,6 +27,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Semaphore;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
@@ -70,6 +73,8 @@ import de.rcenvironment.core.datamodel.types.api.VectorTD;
 import de.rcenvironment.core.scripting.ScriptDataTypeHelper;
 import de.rcenvironment.core.scripting.ScriptingService;
 import de.rcenvironment.core.scripting.ScriptingUtils;
+import de.rcenvironment.core.utils.common.PathUtils;
+import de.rcenvironment.core.utils.common.PathUtils.PathUtilsTargetOS;
 import de.rcenvironment.core.utils.common.StringUtils;
 import de.rcenvironment.core.utils.common.TempFileServiceAccess;
 import de.rcenvironment.core.utils.common.security.StringSubstitutionSecurityUtils;
@@ -89,6 +94,7 @@ import de.rcenvironment.toolkit.utils.text.TextLinesReceiver;
  * @author Doreen Seider (tool run imitation, verification token handling)
  * @author Kathrin Schaffert (#17088)
  * @author Alexander Weinert (OSGI annotations)
+ * @author Jan Flink
  */
 @Component
 public class CommonToolIntegratorComponent extends DefaultComponent {
@@ -117,17 +123,7 @@ public class CommonToolIntegratorComponent extends DefaultComponent {
 
     private static final String ESCAPESLASH = "\\\\";
 
-    private static final String PROPERTY_PLACEHOLDER = "${prop:%s}";
-
-    private static final String ADD_PROPERTY_PLACEHOLDER = "${addProp:%s}";
-
-    private static final String OUTPUT_PLACEHOLDER = "${out:%s}";
-
-    private static final String INPUT_PLACEHOLDER = "${in:%s}";
-
     private static final String SCRIPT_LANGUAGE = "Jython";
-
-    private static final String DIRECTORY_PLACEHOLDER_TEMPLATE = "${dir:%s}";
 
     private static final String QUOTE = "\"";
 
@@ -207,7 +203,7 @@ public class CommonToolIntegratorComponent extends DefaultComponent {
     private Set<String> outputsWithNotAValueWritten = new HashSet<>();
 
     private volatile boolean canceled;
-    
+
     private Optional<ProvenanceEventListener> provenanceListener;
 
     @Override
@@ -404,9 +400,8 @@ public class CommonToolIntegratorComponent extends DefaultComponent {
 
     @Override
     public void processInputs() throws ComponentException {
-        provenanceListener.ifPresent(service -> 
-            service.toolRunStarted(this.componentContext.getExecutionIdentifier(), this.componentContext.getComponentName(), "0.0.1", "0.1")
-        );
+        provenanceListener.ifPresent(service -> service.toolRunStarted(this.componentContext.getExecutionIdentifier(),
+            this.componentContext.getComponentName(), "0.0.1", "0.1"));
 
         Map<String, TypedDatum> inputValues = new HashMap<>();
         if (componentContext != null && componentContext.getInputsWithDatum() != null) {
@@ -504,9 +499,7 @@ public class CommonToolIntegratorComponent extends DefaultComponent {
         }
 
         storeHistoryDataItem();
-        provenanceListener.ifPresent(service -> 
-            service.toolRunFinished(this.componentContext.getExecutionIdentifier())
-        );
+        provenanceListener.ifPresent(service -> service.toolRunFinished(this.componentContext.getExecutionIdentifier()));
     }
 
     private void deleteCurrentWorkingDirectoryIfRequired() {
@@ -544,7 +537,7 @@ public class CommonToolIntegratorComponent extends DefaultComponent {
         String postScript = componentContext.getConfigurationValue(ToolIntegrationConstants.KEY_POST_SCRIPT);
         if (postScript != null) {
             postScript = ComponentUtils.replaceVariable(postScript, String.valueOf(exitCode),
-                ToolIntegrationConstants.PLACEHOLDER_EXIT_CODE, ADD_PROPERTY_PLACEHOLDER);
+                ToolIntegrationConstants.PLACEHOLDER_EXIT_CODE, ToolIntegrationConstants.ADD_PROPERTY_PLACEHOLDER_TEMPLATE);
         }
         runScript(postScript, inputValues, inputNamesToLocalFile, "Post");
     }
@@ -875,33 +868,44 @@ public class CommonToolIntegratorComponent extends DefaultComponent {
         SubstitutionContext context) throws ComponentException {
         if (inputValues != null) {
             for (String inputName : inputValues.keySet()) {
-                if (inputValues.containsKey(inputName) && script.contains(StringUtils.format(INPUT_PLACEHOLDER, inputName))) {
+                if (script.contains(StringUtils.format(ToolIntegrationConstants.INPUT_PLACEHOLDER_TEMPLATE, inputName))) {
                     if (componentContext.getInputDataType(inputName) == DataType.FileReference) {
-                        script = script.replace(StringUtils.format(INPUT_PLACEHOLDER, inputName),
+                        script = script.replace(StringUtils.format(ToolIntegrationConstants.INPUT_PLACEHOLDER_TEMPLATE, inputName),
                             inputNamesToLocalFile.get(inputName).replaceAll(ESCAPESLASH, SLASH));
+                        script = script.replace(StringUtils.format(ToolIntegrationConstants.FILE_NAME_PLACEHOLDER_TEMPLATE, inputName),
+                            inputValues.get(inputName).toString());
                     } else if (componentContext.getInputDataType(inputName) == DataType.DirectoryReference) {
-                        script = script.replace(StringUtils.format(INPUT_PLACEHOLDER, inputName),
+                        script = script.replace(StringUtils.format(ToolIntegrationConstants.INPUT_PLACEHOLDER_TEMPLATE, inputName),
                             inputNamesToLocalFile.get(inputName).replaceAll(ESCAPESLASH, SLASH));
                     } else if (componentContext.getInputDataType(inputName) == DataType.Vector) {
-                        script = script.replace(StringUtils.format(INPUT_PLACEHOLDER, inputName), validate(inputName, context,
-                            StringUtils.format("Name of Vector '%s'" + SUBSTITUTION_ERROR_MESSAGE_PREFIX, inputName)));
+                        script = script.replace(StringUtils.format(ToolIntegrationConstants.INPUT_PLACEHOLDER_TEMPLATE, inputName),
+                            validate(inputName, context,
+                                StringUtils.format("Name of Vector '%s'" + SUBSTITUTION_ERROR_MESSAGE_PREFIX, inputName)));
                     } else if (componentContext.getInputDataType(inputName) == DataType.Matrix) {
-                        script = script.replace(StringUtils.format(INPUT_PLACEHOLDER, inputName), validate(inputName, context,
-                            StringUtils.format("Name of Vector '%s'" + SUBSTITUTION_ERROR_MESSAGE_PREFIX, inputName)));
+                        script = script.replace(StringUtils.format(ToolIntegrationConstants.INPUT_PLACEHOLDER_TEMPLATE, inputName),
+                            validate(inputName, context,
+                                StringUtils.format("Name of Vector '%s'" + SUBSTITUTION_ERROR_MESSAGE_PREFIX, inputName)));
                     } else {
                         String value = inputValues.get(inputName).toString();
                         if (context == SubstitutionContext.JYTHON && componentContext.getInputDataType(inputName) == DataType.Boolean) {
                             value = value.substring(0, 1).toUpperCase() + value.substring(1);
                         }
-                        script = script.replace(StringUtils.format(INPUT_PLACEHOLDER, inputName),
+                        script = script.replace(StringUtils.format(ToolIntegrationConstants.INPUT_PLACEHOLDER_TEMPLATE, inputName),
                             validate(value, context, StringUtils.format("Value '%s' from input '%s'"
                                 + SUBSTITUTION_ERROR_MESSAGE_PREFIX, value, inputName)));
+                    }
+                }
+                if (script.contains(StringUtils.format(ToolIntegrationConstants.FILE_NAME_PLACEHOLDER_TEMPLATE, inputName))) {
+                    if (componentContext.getInputDataType(inputName) == DataType.FileReference
+                        || componentContext.getInputDataType(inputName) == DataType.DirectoryReference) {
+                        script = script.replace(StringUtils.format(ToolIntegrationConstants.FILE_NAME_PLACEHOLDER_TEMPLATE, inputName),
+                            inputValues.get(inputName).toString());
                     }
                 }
             }
         }
 
-        script = replaceOutputVariables(script, componentContext.getOutputs(), OUTPUT_PLACEHOLDER);
+        script = replaceOutputVariables(script, componentContext.getOutputs(), ToolIntegrationConstants.OUTPUT_PLACEHOLDER_TEMPLATE);
         Map<String, String> properties = new HashMap<>();
         // get properties!
         for (String configKey : componentContext.getConfigurationKeys()) {
@@ -910,21 +914,61 @@ public class CommonToolIntegratorComponent extends DefaultComponent {
                 value, configKey));
             properties.put(configKey, componentContext.getConfigurationValue(configKey));
         }
-        script = ComponentUtils.replacePropertyVariables(script, properties, PROPERTY_PLACEHOLDER);
+        script = ComponentUtils.replacePropertyVariables(script, properties, ToolIntegrationConstants.PROPERTY_PLACEHOLDER_TEMPLATE);
         script = ComponentUtils.replaceVariable(script, configDirectory.getAbsolutePath(),
-            ToolIntegrationConstants.DIRECTORIES_PLACEHOLDER[0], DIRECTORY_PLACEHOLDER_TEMPLATE);
+            ToolIntegrationConstants.DirectoryPlaceholder.CONFIG_DIR.placeholderString,
+            ToolIntegrationConstants.DIRECTORY_PLACEHOLDER_TEMPLATE);
         script = ComponentUtils.replaceVariable(script, currentWorkingDirectory.getAbsolutePath(),
-            ToolIntegrationConstants.DIRECTORIES_PLACEHOLDER[1], DIRECTORY_PLACEHOLDER_TEMPLATE);
+            ToolIntegrationConstants.DirectoryPlaceholder.WORKING_DIR.placeholderString,
+            ToolIntegrationConstants.DIRECTORY_PLACEHOLDER_TEMPLATE);
         script = ComponentUtils.replaceVariable(script, currentWorkingDirectory.getAbsolutePath(),
-            ToolIntegrationConstants.DIRECTORIES_PLACEHOLDER[1] + "Dir", DIRECTORY_PLACEHOLDER_TEMPLATE);
+            ToolIntegrationConstants.DirectoryPlaceholder.WORKING_DIR.placeholderString + "Dir",
+            ToolIntegrationConstants.DIRECTORY_PLACEHOLDER_TEMPLATE);
         script = ComponentUtils.replaceVariable(script, inputDirectory.getAbsolutePath(),
-            ToolIntegrationConstants.DIRECTORIES_PLACEHOLDER[2], DIRECTORY_PLACEHOLDER_TEMPLATE);
+            ToolIntegrationConstants.DirectoryPlaceholder.INPUT_DIR.placeholderString,
+            ToolIntegrationConstants.DIRECTORY_PLACEHOLDER_TEMPLATE);
         script = ComponentUtils.replaceVariable(script, outputDirectory.getAbsolutePath(),
-            ToolIntegrationConstants.DIRECTORIES_PLACEHOLDER[4], DIRECTORY_PLACEHOLDER_TEMPLATE);
+            ToolIntegrationConstants.DirectoryPlaceholder.OUTPUT_DIR.placeholderString,
+            ToolIntegrationConstants.DIRECTORY_PLACEHOLDER_TEMPLATE);
         script = ComponentUtils.replaceVariable(script, executionToolDirectory.getAbsolutePath(),
-            ToolIntegrationConstants.DIRECTORIES_PLACEHOLDER[3], DIRECTORY_PLACEHOLDER_TEMPLATE);
+            ToolIntegrationConstants.DirectoryPlaceholder.TOOL_DIR.placeholderString,
+            ToolIntegrationConstants.DIRECTORY_PLACEHOLDER_TEMPLATE);
+
+        script = replaceRelativePathPlaceholder(script, context);
 
         return script;
+    }
+
+    // Prototypical implementation (RCE 10.8.0). Do not use in productive environments.
+    private String replaceRelativePathPlaceholder(String script, SubstitutionContext context) throws ComponentException {
+        String returnScript = script;
+        String osPrefixes =
+            Arrays.toString(Arrays.stream(PathUtilsTargetOS.values()).map(value -> value.shortName).toArray())
+                .replace(',', '|')
+                .replaceAll("\\s", "")
+                .replaceAll("(\\[|\\])", "");
+
+        Pattern pattern = Pattern
+            .compile("\\{((?<osPrefix>" + osPrefixes + ")_)?rel_path:\\s*(?<basePath>.*)\\s*,\\s*(?<targetPath>.*)\\s*\\}");
+        Matcher matcher = pattern.matcher(script);
+
+        while (matcher.find()) {
+            PathUtilsTargetOS targetOS = PathUtilsTargetOS.DEFAULT;
+            if (matcher.group("osPrefix") != null) {
+                String osPrefix = matcher.group("osPrefix").trim();
+                targetOS = Arrays.stream(PathUtilsTargetOS.values()).filter(v -> v.shortName.equals(osPrefix)).findFirst().get();
+            }
+            String basePath = matcher.group("basePath").trim();
+            String targetPath = matcher.group("targetPath").trim();
+            if (context == SubstitutionContext.JYTHON) {
+                returnScript = ComponentUtils.replaceVariable(returnScript, PathUtils.getRelativePath(basePath, targetPath),
+                    "Relative Path", matcher.group());
+            } else {
+                returnScript = returnScript.replace(matcher.group(), PathUtils.getRelativePath(basePath, targetPath, targetOS));
+            }
+        }
+
+        return returnScript;
     }
 
     private String replaceOutputVariables(String script, Set<String> outputs, String outputPlaceholder) {
