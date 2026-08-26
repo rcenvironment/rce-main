@@ -8,13 +8,15 @@
 
 package de.rcenvironment.core.gui.integration.toolintegration;
 
-import java.util.LinkedList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.custom.CTabFolder;
@@ -39,13 +41,16 @@ import org.eclipse.ui.help.IWorkbenchHelpSystem;
 import de.rcenvironment.core.component.integration.IntegrationConstants;
 import de.rcenvironment.core.component.integration.IntegrationContextType;
 import de.rcenvironment.core.component.integration.ToolIntegrationConstants;
+import de.rcenvironment.core.component.integration.ToolIntegrationConstants.DirectoryPlaceholder;
 import de.rcenvironment.core.datamodel.api.DataType;
 import de.rcenvironment.core.gui.integration.toolintegration.api.ToolIntegrationWizardPage;
 import de.rcenvironment.core.gui.utils.common.widgets.LineNumberStyledText;
+import de.rcenvironment.core.utils.common.StringUtils;
 
 /**
  * @author Sascha Zur
  * @author Kathrin Schaffert (#16533 changed Combos into CCombo and added COMBO_WIDTH, INSERT_BUTTON_WIDTH, refactoring)
+ * @author Jan Flink
  */
 public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
 
@@ -54,14 +59,13 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         OUTPUT_COMBO,
         PROPERTY_COMBO,
         ADD_PROPERTY_COMBO,
-        DIRECTORY_COMBO
+        DIRECTORY_COMBO,
+        FILE_NAME_COMBO
     }
 
     private static final int COMBO_WIDTH = 125;
 
     private static final int INSERT_BUTTON_WIDTH = 50;
-
-    private static final int MOCK_GROUP_MINIMUM_HEIGHT = 67;
 
     private static final String HELP_CONTEXT_ID = "de.rcenvironment.core.gui.wizard.toolintegration.integration_execution";
 
@@ -84,6 +88,20 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
     private final CCombo[] propertiesCombos;
 
     private final CCombo[] directoryCombos;
+
+    private CCombo fileNameCombo;
+
+    private final Button[] inputButtons;
+
+    private final Button[] outputButtons;
+
+    private final Button[] propertiesButtons;
+
+    private final Button[] directoryButtons;
+
+    private Button fileNameInsertButton;
+
+    private Button relativePathButton;
 
     private final LineNumberStyledText[] textFields;
 
@@ -122,6 +140,10 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         outputCombos = new CCombo[NUMBER_OF_TABS];
         propertiesCombos = new CCombo[NUMBER_OF_TABS];
         directoryCombos = new CCombo[NUMBER_OF_TABS];
+        inputButtons = new Button[NUMBER_OF_TABS];
+        outputButtons = new Button[NUMBER_OF_TABS];
+        propertiesButtons = new Button[NUMBER_OF_TABS];
+        directoryButtons = new Button[NUMBER_OF_TABS];
         textFields = new LineNumberStyledText[NUMBER_OF_TABS + 1];
 
     }
@@ -131,10 +153,7 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         Composite container = new Composite(parent, SWT.NONE);
         container.setLayout(new GridLayout(1, false));
         tabFolder = new CTabFolder(container, SWT.BORDER);
-        GridData layoutData = new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL
-            | GridData.FILL_VERTICAL | GridData.GRAB_VERTICAL);
-        layoutData.grabExcessVerticalSpace = true;
-        tabFolder.setLayoutData(layoutData);
+        tabFolder.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
         createScriptExecutionTabItem(ToolIntegrationConstants.KEY_COMMAND_SCRIPT_LINUX, Messages.commandScriptMessage);
         createScriptTabItem(ToolIntegrationConstants.KEY_PRE_SCRIPT, Messages.preScript, 1);
         createScriptTabItem(ToolIntegrationConstants.KEY_POST_SCRIPT, Messages.postScript, 2);
@@ -148,32 +167,26 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
 
         PlatformUI.getWorkbench().getHelpSystem().setHelp(this.getControl(),
             HELP_CONTEXT_ID);
-
         updatePageComplete();
     }
 
     private void createMockModeGroup(Composite container) {
-        GridData layoutData;
         Group mockGroup = new Group(container, SWT.NONE);
         mockGroup.setText("Tool run imitation mode");
         mockGroup.setLayout(new GridLayout(2, false));
-        layoutData = new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
-        layoutData.minimumHeight = MOCK_GROUP_MINIMUM_HEIGHT;
-        mockGroup.setLayoutData(layoutData);
+        mockGroup.setLayoutData(GridDataFactory.fillDefaults().create());
         mockModeCheckBox = new Button(mockGroup, SWT.CHECK);
-        layoutData = new GridData();
-        layoutData.horizontalSpan = 2;
-        mockModeCheckBox.setLayoutData(layoutData);
+        mockModeCheckBox.setLayoutData(new GridData(GridData.BEGINNING, GridData.VERTICAL_ALIGN_BEGINNING, true, false, 2, 1));
         mockModeCheckBox.setText("Support tool run imitation");
         mockModeCheckBox.addSelectionListener(new SelectionListener() {
 
             @Override
             public void widgetSelected(SelectionEvent event) {
-                setMockScriptTabEnabled(mockModeCheckBox.getSelection());
+                configurationMap.put(ToolIntegrationConstants.KEY_MOCK_MODE_SUPPORTED, mockModeCheckBox.getSelection());
                 if (mockToolOutputFilenameText != null) {
                     mockToolOutputFilenameText.setEnabled(mockModeCheckBox.getSelection());
                 }
-                configurationMap.put(ToolIntegrationConstants.KEY_MOCK_MODE_SUPPORTED, mockModeCheckBox.getSelection());
+                updatePage();
                 updatePageComplete();
             }
 
@@ -186,15 +199,14 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         // FIXME: CPACS-specific stuff must not be handled here; temporary workaround as wizard will
         // be replaced by an editor soon
         mockToolOutputFilenameLabel = new Label(mockGroup, SWT.NONE);
-        mockToolOutputFilenameLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+        mockToolOutputFilenameLabel.setLayoutData(GridDataFactory.swtDefaults().create());
         mockToolOutputFilenameLabel.setText("Dummy tool output filename:");
 
         mockToolOutputFilenameText = new Text(mockGroup, SWT.BORDER);
-        mockToolOutputFilenameText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+        mockToolOutputFilenameText
+            .setLayoutData(GridDataFactory.swtDefaults().hint(TEXTFIELD_WIDTH, SWT.DEFAULT).grab(false, false).create());
         mockToolOutputFilenameText.addModifyListener(new TextAreaModifyListener(CPACS_MOCK_TOOL_OUTPUT_FILENAME));
 
-        mockToolOutputFilenameLabel.setVisible(false);
-        mockToolOutputFilenameText.setVisible(false);
     }
 
     private void setChildrenEnabled(Composite parent, boolean enabled) {
@@ -216,11 +228,9 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
     public void updatePage() {
         for (int i = 0; i < NUMBER_OF_TABS; i++) {
             addAllEndpoints(inputCombos[i], IntegrationConstants.KEY_ENDPOINT_INPUTS, i);
-            setComboEnabled(inputCombos[i]);
             if (i > 0) {
                 addAllEndpoints(outputCombos[i], IntegrationConstants.KEY_ENDPOINT_OUTPUTS, i);
             }
-            setComboEnabled(outputCombos[i]);
             propertiesCombos[i].removeAll();
             if (configurationMap.containsKey(IntegrationConstants.KEY_PROPERTIES)) {
                 Map<String, Object> properties = (Map<String, Object>) configurationMap.get(IntegrationConstants.KEY_PROPERTIES);
@@ -237,8 +247,10 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
             if (propertiesCombos[i].getItemCount() > 0) {
                 propertiesCombos[i].select(0);
             }
-            setComboEnabled(propertiesCombos[i]);
             directoryCombos[i].select(0);
+
+            addFileDirectoryEndpoints(fileNameCombo, IntegrationConstants.KEY_ENDPOINT_INPUTS);
+
             boolean mockModeSupported = configurationMap.containsKey(ToolIntegrationConstants.KEY_MOCK_MODE_SUPPORTED)
                 && (boolean) configurationMap.get(ToolIntegrationConstants.KEY_MOCK_MODE_SUPPORTED);
             setMockScriptTabEnabled(mockModeSupported);
@@ -246,19 +258,40 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
             if (mockToolOutputFilenameText != null) {
                 mockToolOutputFilenameText.setEnabled(mockModeSupported);
             }
+            setComboEnabled(inputCombos[i], inputButtons[i]);
+            setComboEnabled(outputCombos[i], outputButtons[i]);
+            setComboEnabled(propertiesCombos[i], propertiesButtons[i]);
+            setComboEnabled(fileNameCombo, fileNameInsertButton);
+
+// This code is commented out for the RCE 10.8.0 release because there are still open conceptual
+// decisions regarding the placeholder for relative paths. (J. Flink)
+//            setRelativePathButtonEnabled();
         }
 
         boolean isCPACSType = ((ToolIntegrationWizard) getWizard()).getCurrentContext().getContextTypeString().equalsIgnoreCase("CPACS");
 
         mockToolOutputFilenameLabel.setVisible(isCPACSType);
         mockToolOutputFilenameText.setVisible(isCPACSType);
+        ((GridData) mockToolOutputFilenameLabel.getLayoutData()).exclude = !isCPACSType;
+        ((GridData) mockToolOutputFilenameText.getLayoutData()).exclude = !isCPACSType;
+        getControl().requestLayout();
+
         updateButtons();
         updatePageComplete();
     }
 
-    private void setComboEnabled(CCombo combo) {
+    // This code is commented out for the RCE 10.8.0 release because there are still open conceptual
+    // decisions regarding the placeholder for relative paths. (J. Flink)
+//    private void setRelativePathButtonEnabled() {
+//        // Since all file and directory inputs are also added to the fileNameCombo, it is used for button enabling here as well
+//        relativePathButton.setEnabled(fileNameCombo.getItemCount() != 0);
+//    }
+
+    private void setComboEnabled(CCombo combo, Button button) {
         if (combo != null) {
-            combo.setEnabled(combo.getItemCount() != 0);
+            boolean enable = combo.getItemCount() != 0;
+            combo.setEnabled(enable);
+            button.setEnabled(enable);
         }
     }
 
@@ -490,10 +523,11 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
 
         item.setControl(client);
         final LineNumberStyledText scriptArea = new LineNumberStyledText(client, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
-        GridData scriptAreaData = new GridData(GridData.FILL_BOTH);
+        GridData scriptAreaData = new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL);
 
         scriptAreaData.widthHint = TEXTFIELD_WIDTH;
         scriptAreaData.heightHint = TEXTFIELD_HEIGHT;
+        scriptAreaData.verticalSpan = 2;
         scriptArea.setLayoutData(scriptAreaData);
         scriptArea.addModifyListener(new TextAreaModifyListener(propertyKey));
 
@@ -533,80 +567,134 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
     }
 
     private void createInsertFields(int tabIndex, Composite client, final LineNumberStyledText scriptArea) {
-        Composite buttonComposite = createButtonComposite(client);
+        Composite placeholderHelperGroup = createPlaceholderHelperGroup(client);
 
-        CCombo inputCombo = createCombo(buttonComposite, Messages.inputs);
-        Button inputInsertButton = createInsertButton(buttonComposite);
+        CCombo inputCombo = createCombo(placeholderHelperGroup, Messages.inputs);
+        Button inputInsertButton = createInsertButton(placeholderHelperGroup);
         addInsertButtonSelectionListener(inputInsertButton, inputCombo, ComboType.INPUT_COMBO, scriptArea);
         inputCombos[tabIndex] = inputCombo;
+        inputButtons[tabIndex] = inputInsertButton;
 
-        CCombo outputCombo = createCombo(buttonComposite, Messages.outputs);
-        Button outputInsertButton = createInsertButton(buttonComposite);
+        CCombo outputCombo = createCombo(placeholderHelperGroup, Messages.outputs);
+        Button outputInsertButton = createInsertButton(placeholderHelperGroup);
         addInsertButtonSelectionListener(outputInsertButton, outputCombo, ComboType.OUTPUT_COMBO, scriptArea);
         outputCombos[tabIndex] = outputCombo;
+        outputButtons[tabIndex] = outputInsertButton;
 
-        CCombo propertiesCombo = createCombo(buttonComposite, Messages.properties);
-        Button propertyInsertButton = createInsertButton(buttonComposite);
+        CCombo propertiesCombo = createCombo(placeholderHelperGroup, Messages.properties);
+        Button propertyInsertButton = createInsertButton(placeholderHelperGroup);
         addInsertButtonSelectionListener(propertyInsertButton, propertiesCombo, ComboType.PROPERTY_COMBO, scriptArea);
         propertiesCombos[tabIndex] = propertiesCombo;
+        propertiesButtons[tabIndex] = propertyInsertButton;
 
-        CCombo directoriesCombo = createCombo(buttonComposite, Messages.directory);
-        directoriesCombo.setItems(ToolIntegrationConstants.DIRECTORIES_PLACEHOLDERS_DISPLAYNAMES);
-        Button directoryInsertButton = createInsertButton(buttonComposite);
+        CCombo directoriesCombo = createCombo(placeholderHelperGroup, Messages.directory);
+        addDirectoryPlacholders(directoriesCombo);
+        Button directoryInsertButton = createInsertButton(placeholderHelperGroup);
         addInsertButtonSelectionListener(directoryInsertButton, directoriesCombo, ComboType.DIRECTORY_COMBO, scriptArea);
         directoryCombos[tabIndex] = directoriesCombo;
+        directoryButtons[tabIndex] = directoryInsertButton;
 
         if (tabIndex == 2) {
-            CCombo addPropCombo = createCombo(buttonComposite, "Additional Properties");
+            CCombo addPropCombo = createCombo(placeholderHelperGroup, "Additional Properties");
             addPropCombo.add(Messages.exitCodeLabel);
             addPropCombo.select(0);
-            Button addPropInsertButton = createInsertButton(buttonComposite);
+            Button addPropInsertButton = createInsertButton(placeholderHelperGroup);
             addInsertButtonSelectionListener(addPropInsertButton, addPropCombo, ComboType.ADD_PROPERTY_COMBO, scriptArea);
         }
-        createInsertCopyFileDirArea(scriptArea, buttonComposite);
+
+        Composite codeSnippetGroup = createCodeSnippetGroup(client);
+
+        createInsertCopyFileDirArea(scriptArea, codeSnippetGroup);
         if (tabIndex == 3) {
-            mockScriptTabButtonComposite = buttonComposite;
+            mockScriptTabButtonComposite = placeholderHelperGroup;
         }
 
     }
 
-    private void createInsertFieldsOnExecutionTab(Composite client, final LineNumberStyledText scriptAreaWin,
-        final LineNumberStyledText scriptArea) {
-        Composite buttonComposite = createButtonComposite(client);
+    private Composite createCodeSnippetGroup(Composite client) {
+        Group group = new Group(client, SWT.NONE);
+        group.setText("Code snippets");
+        group.setLayout(new GridLayout(1, false));
+        GridData groupData = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+        groupData.grabExcessHorizontalSpace = false;
+        group.setLayoutData(groupData);
+        return group;
+
+    }
+
+    private void addDirectoryPlacholders(CCombo directoriesCombo) {
+        for (DirectoryPlaceholder placeholder : EnumSet
+            .allOf(ToolIntegrationConstants.DirectoryPlaceholder.class)) {
+            directoriesCombo.add(placeholder.displayName);
+            directoriesCombo.setData(placeholder.displayName, placeholder.placeholderString);
+        }
+    }
+
+    private void createInsertFieldsOnExecutionTab(Composite client, final LineNumberStyledText scriptAreaWindows,
+        final LineNumberStyledText scriptAreaLinux) {
+        Composite buttonComposite = createPlaceholderHelperGroup(client);
 
         CCombo inputCombo = createCombo(buttonComposite, Messages.inputs);
         Button inputInsertButton = createInsertButton(buttonComposite);
-        addInsertButtonSelectionListener(inputInsertButton, inputCombo, ComboType.INPUT_COMBO, scriptAreaWin, scriptArea);
+        addInsertButtonSelectionListener(inputInsertButton, inputCombo, ComboType.INPUT_COMBO, scriptAreaWindows, scriptAreaLinux);
         inputCombos[0] = inputCombo;
+        inputButtons[0] = inputInsertButton;
 
         CCombo propertiesCombo = createCombo(buttonComposite, Messages.properties);
         Button propertyInsertButton = createInsertButton(buttonComposite);
-        addInsertButtonSelectionListener(propertyInsertButton, propertiesCombo, ComboType.PROPERTY_COMBO, scriptAreaWin, scriptArea);
+        addInsertButtonSelectionListener(propertyInsertButton, propertiesCombo, ComboType.PROPERTY_COMBO, scriptAreaWindows,
+            scriptAreaLinux);
         propertiesCombos[0] = propertiesCombo;
+        propertiesButtons[0] = propertyInsertButton;
 
         CCombo directoriesCombo = createCombo(buttonComposite, Messages.directory);
-        directoriesCombo.setItems(ToolIntegrationConstants.DIRECTORIES_PLACEHOLDERS_DISPLAYNAMES);
+        addDirectoryPlacholders(directoriesCombo);
         Button directoryInsertButton = createInsertButton(buttonComposite);
-        addInsertButtonSelectionListener(directoryInsertButton, directoriesCombo, ComboType.DIRECTORY_COMBO, scriptAreaWin, scriptArea);
+        addInsertButtonSelectionListener(directoryInsertButton, directoriesCombo, ComboType.DIRECTORY_COMBO, scriptAreaWindows,
+            scriptAreaLinux);
         directoryCombos[0] = directoriesCombo;
+        directoryButtons[0] = directoryInsertButton;
+
+        fileNameCombo = createCombo(buttonComposite, "File/Directory Name");
+        fileNameInsertButton = createInsertButton(buttonComposite);
+        addInsertButtonSelectionListener(fileNameInsertButton, fileNameCombo, ComboType.FILE_NAME_COMBO, scriptAreaWindows,
+            scriptAreaLinux);
+
+// This code is commented out for the RCE 10.8.0 release because there are still open conceptual
+// decisions regarding the placeholder for relative paths. (J. Flink)
+//        GridData labelData = new GridData();
+//        labelData.horizontalSpan = 2;
+//        Label label = new Label(buttonComposite, SWT.NONE);
+//        label.setText(StringUtils.format("%s:", "File/Directory Paths"));
+//        label.setLayoutData(labelData);
+//        createRelativePathButton(scriptAreaWindows, scriptAreaLinux, buttonComposite);
     }
 
-    private Composite createButtonComposite(Composite client) {
-        Composite buttonComposite = new Composite(client, SWT.NONE);
-        buttonComposite.setLayout(new GridLayout(2, false));
-        GridData buttonCompositeData = new GridData();
-        buttonCompositeData.verticalAlignment = GridData.BEGINNING;
-        buttonCompositeData.horizontalSpan = 1;
-        buttonComposite.setLayoutData(buttonCompositeData);
-        return buttonComposite;
+    // This code is commented out for the RCE 10.8.0 release because there are still open conceptual
+    // decisions regarding the placeholder for relative paths. (J. Flink)
+//    private void createRelativePathButton(final LineNumberStyledText scriptAreaWindows,
+//        final LineNumberStyledText scriptAreaLinux, Composite parent) {
+//        relativePathButton = new Button(parent, SWT.PUSH);
+//        GridData gd = new GridData();
+//        gd.horizontalSpan = 2;
+//        relativePathButton.setLayoutData(gd);
+//        relativePathButton.setText("Working dir relative path...");
+//        relativePathButton.addSelectionListener(new RelativePathResolverListener(scriptAreaWindows, scriptAreaLinux));
+//    }
+
+    private Composite createPlaceholderHelperGroup(Composite client) {
+        Group group = new Group(client, SWT.NONE);
+        group.setText("Placeholder helpers");
+        group.setLayout(new GridLayout(2, false));
+        GridData groupData = new GridData();
+        groupData.verticalAlignment = GridData.BEGINNING;
+        groupData.horizontalSpan = 1;
+        group.setLayoutData(groupData);
+        return group;
     }
 
     private void createInsertCopyFileDirArea(final LineNumberStyledText scriptArea, Composite buttonComposite) {
-        new Label(buttonComposite, SWT.NONE).setText("");
-        new Label(buttonComposite, SWT.NONE).setText("");
         Button insertCopyCommand = new Button(buttonComposite, SWT.PUSH);
-        GridData copyData = new GridData();
-        insertCopyCommand.setLayoutData(copyData);
         insertCopyCommand.setText("Insert copy of file/dir...");
         insertCopyCommand.addSelectionListener(new CopyInputListener(scriptArea));
     }
@@ -615,7 +703,7 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         GridData labelData = new GridData();
         labelData.horizontalSpan = 2;
         Label label = new Label(buttonComposite, SWT.NONE);
-        label.setText(messageLabel);
+        label.setText(StringUtils.format("%s:", messageLabel));
         label.setLayoutData(labelData);
         CCombo combo = new CCombo(buttonComposite, SWT.READ_ONLY | SWT.BORDER);
         GridData comboData = new GridData(GridData.FILL_HORIZONTAL);
@@ -636,9 +724,9 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
     }
 
     private void addInsertButtonSelectionListener(Button button, CCombo combo,
-        ComboType comboType, final LineNumberStyledText scriptAreaWin, final LineNumberStyledText scriptArea) {
+        ComboType comboType, final LineNumberStyledText scriptAreaWindows, final LineNumberStyledText scriptAreaLinux) {
         button.addSelectionListener(
-            new InsertButtonListener(combo, scriptArea, scriptAreaWin, comboType));
+            new InsertButtonListener(combo, scriptAreaLinux, scriptAreaWindows, comboType));
 
     }
 
@@ -695,6 +783,27 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         }
     }
 
+    private void addFileDirectoryEndpoints(CCombo endpointCombo, String key) {
+        endpointCombo.removeAll();
+        @SuppressWarnings("unchecked") List<Map<String, String>> endpointList = (List<Map<String, String>>) configurationMap.get(key);
+        if (endpointList != null) {
+            for (Map<String, String> endpoint : endpointList) {
+                if (endpoint.get(IntegrationConstants.KEY_ENDPOINT_DATA_TYPE).equals(DataType.FileReference.name())
+                    || endpoint.get(IntegrationConstants.KEY_ENDPOINT_DATA_TYPE).equals(DataType.DirectoryReference.name())) {
+                    endpointCombo.add(endpoint.get(IntegrationConstants.KEY_ENDPOINT_NAME));
+                }
+            }
+            if (endpointCombo.getItemCount() > 0) {
+                endpointCombo.select(0);
+            }
+        }
+    }
+
+    private String addQoutes(String text) {
+        String qouteString = "\"%s\"";
+        return StringUtils.format(qouteString, text);
+    }
+
     /**
      * Listener for the script text areas for saving the content to the correct key.
      * 
@@ -728,26 +837,26 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
      */
     private class InsertButtonListener implements SelectionListener {
 
-        private static final String QUOTE = "\"";
-
         private final CCombo combo;
 
-        private final LineNumberStyledText text;
+        private final LineNumberStyledText commandText;
+
+        private final LineNumberStyledText commandTextWindows;
 
         private final ComboType comboType;
 
-        private LineNumberStyledText text2;
-
         InsertButtonListener(CCombo inputCombo, LineNumberStyledText scriptArea, ComboType comboType) {
             combo = inputCombo;
-            text = scriptArea;
+            commandText = scriptArea;
+            commandTextWindows = null;
             this.comboType = comboType;
         }
 
-        InsertButtonListener(CCombo inputCombo, LineNumberStyledText scriptArea, LineNumberStyledText scriptArea2, ComboType comboType) {
+        InsertButtonListener(CCombo inputCombo, LineNumberStyledText scriptAreaLinux, LineNumberStyledText scriptAreaWindows,
+            ComboType comboType) {
             combo = inputCombo;
-            text = scriptArea;
-            text2 = scriptArea2;
+            commandText = scriptAreaLinux;
+            commandTextWindows = scriptAreaWindows;
             this.comboType = comboType;
         }
 
@@ -761,14 +870,13 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         @Override
         public void widgetSelected(SelectionEvent arg0) {
             String insertText = combo.getText();
-            LineNumberStyledText currentText = text;
-            if (winScriptHasFocus && text2 != null) {
-                currentText = text2;
+            LineNumberStyledText currentText = commandText;
+            if (winScriptHasFocus && commandTextWindows != null) {
+                currentText = commandTextWindows;
             }
             if (currentText.isEnabled()) {
                 if (comboType.equals(ComboType.INPUT_COMBO) && insertText != null && !insertText.isEmpty()) {
                     int distanceCaretPositionToTextLength = currentText.getText().length() - currentText.getSelection().x;
-                    String possibleQuotes = "";
                     List<Map<String, Object>> endpointList =
                         (List<Map<String, Object>>) configurationMap.get(IntegrationConstants.KEY_ENDPOINT_INPUTS);
                     Map<String, Object> endpoint = null;
@@ -777,23 +885,20 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
                             endpoint = ep;
                         }
                     }
+                    String placeholderString = StringUtils.format(ToolIntegrationConstants.INPUT_PLACEHOLDER_TEMPLATE, insertText);
                     if (endpoint != null) {
                         if (endpoint.get(IntegrationConstants.KEY_ENDPOINT_DATA_TYPE).equals(DataType.ShortText.name())
                             || endpoint.get(IntegrationConstants.KEY_ENDPOINT_DATA_TYPE).equals(DataType.FileReference.name())
                             || endpoint.get(IntegrationConstants.KEY_ENDPOINT_DATA_TYPE).equals(DataType.DirectoryReference.name())) {
-                            possibleQuotes = QUOTE;
+                            placeholderString = addQoutes(placeholderString);
                         }
                     }
-                    currentText.insert(possibleQuotes + ToolIntegrationConstants.PLACEHOLDER_PREFIX
-                        + ToolIntegrationConstants.PLACEHOLDER_INPUT_PREFIX
-                        + ToolIntegrationConstants.PLACEHOLDER_SEPARATOR + insertText + ToolIntegrationConstants.PLACEHOLDER_SUFFIX
-                        + possibleQuotes);
+                    currentText.insert(placeholderString);
                     currentText.setSelection(currentText.getText().length() - distanceCaretPositionToTextLength);
                 }
                 if (comboType.equals(ComboType.OUTPUT_COMBO) && insertText != null && !insertText.isEmpty()) {
                     int distanceCaretPositionToTextLength = currentText.getText().length() - currentText.getSelection().x;
-                    currentText.insert(ToolIntegrationConstants.PLACEHOLDER_PREFIX + ToolIntegrationConstants.PLACEHOLDER_OUTPUT_PREFIX
-                        + ToolIntegrationConstants.PLACEHOLDER_SEPARATOR + insertText + ToolIntegrationConstants.PLACEHOLDER_SUFFIX);
+                    currentText.insert(StringUtils.format(ToolIntegrationConstants.OUTPUT_PLACEHOLDER_TEMPLATE, insertText));
                     currentText.setSelection(currentText.getText().length() - distanceCaretPositionToTextLength);
                 }
                 if (comboType.equals(ComboType.PROPERTY_COMBO) && insertText != null && !insertText.isEmpty()
@@ -808,10 +913,7 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
                             if (propertyObject instanceof Map<?, ?>) {
                                 Map<String, String> property = (Map<String, String>) propertyObject;
                                 if (property.get(IntegrationConstants.KEY_PROPERTY_DISPLAYNAME).equals(insertText)) {
-                                    currentText.insert(QUOTE + ToolIntegrationConstants.PLACEHOLDER_PREFIX
-                                        + ToolIntegrationConstants.PLACEHOLDER_PROPERTY_PREFIX
-                                        + ToolIntegrationConstants.PLACEHOLDER_SEPARATOR
-                                        + propkey + ToolIntegrationConstants.PLACEHOLDER_SUFFIX + QUOTE);
+                                    currentText.insert(StringUtils.format(ToolIntegrationConstants.PROPERTY_PLACEHOLDER_TEMPLATE, propkey));
                                 }
                             }
                         }
@@ -820,30 +922,88 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
                 }
                 if (comboType.equals(ComboType.DIRECTORY_COMBO) && insertText != null && !insertText.isEmpty()) {
                     int distanceCaretPositionToTextLength = currentText.getText().length() - currentText.getSelection().x;
-                    currentText.insert(QUOTE + ToolIntegrationConstants.PLACEHOLDER_PREFIX
-                        + ToolIntegrationConstants.PLACEHOLDER_DIRECTORY_PREFIX
-                        + ToolIntegrationConstants.PLACEHOLDER_SEPARATOR
-                        + ToolIntegrationConstants.DIRECTORIES_PLACEHOLDER[combo.getSelectionIndex()]
-                        + ToolIntegrationConstants.PLACEHOLDER_SUFFIX + QUOTE);
+                    currentText.insert(
+                        addQoutes(
+                            StringUtils.format(ToolIntegrationConstants.DIRECTORY_PLACEHOLDER_TEMPLATE, combo.getData(combo.getText()))));
                     currentText.setSelection(currentText.getText().length() - distanceCaretPositionToTextLength);
                 }
 
                 if (comboType.equals(ComboType.ADD_PROPERTY_COMBO) && insertText != null && !insertText.isEmpty()) {
-                    currentText.insert(createAddPropertyPlaceHolder(ToolIntegrationConstants.PLACEHOLDER_EXIT_CODE));
+                    currentText.insert(StringUtils.format(ToolIntegrationConstants.ADD_PROPERTY_PLACEHOLDER_TEMPLATE,
+                        ToolIntegrationConstants.PLACEHOLDER_EXIT_CODE));
+                }
+                if (comboType.equals(ComboType.FILE_NAME_COMBO) && insertText != null && !insertText.isEmpty()) {
+                    int distanceCaretPositionToTextLength = currentText.getText().length() - currentText.getSelection().x;
+                    currentText.insert(StringUtils.format(ToolIntegrationConstants.FILE_NAME_PLACEHOLDER_TEMPLATE, combo.getText()));
+                    currentText.setSelection(currentText.getText().length() - distanceCaretPositionToTextLength);
                 }
                 currentText.setFocus();
             }
         }
 
-        private String createAddPropertyPlaceHolder(String addPropPlaceholder) {
-            return ToolIntegrationConstants.PLACEHOLDER_PREFIX
-                + ToolIntegrationConstants.PLACEHOLDER_ADDITIONAL_PROPERTIES_PREFIX
-                + ToolIntegrationConstants.PLACEHOLDER_SEPARATOR
-                + addPropPlaceholder
-                + ToolIntegrationConstants.PLACEHOLDER_SUFFIX;
-        }
     }
 
+    // This code is commented out for the RCE 10.8.0 release because there are still open conceptual
+    // decisions regarding the placeholder for relative paths. (J. Flink)
+//    /**
+//     * Listener for the extract file name button.
+//     * 
+//     * @author Jan Flink
+//     */
+//    private class RelativePathResolverListener implements SelectionListener {
+//
+//        private final LineNumberStyledText commandTextLinux;
+//
+//        private final LineNumberStyledText commandTextWindows;
+//
+//        private final EnumSet<DirectoryPlaceholder> directories;
+//
+//        RelativePathResolverListener(LineNumberStyledText scriptAreaWindows, LineNumberStyledText scriptAreaLinux) {
+//            commandTextLinux = scriptAreaLinux;
+//            commandTextWindows = scriptAreaWindows;
+//            directories = EnumSet.of(ToolIntegrationConstants.DirectoryPlaceholder.WORKING_DIR,
+//                ToolIntegrationConstants.DirectoryPlaceholder.INPUT_DIR);
+//        }
+//
+//        @Override
+//        public void widgetDefaultSelected(SelectionEvent arg0) {
+//            widgetSelected(arg0);
+//
+//        }
+//
+//        @Override
+//        public void widgetSelected(SelectionEvent arg0) {
+//            final LineNumberStyledText commandText;
+//            if (winScriptHasFocus && commandTextWindows != null) {
+//                commandText = commandTextWindows;
+//            } else {
+//                commandText = commandTextLinux;
+//            }
+//
+//            int distanceCaretPositionToTextLength = commandText.getText().length() - commandText.getSelection().x;
+//
+//            @SuppressWarnings("unchecked") List<Map<String, String>> endpointList =
+//                (List<Map<String, String>>) configurationMap.get(IntegrationConstants.KEY_ENDPOINT_INPUTS);
+//            List<String> endpointNames = new LinkedList<>();
+//            if (endpointList != null) {
+//                for (Map<String, String> endpoint : endpointList) {
+//                    if (endpoint.get(IntegrationConstants.KEY_ENDPOINT_DATA_TYPE).equals(DataType.FileReference.name())
+//                        || endpoint.get(IntegrationConstants.KEY_ENDPOINT_DATA_TYPE).equals(DataType.DirectoryReference.name())) {
+//                        endpointNames.add(endpoint.get(IntegrationConstants.KEY_ENDPOINT_NAME));
+//                    }
+//                }
+//            }
+//            WizardRelativePathDialog dialog =
+//                new WizardRelativePathDialog(getShell(), endpointNames, directories);
+//            if (dialog.open() == Dialog.OK) {
+//                String placeholder = dialog.getPlaceholder();
+//                if (!commandText.isDisposed()) {
+//                    commandText.insert(addQoutes(placeholder));
+//                    commandText.setSelection(commandText.getText().length() - distanceCaretPositionToTextLength);
+//                }
+//            }
+//        }
+//    }
 
     /**
      * Listener for the insert copy command button.
@@ -868,19 +1028,21 @@ public class ScriptConfigurationPage extends ToolIntegrationWizardPage {
         public void widgetSelected(SelectionEvent arg0) {
             @SuppressWarnings("unchecked") List<Map<String, String>> endpointList =
                 (List<Map<String, String>>) configurationMap.get(IntegrationConstants.KEY_ENDPOINT_INPUTS);
-            List<String> endpointNames = new LinkedList<>();
+            Map<String, String> endpointNames = new TreeMap<String, String>();
             if (endpointList != null) {
                 for (Map<String, String> endpoint : endpointList) {
                     if (endpoint.get(IntegrationConstants.KEY_ENDPOINT_DATA_TYPE).equals(DataType.FileReference.name())) {
-                        endpointNames.add("File : " + endpoint.get(IntegrationConstants.KEY_ENDPOINT_NAME));
+                        endpointNames.put(endpoint.get(IntegrationConstants.KEY_ENDPOINT_NAME), DataType.FileReference.getDisplayName());
                     }
                     if (endpoint.get(IntegrationConstants.KEY_ENDPOINT_DATA_TYPE).equals(DataType.DirectoryReference.name())) {
-                        endpointNames.add("Directory : " + endpoint.get(IntegrationConstants.KEY_ENDPOINT_NAME));
+                        endpointNames.put(endpoint.get(IntegrationConstants.KEY_ENDPOINT_NAME),
+                            DataType.DirectoryReference.getDisplayName());
                     }
                 }
             }
             WizardInsertCopyCommandDialog dialog =
-                new WizardInsertCopyCommandDialog(getShell(), endpointNames, directoryCombos[1].getItems());
+                new WizardInsertCopyCommandDialog(getShell(), endpointNames,
+                    EnumSet.allOf(DirectoryPlaceholder.class));
             if (dialog.open() == Dialog.OK) {
                 String command = dialog.getCopyCommand();
                 if (!text.isDisposed()) {

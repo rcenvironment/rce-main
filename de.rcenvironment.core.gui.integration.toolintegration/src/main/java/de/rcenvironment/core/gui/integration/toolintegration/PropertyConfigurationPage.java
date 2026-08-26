@@ -256,8 +256,8 @@ public class PropertyConfigurationPage extends ToolIntegrationWizardPage {
         createConfigButton.setLayoutData(createConfigButtonGridData);
         createConfigButton.addSelectionListener(new CreateConfigSelectionListener());
 
-        new Label(createConfigComposite, SWT.NONE).setText(ToolIntegrationConstants.DIRECTORIES_PLACEHOLDER[1] + "/"
-            + ToolIntegrationConstants.DIRECTORIES_PLACEHOLDER[0].replace('c', 'C') + "/");
+        new Label(createConfigComposite, SWT.NONE).setText(ToolIntegrationConstants.DirectoryPlaceholder.WORKING_DIR.placeholderString + "/"
+            + ToolIntegrationConstants.DirectoryPlaceholder.CONFIG_DIR.placeholderString + "/");
 
         configurationFileNameText = new Text(createConfigComposite, SWT.BORDER);
         GridData configFilenameTextData = new GridData(GridData.FILL_BOTH | GridData.GRAB_HORIZONTAL);
