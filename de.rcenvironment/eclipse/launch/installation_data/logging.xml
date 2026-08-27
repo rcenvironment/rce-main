@@ -75,6 +75,8 @@
 		<Logger name="sun.awt" level="warn" />
 		<Logger name="sun.rmi" level="warn" />
 		<Logger name="sun.net.www.protocol.http" level="warn" />
+		<!-- logs every start() if DEBUG is enabled -->
+		<Logger name="java.lang.ProcessBuilder" level="info" />
 	</Loggers>
 
 </Configuration>
