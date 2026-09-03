@@ -166,8 +166,8 @@ public class WorkflowIntegratorComponent extends DefaultComponent {
         for (Entry<String, TypedDatum> nonreplacedInput : inputs.entrySet()) {
             if (nonreplacedInput.getValue() instanceof FileReferenceTD) {
                 try {
-                    final File tempFile = createTempFile();
                     final FileReferenceTD nonreplacedDatum = (FileReferenceTD) nonreplacedInput.getValue();
+                    final File tempFile = createTempFile(nonreplacedDatum.getFileName());
                     dms.copyReferenceToLocalFile(nonreplacedDatum.getFileReference(), tempFile, outerWorkflowStorage);
                     
                     replacedInputs.put(
@@ -213,8 +213,8 @@ public class WorkflowIntegratorComponent extends DefaultComponent {
         return TempFileServiceAccess.getInstance().createManagedTempDir();
     }
 
-    protected File createTempFile() throws IOException {
-        return TempFileServiceAccess.getInstance().createTempFileFromPattern("*");
+    protected File createTempFile(String fileName) throws IOException {
+        return TempFileServiceAccess.getInstance().createTempFileWithFixedFilename(fileName);
     }
 
     public File getWorkflowFileAndAssertExistence() throws ComponentException {
