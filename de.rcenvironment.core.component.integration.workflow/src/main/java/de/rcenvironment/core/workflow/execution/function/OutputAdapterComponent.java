@@ -106,7 +106,7 @@ public class OutputAdapterComponent extends DefaultComponent {
      */
     private ShortTextTD tryCopyFileToLocalFilesystem(final FileReferenceTD nonreplacedDatum) throws ComponentException {
         try {
-            final File tempFile = createTemporaryFile();
+            final File tempFile = createTemporaryFile(nonreplacedDatum.getFileName());
             getDataManagementService().copyReferenceToLocalFile(
                 nonreplacedDatum.getFileReference(), tempFile, context.getStorageNetworkDestination());
 
@@ -157,8 +157,8 @@ public class OutputAdapterComponent extends DefaultComponent {
         return context.getService(TypedDatumService.class).getSerializer();
     }
 
-    protected File createTemporaryFile() throws IOException {
-        return TempFileServiceAccess.getInstance().createTempFileFromPattern("*");
+    protected File createTemporaryFile(String fileName) throws IOException {
+        return TempFileServiceAccess.getInstance().createTempFileWithFixedFilename(fileName);
     }
 
     protected File createTemporaryDirectory() throws IOException {
