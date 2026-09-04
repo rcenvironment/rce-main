@@ -66,7 +66,7 @@ public class WorkflowIntegratorComponentTest {
         }
 
         @Override
-        protected File createTempFile() throws IOException {
+        protected File createTempFile(String filename) throws IOException {
             return tempFile;
         }
 

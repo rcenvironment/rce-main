@@ -81,7 +81,7 @@ public class OutputAdapterComponentTest {
         }
 
         @Override
-        protected File createTemporaryFile() throws IOException {
+        protected File createTemporaryFile(String filename) throws IOException {
             return temporaryFile;
         }
 
@@ -312,6 +312,7 @@ public class OutputAdapterComponentTest {
         final FileReferenceTD deserializedDatum = EasyMock.createMock(FileReferenceTD.class);
         EasyMock.expect(deserializedDatum.getDataType()).andStubReturn(DataType.FileReference);
         EasyMock.expect(deserializedDatum.getFileReference()).andStubReturn(fileReference);
+        EasyMock.expect(deserializedDatum.getFileName()).andStubReturn("someFileName");
         EasyMock.replay(deserializedDatum);
         return deserializedDatum;
     }
