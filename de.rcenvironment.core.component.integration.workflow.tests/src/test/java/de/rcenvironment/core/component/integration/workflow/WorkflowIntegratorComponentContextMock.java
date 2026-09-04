@@ -47,6 +47,7 @@ class WorkflowIntegratorComponentContextMock extends ComponentContextMock {
     private static FileReferenceTD fileReferenceMock(String fileReference) {
         final FileReferenceTD returnValue = EasyMock.createMock(FileReferenceTD.class);
         EasyMock.expect(returnValue.getFileReference()).andStubReturn(fileReference);
+        EasyMock.expect(returnValue.getFileName()).andStubReturn("someFileName");
         EasyMock.replay(returnValue);
         return returnValue;
     }
