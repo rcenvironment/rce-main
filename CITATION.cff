@@ -14,9 +14,9 @@ contact:
     email: rce@dlr.de
     website: "https://rcenvironment.de/"
 identifiers:
-  - description: "The DOI of RCE 10.7.0"
+  - description: "The DOI of RCE 10.8.0"
     type: doi
-    value: 10.5281/zenodo.17878323
+    value: 10.5281/zenodo.22280298
   - description: "The Concept DOI of RCE"
     type: doi
     value: 10.5281/zenodo.3691674
@@ -53,8 +53,8 @@ preferred-citation:
   pages: 100759
   doi: 10.1016/j.softx.2021.100759
 
-version: 10.7.0
-date-released: "2025-12-18"
+version: 10.8.0
+date-released: "2026-09-04"
 authors:
   - family-names: Flink
     given-names: Jan
@@ -62,13 +62,13 @@ authors:
   - family-names: Mischke
     given-names: Robert
     orcid: "https://orcid.org/0000-0003-3419-4897"
-  - family-names: Wichter
-    given-names: David
-    orcid: "https://orcid.org/0009-0004-1502-7617"
+  - family-names: Rosenbach
+    given-names: Lukas
+	orcid: https://orcid.org/0009-0002-1700-828X
 
 # We would also like to recognize the assistance of
-# - Lukas Rosenbach (https://orcid.org/0009-0002-1700-828X) and
-# - Matthias Wagner (https://orcid.org/0000-0002-1044-5367)
+# - Matthias Wagner (https://orcid.org/0000-0002-1044-5367) and
+  - David Wichter (https://orcid.org/0009-0004-1502-7617)
 # during final testing of this release.
 # 
 # We look forward to future versions of the CFF standard 

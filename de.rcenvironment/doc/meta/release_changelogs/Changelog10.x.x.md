@@ -1,3 +1,50 @@
+RCE 10.8.0 (September 4, 2026)
+
+# Tool Integration
+
+- Added a ${file_name: <input name>} script placeholder to determine the file name of any file or directory input
+
+# Workflow as Component
+
+- Improved file input and output handling so that filenames are properly forwarded to and from internal workflows
+
+# Bugfixes
+
+- Fixed tool cancelation not working properly with Java 17 or higher
+- Fixed a bug that lead to an error in the "Configuration Information" dialog if the workspace location is set manually via the -data command line argument
+- Fixed potential GUI resource (primarily memory) leaks
+
+# Command Console
+
+- Added role-based filtering of available console commands in the SSH console, and the "help" command now only displays the available commands for the current role
+
+# QA
+
+- Reworked workflow component input dialogs (add/edit) to improve visibility of controls and resizing behavior
+- Added documentation regarding the rcec.exe file delivered as part of RCE packages
+
+# Other/Internal
+
+- Added a Python script in de.rcenvironment/utils/maintenance to generate an Eclipse "Launch Group" to run all non-OSGi unit tests at once
+- Fixed large XML test files stalling the build in certain Eclipse versions
+- Adapted to different serialization behavior of ActiveMQ after upgrade
+- Made the "provenance listener" interface more robust
+- Compressed/removed irrelevant log output
+- Minor test automation fixes
+
+# Third-party Library Upgrades / Security
+
+- Upgraded activemq to 5.19.10
+- Upgraded cucumber to 7.34.7
+- Upgraded jackson to 2.22.2
+- Upgraded pax-logging to 2.3.4 to upgrade the embedded log4j to 2.26.0
+- Upgraded apache-sshd to 2.17.1
+- Upgraded bouncycastle to 1.84
+- Upgraded commons-exec to 1.6.0
+- Upgraded jackson to 2.21.3
+- Upgraded jsch-mwiede to 2.28.2
+
+
 RCE 10.7.0 (December 18, 2025)
 
 # Uplink Connections
