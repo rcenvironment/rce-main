@@ -32,6 +32,7 @@ import de.rcenvironment.core.utils.common.TempFileServiceAccess;
  * A {@link CommandLineExecutor} that executes the given commands locally.
  * 
  * @author Robert Mischke
+ * @author Lukas Rosenbach (#17036, #18333)
  * 
  */
 public class LocalApacheCommandLineExecutor extends AbstractCommandLineExecutor implements CommandLineExecutor {
@@ -342,12 +343,11 @@ public class LocalApacheCommandLineExecutor extends AbstractCommandLineExecutor 
             return false;
         }
 
-        int pid = MINUS_ONE;
+        long pid = MINUS_ONE;
         try {
             pid = ProcessUtils.getPid(process);
             ProcessUtils.killProcessTree(pid);
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException
-            | IllegalAccessException | IOException | InterruptedException e) {
+        } catch (SecurityException | IllegalArgumentException | IOException | InterruptedException e) {
             if (pid != MINUS_ONE) {
                 log.error(StringUtils.format("Unable to cancel the process with pid %s", pid), e);
             } else {
