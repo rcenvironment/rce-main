@@ -219,6 +219,7 @@
             component="de.rcenvironment.integration.common.*"
             default="true"
             id="de.rcenvironment.integration.editIntegration"
+            icon="platform:/plugin/de.rcenvironment.core.gui.resources/resources/images/integration_edit.png"
             label="Edit selected Tool Integration...">
       </action>
       
@@ -227,6 +228,7 @@
             component="de.rcenvironment.integration.cpacs.*"
             default="true"
             id="de.rcenvironment.integration.editIntegration"
+            icon="platform:/plugin/de.rcenvironment.core.gui.resources/resources/images/integration_edit.png"
             label="Edit selected Tool Integration...">
       </action>
 
@@ -235,6 +237,7 @@
             component="de.rcenvironment.integration.workflow.*"
             default="true"
             id="de.rcenvironment.integration.editIntegration"
+            icon="platform:/plugin/de.rcenvironment.core.gui.resources/resources/images/wf_integration_edit.png"
             label="Edit selected Workflow Integration...">
       </action>
       

@@ -8,10 +8,13 @@
 
 package de.rcenvironment.core.gui.workflow.editor;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.gef.ContextMenuProvider;
 import org.eclipse.gef.EditPartViewer;
@@ -22,6 +25,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 
@@ -117,6 +121,17 @@ public class WorkflowEditorContextMenuProvider extends ContextMenuProvider {
                         @Override
                         public void run() {
                             action.performAction();
+                        }
+
+                        @Override
+                        public ImageDescriptor getImageDescriptor() {
+                            URL url;
+                            try {
+                                url = new URL(confElement.getAttribute("icon"));
+                                return ImageDescriptor.createFromURL(url);
+                            } catch (MalformedURLException | InvalidRegistryObjectException e) {
+                                return super.getImageDescriptor();
+                            }
                         }
 
                         @Override
