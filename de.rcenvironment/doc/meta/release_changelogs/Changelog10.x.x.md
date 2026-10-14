@@ -1,3 +1,22 @@
+RCE 10.8.1 (October 14, 2026)
+
+# Bugfixes
+
+- Fixed missing context menu icons for editing integrated tools and workflows
+- Fixed tool cancelation not working properly with Java 17 or higher (missing from 10.8.0)
+
+# QA
+
+- Suppressed/removed irrelevant log output when executing external processes (e.g. tools)
+
+# Third-party Library Upgrades / Security
+
+- Upgraded bouncycastle to 1.85
+- Upgraded jackson to 2.22.3
+- Upgraded cucumber to 7.34.9
+- Upgraded picocontainer to 2.15.2
+
+
 RCE 10.8.0 (September 4, 2026)
 
 # Tool Integration
