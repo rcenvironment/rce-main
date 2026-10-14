@@ -14,9 +14,9 @@ contact:
     email: rce@dlr.de
     website: "https://rcenvironment.de/"
 identifiers:
-  - description: "The DOI of RCE 10.8.0"
+  - description: "The DOI of RCE 10.8.1"
     type: doi
-    value: 10.5281/zenodo.22280298
+    value: 10.5281/zenodo.23315853
   - description: "The Concept DOI of RCE"
     type: doi
     value: 10.5281/zenodo.3691674
@@ -53,8 +53,8 @@ preferred-citation:
   pages: 100759
   doi: 10.1016/j.softx.2021.100759
 
-version: 10.8.0
-date-released: "2026-09-04"
+version: 10.8.1
+date-released: "2026-10-14"
 authors:
   - family-names: Flink
     given-names: Jan
